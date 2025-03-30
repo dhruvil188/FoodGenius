@@ -11,7 +11,7 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize the Google Generative AI API
+  // Initialize the Google Generative AI API with the user-provided key
   const genAI = new GoogleGenerativeAI(
     process.env.GEMINI_API_KEY || "AIzaSyBPdE26_ZZpOg5Ru91QJ9Ihp1TodQKQsZo"
   );
@@ -119,49 +119,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Ensure the JSON is valid with no trailing commas.
       `;
 
-      // Generate content using the Gemini API
-      const result = await model.generateContent([prompt, ...imageParts]);
-      const response = await result.response;
-      const text = response.text();
-
-      // Extract the JSON from the response
-      let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || 
-                      text.match(/\{[\s\S]*\}/);
-      
-      let jsonContent = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
-      
-      // Parse the JSON response
-      let parsedData: AnalyzeImageResponse;
       try {
-        parsedData = JSON.parse(jsonContent);
+        // Generate content using the Gemini API
+        const result = await model.generateContent([prompt, ...imageParts]);
+        const response = await result.response;
+        const text = response.text();
+
+        // Extract the JSON from the response
+        let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || 
+                        text.match(/\{[\s\S]*\}/);
         
-        // Validate the response against our schema
-        const validatedResponse = analyzeImageResponseSchema.parse(parsedData);
+        let jsonContent = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
         
-        return res.status(200).json(validatedResponse);
-      } catch (err) {
-        console.error("Error parsing Gemini API response:", err);
-        console.log("Raw response:", text);
+        // Parse the JSON response
+        try {
+          const parsedData = JSON.parse(jsonContent);
+          
+          // Validate the response against our schema
+          const validatedResponse = analyzeImageResponseSchema.parse(parsedData);
+          
+          return res.status(200).json(validatedResponse);
+        } catch (err) {
+          console.error("Error parsing Gemini API response:", err);
+          console.log("Raw response:", text);
+          
+          return res.status(500).json({ 
+            error: "Could not parse the AI response properly",
+            details: "The response format from Gemini API was unexpected" 
+          });
+        }
+      } catch (apiError: any) {
+        console.error("API request error:", apiError);
         
-        return res.status(500).json({ 
-          error: "Could not parse the AI response properly",
-          details: "The response format from Gemini API was unexpected" 
+        // Check if it's a quota or rate limit error (status code 429)
+        if (apiError.status === 429) {
+          return res.status(429).json({
+            error: "API quota exceeded",
+            details: "The Gemini API quota has been exceeded. Please try again later or upgrade your API plan.",
+            retryAfter: apiError?.errorDetails?.[2]?.retryDelay || "60s"
+          });
+        }
+
+        return res.status(500).json({
+          error: "AI service error",
+          details: "There was a problem connecting to the AI service. Please try again later."
         });
       }
     } catch (err) {
-      console.error("Error analyzing image:", err);
+      console.error("Error in image analysis:", err);
       
       if (err instanceof ZodError) {
         const validationError = fromZodError(err);
         return res.status(400).json({ 
-          error: "Validation error", 
+          error: "Invalid request data", 
           details: validationError.message 
         });
       }
       
+      // Handle PayloadTooLargeError from Express
+      if ((err as any)?.type === 'entity.too.large' || 
+          (err as Error).message?.includes('request entity too large')) {
+        return res.status(413).json({
+          error: "Image too large",
+          details: "The uploaded image exceeds the maximum size limit. Please upload a smaller image (max 5MB)."
+        });
+      }
+      
       return res.status(500).json({ 
-        error: "Error analyzing image",
-        details: err instanceof Error ? err.message : "Unknown error"
+        error: "Error analyzing image", 
+        details: err instanceof Error ? err.message : "Unknown error" 
       });
     }
   });

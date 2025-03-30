@@ -5,57 +5,6 @@ import { useEffect, useState } from 'react';
 import CountUp from 'react-countup';
 import { Badge } from '@/components/ui/badge';
 
-// Animated Wave Background
-const WaveBackground = () => (
-  <div className="absolute inset-0 overflow-hidden z-0">
-    <svg 
-      className="absolute w-full min-w-[1000px]" 
-      style={{ bottom: '-10%', left: 0, height: '60%' }}
-      viewBox="0 0 1200 200" 
-      preserveAspectRatio="none"
-    >
-      <path 
-        fill="rgba(16, 185, 129, 0.05)" 
-        d="M0,160 C300,200 400,100 600,160 C800,200 1000,120 1200,160 L1200,200 L0,200 Z" 
-      >
-        <animate 
-          attributeName="d" 
-          values="
-            M0,160 C300,200 400,100 600,160 C800,200 1000,120 1200,160 L1200,200 L0,200 Z;
-            M0,150 C200,120 500,190 700,130 C900,80 1000,150 1200,140 L1200,200 L0,200 Z;
-            M0,160 C300,200 400,100 600,160 C800,200 1000,120 1200,160 L1200,200 L0,200 Z
-          " 
-          dur="20s" 
-          repeatCount="indefinite"
-        />
-      </path>
-      <path 
-        fill="rgba(16, 185, 129, 0.1)" 
-        d="M0,170 C200,120 400,180 600,150 C800,120 1000,170 1200,160 L1200,200 L0,200 Z"
-      >
-        <animate 
-          attributeName="d" 
-          values="
-            M0,170 C200,120 400,180 600,150 C800,120 1000,170 1200,160 L1200,200 L0,200 Z;
-            M0,180 C300,150 500,160 700,180 C900,170 1050,130 1200,170 L1200,200 L0,200 Z;
-            M0,170 C200,120 400,180 600,150 C800,120 1000,170 1200,160 L1200,200 L0,200 Z
-          " 
-          dur="15s" 
-          repeatCount="indefinite"
-        />
-      </path>
-    </svg>
-    
-    {/* Dots pattern */}
-    <div className="absolute inset-0 opacity-20">
-      <div className="absolute inset-0" style={{ 
-        backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', 
-        backgroundSize: '20px 20px' 
-      }} />
-    </div>
-  </div>
-);
-
 // Feature Card Component
 interface FeatureCardProps {
   icon: string;
@@ -80,159 +29,83 @@ const FeatureCard = ({ icon, title, description, delay = 0 }: FeatureCardProps) 
   </motion.div>
 );
 
-// Process Icon Component
-interface ProcessIconProps {
-  number: number;
-  title: string;
-  description: string;
-  icon: string;
+// Floating Food Image Component
+interface FoodImageProps {
+  src: string;
+  alt: string;
+  top: string;
+  right?: string;
+  left?: string;
+  width: string;
   delay?: number;
+  rotate?: number;
+  zIndex?: number;
 }
 
-const ProcessIcon = ({ number, title, description, icon, delay = 0 }: ProcessIconProps) => (
-  <motion.div 
-    className="relative" 
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.5 }}
+const FloatingFoodImage = ({ 
+  src, 
+  alt, 
+  top, 
+  right, 
+  left, 
+  width, 
+  delay = 0, 
+  rotate = 0,
+  zIndex = 10
+}: FoodImageProps) => (
+  <motion.div
+    className="absolute rounded-2xl shadow-xl overflow-hidden"
+    style={{ 
+      top, 
+      right, 
+      left, 
+      width, 
+      zIndex
+    }}
+    initial={{ opacity: 0, y: 20, rotate: rotate - 5 }}
+    animate={{ opacity: 1, y: 0, rotate }}
+    transition={{ 
+      delay, 
+      duration: 0.8,
+      type: "spring",
+      bounce: 0.4
+    }}
   >
-    <div className="flex">
-      <div className="flex-shrink-0">
-        <div className="flex items-center justify-center w-12 h-12 rounded-md bg-gradient-to-tr from-green-600 to-green-400 text-white">
-          <i className={`fas ${icon} text-lg`}></i>
-        </div>
-      </div>
-      <div className="ml-4">
-        <div className="flex items-center">
-          <div className="bg-green-100 text-green-800 font-medium text-xs rounded-full w-5 h-5 flex items-center justify-center mr-2">
-            {number}
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-        </div>
-        <p className="mt-1 text-sm text-gray-500">{description}</p>
-      </div>
-    </div>
+    <img 
+      src={src} 
+      alt={alt}
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
   </motion.div>
 );
 
-// Animated scanner effect
-const ScannerVisualization = () => (
-  <div className="relative h-[300px] w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
-    {/* Scanner glow effect */}
-    <div className="absolute -inset-2 bg-gradient-to-r from-green-500 to-emerald-500 opacity-30 blur-xl rounded-3xl"></div>
-    
-    {/* Scanner content */}
-    <div className="absolute inset-0 flex flex-col">
-      <div className="h-3/5 bg-gray-900 relative">
-        {/* Scanning Grid Pattern */}
-        <div className="absolute inset-0" style={{ 
-          backgroundImage: 'radial-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px)', 
-          backgroundSize: '20px 20px',
-          opacity: 0.5 
-        }} />
-        
-        {/* Corner markers */}
-        <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-green-500"></div>
-        <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-green-500"></div>
-        <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-green-500"></div>
-        <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-green-500"></div>
-        
-        {/* Scan line animation */}
-        <motion.div 
-          className="absolute left-0 right-0 h-1 bg-gradient-to-r from-green-500/0 via-green-500/70 to-green-500/0"
-          initial={{ top: 0 }}
-          animate={{ top: '100%' }}
-          transition={{ 
-            duration: 2, 
-            repeat: Infinity, 
-            repeatType: "loop",
-            ease: "linear"
-          }}
-        />
-        
-        {/* Text Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <motion.div 
-              className="inline-block px-4 py-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <span className="text-green-600 font-medium flex items-center">
-                <i className="fas fa-search mr-2"></i>
-                Analyzing Food Image
-              </span>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Results panel */}
-      <div className="h-2/5 bg-gradient-to-b from-gray-50 to-white p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium text-gray-900">Detection Results</h3>
-          <Badge className="bg-green-500">Ready</Badge>
-        </div>
-        
-        {/* Result data */}
-        <div className="space-y-2">
-          <div className="h-2 bg-gray-200 rounded-full w-3/4"></div>
-          <div className="h-2 bg-gray-200 rounded-full"></div>
-          <div className="h-2 bg-gray-200 rounded-full w-5/6"></div>
-          <div className="h-2 bg-gray-200 rounded-full w-2/3"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// Interactive Food Icon Component
-interface FoodIconProps {
-  x: number;
-  y: number;
-  icon: string;
-  title: string;
+// Recipe Step Component
+interface RecipeStepProps {
+  number: number;
+  text: string;
   delay?: number;
 }
 
-const FoodIcon = ({ x, y, icon, title, delay = 0 }: FoodIconProps) => (
+const RecipeStep = ({ number, text, delay = 0 }: RecipeStepProps) => (
   <motion.div 
-    className="absolute"
-    style={{ left: `${x}%`, top: `${y}%` }}
-    initial={{ scale: 0, opacity: 0 }}
-    animate={{ scale: 1, opacity: 1 }}
-    transition={{ delay, duration: 0.6, type: "spring" }}
+    className="flex items-start gap-4 mb-4"
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay, duration: 0.5 }}
   >
-    <motion.div 
-      className="bg-white rounded-full shadow-lg p-2 cursor-pointer relative group z-10"
-      whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
-    >
-      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-400 flex items-center justify-center text-white">
-        <i className={`fas ${icon} text-sm`}></i>
-      </div>
-      
-      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 text-xs rounded whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-        {title}
-      </div>
-    </motion.div>
+    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold text-sm">
+      {number}
+    </div>
+    <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 flex-1">
+      <p className="text-gray-700 text-sm">{text}</p>
+    </div>
   </motion.div>
 );
 
 // Define interfaces for our data structures
-interface FoodIcon {
-  x: number;
-  y: number;
-  title: string;
-  icon: string;
-  delay: number;
-}
-
-interface ProcessStep {
-  number: number;
-  title: string;
-  description: string;
-  icon: string;
+interface RecipeStep {
+  text: string;
 }
 
 interface Stat {
@@ -260,19 +133,11 @@ export default function Hero() {
     return () => clearTimeout(timeout);
   }, []);
   
-  const foodIcons: FoodIcon[] = [
-    { x: 20, y: 20, title: 'Italian Cuisine', icon: 'fa-pizza-slice', delay: 0.2 },
-    { x: 35, y: 10, title: 'Japanese Cuisine', icon: 'fa-fish', delay: 0.4 },
-    { x: 50, y: 25, title: 'American Cuisine', icon: 'fa-hamburger', delay: 0.6 },
-    { x: 65, y: 15, title: 'Vegetarian Options', icon: 'fa-carrot', delay: 0.8 },
-    { x: 80, y: 30, title: 'Beverage Pairings', icon: 'fa-wine-glass-alt', delay: 1.0 }
-  ];
-  
-  const process: ProcessStep[] = [
-    { number: 1, title: 'Snap', description: 'Take a photo of any food dish', icon: 'fa-camera' },
-    { number: 2, title: 'Upload', description: 'Upload the image to our platform', icon: 'fa-cloud-upload-alt' },
-    { number: 3, title: 'Analyze', description: 'AI identifies ingredients and composition', icon: 'fa-search' },
-    { number: 4, title: 'Receive', description: 'Get your complete recipe details', icon: 'fa-receipt' }
+  const recipeSteps: RecipeStep[] = [
+    { text: 'Preheat oven to 375°F (190°C)' },
+    { text: 'Dice vegetables and prepare ingredients' },
+    { text: 'Sauté onions and garlic until translucent' },
+    { text: 'Add herbs and spices, cook for 1 minute' }
   ];
   
   const stats: Stat[] = [
@@ -291,221 +156,236 @@ export default function Hero() {
   ];
   
   return (
-    <section className="relative overflow-hidden pb-16">
-      {/* Animated background */}
-      <WaveBackground />
+    <section className="relative overflow-hidden pt-16 pb-20">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-5 z-0">
+        <div className="absolute inset-0" style={{ 
+          backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', 
+          backgroundSize: '30px 30px' 
+        }} />
+      </div>
+      
+      {/* Decorative shapes */}
+      <div className="absolute top-20 right-[5%] w-64 h-64 bg-green-400/20 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute bottom-40 left-[10%] w-72 h-72 bg-emerald-300/20 rounded-full blur-3xl -z-10"></div>
       
       {/* Main content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 lg:pt-24">
-        <div className="text-center mb-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Hero content grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left column - Text content */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-6"
+            >
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 px-3 py-1">
+                <i className="fas fa-bolt mr-1.5"></i>
+                AI-POWERED FOOD RECOGNITION
+              </Badge>
+            </motion.div>
+            
+            <motion.h1
+              className="text-5xl font-bold leading-tight text-gray-900 mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <span>Transform </span>
+              <span className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+                food photos
+              </span>
+              <span> into detailed recipes</span>
+            </motion.h1>
+            
+            <motion.p
+              className="text-xl text-gray-600 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Our AI technology instantly identifies dishes, provides ingredients, step-by-step instructions, and nutritional information from a single photo.
+            </motion.p>
+            
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white rounded-full px-8 shadow-lg hover:shadow-xl transition-all py-6 group"
+                onClick={() => navigate('#upload-section')}
+              >
+                <i className="fas fa-camera mr-2.5 group-hover:animate-pulse"></i> 
+                Try It Now
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                className="rounded-full px-8 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 transition-all py-6"
+                onClick={() => navigate('/library')}
+              >
+                <i className="fas fa-book mr-2.5"></i> 
+                Browse Recipes
+              </Button>
+            </motion.div>
+            
+            <motion.div
+              className="flex items-center text-sm text-gray-500"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div className="flex -space-x-2 mr-3">
+                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/17.jpg" alt="" />
+                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/4.jpg" alt="" />
+                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/3.jpg" alt="" />
+              </div>
+              <p>Trusted by <span className="font-medium text-gray-700">14,000+</span> home cooks</p>
+            </motion.div>
+          </div>
+          
+          {/* Right column - Visual content */}
+          <div className="relative h-[500px]">
+            {/* Main dish image */}
+            <FloatingFoodImage 
+              src="https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+              alt="Delicious pasta dish"
+              top="5%"
+              left="5%"
+              width="70%"
+              delay={0.1}
+              zIndex={30}
+            />
+            
+            {/* Secondary food images */}
+            <FloatingFoodImage 
+              src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1081&q=80" 
+              alt="Pizza"
+              top="40%"
+              right="0%"
+              width="50%"
+              delay={0.3}
+              rotate={-5}
+              zIndex={20}
+            />
+            
+            <FloatingFoodImage 
+              src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+              alt="Colorful food plate"
+              top="60%"
+              left="15%"
+              width="45%"
+              delay={0.5}
+              rotate={5}
+              zIndex={25}
+            />
+            
+            {/* Recipe steps card */}
+            <motion.div
+              className="absolute right-5 top-[35%] bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-100 w-[220px] z-40"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+            >
+              <div className="flex items-center mb-3">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-2">
+                  <i className="fas fa-list-ol text-xs"></i>
+                </div>
+                <h3 className="font-medium text-gray-900">Recipe Steps</h3>
+              </div>
+              
+              <div className="space-y-2">
+                {recipeSteps.map((step, index) => (
+                  <div key={index} className="flex items-start text-xs gap-2">
+                    <div className="flex-shrink-0 h-5 w-5 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-medium">
+                      {index + 1}
+                    </div>
+                    <p className="text-gray-700">{step.text}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+            
+            {/* Nutrition badge */}
+            <motion.div
+              className="absolute left-0 top-[20%] bg-white rounded-lg p-3 shadow-lg border border-gray-100 z-40"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.9, duration: 0.5, type: "spring" }}
+            >
+              <div className="flex items-center text-xs font-medium text-gray-500 mb-1">
+                <i className="fas fa-fire-alt text-orange-500 mr-1.5"></i>
+                NUTRITION INFO
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-gray-900">320</div>
+                  <div className="text-xs text-gray-500">Calories</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-bold text-gray-900">24g</div>
+                  <div className="text-xs text-gray-500">Protein</div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+        
+        {/* Features section */}
+        <div className="mt-20 mb-16">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20 mb-4">
-              <svg className="mr-1 h-1.5 w-1.5 fill-green-500 animate-pulse" viewBox="0 0 6 6" aria-hidden="true">
-                <circle cx="3" cy="3" r="3" />
-              </svg>
-              AI-POWERED FOOD RECOGNITION
-            </div>
-          </motion.div>
-          
-          <motion.h1
-            className="mx-auto max-w-4xl text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <span className="block mb-1">Snap,</span> 
-            <span className="block mb-1 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">Analyze,</span> 
-            <span className="block">Cook</span>
-          </motion.h1>
-          
-          <motion.p
-            className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            Turn any food photo into a detailed recipe with ingredients, step-by-step instructions, and nutritional information using our advanced AI technology.
-          </motion.p>
-          
-          <motion.div
-            className="mt-8 flex items-center justify-center gap-x-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white rounded-full px-8 shadow-lg hover:shadow-xl transition-all py-6 group"
-              onClick={() => navigate('#upload-section')}
-            >
-              <i className="fas fa-camera mr-2.5 group-hover:animate-pulse"></i> 
-              Try It Now
-            </Button>
-            <Button 
-              size="lg"
-              variant="outline"
-              className="rounded-full px-8 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 transition-all py-6"
-              onClick={() => navigate('/library')}
-            >
-              <i className="fas fa-book mr-2.5"></i> 
-              Learn More
-            </Button>
-          </motion.div>
-        </div>
-        
-        {/* Interactive visualization area */}
-        <div className="relative mb-24">
-          {/* Food icons positioned around the center */}
-          {foodIcons.map((icon, index) => (
-            <FoodIcon
-              key={index}
-              x={icon.x}
-              y={icon.y}
-              title={icon.title}
-              icon={icon.icon}
-              delay={icon.delay}
-            />
-          ))}
-          
-          {/* Central scanner visualization */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-20"
-          >
-            <ScannerVisualization />
-          </motion.div>
-        </div>
-        
-        {/* How it works section */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">How It Works</h2>
-            <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
-              Our AI-powered platform transforms your food photos into detailed recipes in just a few simple steps
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Every Recipe is Packed with <span className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">Features</span>
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Our AI doesn't just identify the dish - it provides everything you need to recreate it at home with confidence
             </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {process.map((step, index) => (
-              <ProcessIcon 
-                key={index}
-                number={step.number}
-                title={step.title}
-                description={step.description}
-                icon={step.icon}
-                delay={0.2 * index}
-              />
-            ))}
-          </div>
-        </div>
-        
-        {/* Features grid */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Powerful Features</h2>
-            <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
-              Every recipe is loaded with information to help you cook with confidence
-            </p>
-          </div>
+          </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <FeatureCard 
+              <FeatureCard
                 key={index}
-                icon={feature.icon} 
-                title={feature.title} 
-                description={feature.description} 
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
                 delay={feature.delay}
               />
             ))}
           </div>
         </div>
         
-        {/* Community trust section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-16">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-            <div className="text-center lg:text-left">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Trusted by a Global Community</h2>
-              <p className="text-gray-600 mb-6">
-                Join thousands of home cooks who have discovered the joy of cooking with AI-powered recipes
-              </p>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                <Badge variant="outline" className="px-4 py-2 border-green-200 text-green-700 bg-green-50">
-                  <i className="fas fa-check-circle mr-2"></i>
-                  Verified Accuracy
-                </Badge>
-                <Badge variant="outline" className="px-4 py-2 border-amber-200 text-amber-700 bg-amber-50">
-                  <i className="fas fa-star mr-2"></i>
-                  4.8/5 User Rating
-                </Badge>
-                <Badge variant="outline" className="px-4 py-2 border-blue-200 text-blue-700 bg-blue-50">
-                  <i className="fas fa-users mr-2"></i>
-                  Active Community
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="flex items-center">
-              <div className="flex -space-x-4 mr-6">
-                {[1, 2, 3, 4, 5].map((index) => (
-                  <div key={index} className="w-12 h-12 rounded-full border-2 border-white overflow-hidden">
-                    <img
-                      src={`https://randomuser.me/api/portraits/${index % 2 === 0 ? 'women' : 'men'}/${40 + index}.jpg`}
-                      alt={`User avatar ${index}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-gray-900">14,000+</div>
-                <div className="text-sm text-gray-600">Happy home cooks</div>
-              </div>
-            </div>
+        {/* Stats section */}
+        <div className="py-12 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 * index }}
+              >
+                <div className="text-4xl font-bold text-green-600 mb-2">
+                  <CountUp end={stat.value} duration={2.5} separator="," />
+                  {stat.suffix}
+                </div>
+                <div className="text-sm text-gray-500">{stat.label}</div>
+              </motion.div>
+            ))}
           </div>
-        </div>
-        
-        {/* Stats Counter Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16 text-center py-8 border-t border-gray-100">
-          {stats.map((stat, idx) => (
-            <div key={idx} className="p-4">
-              <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-1 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
-                {isVisible && (
-                  <CountUp 
-                    end={stat.value} 
-                    suffix={stat.suffix} 
-                    duration={2.5} 
-                    delay={0.2}
-                  />
-                )}
-              </div>
-              <div className="text-gray-500">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Bottom divider */}
-      <div className="relative mt-8">
-        <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-gray-200"></div>
-        </div>
-        <div className="relative flex justify-center">
-          <motion.span 
-            className="bg-white px-6 py-2 text-sm font-medium text-gray-500 rounded-full border border-gray-100 shadow-sm flex items-center"
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 2 }}
-          >
-            <i className="fas fa-arrow-down mr-2 text-green-500"></i>
-            Explore Features Below
-          </motion.span>
         </div>
       </div>
     </section>

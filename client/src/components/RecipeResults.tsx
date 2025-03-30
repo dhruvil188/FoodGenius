@@ -4,7 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { type AnalyzeImageResponse, type NutritionInfo, type RecipeVariation, type SideDish } from '@shared/schema';
+import { 
+  type AnalyzeImageResponse, 
+  type NutritionInfo, 
+  type RecipeVariation, 
+  type SideDish, 
+  type YoutubeVideo 
+} from '@shared/schema';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
@@ -269,12 +275,15 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
           
           {/* Tabbed Interface */}
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-6">
-            <TabsList className="grid grid-cols-3 mb-6 p-1 rounded-full bg-slate-100 dark:bg-slate-800">
+            <TabsList className="grid grid-cols-4 mb-6 p-1 rounded-full bg-slate-100 dark:bg-slate-800">
               <TabsTrigger value="instructions" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-list-ol mr-2"></i> Instructions
               </TabsTrigger>
               <TabsTrigger value="nutrition" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-apple-alt mr-2"></i> Nutrition
+              </TabsTrigger>
+              <TabsTrigger value="videos" className="flex items-center rounded-full data-[state=active]:shadow-md">
+                <i className="fas fa-video mr-2"></i> Videos
               </TabsTrigger>
               <TabsTrigger value="history" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-history mr-2"></i> History
@@ -781,7 +790,66 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
               )}
             </TabsContent>
             
-            {/* Tab 3: Cooking History */}
+            {/* Tab 3: YouTube Videos */}
+            <TabsContent value="videos">
+              {result.youtubeVideos && result.youtubeVideos.length > 0 ? (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <i className="fas fa-video text-red-600"></i>
+                    <h5 className="text-lg font-semibold food-gradient-text">Recipe Tutorial Videos</h5>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {result.youtubeVideos.map((video, index) => (
+                      <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
+                        <div className="aspect-video relative cursor-pointer group">
+                          <a 
+                            href={`https://www.youtube.com/watch?v=${video.videoId}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <img 
+                              src={video.thumbnailUrl || `https://i.ytimg.com/vi/${video.videoId}/mqdefault.jpg`}
+                              alt={video.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center">
+                                <i className="fas fa-play text-white text-2xl"></i>
+                              </div>
+                            </div>
+                          </a>
+                        </div>
+                        <CardContent className="p-4">
+                          <h4 className="font-medium mb-1 line-clamp-2 hover:text-primary">
+                            <a 
+                              href={`https://www.youtube.com/watch?v=${video.videoId}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                            >
+                              {video.title}
+                            </a>
+                          </h4>
+                          <div className="flex items-center text-sm text-slate-500 mb-2">
+                            <i className="fas fa-user-circle mr-1"></i>
+                            <span>{video.channelTitle || "YouTube Channel"}</span>
+                          </div>
+                          {video.description && (
+                            <p className="text-sm text-slate-600 line-clamp-2">{video.description}</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <i className="fas fa-video-slash text-3xl text-slate-300 mb-3"></i>
+                  <p className="text-slate-500">No tutorial videos available for this recipe.</p>
+                </div>
+              )}
+            </TabsContent>
+            
+            {/* Tab 4: Cooking History */}
             <TabsContent value="history">
               {savedRecipes.length > 0 ? (
                 <div className="space-y-4">

@@ -97,6 +97,17 @@ export const recipeVariationSchema = z.object({
 
 export type RecipeVariation = z.infer<typeof recipeVariationSchema>;
 
+export const youtubeVideoSchema = z.object({
+  videoId: z.string(),
+  title: z.string(),
+  channelTitle: z.string().optional(),
+  description: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
+  publishedAt: z.string().optional(),
+});
+
+export type YoutubeVideo = z.infer<typeof youtubeVideoSchema>;
+
 export const recipeSchema = z.object({
   title: z.string(),
   description: z.string(),
@@ -125,6 +136,7 @@ export const analyzeImageResponseSchema = z.object({
   description: z.string(),
   tags: z.array(z.string()),
   recipes: z.array(recipeSchema),
+  youtubeVideos: z.array(youtubeVideoSchema).optional(),
 });
 
 export type AnalyzeImageResponse = z.infer<typeof analyzeImageResponseSchema>;

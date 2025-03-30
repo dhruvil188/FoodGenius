@@ -1,9 +1,36 @@
-import { AnalyzeImageResponse } from "@shared/schema";
+import { AnalyzeImageResponse, YoutubeVideo } from "@shared/schema";
 
 /**
  * Provides mock data for development when the API quota is exceeded
  */
 export const getMockAnalysisResponse = (): AnalyzeImageResponse => {
+  const mockYoutubeVideos: YoutubeVideo[] = [
+    {
+      videoId: "D_2DBLAt57c",
+      title: "Pasta Carbonara | Basics with Babish",
+      channelTitle: "Babish Culinary Universe",
+      description: "Learn how to make authentic pasta carbonara with this simple recipe.",
+      publishedAt: "2022-04-15T12:00:00Z",
+      thumbnailUrl: "https://i.ytimg.com/vi/D_2DBLAt57c/mqdefault.jpg"
+    },
+    {
+      videoId: "6Oy5ITdDQ3o",
+      title: "How To Make Carbonara | Jamie Oliver",
+      channelTitle: "Jamie Oliver",
+      description: "Jamie shows you his take on a classic carbonara with a few little tips and tricks.",
+      publishedAt: "2021-09-22T14:30:00Z",
+      thumbnailUrl: "https://i.ytimg.com/vi/6Oy5ITdDQ3o/mqdefault.jpg"
+    },
+    {
+      videoId: "q8kTWNwUD88",
+      title: "Gordon Ramsay's Simple Spaghetti Carbonara",
+      channelTitle: "Gordon Ramsay",
+      description: "Gordon Ramsay shows how to make a simple carbonara in under 10 minutes.",
+      publishedAt: "2021-02-11T18:00:00Z",
+      thumbnailUrl: "https://i.ytimg.com/vi/q8kTWNwUD88/mqdefault.jpg"
+    }
+  ];
+
   return {
     foodName: "Pasta Carbonara (Spaghetti alla Carbonara)",
     description: "A rich and creamy Italian pasta dish that originated in Rome, traditionally made with eggs, hard cheese, cured pork, and black pepper. This iconic dish gained popularity after World War II and is now considered one of Italy's most treasured culinary classics, typically served as a primo piatto (first course).",
@@ -355,6 +382,7 @@ export const getMockAnalysisResponse = (): AnalyzeImageResponse => {
           }
         ]
       }
-    ]
+    ],
+    youtubeVideos: mockYoutubeVideos
   };
 };

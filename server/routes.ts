@@ -6,10 +6,12 @@ import {
   analyzeImageRequestSchema,
   analyzeImageResponseSchema,
   type AnalyzeImageResponse,
+  type YoutubeVideo,
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getMockAnalysisResponse } from "./mockData";
+import { searchYouTubeVideos } from "./services/youtubeService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flag to enable development mode with mock data when API quota is exceeded
@@ -481,7 +483,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }))
             };
             
-            const validatedResponse = analyzeImageResponseSchema.parse(finalData);
+            // Fetch related YouTube videos for the recipe
+            let youtubeVideos: YoutubeVideo[] = [];
+            try {
+              console.log("Fetching YouTube videos for:", finalData.foodName);
+              youtubeVideos = await searchYouTubeVideos(finalData.foodName, 5);
+              console.log(`Found ${youtubeVideos.length} YouTube videos`);
+            } catch (youtubeError) {
+              console.error("Error fetching YouTube videos:", youtubeError);
+              // Continue with empty videos rather than failing the request
+            }
+
+            // Add YouTube videos to the response
+            const responseWithVideos = {
+              ...finalData,
+              youtubeVideos
+            };
+
+            const validatedResponse = analyzeImageResponseSchema.parse(responseWithVideos);
             return res.status(200).json(validatedResponse);
           } catch (validationErr) {
             console.error("Schema validation error:", validationErr);

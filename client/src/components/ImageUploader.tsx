@@ -147,9 +147,16 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
-      <Card className="bg-white rounded-2xl shadow-lg">
+      <Card className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-slate-200 dark:border-slate-700 overflow-hidden">
         <CardContent className="p-6">
-          <h3 className="text-xl font-semibold font-heading mb-4 text-center">Upload or Capture Food Image</h3>
+          <motion.h3 
+            className="text-2xl font-serif font-semibold mb-6 text-center gradient-text"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Upload or Capture Your Dish
+          </motion.h3>
           
           <Tabs 
             defaultValue="upload" 
@@ -160,22 +167,36 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               setFileName(null);
             }}
           >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upload" className="flex items-center">
-                <i className="fas fa-upload mr-2"></i> Upload Image
+            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 dark:bg-slate-700/50 p-1 mb-8">
+              <TabsTrigger 
+                value="upload" 
+                className="flex items-center justify-center gap-2 rounded-full data-[state=active]:shadow-lg"
+              >
+                <i className="fas fa-cloud-upload-alt"></i>
+                <span className="font-medium">Upload Image</span>
               </TabsTrigger>
-              <TabsTrigger value="camera" className="flex items-center">
-                <i className="fas fa-camera mr-2"></i> Take Photo
+              <TabsTrigger 
+                value="camera" 
+                className="flex items-center justify-center gap-2 rounded-full data-[state=active]:shadow-lg"
+              >
+                <i className="fas fa-camera"></i>
+                <span className="font-medium">Take Photo</span>
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="upload" className="mt-6">
-              <div 
-                className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:bg-slate-50 transition-colors"
+            <TabsContent value="upload" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
+              <motion.div 
+                className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-300 ${
+                  selectedImage 
+                    ? 'border-primary/20 bg-primary/5 dark:border-primary/30 dark:bg-primary/10' 
+                    : 'border-slate-200 dark:border-slate-700 hover:border-primary/30 hover:bg-slate-50 dark:hover:border-primary/30 dark:hover:bg-slate-800/50'
+                }`}
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
               >
                 <input 
                   type="file" 
@@ -189,127 +210,228 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                   {!selectedImage ? (
                     <motion.div 
                       key="upload-prompt"
-                      className="space-y-3"
+                      className="space-y-4"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
-                      <div className="text-5xl text-slate-300 flex justify-center">
+                      <motion.div 
+                        className="text-6xl text-primary/40 dark:text-primary/60 flex justify-center"
+                        animate={{ y: [0, -10, 0] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      >
                         <i className="fas fa-cloud-upload-alt"></i>
+                      </motion.div>
+                      <div className="space-y-2 max-w-md mx-auto">
+                        <h4 className="text-lg font-medium">Drag & drop your food image</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          or click to browse your device
+                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
+                          Supports JPG, PNG files up to 5MB
+                        </p>
                       </div>
-                      <h4 className="text-lg font-medium text-slate-700">Drag & drop your image or click to browse</h4>
-                      <p className="text-sm text-slate-500">Supports JPG, PNG files up to 5MB</p>
                     </motion.div>
                   ) : (
                     <motion.div 
                       key="image-preview"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      className="py-3"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
                     >
-                      <div className="relative w-full max-w-xs mx-auto">
-                        <img 
-                          src={selectedImage} 
-                          alt="Selected food" 
-                          className="rounded-lg max-h-60 mx-auto"
-                        />
-                        <button 
-                          className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-red-500 hover:text-red-600 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveImage();
-                          }}
+                      <div className="relative max-w-xs mx-auto">
+                        <motion.div
+                          className="rounded-xl overflow-hidden shadow-lg"
+                          whileHover={{ scale: 1.03 }}
                         >
-                          <i className="fas fa-times"></i>
-                        </button>
+                          <img 
+                            src={selectedImage} 
+                            alt="Selected food" 
+                            className="max-h-60 w-full object-cover"
+                          />
+                          <motion.button 
+                            className="absolute top-3 right-3 bg-white dark:bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center shadow-md text-red-500 hover:text-red-600 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveImage();
+                            }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <i className="fas fa-times"></i>
+                          </motion.button>
+                        </motion.div>
+                        {fileName && (
+                          <motion.p 
+                            className="mt-3 text-sm font-medium overflow-hidden text-ellipsis text-slate-600 dark:text-slate-300"
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <i className="fas fa-file-image text-primary mr-2"></i>
+                            {fileName}
+                          </motion.p>
+                        )}
                       </div>
-                      {fileName && (
-                        <p className="mt-3 text-sm font-medium text-slate-700">{fileName}</p>
-                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             </TabsContent>
             
-            <TabsContent value="camera" className="mt-6">
-              <div className="camera-container relative bg-slate-100 rounded-lg overflow-hidden" style={{ minHeight: '250px' }}>
+            <TabsContent value="camera" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
+              <motion.div 
+                className="camera-container relative bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden shadow-md"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{ minHeight: '300px' }}
+              >
                 {activeTab === 'camera' && (
-                  <Webcam
-                    audio={false}
-                    ref={webcamRef}
-                    screenshotFormat="image/jpeg"
-                    videoConstraints={videoConstraints}
-                    onUserMedia={() => setIsCameraReady(true)}
-                    onUserMediaError={() => {
-                      toast({
-                        title: "Camera Error",
-                        description: "Could not access camera. Make sure you've granted camera permissions.",
-                        variant: "destructive"
-                      });
-                    }}
-                    className="w-full h-full object-cover"
-                    style={{ height: '300px' }}
-                  />
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Webcam
+                      audio={false}
+                      ref={webcamRef}
+                      screenshotFormat="image/jpeg"
+                      videoConstraints={videoConstraints}
+                      onUserMedia={() => setIsCameraReady(true)}
+                      onUserMediaError={() => {
+                        toast({
+                          title: "Camera Error",
+                          description: "Could not access camera. Make sure you've granted camera permissions.",
+                          variant: "destructive"
+                        });
+                      }}
+                      className="w-full h-full object-cover"
+                      style={{ height: '350px' }}
+                    />
+                  </motion.div>
                 )}
                 
-                {!selectedImage && (
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
-                    <Button 
-                      className="bg-white rounded-full p-3 shadow-md text-primary hover:text-primary-dark transition-colors"
-                      onClick={handleCapturePhoto}
-                      disabled={!isCameraReady}
-                      size="icon"
-                    >
-                      <i className="fas fa-circle text-xl"></i>
-                    </Button>
-                    <Button 
-                      className="bg-white rounded-full p-3 shadow-md text-red-500 hover:text-red-600 transition-colors"
-                      onClick={handleSwitchCamera}
-                      disabled={!isCameraReady}
-                      size="icon"
-                    >
-                      <i className="fas fa-sync-alt"></i>
-                    </Button>
-                  </div>
+                {!selectedImage && activeTab === 'camera' && (
+                  <motion.div 
+                    className="absolute bottom-4 left-0 right-0 flex justify-center gap-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                      <Button 
+                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-primary hover:text-primary/80 rounded-full size-14 shadow-lg border-none"
+                        onClick={handleCapturePhoto}
+                        disabled={!isCameraReady}
+                        size="icon"
+                      >
+                        <div className="relative">
+                          <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping"></div>
+                          <i className="fas fa-circle text-2xl"></i>
+                        </div>
+                      </Button>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                      <Button 
+                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full size-10 shadow-md"
+                        onClick={handleSwitchCamera}
+                        disabled={!isCameraReady}
+                        size="icon"
+                      >
+                        <i className="fas fa-sync-alt"></i>
+                      </Button>
+                    </motion.div>
+                  </motion.div>
                 )}
                 
-                {selectedImage && (
-                  <div className="absolute inset-0">
+                {selectedImage && activeTab === 'camera' && (
+                  <motion.div 
+                    className="absolute inset-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <div className="relative w-full h-full">
                       <img 
                         src={selectedImage} 
                         alt="Captured food" 
                         className="w-full h-full object-cover"
                       />
-                      <button 
-                        className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md text-red-500 hover:text-red-600 transition-colors"
+                      <motion.button 
+                        className="absolute top-3 right-3 bg-white dark:bg-slate-800 rounded-full w-10 h-10 flex items-center justify-center shadow-md text-red-500 hover:text-red-600 transition-colors"
                         onClick={handleRemoveImage}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         <i className="fas fa-times"></i>
-                      </button>
+                      </motion.button>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
+              
+              {activeTab === 'camera' && !isCameraReady && !selectedImage && (
+                <div className="flex justify-center items-center h-32">
+                  <motion.div 
+                    className="text-center" 
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <i className="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Initializing camera...</p>
+                  </motion.div>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
           
-          <div className="text-center">
-            <Button 
-              className="bg-primary hover:bg-[#16a34a] text-white font-medium rounded-full px-8 py-3 transition-colors"
-              disabled={!selectedImage || isAnalyzing}
-              onClick={handleAnalyzeImage}
+          <motion.div 
+            className="text-center pt-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {isAnalyzing ? (
-                <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i> Analyzing...
-                </>
-              ) : (
-                'Analyze Image'
-              )}
-            </Button>
-          </div>
+              <Button 
+                className="bg-primary text-white font-medium rounded-full px-8 py-6 shadow-md hover:shadow-lg hover:bg-primary/90 dark:hover:bg-primary/80 transition-all"
+                disabled={!selectedImage || isAnalyzing}
+                onClick={handleAnalyzeImage}
+                size="lg"
+              >
+                {isAnalyzing ? (
+                  <div className="flex items-center gap-2">
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Analyzing...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <i className="fas fa-magic text-lg"></i>
+                    <span>Analyze Image</span>
+                  </div>
+                )}
+              </Button>
+            </motion.div>
+            
+            {!selectedImage && (
+              <motion.p 
+                className="mt-4 text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                Upload or capture an image of your food to get detailed cooking instructions and nutritional information
+              </motion.p>
+            )}
+          </motion.div>
         </CardContent>
       </Card>
     </motion.section>

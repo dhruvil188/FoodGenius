@@ -1,70 +1,95 @@
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { Logo } from './Logo';
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  
   return (
-    <footer className="bg-slate-800 text-slate-300 py-10 mt-16">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h4 className="font-heading text-lg font-semibold text-white mb-4">Dish Detective</h4>
-            <p className="text-sm mb-4">Discover any recipe with just a photo. Powered by AI to help you recreate your favorite dishes at home.</p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-slate-300 hover:text-white transition-colors">
-                <i className="fab fa-facebook-f"></i>
-              </a>
-              <a href="#" className="text-slate-300 hover:text-white transition-colors">
-                <i className="fab fa-twitter"></i>
-              </a>
-              <a href="#" className="text-slate-300 hover:text-white transition-colors">
-                <i className="fab fa-instagram"></i>
-              </a>
-              <a href="#" className="text-slate-300 hover:text-white transition-colors">
-                <i className="fab fa-pinterest"></i>
-              </a>
+    <motion.footer 
+      className="bg-slate-50 dark:bg-slate-900 py-8 mt-16"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+          <div className="mb-6 md:mb-0">
+            <Logo size="small" animated={false} />
+            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-xs">
+              Your AI-powered cooking assistant. Upload food photos and get instant recipe suggestions.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-sm mb-3 text-slate-800 dark:text-slate-200">Features</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                  <a href="#" className="flex items-center gap-1">
+                    <i className="fas fa-camera-retro"></i> Image Analysis
+                  </a>
+                </li>
+                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                  <a href="#" className="flex items-center gap-1">
+                    <i className="fas fa-list-check"></i> Recipe Steps
+                  </a>
+                </li>
+                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                  <a href="#" className="flex items-center gap-1">
+                    <i className="fas fa-apple-alt"></i> Nutrition Info
+                  </a>
+                </li>
+              </ul>
             </div>
-          </div>
-          
-          <div>
-            <h4 className="font-heading text-md font-semibold text-white mb-4">Quick Links</h4>
-            <ul className="text-sm space-y-2">
-              <li><a href="#" className="hover:text-white transition-colors">Home</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">How It Works</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Recipe Collection</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-heading text-md font-semibold text-white mb-4">Resources</h4>
-            <ul className="text-sm space-y-2">
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Cooking Tips</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Ingredient Guide</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-heading text-md font-semibold text-white mb-4">Subscribe</h4>
-            <p className="text-sm mb-4">Get weekly recipes and cooking tips delivered to your inbox.</p>
-            <form className="flex">
-              <Input 
-                type="email" 
-                placeholder="Your email" 
-                className="rounded-l-lg px-4 py-2 w-full text-slate-800 text-sm focus:ring-2 focus:ring-primary rounded-r-none" 
-              />
-              <Button type="submit" className="bg-primary hover:bg-[#16a34a] text-white rounded-l-none rounded-r-lg px-4">
-                <i className="fas fa-paper-plane"></i>
-              </Button>
-            </form>
+            
+            <div className="flex flex-col">
+              <h4 className="font-semibold text-sm mb-3 text-slate-800 dark:text-slate-200">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                  <a href="#" className="flex items-center gap-1">
+                    <i className="fas fa-book"></i> Cooking Guide
+                  </a>
+                </li>
+                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                  <a href="#" className="flex items-center gap-1">
+                    <i className="fas fa-question-circle"></i> Help Center
+                  </a>
+                </li>
+                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                  <a href="#" className="flex items-center gap-1">
+                    <i className="fas fa-lightbulb"></i> Tips & Tricks
+                  </a>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="flex flex-col col-span-2 md:col-span-1">
+              <h4 className="font-semibold text-sm mb-3 text-slate-800 dark:text-slate-200">Join Our Community</h4>
+              <div className="flex space-x-3 mb-4">
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                  <i className="fab fa-twitter"></i>
+                </a>
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                  <i className="fab fa-instagram"></i>
+                </a>
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                  <i className="fab fa-pinterest"></i>
+                </a>
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                  <i className="fab fa-youtube"></i>
+                </a>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Share your culinary creations with us and join our cooking community!
+              </p>
+            </div>
           </div>
         </div>
         
-        <div className="border-t border-slate-700 mt-8 pt-8 text-sm text-center">
-          <p>&copy; {new Date().getFullYear()} Dish Detective. All rights reserved.</p>
+        <div className="pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-sm text-slate-500 dark:text-slate-400">
+          <p>© {currentYear} DishDetective. All rights reserved.</p>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 }

@@ -43,6 +43,12 @@ export default function Home() {
     // Directly use apiRequest from lib/api
     apiRequest<AnalyzeImageResponse>('POST', '/api/analyze-image', { imageData })
       .then((response) => {
+        // Validate that we have a proper response with required fields
+        if (!response || !response.foodName || !response.recipes || response.recipes.length === 0) {
+          console.error('Invalid response from API:', response);
+          throw new Error("The AI couldn't identify the food in your image properly.");
+        }
+        
         console.log('Analysis successful:', response);
         setAnalysisResult(response);
         setStage("results");
@@ -82,11 +88,19 @@ export default function Home() {
             variant: "destructive",
           });
         }
+        // Handle API validation errors
+        else if (error.status === 500 && error.details) {
+          toast({
+            title: "Analysis Failed",
+            description: error.details || "The AI service encountered a problem. Please try again with a different image.",
+            variant: "destructive",
+          });
+        }
         // Generic error for other cases
         else {
           toast({
             title: "Analysis Failed",
-            description: "We couldn't analyze your image. Please try again with a clearer photo.",
+            description: "We couldn't analyze your image. Please try again with a clearer photo of a food dish.",
             variant: "destructive",
           });
         }

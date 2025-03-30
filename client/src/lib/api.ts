@@ -12,38 +12,74 @@ export async function apiRequest<T = any>(
   data?: unknown | undefined,
 ): Promise<T> {
   try {
+    // Use the baseApiRequest function to make the actual request
     const response = await baseApiRequest(method, url, data);
     
-    // Check for non-2xx response
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      // Create a custom error object with status and error details from the response
-      const error: any = new Error(errorData.error || response.statusText);
-      error.status = response.status;
-      error.details = errorData.details || null;
-      error.retryAfter = errorData.retryAfter || null;
-      throw error;
-    }
+    // Clone the response so we can read the body multiple times if needed
+    const clonedResponse = response.clone();
     
-    // Handle the JSON parsing error specifically
+    // Try to parse the JSON response
     try {
       const jsonData = await response.json();
       
       // For the analyze-image endpoint, verify we have actual content
       if (url === '/api/analyze-image' && (!jsonData.foodName || !jsonData.recipes || jsonData.recipes.length === 0)) {
-        throw new Error("The AI service couldn't properly analyze the image. Please try with a clearer food image.");
+        if (jsonData.error) {
+          // If the response has an error field, use that information
+          const error: any = new Error(jsonData.error);
+          error.status = 500;
+          error.details = jsonData.details || "The AI couldn't properly analyze the image. Please try with a clearer food photo.";
+          throw error;
+        } else {
+          // Otherwise, create a generic error
+          const error: any = new Error("The AI service couldn't properly analyze the image.");
+          error.status = 500;
+          error.details = "Please try with a clearer food photo that shows the dish more distinctly.";
+          throw error;
+        }
       }
       
       return jsonData;
     } catch (parseError) {
       console.error("JSON parsing error:", parseError);
-      const error: any = new Error("Failed to parse server response");
+      
+      // Try to read the text response to see if there's any useful information
+      try {
+        const textResponse = await clonedResponse.text();
+        console.log("Raw response text:", textResponse);
+        
+        // Check if there's an error message in the raw text
+        if (textResponse.includes("error")) {
+          const error: any = new Error("Server error");
+          error.status = 500;
+          error.details = "The server encountered an error processing your request.";
+          throw error;
+        }
+      } catch (textError) {
+        console.error("Error reading response text:", textError);
+      }
+      
+      // Create a user-friendly error
+      const error: any = new Error("Failed to process server response");
       error.status = 500;
+      error.details = "There was a problem with the server response. Please try again with a different image.";
       error.originalError = parseError;
       throw error;
     }
-  } catch (error) {
+  } catch (error: any) {
+    // Add more detailed logging for debugging
     console.error("API request error:", error);
+    
+    // If the error doesn't have a status, add one
+    if (!error.status) {
+      error.status = 500;
+    }
+    
+    // If the error doesn't have details, add generic ones
+    if (!error.details) {
+      error.details = "There was a problem processing your request.";
+    }
+    
     throw error;
   }
 }

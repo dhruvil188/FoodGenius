@@ -818,90 +818,310 @@ export default function Home() {
                   transition={{ duration: 0.5 }}
                 >
                   <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
-                    KEY FEATURES
+                    AI-POWERED RECIPES
                   </Badge>
                   <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                    Everything You <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Need</span>
+                    Recipe <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Magic</span> In Action
                   </h2>
                   <p className="text-slate-600 max-w-2xl mx-auto">
-                    Our platform offers everything you need to transform food photos into delicious home-cooked meals.
+                    Take a look at the incredible recipe insights our AI generates from a single food photo.
                   </p>
                 </motion.div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                  {[
-                    {
-                      icon: "fa-camera-retro",
-                      title: "Instant Image Analysis",
-                      description: "Our AI can recognize thousands of dishes from a single photo, giving you accurate results in seconds",
-                      bgColor: "bg-green-100",
-                      iconColor: "text-green-600"
-                    },
-                    {
-                      icon: "fa-book-open",
-                      title: "Complete Recipes",
-                      description: "Get detailed ingredients, step-by-step instructions, and cooking times for any dish",
-                      bgColor: "bg-blue-100",
-                      iconColor: "text-blue-600"
-                    },
-                    {
-                      icon: "fa-chart-pie",
-                      title: "Nutrition Facts",
-                      description: "Understand the nutritional profile of your meals with detailed macro and micronutrient information",
-                      bgColor: "bg-purple-100",
-                      iconColor: "text-purple-600"
-                    },
-                    {
-                      icon: "fa-sliders-h",
-                      title: "Recipe Variations",
-                      description: "Customize recipes to your taste with spicy, mild, or dietary-specific variations",
-                      bgColor: "bg-amber-100",
-                      iconColor: "text-amber-600"
-                    },
-                    {
-                      icon: "fa-lightbulb",
-                      title: "Cooking Tips",
-                      description: "Learn professional techniques and avoid common mistakes with expert cooking advice",
-                      bgColor: "bg-rose-100",
-                      iconColor: "text-rose-600"
-                    },
-                    {
-                      icon: "fa-mobile-alt",
-                      title: "Use Anywhere",
-                      description: "Take photos directly or upload existing images from your gallery, works on any device",
-                      bgColor: "bg-cyan-100",
-                      iconColor: "text-cyan-600"
-                    }
-                  ].map((feature, index) => (
+                {/* Animated Recipe Output Showcase */}
+                <div className="relative mx-auto max-w-5xl rounded-2xl overflow-hidden shadow-2xl mb-16 bg-white border border-slate-200">
+                  {/* Phone Frame Header */}
+                  <div className="bg-slate-900 py-4 px-6 flex items-center">
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div className="flex-1 text-center text-white text-sm font-medium">
+                      dishdetective.app
+                    </div>
+                  </div>
+                  
+                  {/* Recipe Content */}
+                  <div className="flex flex-col lg:flex-row p-4 gap-6">
+                    {/* Food Image */}
                     <motion.div 
-                      key={index}
-                      className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-100"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
+                      className="w-full lg:w-2/5 rounded-xl overflow-hidden relative"
+                      initial={{ opacity: 0, x: -40 }}
+                      whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: index * 0.05 }}
+                      transition={{ duration: 0.7 }}
                     >
-                      <div className={`w-16 h-16 ${feature.bgColor} rounded-xl flex items-center justify-center mb-5 relative overflow-hidden group`}>
-                        <div className="absolute inset-0 bg-white/30 rounded-lg m-1"></div>
-                        <div className="absolute inset-0 bg-gradient-radial from-white/20 via-transparent to-transparent"></div>
-                        <motion.div
-                          animate={{ 
-                            scale: [1, 1.08, 1],
-                          }}
-                          transition={{ 
-                            duration: 3,
-                            repeat: Infinity,
-                            repeatType: "loop"
-                          }}
-                          className="relative z-10"
-                        >
-                          <i className={`fas ${feature.icon} text-2xl ${feature.iconColor}`}></i>
-                        </motion.div>
+                      <img 
+                        src="https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg" 
+                        alt="Butter Chicken Dish" 
+                        className="w-full h-[300px] object-cover"
+                      />
+                      <div className="absolute top-4 left-4 bg-black/70 text-white rounded-lg px-3 py-1 text-sm font-medium">
+                        <i className="fas fa-check-circle mr-2 text-green-400"></i>
+                        Identified: Butter Chicken
                       </div>
-                      <h3 className="text-lg font-semibold mb-3 text-slate-800">{feature.title}</h3>
-                      <p className="text-slate-600 text-sm">{feature.description}</p>
                     </motion.div>
-                  ))}
+                    
+                    {/* Recipe Info with Tabs */}
+                    <div className="w-full lg:w-3/5">
+                      <Tabs defaultValue="ingredients" className="w-full">
+                        <TabsList className="w-full">
+                          <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
+                          <TabsTrigger value="instructions">Steps</TabsTrigger>
+                          <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
+                          <TabsTrigger value="tips">Pro Tips</TabsTrigger>
+                        </TabsList>
+                        
+                        <AnimatePresence mode="wait">
+                          <TabsContent value="ingredients" className="mt-4">
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Butter Chicken Ingredients</h3>
+                              <div className="space-y-2">
+                                {[
+                                  "800g boneless chicken thighs",
+                                  "1 cup plain yogurt",
+                                  "2 tbsp lemon juice",
+                                  "2 tsp garam masala",
+                                  "2 tsp ground cumin",
+                                  "2 tsp ground turmeric",
+                                  "4 tbsp butter",
+                                  "1 large onion, finely chopped",
+                                  "4 cloves garlic, minced",
+                                  "2 tbsp ginger, grated",
+                                  "2 cups tomato puree",
+                                  "1 cup heavy cream",
+                                  "Fresh cilantro for garnish"
+                                ].map((ingredient, index) => (
+                                  <motion.div 
+                                    key={index}
+                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                                  >
+                                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                      <i className="fas fa-check text-xs"></i>
+                                    </div>
+                                    <span className="text-slate-700">{ingredient}</span>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          </TabsContent>
+                          
+                          <TabsContent value="instructions" className="mt-4">
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Cooking Instructions</h3>
+                              <div className="space-y-3">
+                                {[
+                                  "In a bowl, mix yogurt, lemon juice, and spices for the marinade.",
+                                  "Add chicken pieces and marinate for at least 2 hours.",
+                                  "Heat butter in a large pan. Cook chicken until browned.",
+                                  "In the same pan, add onions, garlic, ginger. Sauté until golden.",
+                                  "Add tomato puree and simmer for 15 minutes.",
+                                  "Return chicken to the pan, add cream, and simmer for 10-15 minutes.",
+                                  "Season with salt, garnish with cilantro, and serve with naan or rice."
+                                ].map((step, index) => (
+                                  <motion.div 
+                                    key={index}
+                                    className="flex gap-4 p-2"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.08 }}
+                                  >
+                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-medium">
+                                      {index + 1}
+                                    </div>
+                                    <div className="text-slate-700">{step}</div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          </TabsContent>
+                          
+                          <TabsContent value="nutrition" className="mt-4">
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Nutritional Information</h3>
+                              <div className="grid grid-cols-2 gap-4">
+                                <motion.div 
+                                  className="bg-green-50 rounded-lg p-3 relative overflow-hidden"
+                                  whileHover={{ scale: 1.03 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                >
+                                  <div className="absolute right-0 top-0 opacity-10">
+                                    <i className="fas fa-fire text-5xl text-green-500"></i>
+                                  </div>
+                                  <p className="text-xs uppercase font-semibold text-green-700">Calories</p>
+                                  <p className="text-2xl font-bold text-green-800">580</p>
+                                  <p className="text-xs text-green-600">per serving</p>
+                                </motion.div>
+                                
+                                <motion.div 
+                                  className="bg-blue-50 rounded-lg p-3 relative overflow-hidden"
+                                  whileHover={{ scale: 1.03 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                >
+                                  <div className="absolute right-0 top-0 opacity-10">
+                                    <i className="fas fa-drumstick-bite text-5xl text-blue-500"></i>
+                                  </div>
+                                  <p className="text-xs uppercase font-semibold text-blue-700">Protein</p>
+                                  <p className="text-2xl font-bold text-blue-800">42g</p>
+                                  <p className="text-xs text-blue-600">excellent source</p>
+                                </motion.div>
+                                
+                                <motion.div 
+                                  className="bg-amber-50 rounded-lg p-3 relative overflow-hidden"
+                                  whileHover={{ scale: 1.03 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                >
+                                  <div className="absolute right-0 top-0 opacity-10">
+                                    <i className="fas fa-bread-slice text-5xl text-amber-500"></i>
+                                  </div>
+                                  <p className="text-xs uppercase font-semibold text-amber-700">Carbs</p>
+                                  <p className="text-2xl font-bold text-amber-800">18g</p>
+                                  <p className="text-xs text-amber-600">low-carb friendly</p>
+                                </motion.div>
+                                
+                                <motion.div 
+                                  className="bg-purple-50 rounded-lg p-3 relative overflow-hidden"
+                                  whileHover={{ scale: 1.03 }}
+                                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                >
+                                  <div className="absolute right-0 top-0 opacity-10">
+                                    <i className="fas fa-cheese text-5xl text-purple-500"></i>
+                                  </div>
+                                  <p className="text-xs uppercase font-semibold text-purple-700">Fats</p>
+                                  <p className="text-2xl font-bold text-purple-800">38g</p>
+                                  <p className="text-xs text-purple-600">primarily from dairy</p>
+                                </motion.div>
+                              </div>
+                            </motion.div>
+                          </TabsContent>
+                          
+                          <TabsContent value="tips" className="mt-4">
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Chef's Pro Tips</h3>
+                              <div className="space-y-3">
+                                {[
+                                  "For deeper flavor, toast whole spices and grind them fresh",
+                                  "The longer the marinating time, the more tender and flavorful the chicken",
+                                  "Kasuri methi (dried fenugreek leaves) adds authentic flavor - add at the end",
+                                  "For a lighter version, substitute half the cream with coconut milk",
+                                  "Let the dish rest for 10 minutes before serving to allow flavors to meld"
+                                ].map((tip, index) => (
+                                  <motion.div 
+                                    key={index}
+                                    className="flex items-start gap-3 p-2"
+                                    initial={{ opacity: 0, x: 10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.08 }}
+                                  >
+                                    <div className="mt-1 text-amber-500">
+                                      <i className="fas fa-lightbulb"></i>
+                                    </div>
+                                    <p className="text-slate-700">{tip}</p>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </motion.div>
+                          </TabsContent>
+                        </AnimatePresence>
+                      </Tabs>
+                      
+                      {/* Interactive Elements Hint */}
+                      <motion.div 
+                        className="mt-4 text-center"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ delay: 1, duration: 0.5 }}
+                      >
+                        <p className="text-sm text-slate-500 italic">
+                          <i className="fas fa-mouse-pointer text-primary mr-1"></i> 
+                          Explore tabs above to see more recipe details
+                        </p>
+                      </motion.div>
+                    </div>
+                  </div>
+                  
+                  {/* AI Generation Indicator */}
+                  <div className="bg-slate-100 py-3 px-6 text-sm text-slate-500 flex items-center justify-center">
+                    <div className="flex items-center">
+                      <i className="fas fa-robot mr-2 text-primary"></i>
+                      <span>Generated by AI in 2.8 seconds</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Feature Highlights */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <motion.div 
+                    className="bg-white rounded-xl p-6 shadow-sm border border-slate-100"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
+                      <i className="fas fa-magic text-lg text-green-600"></i>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-slate-800">Smart Recognition</h3>
+                    <p className="text-slate-600 text-sm">
+                      Our AI can recognize thousands of dishes from anywhere in the world with remarkable accuracy.
+                    </p>
+                  </motion.div>
+                  
+                  <motion.div 
+                    className="bg-white rounded-xl p-6 shadow-sm border border-slate-100"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                      <i className="fas fa-cubes text-lg text-blue-600"></i>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-slate-800">Interactive Recipes</h3>
+                    <p className="text-slate-600 text-sm">
+                      Track your progress with step-by-step instructions and interactive ingredient checklists.
+                    </p>
+                  </motion.div>
+                  
+                  <motion.div 
+                    className="bg-white rounded-xl p-6 shadow-sm border border-slate-100"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                      <i className="fas fa-book-open text-lg text-purple-600"></i>
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2 text-slate-800">Expert Knowledge</h3>
+                    <p className="text-slate-600 text-sm">
+                      Get professional chef tips, cooking techniques, and cultural insights with every recipe.
+                    </p>
+                  </motion.div>
                 </div>
               </div>
             </section>

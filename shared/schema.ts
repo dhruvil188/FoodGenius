@@ -90,7 +90,7 @@ export const sideDishSchema = z.object({
 export type SideDish = z.infer<typeof sideDishSchema>;
 
 export const recipeVariationSchema = z.object({
-  type: z.enum(['spicy', 'buttery', 'non-spicy']),
+  type: z.string(),
   description: z.string(),
   adjustments: z.array(z.string()),
 });

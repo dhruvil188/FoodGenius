@@ -258,3 +258,20 @@ const middleEasternYoutubeVideos: YoutubeVideo[] = [
   }
 ];
 
+// Export YouTubeVideo arrays for use in expandedRecipeLibrary
+export {
+  pastaYoutubeVideos,
+  pizzaYoutubeVideos,
+  curryYoutubeVideos,
+  genericYoutubeVideos,
+  mexicanYoutubeVideos,
+  japaneseYoutubeVideos,
+  frenchYoutubeVideos,
+  chineseYoutubeVideos,
+  thaiYoutubeVideos,
+  mediterraneanYoutubeVideos,
+  koreanYoutubeVideos,
+  brazilianYoutubeVideos,
+  middleEasternYoutubeVideos
+};
+

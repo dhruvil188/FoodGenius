@@ -65,6 +65,35 @@ export const analyzeImageRequestSchema = z.object({
 
 export type AnalyzeImageRequest = z.infer<typeof analyzeImageRequestSchema>;
 
+export const nutritionInfoSchema = z.object({
+  calories: z.number().optional(),
+  protein: z.string().optional(),
+  carbs: z.string().optional(),
+  fats: z.string().optional(),
+  fiber: z.string().optional(),
+  sugar: z.string().optional(),
+  healthyAlternatives: z.array(z.string()).optional(),
+  dietaryNotes: z.array(z.string()).optional(),
+});
+
+export type NutritionInfo = z.infer<typeof nutritionInfoSchema>;
+
+export const sideDishSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  preparationTime: z.string().optional(),
+});
+
+export type SideDish = z.infer<typeof sideDishSchema>;
+
+export const recipeVariationSchema = z.object({
+  type: z.enum(['spicy', 'buttery', 'non-spicy']),
+  description: z.string(),
+  adjustments: z.array(z.string()),
+});
+
+export type RecipeVariation = z.infer<typeof recipeVariationSchema>;
+
 export const recipeSchema = z.object({
   title: z.string(),
   description: z.string(),
@@ -77,6 +106,9 @@ export const recipeSchema = z.object({
   ingredients: z.array(z.string()),
   instructions: z.array(z.string()),
   imageUrl: z.string().optional(),
+  nutritionInfo: nutritionInfoSchema.optional(),
+  variations: z.array(recipeVariationSchema).optional(),
+  sideDishSuggestions: z.array(sideDishSchema).optional(),
 });
 
 export const analyzeImageResponseSchema = z.object({

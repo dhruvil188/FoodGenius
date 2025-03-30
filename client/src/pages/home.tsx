@@ -12,28 +12,205 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Featured food cards used in the new design
+// Featured food cards with recipe data
 const featuredFoods = [
   {
     name: "Pasta Carbonara",
     image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=715&q=80",
-    tags: ["Italian", "Dinner", "Creamy"]
+    tags: ["Italian", "Dinner", "Creamy"],
+    recipe: {
+      foodName: "Pasta Carbonara",
+      description: "Pasta Carbonara is a classic Italian pasta dish from Rome made with eggs, hard cheese, cured pork, and black pepper. The dish took its modern form and name in the middle of the 20th century, after World War II.",
+      tags: ["Italian", "Pasta", "Dinner", "Creamy", "Quick", "Egg-based"],
+      recipes: [
+        {
+          title: "Classic Pasta Carbonara",
+          description: "A traditional Roman pasta dish that combines eggs, Pecorino Romano cheese, pancetta and black pepper for a simple yet delicious meal.",
+          prepTime: "10 minutes",
+          cookTime: "15 minutes",
+          totalTime: "25 minutes",
+          servings: 4,
+          ingredients: [
+            "350g (12oz) spaghetti or bucatini",
+            "150g (5oz) pancetta or guanciale, diced",
+            "4 large egg yolks",
+            "1 whole egg",
+            "75g (2.5oz) Pecorino Romano cheese, finely grated",
+            "75g (2.5oz) Parmesan cheese, finely grated", 
+            "Black pepper, freshly ground",
+            "Salt for pasta water"
+          ],
+          instructions: [
+            "Bring a large pot of salted water to boil and cook pasta until al dente.",
+            "While pasta cooks, sauté the pancetta in a large pan until crispy.",
+            "In a bowl, whisk together egg yolks, whole egg, and grated cheeses.",
+            "Reserve 1 cup of pasta water, then drain pasta.",
+            "Working quickly, add hot pasta to the pan with pancetta (heat off).",
+            "Add a splash of pasta water, then pour in egg mixture, tossing rapidly.",
+            "Add more pasta water as needed to create a silky sauce.",
+            "Season generously with freshly ground black pepper.",
+            "Serve immediately with extra grated cheese on top."
+          ],
+          nutritionInfo: {
+            calories: 650,
+            protein: "32g",
+            carbs: "65g",
+            fats: "28g"
+          }
+        }
+      ]
+    }
   },
   {
     name: "Avocado Toast",
     image: "https://images.unsplash.com/photo-1588137378783-f23d106a4d76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80",
-    tags: ["Breakfast", "Healthy", "Quick"]
+    tags: ["Breakfast", "Healthy", "Quick"],
+    recipe: {
+      foodName: "Avocado Toast",
+      description: "Avocado toast is a simple open-faced sandwich consisting of toasted bread topped with mashed avocado and various seasonings. It has become a popular breakfast dish in contemporary cafe culture and health-conscious eating.",
+      tags: ["Breakfast", "Brunch", "Healthy", "Vegetarian", "Quick", "Vegan-Optional"],
+      recipes: [
+        {
+          title: "Classic Avocado Toast",
+          description: "A simple yet delicious breakfast or snack featuring creamy avocado on toasted bread with minimal ingredients that let the avocado shine.",
+          prepTime: "5 minutes",
+          cookTime: "5 minutes",
+          totalTime: "10 minutes",
+          servings: 2,
+          ingredients: [
+            "2 slices of sourdough bread",
+            "1 ripe avocado",
+            "1 tbsp lemon or lime juice",
+            "1/4 tsp salt",
+            "1/4 tsp red pepper flakes (optional)",
+            "1 tbsp extra virgin olive oil",
+            "Freshly ground black pepper",
+            "Microgreens or sprouts for garnish (optional)"
+          ],
+          instructions: [
+            "Toast your bread slices until golden brown and crisp.",
+            "Cut the avocado in half, remove the pit, and scoop the flesh into a bowl.",
+            "Add lemon juice, salt, and mash with a fork to your desired consistency.",
+            "Spread the mashed avocado evenly over the toasted bread.",
+            "Drizzle with olive oil, sprinkle with red pepper flakes and black pepper.",
+            "Top with microgreens if using, and serve immediately."
+          ],
+          nutritionInfo: {
+            calories: 290,
+            protein: "5g",
+            carbs: "22g",
+            fats: "21g"
+          }
+        }
+      ]
+    }
   },
   {
     name: "Butter Chicken",
     image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80",
-    tags: ["Indian", "Spicy", "Dinner"]
+    tags: ["Indian", "Spicy", "Dinner"],
+    recipe: {
+      foodName: "Butter Chicken",
+      description: "Butter Chicken (Murgh Makhani) is a popular North Indian dish of chicken in a mildly spiced tomato sauce. It was developed in the 1950s by Kundan Lal Gujral, who created the recipe by mixing leftover tandoori chicken in a tomato gravy rich with butter and cream.",
+      tags: ["Indian", "Curry", "Spicy", "Creamy", "Dinner", "Chicken"],
+      recipes: [
+        {
+          title: "Authentic Butter Chicken",
+          description: "A rich and creamy North Indian classic featuring tender chicken pieces in a velvety tomato-based sauce with aromatic spices.",
+          prepTime: "30 minutes (plus 2 hours marinating)",
+          cookTime: "40 minutes",
+          totalTime: "3 hours 10 minutes",
+          servings: 4,
+          ingredients: [
+            "800g (1.8lb) boneless chicken thighs, cut into pieces",
+            "1 cup plain yogurt",
+            "2 tbsp lemon juice",
+            "2 tsp garam masala",
+            "2 tsp ground cumin",
+            "2 tsp ground turmeric",
+            "2 tsp ground coriander",
+            "4 tbsp butter, divided",
+            "1 large onion, finely chopped",
+            "4 cloves garlic, minced",
+            "2 tbsp ginger, grated",
+            "2 green chilies, minced (adjust to taste)",
+            "2 cups tomato puree",
+            "1 cup heavy cream",
+            "2 tbsp dried fenugreek leaves (kasoori methi)",
+            "Salt to taste",
+            "Fresh cilantro for garnish"
+          ],
+          instructions: [
+            "In a bowl, mix yogurt, lemon juice, and spices for the marinade.",
+            "Add chicken pieces and marinate for at least 2 hours or overnight.",
+            "Heat 2 tbsp butter in a large pan. Cook chicken until browned and set aside.",
+            "In the same pan, add remaining butter, onions, garlic, ginger, and chilies. Sauté until golden.",
+            "Add tomato puree and simmer for 15 minutes until sauce thickens.",
+            "Return chicken to the pan, add heavy cream, and simmer for 10-15 minutes.",
+            "Crush dried fenugreek leaves between palms and add to the curry.",
+            "Season with salt, garnish with cilantro, and serve with naan or rice."
+          ],
+          nutritionInfo: {
+            calories: 580,
+            protein: "42g",
+            carbs: "18g",
+            fats: "38g"
+          }
+        }
+      ]
+    }
   },
   {
     name: "Berry Smoothie Bowl",
     image: "https://images.unsplash.com/photo-1626074353765-517a681e40be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
-    tags: ["Breakfast", "Healthy", "Vegan"]
+    tags: ["Breakfast", "Healthy", "Vegan"],
+    recipe: {
+      foodName: "Berry Smoothie Bowl",
+      description: "A smoothie bowl is a thick blend of fruits, vegetables, and other nutritious ingredients served in a bowl and topped with granola, fruits, nuts, seeds, or other toppings. It's essentially a smoothie that's thick enough to eat with a spoon.",
+      tags: ["Breakfast", "Healthy", "Vegan", "Dairy-Free", "Gluten-Free", "No-Cook"],
+      recipes: [
+        {
+          title: "Mixed Berry Smoothie Bowl",
+          description: "A vibrant, antioxidant-rich breakfast bowl featuring a blend of mixed berries topped with crunchy, nutritious ingredients for a satisfying start to your day.",
+          prepTime: "10 minutes",
+          cookTime: "0 minutes",
+          totalTime: "10 minutes",
+          servings: 1,
+          ingredients: [
+            "1 cup frozen mixed berries (strawberries, blueberries, raspberries)",
+            "1 frozen banana",
+            "1/4 cup plant-based milk (almond, oat, or coconut)",
+            "1 tbsp chia seeds",
+            "1 tbsp almond or peanut butter (optional)",
+            "For toppings: sliced fresh fruits, granola, coconut flakes, more chia seeds, hemp seeds, honey or maple syrup (optional)"
+          ],
+          instructions: [
+            "Add frozen berries, banana, plant milk, chia seeds, and nut butter to a blender.",
+            "Blend until smooth and thick. If too thick, add a splash more milk.",
+            "The mixture should be thicker than a regular smoothie - you should be able to eat it with a spoon.",
+            "Pour into a bowl and arrange toppings artfully on top.",
+            "Serve immediately before it melts."
+          ],
+          nutritionInfo: {
+            calories: 350,
+            protein: "8g",
+            carbs: "65g",
+            fats: "10g"
+          }
+        }
+      ]
+    }
   }
 ];
 
@@ -87,6 +264,8 @@ export default function Home() {
   const [stage, setStage] = useState<"upload" | "loading" | "results">("upload");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalyzeImageResponse | null>(null);
+  const [featuredRecipeOpen, setFeaturedRecipeOpen] = useState(false);
+  const [selectedFeaturedRecipe, setSelectedFeaturedRecipe] = useState<typeof featuredFoods[0] | null>(null);
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const uploadSectionRef = useRef<HTMLDivElement>(null);
@@ -97,6 +276,12 @@ export default function Home() {
       uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [location]);
+  
+  // Function to handle clicking on a featured dish
+  const handleFeaturedDishClick = (food: typeof featuredFoods[0]) => {
+    setSelectedFeaturedRecipe(food);
+    setFeaturedRecipeOpen(true);
+  };
 
   // Handle analyzing an image
   const handleAnalyzeImage = (imageData: string) => {
@@ -353,11 +538,12 @@ export default function Home() {
                   {featuredFoods.map((food, index) => (
                     <motion.div 
                       key={index}
-                      className="group"
+                      className="group cursor-pointer"
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
+                      onClick={() => handleFeaturedDishClick(food)}
                     >
                       <div className="relative overflow-hidden rounded-2xl shadow-md h-64">
                         <img 
@@ -367,7 +553,10 @@ export default function Home() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
                         <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="text-white font-semibold text-xl mb-2">{food.name}</h3>
+                          <h3 className="text-white font-semibold text-xl mb-2 flex items-center">
+                            {food.name}
+                            <i className="fas fa-search-plus ml-2 text-sm opacity-70"></i>
+                          </h3>
                           <div className="flex flex-wrap gap-2">
                             {food.tags.map((tag, idx) => (
                               <Badge key={idx} variant="outline" className="bg-black/30 text-white border-none backdrop-blur-sm">
@@ -380,6 +569,134 @@ export default function Home() {
                     </motion.div>
                   ))}
                 </div>
+                
+                {/* Recipe Dialog */}
+                <Dialog open={featuredRecipeOpen} onOpenChange={setFeaturedRecipeOpen}>
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+                    {selectedFeaturedRecipe && (
+                      <div>
+                        <div className="relative h-48 sm:h-64 overflow-hidden">
+                          <img 
+                            src={selectedFeaturedRecipe.image} 
+                            alt={selectedFeaturedRecipe.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                          <div className="absolute bottom-0 left-0 right-0 p-6">
+                            <h2 className="text-white text-2xl sm:text-3xl font-bold">{selectedFeaturedRecipe.recipe.foodName}</h2>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {selectedFeaturedRecipe.recipe.tags.slice(0, 5).map((tag, idx) => (
+                                <Badge key={idx} variant="outline" className="bg-black/30 text-white border-none backdrop-blur-sm">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="p-6">
+                          <p className="text-slate-700 mb-6">{selectedFeaturedRecipe.recipe.description}</p>
+                          
+                          <Tabs defaultValue="recipe" className="mt-4">
+                            <TabsList className="w-full grid grid-cols-3 mb-6">
+                              <TabsTrigger value="recipe">Recipe</TabsTrigger>
+                              <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
+                              <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="recipe" className="space-y-4">
+                              <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div className="bg-slate-50 p-4 rounded-lg text-center">
+                                  <p className="text-xs text-slate-500">Prep Time</p>
+                                  <p className="font-semibold text-primary">{selectedFeaturedRecipe.recipe.recipes[0].prepTime}</p>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-lg text-center">
+                                  <p className="text-xs text-slate-500">Cook Time</p>
+                                  <p className="font-semibold text-primary">{selectedFeaturedRecipe.recipe.recipes[0].cookTime}</p>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-lg text-center">
+                                  <p className="text-xs text-slate-500">Servings</p>
+                                  <p className="font-semibold text-primary">{selectedFeaturedRecipe.recipe.recipes[0].servings}</p>
+                                </div>
+                              </div>
+                              
+                              <h3 className="text-lg font-semibold mb-2">Instructions</h3>
+                              <ol className="space-y-3 list-decimal pl-5">
+                                {selectedFeaturedRecipe.recipe.recipes[0].instructions.map((step, idx) => (
+                                  <li key={idx} className="text-slate-700">
+                                    <span>{step}</span>
+                                  </li>
+                                ))}
+                              </ol>
+                            </TabsContent>
+                            
+                            <TabsContent value="ingredients" className="space-y-4">
+                              <h3 className="text-lg font-semibold mb-4">Ingredients</h3>
+                              <ul className="space-y-2">
+                                {selectedFeaturedRecipe.recipe.recipes[0].ingredients.map((ingredient, idx) => (
+                                  <li key={idx} className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 size-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                                      <i className="fas fa-check text-xs text-primary"></i>
+                                    </div>
+                                    <span className="text-slate-700">{ingredient}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </TabsContent>
+                            
+                            <TabsContent value="nutrition" className="space-y-4">
+                              <h3 className="text-lg font-semibold mb-4">Nutritional Information</h3>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div className="bg-slate-50 p-4 rounded-lg">
+                                  <div className="text-2xl font-bold text-primary">
+                                    {selectedFeaturedRecipe.recipe.recipes[0].nutritionInfo.calories}
+                                  </div>
+                                  <div className="text-sm text-slate-500">Calories</div>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-lg">
+                                  <div className="text-2xl font-bold text-emerald-600">
+                                    {selectedFeaturedRecipe.recipe.recipes[0].nutritionInfo.protein}
+                                  </div>
+                                  <div className="text-sm text-slate-500">Protein</div>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-lg">
+                                  <div className="text-2xl font-bold text-amber-600">
+                                    {selectedFeaturedRecipe.recipe.recipes[0].nutritionInfo.carbs}
+                                  </div>
+                                  <div className="text-sm text-slate-500">Carbs</div>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-lg">
+                                  <div className="text-2xl font-bold text-blue-600">
+                                    {selectedFeaturedRecipe.recipe.recipes[0].nutritionInfo.fats}
+                                  </div>
+                                  <div className="text-sm text-slate-500">Fats</div>
+                                </div>
+                              </div>
+                            </TabsContent>
+                          </Tabs>
+                        </div>
+                        
+                        <DialogFooter className="p-6 pt-0 flex flex-col sm:flex-row gap-4 items-center">
+                          <Button 
+                            className="w-full sm:w-auto bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 gap-2 text-white"
+                            onClick={scrollToUpload}
+                          >
+                            <i className="fas fa-camera"></i>
+                            Try with your own dish
+                          </Button>
+                          <DialogClose asChild>
+                            <Button 
+                              variant="outline" 
+                              className="w-full sm:w-auto"
+                            >
+                              Close
+                            </Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </div>
             </section>
 

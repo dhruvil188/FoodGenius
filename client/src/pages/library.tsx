@@ -19,13 +19,13 @@ export default function Library() {
     "Butter Chicken (Murgh Makhani)": "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
     "Guacamole": "https://images.unsplash.com/photo-1604152135912-04a022e23696?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
     "Sushi": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
-    "French Onion Soup": "https://images.unsplash.com/photo-1605886911698-0fe7468c24b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
+    "French Onion Soup": "https://cdn.pixabay.com/photo/2018/03/22/16/09/food-3251104_960_720.jpg",
     "Chinese Fried Rice": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
     "Pad Thai": "https://images.unsplash.com/photo-1559314809-0d155014e29e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
-    "Greek Tzatziki": "https://images.pexels.com/photos/9928350/pexels-photo-9928350.jpeg?auto=compress&cs=tinysrgb&w=700",
+    "Greek Tzatziki": "https://cdn.pixabay.com/photo/2018/07/12/21/33/food-3534452_960_720.jpg",
     "Korean Bibimbap": "https://images.unsplash.com/photo-1590301157890-4810ed352733?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
-    "Brazilian Feijoada": "https://images.pexels.com/photos/5695875/pexels-photo-5695875.jpeg?auto=compress&cs=tinysrgb&w=700",
-    "Falafel": "https://images.pexels.com/photos/7470455/pexels-photo-7470455.jpeg?auto=compress&cs=tinysrgb&w=700",
+    "Brazilian Feijoada": "https://cdn.pixabay.com/photo/2021/02/15/11/55/feijoada-6017804_960_720.jpg",
+    "Falafel": "https://cdn.pixabay.com/photo/2021/01/10/04/37/falafel-5904068_960_720.jpg",
     "Paella": "https://images.unsplash.com/photo-1534080564583-6be75777b70a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
     "Tiramisu": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80"
   };

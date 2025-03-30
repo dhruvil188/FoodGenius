@@ -99,9 +99,10 @@ export default function Hero() {
                 size="lg"
                 variant="outline"
                 className="rounded-full px-10 border-2 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all py-6"
+                onClick={() => navigate('/library')}
               >
-                <i className="fas fa-play-circle mr-2.5"></i> 
-                Watch Demo
+                <i className="fas fa-book mr-2.5"></i> 
+                Browse Recipe Library
               </Button>
             </div>
           </motion.div>

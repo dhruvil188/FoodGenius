@@ -173,14 +173,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!jsonContent || jsonContent.trim() === '') {
           console.error("Empty JSON content from Gemini API");
           console.log("Full API text response:", text);
-          throw new Error("Empty JSON content from Gemini API");
+          return res.status(500).json({
+            error: "Empty response from AI",
+            details: "The AI service returned an empty response. Please try with a clearer food image."
+          });
         }
 
+        // Log first part of the JSON response for debugging (limit to first 100 chars)
         console.log("Attempting to parse Gemini response:", jsonContent.substring(0, 100) + '...');
         
         // Parse the JSON response
         try {
-          const parsedData = JSON.parse(jsonContent);
+          // Attempt to parse JSON with additional safety checks
+          let parsedData;
+          try {
+            parsedData = JSON.parse(jsonContent);
+          } catch (jsonParseError) {
+            console.error("JSON parsing error:", jsonParseError);
+            console.log("Invalid JSON content:", jsonContent.substring(0, 500) + '...');
+            
+            // Try to clean up the JSON further before giving up
+            const cleanedJson = jsonContent
+              .replace(/(\w+):/g, '"$1":') // Convert unquoted property names to quoted
+              .replace(/'/g, '"') // Replace single quotes with double quotes
+              .replace(/,\s*([}\]])/g, '$1'); // Remove trailing commas in objects/arrays
+              
+            try {
+              parsedData = JSON.parse(cleanedJson);
+              console.log("Successfully parsed after cleanup");
+            } catch (secondAttemptError) {
+              // Still failed, return proper error
+              return res.status(500).json({
+                error: "Invalid response format", 
+                details: "The AI service returned data in an unexpected format. Please try again with a clearer food image."
+              });
+            }
+          }
           
           // Log success and check for required fields
           console.log("Successfully parsed JSON response");

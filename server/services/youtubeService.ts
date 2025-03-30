@@ -33,8 +33,8 @@ export async function searchYouTubeVideos(recipeName: string, maxResults: number
       return [];
     }
 
-    // Format the search query - add "recipe" to improve search relevance
-    const searchQuery = encodeURIComponent(`${recipeName} recipe cooking tutorial`);
+    // Format the search query - be more specific to improve search relevance
+    const searchQuery = encodeURIComponent(`${recipeName} authentic recipe tutorial how to make`);
     
     // Build the YouTube Data API URL
     const youtubeApiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${searchQuery}&type=video&maxResults=${maxResults}&key=${process.env.YOUTUBE_API_KEY}`;

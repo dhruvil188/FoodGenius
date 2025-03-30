@@ -30,9 +30,41 @@ export default function Library() {
     "Tiramisu": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80"
   };
 
+  // Generic food category images to use as fallbacks
+  const fallbackImages = {
+    default: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
+    soup: "https://images.unsplash.com/photo-1547592166-23ac45744acd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
+    dessert: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
+    meat: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
+    vegetarian: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=700&q=80",
+  };
+
+  // Get an appropriate image for a recipe based on name or tags
+  const getRecipeImage = (recipe: AnalyzeImageResponse): string => {
+    // First try exact match by name
+    if (placeholderImages[recipe.foodName]) {
+      return placeholderImages[recipe.foodName];
+    }
+    
+    // Then look for category matches in tags
+    const lowerTags = recipe.tags.map(tag => tag.toLowerCase());
+    if (lowerTags.some(tag => tag.includes('soup'))) {
+      return fallbackImages.soup;
+    } else if (lowerTags.some(tag => tag.includes('dessert') || tag.includes('sweet'))) {
+      return fallbackImages.dessert;
+    } else if (lowerTags.some(tag => tag.includes('vegetarian') || tag.includes('vegan'))) {
+      return fallbackImages.vegetarian;
+    } else if (lowerTags.some(tag => tag.includes('meat') || tag.includes('chicken') || tag.includes('beef'))) {
+      return fallbackImages.meat;
+    }
+    
+    // Default fallback
+    return fallbackImages.default;
+  };
+
   const handleRecipeSelect = (recipe: AnalyzeImageResponse) => {
     setSelectedRecipe(recipe);
-    setSelectedImageUrl(placeholderImages[recipe.foodName as keyof typeof placeholderImages] || "");
+    setSelectedImageUrl(getRecipeImage(recipe));
   };
 
   const handleBackToLibrary = () => {
@@ -96,7 +128,7 @@ export default function Library() {
               <RecipeCard 
                 key={index} 
                 recipe={recipe} 
-                imageUrl={placeholderImages[recipe.foodName as keyof typeof placeholderImages] || ""} 
+                imageUrl={getRecipeImage(recipe)} 
                 onSelect={handleRecipeSelect}
                 index={index}
               />
@@ -111,7 +143,7 @@ export default function Library() {
                 <RecipeCard 
                   key={index} 
                   recipe={recipe} 
-                  imageUrl={placeholderImages[recipe.foodName as keyof typeof placeholderImages] || ""} 
+                  imageUrl={getRecipeImage(recipe)} 
                   onSelect={handleRecipeSelect}
                   index={index}
                 />

@@ -115,83 +115,29 @@ const ProcessIcon = ({ number, title, description, icon, delay = 0 }: ProcessIco
   </motion.div>
 );
 
-// Enhanced animated scanner effect
+// Animated scanner effect
 const ScannerVisualization = () => (
-  <div className="relative h-[380px] w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 transform perspective-800">
-    {/* Advanced glow effects */}
-    <div className="absolute -inset-3 bg-gradient-to-r from-green-500 to-emerald-500 opacity-20 blur-2xl rounded-3xl"></div>
-    <div className="absolute -inset-1 bg-gradient-to-tr from-green-300 to-emerald-400 opacity-10 blur-xl rounded-3xl"></div>
+  <div className="relative h-[300px] w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+    {/* Scanner glow effect */}
+    <div className="absolute -inset-2 bg-gradient-to-r from-green-500 to-emerald-500 opacity-30 blur-xl rounded-3xl"></div>
     
     {/* Scanner content */}
     <div className="absolute inset-0 flex flex-col">
-      <div className="h-3/5 bg-gray-900 relative overflow-hidden">
-        {/* Animated Background Pattern */}
-        <motion.div 
-          className="absolute inset-0 opacity-30"
-          style={{ 
-            backgroundImage: `
-              linear-gradient(0deg, transparent 24%, rgba(16, 185, 129, 0.3) 25%, rgba(16, 185, 129, 0.3) 26%, transparent 27%, transparent 74%, rgba(16, 185, 129, 0.3) 75%, rgba(16, 185, 129, 0.3) 76%, transparent 77%, transparent),
-              linear-gradient(90deg, transparent 24%, rgba(16, 185, 129, 0.3) 25%, rgba(16, 185, 129, 0.3) 26%, transparent 27%, transparent 74%, rgba(16, 185, 129, 0.3) 75%, rgba(16, 185, 129, 0.3) 76%, transparent 77%, transparent)
-            `,
-            backgroundSize: '40px 40px',
-          }} 
-          animate={{
-            backgroundPosition: ['0px 0px', '40px 40px']
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
+      <div className="h-3/5 bg-gray-900 relative">
+        {/* Scanning Grid Pattern */}
+        <div className="absolute inset-0" style={{ 
+          backgroundImage: 'radial-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px)', 
+          backgroundSize: '20px 20px',
+          opacity: 0.5 
+        }} />
         
-        {/* Particles floating */}
-        <div className="absolute inset-0">
-          {[...Array(15)].map((_, index) => (
-            <motion.div
-              key={index}
-              className="absolute w-1.5 h-1.5 rounded-full bg-green-400"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                opacity: 0.4 + (Math.random() * 0.4),
-              }}
-              animate={{
-                y: [0, -15, 0],
-                x: [0, Math.random() * 10 - 5, 0],
-                opacity: [0.4, 0.8, 0.4],
-              }}
-              transition={{
-                duration: 3 + (Math.random() * 2),
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
+        {/* Corner markers */}
+        <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-green-500"></div>
+        <div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-green-500"></div>
+        <div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-green-500"></div>
+        <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-green-500"></div>
         
-        {/* Corner markers with animated pulses */}
-        {[
-          "top-0 left-0 border-t-2 border-l-2",
-          "top-0 right-0 border-t-2 border-r-2",
-          "bottom-0 left-0 border-b-2 border-l-2",
-          "bottom-0 right-0 border-b-2 border-r-2"
-        ].map((position, index) => (
-          <div key={index} className={`absolute ${position} border-green-500 w-6 h-6`}>
-            <motion.div
-              className="absolute inset-0 border-green-500 opacity-60"
-              animate={{ opacity: [0.6, 0.2, 0.6] }}
-              transition={{ 
-                duration: 2,
-                repeat: Infinity,
-                delay: index * 0.5
-              }}
-              style={{ borderWidth: '2px', borderStyle: position.includes('top') ? (position.includes('left') ? 'solid none none solid' : 'solid solid none none') : (position.includes('left') ? 'none none solid solid' : 'none solid solid none') }}
-            />
-          </div>
-        ))}
-        
-        {/* Multiple scan line animations */}
+        {/* Scan line animation */}
         <motion.div 
           className="absolute left-0 right-0 h-1 bg-gradient-to-r from-green-500/0 via-green-500/70 to-green-500/0"
           initial={{ top: 0 }}
@@ -204,114 +150,37 @@ const ScannerVisualization = () => (
           }}
         />
         
-        <motion.div 
-          className="absolute left-0 right-0 h-[40%] bg-gradient-to-b from-green-400/0 via-green-400/5 to-green-400/0"
-          initial={{ top: 0 }}
-          animate={{ top: '80%' }}
-          transition={{ 
-            duration: 3, 
-            repeat: Infinity, 
-            repeatType: "loop",
-            ease: "easeInOut"
-          }}
-        />
-        
-        {/* Recognition pulse */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: [0, 0.5, 0],
-            scale: [0.8, 1.2, 0.8]
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut",
-            delay: 1
-          }}
-        >
-          <div className="w-24 h-24 rounded-full border-2 border-green-400/30"></div>
-        </motion.div>
-        
         {/* Text Overlay */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <motion.div 
-              className="inline-block px-5 py-2.5 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              className="inline-block px-4 py-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <motion.span 
-                className="text-green-600 font-medium flex items-center"
-                animate={{ opacity: [1, 0.7, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
+              <span className="text-green-600 font-medium flex items-center">
                 <i className="fas fa-search mr-2"></i>
                 Analyzing Food Image
-              </motion.span>
+              </span>
             </motion.div>
           </div>
         </div>
       </div>
       
-      {/* Enhanced results panel */}
-      <div className="h-2/5 bg-gradient-to-b from-gray-50 to-white p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center">
-            <motion.div 
-              className="h-2.5 w-2.5 bg-green-500 rounded-full mr-2"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <h3 className="text-sm font-semibold text-gray-900">AI Recognition Results</h3>
-          </div>
-          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-none">Ready</Badge>
+      {/* Results panel */}
+      <div className="h-2/5 bg-gradient-to-b from-gray-50 to-white p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-900">Detection Results</h3>
+          <Badge className="bg-green-500">Ready</Badge>
         </div>
         
-        {/* Result data with animations */}
-        <div className="space-y-3">
-          {[
-            { width: "w-3/4", delay: 0.1 },
-            { width: "w-full", delay: 0.2 },
-            { width: "w-5/6", delay: 0.3 },
-            { width: "w-2/3", delay: 0.4 }
-          ].map((item, index) => (
-            <div key={index} className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-              <motion.div 
-                className={`h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full`}
-                initial={{ width: 0 }}
-                animate={{ width: item.width }}
-                transition={{ 
-                  duration: 1, 
-                  delay: item.delay,
-                  ease: "easeOut" 
-                }}
-              />
-            </div>
-          ))}
-          
-          {/* Recognition tags */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            {[
-              { label: "Dessert", color: "bg-pink-100 text-pink-800" },
-              { label: "Chocolate", color: "bg-amber-100 text-amber-800" },
-              { label: "Baking", color: "bg-blue-100 text-blue-800" }
-            ].map((tag, index) => (
-              <motion.div
-                key={index}
-                className={`text-xs px-2 py-1 rounded-full ${tag.color} inline-flex items-center`}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + (index * 0.1) }}
-              >
-                <i className="fas fa-tag text-xs mr-1 opacity-70"></i>
-                {tag.label}
-              </motion.div>
-            ))}
-          </div>
+        {/* Result data */}
+        <div className="space-y-2">
+          <div className="h-2 bg-gray-200 rounded-full w-3/4"></div>
+          <div className="h-2 bg-gray-200 rounded-full"></div>
+          <div className="h-2 bg-gray-200 rounded-full w-5/6"></div>
+          <div className="h-2 bg-gray-200 rounded-full w-2/3"></div>
         </div>
       </div>
     </div>
@@ -434,105 +303,27 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="relative inline-flex items-center rounded-full bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-1.5 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-500/30 mb-5 overflow-hidden shadow-sm">
-              {/* Animated pulse effect in background */}
-              <motion.div 
-                className="absolute w-12 h-12 bg-green-300/20 rounded-full"
-                animate={{ 
-                  scale: [1, 1.8, 1],
-                  opacity: [0.3, 0.1, 0.3]
-                }}
-                transition={{ 
-                  duration: 3,
-                  repeat: Infinity,
-                  repeatType: "loop"
-                }}
-              />
-              <div className="relative flex items-center">
-                <svg className="mr-2 h-2 w-2 fill-green-500 animate-pulse" viewBox="0 0 6 6" aria-hidden="true">
-                  <circle cx="3" cy="3" r="3" />
-                </svg>
-                <span className="mr-1 uppercase font-semibold tracking-wider">AI-Powered</span>
-                <span className="uppercase text-emerald-700 font-semibold tracking-wider">Food Recognition</span>
-              </div>
+            <div className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20 mb-4">
+              <svg className="mr-1 h-1.5 w-1.5 fill-green-500 animate-pulse" viewBox="0 0 6 6" aria-hidden="true">
+                <circle cx="3" cy="3" r="3" />
+              </svg>
+              AI-POWERED FOOD RECOGNITION
             </div>
           </motion.div>
           
-          <div className="relative">
-            {/* Decorative elements */}
-            <motion.div 
-              className="absolute -left-10 -top-8 w-20 h-20 bg-gradient-to-br from-green-400/10 to-emerald-300/10 rounded-full blur-xl"
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.3, 0.7, 0.3]
-              }}
-              transition={{ 
-                duration: 8,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
-            <motion.div 
-              className="absolute -right-5 top-10 w-32 h-32 bg-gradient-to-tr from-amber-300/10 to-yellow-200/10 rounded-full blur-xl"
-              animate={{ 
-                scale: [1, 1.3, 1],
-                opacity: [0.2, 0.5, 0.2]
-              }}
-              transition={{ 
-                duration: 10,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
-          
-            <motion.h1
-              className="relative mx-auto max-w-4xl text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <motion.span 
-                className="relative inline-block mb-2 px-2"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 200, damping: 10 }}
-              >
-                <span className="relative z-10">Snap</span>
-                <motion.span 
-                  className="absolute inset-0 bg-gradient-to-r from-green-100 to-green-50 rounded-lg -z-10"
-                  initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
-                />
-              </motion.span>
-              <span className="mx-2 text-gray-300">•</span>
-              
-              <motion.span 
-                className="relative inline-block mb-2 px-2 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 200, damping: 10 }}
-              >
-                <span>Analyze</span>
-              </motion.span>
-              <span className="mx-2 text-gray-300">•</span>
-              
-              <motion.span 
-                className="relative inline-block mb-2 px-2"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 200, damping: 10 }}
-              >
-                <span className="relative z-10">Cook</span>
-                <motion.span 
-                  className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg -z-10"
-                  initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
-                  transition={{ duration: 0.8, delay: 1 }}
-                />
-              </motion.span>
-            </motion.h1>
-          </div>
+          <motion.h1
+            className="mx-auto max-w-4xl text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <span className="block mb-1">Snap,</span> 
+            <span className="block mb-1 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">Analyze,</span> 
+            <span className="block">Cook</span>
+          </motion.h1>
           
           <motion.p
-            className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-gray-600"
+            className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -566,114 +357,9 @@ export default function Hero() {
           </motion.div>
         </div>
         
-        {/* Enhanced interactive visualization area with immersive food elements */}
+        {/* Interactive visualization area */}
         <div className="relative mb-24">
-          {/* Advanced animated background pattern */}
-          <div className="absolute inset-x-0 -top-10 -bottom-10 overflow-hidden">
-            <motion.div 
-              className="absolute inset-0 opacity-10"
-              style={{ 
-                backgroundImage: `radial-gradient(circle, rgba(34, 197, 94, 0.2) 1px, transparent 1px)`,
-                backgroundSize: '30px 30px',
-              }}
-              animate={{
-                backgroundPosition: ['0px 0px', '30px 30px']
-              }}
-              transition={{
-                duration: 15,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-            />
-
-            {/* Animated food ingredients floating in the background */}
-            {[
-              { icon: '🥑', size: 'w-8 h-8', top: '15%', left: '10%', duration: 25 },
-              { icon: '🍅', size: 'w-7 h-7', top: '60%', left: '8%', duration: 32 },
-              { icon: '🧄', size: 'w-6 h-6', top: '80%', left: '15%', duration: 28 },
-              { icon: '🍋', size: 'w-8 h-8', top: '25%', left: '85%', duration: 30 },
-              { icon: '🧂', size: 'w-5 h-5', top: '65%', left: '88%', duration: 26 },
-              { icon: '🌿', size: 'w-8 h-8', top: '40%', left: '92%', duration: 34 },
-              { icon: '🧅', size: 'w-6 h-6', top: '75%', left: '82%', duration: 31 },
-              { icon: '🥕', size: 'w-7 h-7', top: '10%', left: '75%', duration: 29 }
-            ].map((item, index) => (
-              <motion.div 
-                key={`ingredient-${index}`}
-                className={`absolute select-none ${item.size} flex items-center justify-center opacity-40 filter blur-[0.5px]`}
-                style={{ 
-                  top: item.top, 
-                  left: item.left,
-                }}
-                animate={{
-                  y: [0, -15, 0, 10, 0],
-                  x: [0, 8, -5, 5, 0],
-                  rotate: [0, 5, -5, 3, 0],
-                  scale: [1, 1.05, 0.95, 1.02, 1],
-                }}
-                transition={{
-                  duration: item.duration,
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  ease: "easeInOut",
-                }}
-              >
-                <span className="text-2xl">{item.icon}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Animated cooking process steps on the left side */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 hidden lg:block">
-            {[
-              { step: 1, color: "from-green-400 to-emerald-500", icon: "fa-camera", label: "Snap" },
-              { step: 2, color: "from-cyan-400 to-blue-500", icon: "fa-bolt", label: "Process" },
-              { step: 3, color: "from-amber-400 to-orange-500", icon: "fa-utensils", label: "Cook" }
-            ].map((item, index) => (
-              <motion.div
-                key={`process-${index}`}
-                className="mb-10 flex items-center relative"
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.5 + (index * 0.2), duration: 0.6, type: "spring" }}
-              >
-                <motion.div 
-                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg text-white mr-4`}
-                  whileHover={{ 
-                    scale: 1.1,
-                    boxShadow: "0 0 15px rgba(34, 197, 94, 0.5)"
-                  }}
-                  animate={{
-                    boxShadow: [
-                      "0 0 0px rgba(34, 197, 94, 0)",
-                      "0 0 15px rgba(34, 197, 94, 0.5)",
-                      "0 0 0px rgba(34, 197, 94, 0)"
-                    ]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: index * 1
-                  }}
-                >
-                  <i className={`fas ${item.icon}`}></i>
-                </motion.div>
-                <div>
-                  <div className="text-green-600 font-medium">{item.label}</div>
-                  <div className="text-xs text-gray-500">Step {item.step}</div>
-                </div>
-                {index < 2 && (
-                  <motion.div 
-                    className="absolute -bottom-7 left-6 h-5 w-0.5 bg-gray-200"
-                    initial={{ height: 0 }}
-                    animate={{ height: 20 }}
-                    transition={{ delay: 0.7 + (index * 0.2), duration: 0.4 }}
-                  />
-                )}
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Food icons positioned around the scanner */}
+          {/* Food icons positioned around the center */}
           {foodIcons.map((icon, index) => (
             <FoodIcon
               key={index}
@@ -690,119 +376,31 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-16 relative z-10"
+            className="mt-20"
           >
             <ScannerVisualization />
           </motion.div>
-
-          {/* Animated measurement lines */}
-          <div className="absolute inset-0 pointer-events-none">
-            <motion.div 
-              className="absolute top-1/2 left-20 w-16 h-0.5 bg-green-200"
-              initial={{ width: 0 }}
-              animate={{ width: 64 }}
-              transition={{ delay: 1.2, duration: 0.5 }}
-            />
-            <motion.div 
-              className="absolute top-1/2 right-20 w-16 h-0.5 bg-green-200"
-              initial={{ width: 0 }}
-              animate={{ width: 64 }}
-              transition={{ delay: 1.2, duration: 0.5 }}
-            />
-          </div>
-
-          {/* Animated cooking metrics on the right side */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block">
-            {[
-              { label: "Recognition Accuracy", value: "96%", icon: "fa-bullseye", color: "text-green-500" },
-              { label: "Average Recipe Time", value: "12s", icon: "fa-bolt", color: "text-amber-500" },
-              { label: "Ingredients Detected", value: "98%", icon: "fa-check-circle", color: "text-blue-500" }
-            ].map((item, index) => (
-              <motion.div
-                key={`metric-${index}`}
-                className="mb-8 text-right"
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.7 + (index * 0.2), duration: 0.6, type: "spring" }}
-              >
-                <div className="flex items-center justify-end">
-                  <div className="mr-3">
-                    <div className="text-gray-700 font-medium">{item.label}</div>
-                    <motion.div 
-                      className={`text-xl font-bold ${item.color}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1.5 + (index * 0.3), duration: 0.8 }}
-                    >
-                      {item.value}
-                    </motion.div>
-                  </div>
-                  <div className={`w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center ${item.color}`}>
-                    <i className={`fas ${item.icon}`}></i>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Interactive animated benefits */}
-          <div className="flex justify-center mt-10 gap-8">
-            {[
-              { icon: "fa-clock", label: "Fast Analysis", color: "from-green-500 to-emerald-400" },
-              { icon: "fa-bullseye", label: "Precise Results", color: "from-blue-500 to-cyan-400" },
-              { icon: "fa-utensils", label: "Ready to Cook", color: "from-amber-500 to-orange-400" }
-            ].map((benefit, index) => (
-              <motion.div
-                key={`benefit-${index}`}
-                className="text-center"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 1.2 + (index * 0.2), duration: 0.5 }}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              >
-                <motion.div 
-                  className={`w-12 h-12 mx-auto rounded-full bg-gradient-to-r ${benefit.color} flex items-center justify-center text-white shadow-md mb-2`}
-                  whileHover={{ 
-                    scale: 1.1,
-                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                  }}
-                >
-                  <i className={`fas ${benefit.icon}`}></i>
-                </motion.div>
-                <div className="text-sm font-medium text-gray-700">{benefit.label}</div>
-              </motion.div>
-            ))}
-          </div>
         </div>
         
-        {/* Stats section */}
+        {/* How it works section */}
         <div className="mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {stats.map((stat, index) => (
-              <motion.div 
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">How It Works</h2>
+            <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
+              Our AI-powered platform transforms your food photos into detailed recipes in just a few simple steps
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {process.map((step, index) => (
+              <ProcessIcon 
                 key={index}
-                className="bg-white rounded-xl p-6 shadow-md border border-gray-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index, duration: 0.5 }}
-              >
-                <div className="text-center">
-                  <motion.div 
-                    className="text-4xl font-bold text-gray-900 mb-2"
-                    initial={{ scale: 0.8 }}
-                    whileInView={{ scale: 1 }}
-                    transition={{ 
-                      type: "spring",
-                      duration: 0.8, 
-                      delay: 0.5 + (0.1 * index) 
-                    }}
-                  >
-                    <CountUp end={stat.value} duration={2} separator="," />
-                    <span className="text-green-600">{stat.suffix}</span>
-                  </motion.div>
-                  <div className="text-gray-600">{stat.label}</div>
-                </div>
-              </motion.div>
+                number={step.number}
+                title={step.title}
+                description={step.description}
+                icon={step.icon}
+                delay={0.2 * index}
+              />
             ))}
           </div>
         </div>

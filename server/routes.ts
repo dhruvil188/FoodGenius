@@ -49,10 +49,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
          - Brief description
          - Preparation time
          - Cooking time
+         - Total time
          - Servings
          - Difficulty level
-         - Ingredients list
-         - Step-by-step instructions
+         - Tags for dietary restrictions
+         - Ingredients list (detailed with measurements)
+         - Step-by-step instructions (be very specific and detailed)
+         - Nutritional information (calories, protein, carbs, fats, fiber, sugar)
+         - Healthy alternatives for ingredients
+         - Dietary notes (if high in something or good for certain diets)
+         - Recipe variations (spicy, buttery & rich, and non-spicy versions with their adjustments)
+         - Suggested side dishes that complement the main dish (name, brief description, preparation time)
       
       Format your response as a JSON object with the following structure:
       {
@@ -70,7 +77,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
             "difficulty": "Difficulty level",
             "tags": ["tag1", "tag2"],
             "ingredients": ["ingredient1", "ingredient2"],
-            "instructions": ["step1", "step2"]
+            "instructions": ["step1", "step2"],
+            "nutritionInfo": {
+              "calories": number,
+              "protein": "amount in grams",
+              "carbs": "amount in grams",
+              "fats": "amount in grams",
+              "fiber": "amount in grams",
+              "sugar": "amount in grams",
+              "healthyAlternatives": ["alternative1", "alternative2"],
+              "dietaryNotes": ["note1", "note2"]
+            },
+            "variations": [
+              {
+                "type": "spicy",
+                "description": "Spicier version of the recipe",
+                "adjustments": ["adjustment1", "adjustment2"]
+              },
+              {
+                "type": "buttery",
+                "description": "Rich and buttery version",
+                "adjustments": ["adjustment1", "adjustment2"]
+              },
+              {
+                "type": "non-spicy",
+                "description": "Mild version of the recipe",
+                "adjustments": ["adjustment1", "adjustment2"]
+              }
+            ],
+            "sideDishSuggestions": [
+              {
+                "name": "Side dish name",
+                "description": "Brief description",
+                "preparationTime": "Preparation time"
+              }
+            ]
           }
         ]
       }

@@ -1,9 +1,15 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { type AnalyzeImageResponse } from '@shared/schema';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { type AnalyzeImageResponse, type NutritionInfo, type RecipeVariation, type SideDish } from '@shared/schema';
+import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RecipeResultsProps {
   result: AnalyzeImageResponse;
@@ -12,18 +18,109 @@ interface RecipeResultsProps {
 }
 
 export default function RecipeResults({ result, imageUrl, onTryAnother }: RecipeResultsProps) {
-  const [expandedRecipe, setExpandedRecipe] = useState<number | null>(null);
-  const [showAllRecipes, setShowAllRecipes] = useState(false);
+  const [selectedRecipeIndex, setSelectedRecipeIndex] = useState(0);
+  const [selectedTab, setSelectedTab] = useState("instructions");
+  const [completedSteps, setCompletedSteps] = useState<Record<number, Set<number>>>({});
+  const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
+  const [savedRecipes, setSavedRecipes] = useState<AnalyzeImageResponse[]>([]);
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
   
-  const toggleRecipeExpand = (index: number) => {
-    setExpandedRecipe(expandedRecipe === index ? null : index);
+  // Initialize completed steps for each recipe
+  useEffect(() => {
+    const initialCompletedSteps: Record<number, Set<number>> = {};
+    result.recipes.forEach((_, index) => {
+      initialCompletedSteps[index] = new Set();
+    });
+    setCompletedSteps(initialCompletedSteps);
+    
+    // Load saved recipes from localStorage
+    const savedRecipesJson = localStorage.getItem('dishDetectiveSavedRecipes');
+    if (savedRecipesJson) {
+      try {
+        const savedRecipes = JSON.parse(savedRecipesJson);
+        setSavedRecipes(savedRecipes);
+      } catch (error) {
+        console.error('Error loading saved recipes:', error);
+      }
+    }
+    
+    // Add current recipe to history
+    saveToHistory(result);
+  }, [result]);
+  
+  const saveToHistory = (recipeData: AnalyzeImageResponse) => {
+    // Check if recipe already exists to avoid duplicates
+    const exists = savedRecipes.some(recipe => recipe.foodName === recipeData.foodName);
+    if (!exists) {
+      const updatedHistory = [...savedRecipes, recipeData].slice(-10); // Keep last 10 recipes
+      setSavedRecipes(updatedHistory);
+      localStorage.setItem('dishDetectiveSavedRecipes', JSON.stringify(updatedHistory));
+    }
   };
   
-  const displayedRecipes = showAllRecipes ? result.recipes : result.recipes.slice(0, 3);
+  const toggleStepCompletion = (recipeIndex: number, stepIndex: number) => {
+    setCompletedSteps(prev => {
+      const newCompletedSteps = { ...prev };
+      if (newCompletedSteps[recipeIndex].has(stepIndex)) {
+        newCompletedSteps[recipeIndex].delete(stepIndex);
+      } else {
+        newCompletedSteps[recipeIndex].add(stepIndex);
+      }
+      return newCompletedSteps;
+    });
+  };
+  
+  const calculateProgress = (recipeIndex: number, totalSteps: number) => {
+    if (!completedSteps[recipeIndex]) return 0;
+    return (completedSteps[recipeIndex].size / totalSteps) * 100;
+  };
+  
+  const selectedRecipe = result.recipes[selectedRecipeIndex];
+  const totalInstructions = selectedRecipe.instructions.length;
+  const currentProgress = calculateProgress(selectedRecipeIndex, totalInstructions);
+  
+  const getVariationStyles = (variation: string) => {
+    if (variation === selectedVariation) {
+      return "bg-primary text-white";
+    }
+    switch (variation) {
+      case 'spicy': return "bg-red-100 text-red-800 hover:bg-red-200";
+      case 'buttery': return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+      case 'non-spicy': return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      default: return "bg-gray-100 text-gray-800 hover:bg-gray-200";
+    }
+  };
+  
+  const renderNutritionBadge = (label: string, value: string | number | undefined, type: 'high' | 'medium' | 'low' = 'medium') => {
+    if (!value) return null;
+    const colors = {
+      high: "bg-red-100 text-red-800",
+      medium: "bg-yellow-100 text-yellow-800",
+      low: "bg-green-100 text-green-800"
+    };
+    
+    return (
+      <div className={`${colors[type]} px-3 py-1 rounded-full text-xs font-medium`}>
+        {label}: {value}
+      </div>
+    );
+  };
+  
+  const handleLoadSavedRecipe = (savedRecipe: AnalyzeImageResponse) => {
+    toast({
+      title: "Recipe Loaded",
+      description: `Loaded recipe for ${savedRecipe.foodName}`,
+    });
+    
+    // In a real app, this would replace the current result with the saved one
+    // For now, we'll just switch to the first tab
+    setSelectedTab("instructions");
+  };
   
   return (
     <motion.section 
-      className="max-w-4xl mx-auto"
+      className="max-w-5xl mx-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -59,117 +156,335 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                 ))}
               </div>
               
-              {result.recipes[0] && (
-                <div className="flex flex-wrap items-center space-x-4 text-sm text-slate-500">
-                  {result.recipes[0].prepTime && (
-                    <div>
-                      <i className="fas fa-clock mr-1"></i> {result.recipes[0].prepTime}
-                    </div>
-                  )}
-                  {result.recipes[0].difficulty && (
-                    <div>
-                      <i className="fas fa-fire mr-1"></i> {result.recipes[0].difficulty}
-                    </div>
-                  )}
-                  {result.recipes[0].servings && (
-                    <div>
-                      <i className="fas fa-user-friends mr-1"></i> Serves {result.recipes[0].servings}
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="flex flex-wrap items-center space-x-4 text-sm text-slate-500">
+                {selectedRecipe.prepTime && (
+                  <div>
+                    <i className="fas fa-clock mr-1"></i> {selectedRecipe.prepTime}
+                  </div>
+                )}
+                {selectedRecipe.difficulty && (
+                  <div>
+                    <i className="fas fa-fire mr-1"></i> {selectedRecipe.difficulty}
+                  </div>
+                )}
+                {selectedRecipe.servings && (
+                  <div>
+                    <i className="fas fa-user-friends mr-1"></i> Serves {selectedRecipe.servings}
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
           
-          <h4 className="text-xl font-semibold font-heading mb-4">Try These Recipes</h4>
-          
-          {displayedRecipes.map((recipe, index) => (
-            <motion.div 
-              key={index}
-              className="recipe-card bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.2 }}
-            >
-              <div className="flex flex-col md:flex-row">
-                <div className="w-full md:w-1/4 bg-slate-100 flex items-center justify-center">
-                  <i className="fas fa-utensils text-4xl text-slate-300"></i>
-                </div>
-                <div className="w-full md:w-3/4 p-4">
-                  <h5 className="text-lg font-semibold mb-2">{recipe.title}</h5>
-                  <p className="text-slate-600 text-sm mb-3 line-clamp-2">{recipe.description}</p>
-                  
-                  <div className="flex flex-wrap gap-4 text-xs text-slate-500 mb-3">
-                    {recipe.prepTime && (
-                      <div><i className="fas fa-clock mr-1"></i> {recipe.prepTime}</div>
-                    )}
-                    {recipe.servings && (
-                      <div><i className="fas fa-chart-pie mr-1"></i> {recipe.servings} servings</div>
-                    )}
-                    {recipe.difficulty && (
-                      <div><i className="fas fa-star mr-1"></i> {recipe.difficulty}</div>
-                    )}
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    {recipe.tags && recipe.tags.length > 0 && (
-                      <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200 rounded-full">
-                        {recipe.tags[0]}
-                      </Badge>
-                    )}
-                    <Button 
-                      variant="link" 
-                      className="text-primary hover:text-[#16a34a] font-medium text-sm flex items-center"
-                      onClick={() => toggleRecipeExpand(index)}
-                    >
-                      {expandedRecipe === index ? 'Hide Recipe' : 'View Recipe'} 
-                      <i className={`fas fa-arrow-${expandedRecipe === index ? 'up' : 'right'} ml-1`}></i>
-                    </Button>
-                  </div>
-                  
-                  {expandedRecipe === index && (
-                    <motion.div 
-                      className="mt-4 pt-4 border-t border-slate-100"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="mb-4">
-                        <h6 className="font-semibold mb-2">Ingredients:</h6>
-                        <ul className="list-disc pl-5 space-y-1 text-sm">
-                          {recipe.ingredients.map((ingredient, i) => (
-                            <li key={i}>{ingredient}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      <div>
-                        <h6 className="font-semibold mb-2">Instructions:</h6>
-                        <ol className="list-decimal pl-5 space-y-2 text-sm">
-                          {recipe.instructions.map((step, i) => (
-                            <li key={i}>{step}</li>
-                          ))}
-                        </ol>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
+          {/* Recipe Selection */}
+          {result.recipes.length > 1 && (
+            <div className="mb-6">
+              <h4 className="text-lg font-semibold mb-3">Choose a Recipe:</h4>
+              <div className="flex flex-wrap gap-2">
+                {result.recipes.map((recipe, index) => (
+                  <Button
+                    key={index}
+                    variant={selectedRecipeIndex === index ? "default" : "outline"}
+                    onClick={() => setSelectedRecipeIndex(index)}
+                    className="rounded-full"
+                  >
+                    {recipe.title}
+                  </Button>
+                ))}
               </div>
-            </motion.div>
-          ))}
-          
-          {result.recipes.length > 3 && (
-            <div className="mt-6 text-center">
-              <Button 
-                variant="link" 
-                className="text-primary hover:text-[#16a34a] font-medium flex items-center mx-auto"
-                onClick={() => setShowAllRecipes(!showAllRecipes)}
-              >
-                {showAllRecipes ? 'Show Less' : 'Show More Recipes'} 
-                <i className={`fas fa-chevron-${showAllRecipes ? 'up' : 'down'} ml-1`}></i>
-              </Button>
             </div>
           )}
+          
+          {/* Recipe Variations */}
+          {selectedRecipe.variations && selectedRecipe.variations.length > 0 && (
+            <div className="mb-6">
+              <h4 className="text-lg font-semibold mb-3">Recipe Variations:</h4>
+              <div className="flex flex-wrap gap-2">
+                {selectedRecipe.variations.map((variation, index) => (
+                  <Badge 
+                    key={index}
+                    variant="outline" 
+                    className={`cursor-pointer ${getVariationStyles(variation.type)}`}
+                    onClick={() => setSelectedVariation(
+                      selectedVariation === variation.type ? null : variation.type
+                    )}
+                  >
+                    {variation.type === 'spicy' && <i className="fas fa-pepper-hot mr-1"></i>}
+                    {variation.type === 'buttery' && <i className="fas fa-cheese mr-1"></i>}
+                    {variation.type === 'non-spicy' && <i className="fas fa-snowflake mr-1"></i>}
+                    {variation.type.charAt(0).toUpperCase() + variation.type.slice(1)}
+                  </Badge>
+                ))}
+              </div>
+              
+              {/* Show selected variation details */}
+              {selectedVariation && selectedRecipe.variations && (
+                <motion.div 
+                  className="mt-3 p-3 bg-slate-50 rounded-lg"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {selectedRecipe.variations.filter(v => v.type === selectedVariation).map((variation, index) => (
+                    <div key={index}>
+                      <p className="font-medium mb-2">{variation.description}</p>
+                      <ul className="list-disc pl-5 text-sm space-y-1">
+                        {variation.adjustments.map((adjustment, i) => (
+                          <li key={i}>{adjustment}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </div>
+          )}
+          
+          {/* Tabbed Interface */}
+          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-6">
+            <TabsList className="grid grid-cols-3 mb-6">
+              <TabsTrigger value="instructions" className="flex items-center">
+                <i className="fas fa-list-ol mr-2"></i> Instructions
+              </TabsTrigger>
+              <TabsTrigger value="nutrition" className="flex items-center">
+                <i className="fas fa-apple-alt mr-2"></i> Nutrition
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex items-center">
+                <i className="fas fa-history mr-2"></i> History
+              </TabsTrigger>
+            </TabsList>
+            
+            {/* Tab 1: Step-by-Step Instructions */}
+            <TabsContent value="instructions" className="space-y-4">
+              <div className="p-4 bg-slate-50 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h5 className="font-semibold">Recipe Progress</h5>
+                  <span className="text-sm text-slate-600">{completedSteps[selectedRecipeIndex]?.size || 0}/{totalInstructions} steps</span>
+                </div>
+                <Progress value={currentProgress} className="h-2" />
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <h5 className="text-lg font-semibold mb-3">Ingredients</h5>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {selectedRecipe.ingredients.map((ingredient, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <div className="min-w-4 pt-0.5">
+                          <i className="fas fa-check-circle text-primary"></i>
+                        </div>
+                        <span>{ingredient}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h5 className="text-lg font-semibold mb-3">Cooking Instructions</h5>
+                  <ol className="space-y-4">
+                    {selectedRecipe.instructions.map((step, i) => (
+                      <motion.li 
+                        key={i}
+                        className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
+                          completedSteps[selectedRecipeIndex]?.has(i) 
+                            ? 'bg-green-50 text-green-900' 
+                            : 'bg-white'
+                        }`}
+                        whileHover={{ x: 5 }}
+                      >
+                        <div className="mt-0.5">
+                          <Checkbox 
+                            checked={completedSteps[selectedRecipeIndex]?.has(i)}
+                            onCheckedChange={() => toggleStepCompletion(selectedRecipeIndex, i)}
+                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          />
+                        </div>
+                        <div>
+                          <p className={completedSteps[selectedRecipeIndex]?.has(i) ? 'line-through opacity-70' : ''}>
+                            {step}
+                          </p>
+                        </div>
+                      </motion.li>
+                    ))}
+                  </ol>
+                </div>
+                
+                {/* Side Dish Suggestions */}
+                {selectedRecipe.sideDishSuggestions && selectedRecipe.sideDishSuggestions.length > 0 && (
+                  <div className="mt-8">
+                    <h5 className="text-lg font-semibold mb-3">Recommended Side Dishes</h5>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {selectedRecipe.sideDishSuggestions.map((sideDish, i) => (
+                        <Card key={i} className="bg-slate-50">
+                          <CardHeader className="py-3 px-4">
+                            <CardTitle className="text-md font-medium">{sideDish.name}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="py-2 px-4">
+                            {sideDish.description && (
+                              <p className="text-sm text-slate-600 mb-2">{sideDish.description}</p>
+                            )}
+                            {sideDish.preparationTime && (
+                              <Badge variant="outline" className="text-xs">
+                                <i className="fas fa-clock mr-1"></i> {sideDish.preparationTime}
+                              </Badge>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            {/* Tab 2: Nutritional Information */}
+            <TabsContent value="nutrition">
+              {selectedRecipe.nutritionInfo ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="bg-slate-50">
+                      <CardHeader className="py-3 px-4">
+                        <CardTitle className="text-md font-medium">Nutrition Facts</CardTitle>
+                      </CardHeader>
+                      <CardContent className="py-2 px-4">
+                        <ul className="space-y-2">
+                          {selectedRecipe.nutritionInfo.calories && (
+                            <li className="flex justify-between">
+                              <span className="font-medium">Calories:</span>
+                              <span>{selectedRecipe.nutritionInfo.calories}</span>
+                            </li>
+                          )}
+                          {selectedRecipe.nutritionInfo.protein && (
+                            <li className="flex justify-between">
+                              <span>Protein:</span>
+                              <span>{selectedRecipe.nutritionInfo.protein}</span>
+                            </li>
+                          )}
+                          {selectedRecipe.nutritionInfo.carbs && (
+                            <li className="flex justify-between">
+                              <span>Carbs:</span>
+                              <span>{selectedRecipe.nutritionInfo.carbs}</span>
+                            </li>
+                          )}
+                          {selectedRecipe.nutritionInfo.fats && (
+                            <li className="flex justify-between">
+                              <span>Fats:</span>
+                              <span>{selectedRecipe.nutritionInfo.fats}</span>
+                            </li>
+                          )}
+                          {selectedRecipe.nutritionInfo.fiber && (
+                            <li className="flex justify-between">
+                              <span>Fiber:</span>
+                              <span>{selectedRecipe.nutritionInfo.fiber}</span>
+                            </li>
+                          )}
+                          {selectedRecipe.nutritionInfo.sugar && (
+                            <li className="flex justify-between">
+                              <span>Sugar:</span>
+                              <span>{selectedRecipe.nutritionInfo.sugar}</span>
+                            </li>
+                          )}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-slate-50">
+                      <CardHeader className="py-3 px-4">
+                        <CardTitle className="text-md font-medium">Dietary Notes</CardTitle>
+                      </CardHeader>
+                      <CardContent className="py-2 px-4">
+                        {selectedRecipe.nutritionInfo.dietaryNotes && selectedRecipe.nutritionInfo.dietaryNotes.length > 0 ? (
+                          <ul className="list-disc pl-5 space-y-1">
+                            {selectedRecipe.nutritionInfo.dietaryNotes.map((note, i) => (
+                              <li key={i} className="text-sm">{note}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-slate-500">No dietary notes available</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-slate-50">
+                      <CardHeader className="py-3 px-4">
+                        <CardTitle className="text-md font-medium">Healthier Alternatives</CardTitle>
+                      </CardHeader>
+                      <CardContent className="py-2 px-4">
+                        {selectedRecipe.nutritionInfo.healthyAlternatives && selectedRecipe.nutritionInfo.healthyAlternatives.length > 0 ? (
+                          <ul className="list-disc pl-5 space-y-1">
+                            {selectedRecipe.nutritionInfo.healthyAlternatives.map((alternative, i) => (
+                              <li key={i} className="text-sm">{alternative}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-sm text-slate-500">No alternatives available</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {selectedRecipe.nutritionInfo.protein && 
+                      renderNutritionBadge("Protein", selectedRecipe.nutritionInfo.protein, "medium")}
+                    
+                    {selectedRecipe.nutritionInfo.carbs && 
+                      renderNutritionBadge("Carbs", selectedRecipe.nutritionInfo.carbs, "medium")}
+                      
+                    {selectedRecipe.nutritionInfo.fats && 
+                      renderNutritionBadge("Fats", selectedRecipe.nutritionInfo.fats, "medium")}
+                    
+                    {selectedRecipe.nutritionInfo.fiber && 
+                      renderNutritionBadge("Fiber", selectedRecipe.nutritionInfo.fiber, "low")}
+                      
+                    {selectedRecipe.nutritionInfo.sugar && 
+                      renderNutritionBadge("Sugar", selectedRecipe.nutritionInfo.sugar, "high")}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <i className="fas fa-info-circle text-3xl text-slate-300 mb-3"></i>
+                  <p className="text-slate-500">Nutritional information not available for this recipe.</p>
+                </div>
+              )}
+            </TabsContent>
+            
+            {/* Tab 3: Cooking History */}
+            <TabsContent value="history">
+              {savedRecipes.length > 0 ? (
+                <div className="space-y-4">
+                  <h5 className="text-lg font-semibold mb-3">Your Cooking History</h5>
+                  <div className="grid grid-cols-1 gap-4">
+                    {savedRecipes.map((savedRecipe, index) => (
+                      <Card key={index} className="bg-white">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h6 className="font-semibold">{savedRecipe.foodName}</h6>
+                              <p className="text-sm text-slate-500 line-clamp-1">{savedRecipe.description}</p>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              className="text-primary"
+                              onClick={() => handleLoadSavedRecipe(savedRecipe)}
+                            >
+                              <i className="fas fa-utensils mr-1"></i> Cook Again
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <i className="fas fa-history text-3xl text-slate-300 mb-3"></i>
+                  <p className="text-slate-500">No cooking history available yet. Recipes you analyze will appear here.</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
       

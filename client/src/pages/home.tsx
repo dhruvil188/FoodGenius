@@ -711,7 +711,26 @@ export default function Home() {
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                     >
                       <div className="relative">
-                        <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-6 relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent animate-pulse"></div>
+                          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                            <circle 
+                              cx="50" 
+                              cy="50" 
+                              r="48" 
+                              fill="none" 
+                              stroke="url(#gradient-circle)" 
+                              strokeWidth="1" 
+                              strokeDasharray="0.5 8" 
+                              className="animate-spin-slow"
+                            />
+                            <defs>
+                              <linearGradient id="gradient-circle" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="rgba(16, 185, 129, 0.2)" />
+                                <stop offset="100%" stopColor="rgba(5, 150, 105, 0.05)" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
                           <motion.div
                             animate={{ 
                               scale: [1, 1.1, 1],
@@ -721,8 +740,9 @@ export default function Home() {
                               repeat: Infinity,
                               repeatType: "loop"
                             }}
+                            className="relative z-10"
                           >
-                            <i className={`fas ${step.icon} text-2xl text-primary`}></i>
+                            <i className={`fas ${step.icon} text-2xl text-primary drop-shadow-md`}></i>
                           </motion.div>
                         </div>
                         {index < howItWorksSteps.length - 1 && (
@@ -854,8 +874,10 @@ export default function Home() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: index * 0.05 }}
                     >
-                      <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-xl flex items-center justify-center mb-5">
-                        <i className={`fas ${feature.icon} text-xl text-primary`}></i>
+                      <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-xl flex items-center justify-center mb-5 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute -inset-1 bg-gradient-to-br from-emerald-500/20 to-primary/20 blur-md opacity-0 group-hover:opacity-70 transition-opacity"></div>
+                        <i className={`fas ${feature.icon} text-xl text-primary group-hover:scale-110 transition-transform relative z-10`}></i>
                       </div>
                       <h3 className="text-lg font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">{feature.title}</h3>
                       <p className="text-slate-600 text-sm">{feature.description}</p>

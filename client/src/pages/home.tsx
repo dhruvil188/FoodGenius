@@ -700,111 +700,40 @@ export default function Home() {
                   </p>
                 </motion.div>
                 
-                <div className="relative">
-                  {/* Connector Lines */}
-                  <div className="hidden lg:block absolute top-1/3 left-[20%] right-[20%] h-1 bg-gradient-to-r from-primary/30 to-emerald-300/30 transform -translate-y-1/2 z-0">
-                    <div className="absolute left-1/3 top-1/2 w-3 h-3 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
-                    <div className="absolute left-2/3 top-1/2 w-3 h-3 bg-primary rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {howItWorksSteps.map((step, index) => (
-                      <motion.div 
-                        key={index}
-                        className="text-center relative z-10"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                      >
-                        <div className="relative">
-                          <div className="w-28 h-28 bg-gradient-to-br from-primary/20 to-emerald-400/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100 border-2 border-white">
-                            <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shadow-md shadow-emerald-200/50">
-                              {index + 1}
-                            </div>
-                            
-                            {/* Inner circle with icon */}
-                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-inner">
-                              <motion.div
-                                animate={{ 
-                                  scale: [1, 1.2, 1],
-                                }}
-                                transition={{ 
-                                  duration: 2.5, 
-                                  repeat: Infinity, 
-                                  repeatType: "loop" 
-                                }}
-                                className="relative"
-                              >
-                                {step.icon === "fa-camera" && (
-                                  <div className="relative">
-                                    <i className={`fas ${step.icon} text-3xl text-primary`}></i>
-                                    <motion.div 
-                                      className="absolute -top-2 -right-2 text-yellow-400 text-sm"
-                                      animate={{ opacity: [0, 1, 0] }}
-                                      transition={{ duration: 1.5, repeat: Infinity }}
-                                    >
-                                      <i className="fas fa-circle"></i>
-                                    </motion.div>
-                                  </div>
-                                )}
-                                {step.icon === "fa-magic" && (
-                                  <div className="relative">
-                                    <i className={`fas ${step.icon} text-3xl text-primary`}></i>
-                                    <motion.div 
-                                      className="absolute -top-3 -right-1 text-purple-400 text-sm"
-                                      animate={{ 
-                                        scale: [0.8, 1.2, 0.8],
-                                        opacity: [0.5, 1, 0.5]
-                                      }}
-                                      transition={{ duration: 2, repeat: Infinity }}
-                                    >
-                                      <i className="fas fa-star"></i>
-                                    </motion.div>
-                                  </div>
-                                )}
-                                {step.icon === "fa-utensils" && (
-                                  <div className="relative flex items-center">
-                                    <i className={`fas ${step.icon} text-3xl text-primary`}></i>
-                                    <motion.div 
-                                      className="absolute -top-3 left-5 text-red-400 text-xs"
-                                      animate={{ y: [0, -8, 0] }}
-                                      transition={{ duration: 2, repeat: Infinity }}
-                                    >
-                                      <i className="fas fa-heart"></i>
-                                    </motion.div>
-                                  </div>
-                                )}
-                                {step.icon === "fa-check-circle" && (
-                                  <div className="relative">
-                                    <i className={`fas ${step.icon} text-3xl text-primary`}></i>
-                                    <motion.div 
-                                      className="absolute -bottom-1 -right-1 bg-green-500 rounded-full h-4 w-4 flex items-center justify-center"
-                                      animate={{ scale: [1, 1.3, 1] }}
-                                      transition={{ duration: 1, repeat: Infinity }}
-                                    >
-                                      <i className="fas fa-check text-[8px] text-white"></i>
-                                    </motion.div>
-                                  </div>
-                                )}
-                              </motion.div>
-                            </div>
-                          </div>
-                          
-                          {/* Connection arrow */}
-                          {index < howItWorksSteps.length - 1 && (
-                            <div className="hidden lg:block absolute top-14 left-full w-full h-0.5 bg-gradient-to-r from-primary/40 to-emerald-400/20 transform -translate-x-10">
-                              <div className="absolute right-0 -top-1.5 bg-white rounded-full p-1 shadow-sm">
-                                <i className="fas fa-chevron-right text-primary text-xs"></i>
-                              </div>
-                            </div>
-                          )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {howItWorksSteps.map((step, index) => (
+                    <motion.div 
+                      key={index}
+                      className="text-center"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <div className="relative">
+                        <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                          <motion.div
+                            animate={{ 
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{ 
+                              duration: 2,
+                              repeat: Infinity,
+                              repeatType: "loop"
+                            }}
+                          >
+                            <i className={`fas ${step.icon} text-2xl text-primary`}></i>
+                          </motion.div>
                         </div>
-                        <h3 className="text-xl font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
-                          {step.title}
-                        </h3>
-                        <p className="text-slate-600">{step.description}</p>
-                      </motion.div>
+                        {index < howItWorksSteps.length - 1 && (
+                          <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-primary/20 to-emerald-400/20 transform -translate-x-10"></div>
+                        )}
+                      </div>
+                      <h3 className="text-xl font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
+                        {step.title}
+                      </h3>
+                      <p className="text-slate-600">{step.description}</p>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -925,31 +854,10 @@ export default function Home() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: index * 0.05 }}
                     >
-                      <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-xl flex items-center justify-center mb-5 shadow-md shadow-emerald-100/50 relative">
-                        <div className="absolute inset-0 bg-white opacity-40 rounded-xl"></div>
-                        <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white shadow-sm border border-green-100 flex items-center justify-center">
-                          <i className="fas fa-check text-xs text-primary"></i>
-                        </div>
-                        <motion.div
-                          animate={{ 
-                            rotateY: [0, 15, 0, -15, 0],
-                          }}
-                          transition={{ 
-                            duration: 4,
-                            repeat: Infinity,
-                            repeatType: "loop",
-                            ease: "easeInOut"
-                          }}
-                        >
-                          <i className={`fas ${feature.icon} text-2xl text-primary`}></i>
-                        </motion.div>
+                      <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-xl flex items-center justify-center mb-5">
+                        <i className={`fas ${feature.icon} text-xl text-primary`}></i>
                       </div>
-                      <h3 className="text-lg font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent flex items-center justify-center gap-2">
-                        {feature.title}
-                        {feature.icon === "fa-camera-retro" && <span className="text-yellow-400 text-xs"><i className="fas fa-bolt"></i></span>}
-                        {feature.icon === "fa-chart-pie" && <span className="text-blue-400 text-xs"><i className="fas fa-tachometer-alt"></i></span>}
-                        {feature.icon === "fa-lightbulb" && <span className="text-amber-400 text-xs"><i className="fas fa-star"></i></span>}
-                      </h3>
+                      <h3 className="text-lg font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">{feature.title}</h3>
                       <p className="text-slate-600 text-sm">{feature.description}</p>
                     </motion.div>
                   ))}

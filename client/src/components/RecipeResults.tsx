@@ -19,6 +19,7 @@ interface RecipeResultsProps {
 }
 
 export default function RecipeResults({ result, imageUrl, onTryAnother }: RecipeResultsProps) {
+  // Always use the first (original) recipe
   const [selectedRecipeIndex, setSelectedRecipeIndex] = useState(0);
   const [selectedTab, setSelectedTab] = useState("instructions");
   const [completedSteps, setCompletedSteps] = useState<Record<number, Set<number>>>({});
@@ -204,21 +205,19 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             </div>
           </motion.div>
           
-          {/* Recipe Selection */}
-          {result.recipes.length > 1 && (
+          {/* Recipe Selection - Only keep the first (original) recipe */}
+          {false && result.recipes.length > 1 && (
             <div className="mb-6">
               <h4 className="text-lg font-semibold mb-3">Choose a Recipe:</h4>
               <div className="flex flex-wrap gap-2">
-                {result.recipes.map((recipe, index) => (
-                  <Button
-                    key={index}
-                    variant={selectedRecipeIndex === index ? "default" : "outline"}
-                    onClick={() => setSelectedRecipeIndex(index)}
-                    className="rounded-full"
-                  >
-                    {recipe.title}
-                  </Button>
-                ))}
+                {/* Only show the first recipe (index 0) */}
+                <Button
+                  key={0}
+                  variant="default"
+                  className="rounded-full"
+                >
+                  {result.recipes[0].title}
+                </Button>
               </div>
             </div>
           )}

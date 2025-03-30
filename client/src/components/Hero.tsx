@@ -82,7 +82,7 @@ export default function Hero() {
             <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
               From Food Photo to Delicious Recipe in Seconds
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
               Dish Detective analyzes your food photos using AI to instantly generate detailed recipes, nutritional information, and cooking instructions.
             </p>
             
@@ -116,13 +116,13 @@ export default function Hero() {
               <motion.div 
                 key={index}
                 variants={item}
-                className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-4 mx-auto">
                   <i className={`fas ${feature.icon} text-xl`}></i>
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-slate-600 dark:text-slate-300 text-sm">{feature.description}</p>
+                <p className="text-slate-600 text-sm">{feature.description}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -131,10 +131,10 @@ export default function Hero() {
       
       <div className="relative z-10">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-slate-200 dark:border-slate-700"></div>
+          <div className="w-full border-t border-slate-200"></div>
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-slate-50 dark:bg-slate-900 px-6 text-sm text-slate-500 dark:text-slate-400">
+          <span className="bg-slate-50 px-6 text-sm text-slate-500">
             Start by uploading a food image
           </span>
         </div>

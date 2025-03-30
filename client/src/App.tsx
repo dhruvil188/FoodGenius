@@ -6,7 +6,6 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useEffect } from "react";
 
 function Router() {
   return (
@@ -18,23 +17,9 @@ function Router() {
 }
 
 function App() {
-  // Initialize dark mode based on system preference or localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
-    const isDarkMode = savedTheme === "dark" || (!savedTheme && prefersDark);
-    
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-  
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 transition-colors duration-300">
+      <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300">
         <Header />
         <main className="flex-grow pt-24">
           <Router />

@@ -6,7 +6,7 @@ export default function Footer() {
   
   return (
     <motion.footer 
-      className="bg-slate-50 dark:bg-slate-900 py-8 mt-16"
+      className="bg-slate-50 py-8 mt-16"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.2 }}
@@ -15,26 +15,26 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div className="mb-6 md:mb-0">
             <Logo size="small" animated={false} />
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-xs">
+            <p className="text-slate-500 mt-2 text-sm max-w-xs">
               Your AI-powered cooking assistant. Upload food photos and get instant recipe suggestions.
             </p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
             <div className="flex flex-col">
-              <h4 className="font-semibold text-sm mb-3 text-slate-800 dark:text-slate-200">Features</h4>
+              <h4 className="font-semibold text-sm mb-3 text-slate-800">Features</h4>
               <ul className="space-y-2 text-sm">
-                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <li className="text-slate-500 hover:text-primary transition-colors">
                   <a href="#" className="flex items-center gap-1">
                     <i className="fas fa-camera-retro"></i> Image Analysis
                   </a>
                 </li>
-                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <li className="text-slate-500 hover:text-primary transition-colors">
                   <a href="#" className="flex items-center gap-1">
                     <i className="fas fa-list-check"></i> Recipe Steps
                   </a>
                 </li>
-                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <li className="text-slate-500 hover:text-primary transition-colors">
                   <a href="#" className="flex items-center gap-1">
                     <i className="fas fa-apple-alt"></i> Nutrition Info
                   </a>
@@ -43,19 +43,19 @@ export default function Footer() {
             </div>
             
             <div className="flex flex-col">
-              <h4 className="font-semibold text-sm mb-3 text-slate-800 dark:text-slate-200">Resources</h4>
+              <h4 className="font-semibold text-sm mb-3 text-slate-800">Resources</h4>
               <ul className="space-y-2 text-sm">
-                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <li className="text-slate-500 hover:text-primary transition-colors">
                   <a href="#" className="flex items-center gap-1">
                     <i className="fas fa-book"></i> Cooking Guide
                   </a>
                 </li>
-                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <li className="text-slate-500 hover:text-primary transition-colors">
                   <a href="#" className="flex items-center gap-1">
                     <i className="fas fa-question-circle"></i> Help Center
                   </a>
                 </li>
-                <li className="text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors">
+                <li className="text-slate-500 hover:text-primary transition-colors">
                   <a href="#" className="flex items-center gap-1">
                     <i className="fas fa-lightbulb"></i> Tips & Tricks
                   </a>
@@ -64,29 +64,29 @@ export default function Footer() {
             </div>
             
             <div className="flex flex-col col-span-2 md:col-span-1">
-              <h4 className="font-semibold text-sm mb-3 text-slate-800 dark:text-slate-200">Join Our Community</h4>
+              <h4 className="font-semibold text-sm mb-3 text-slate-800">Join Our Community</h4>
               <div className="flex space-x-3 mb-4">
-                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-primary hover:text-white transition-colors">
                   <i className="fab fa-twitter"></i>
                 </a>
-                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-primary hover:text-white transition-colors">
                   <i className="fab fa-instagram"></i>
                 </a>
-                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-primary hover:text-white transition-colors">
                   <i className="fab fa-pinterest"></i>
                 </a>
-                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-white transition-colors">
+                <a href="#" className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 hover:bg-primary hover:text-white transition-colors">
                   <i className="fab fa-youtube"></i>
                 </a>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500">
                 Share your culinary creations with us and join our cooking community!
               </p>
             </div>
           </div>
         </div>
         
-        <div className="pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-sm text-slate-500 dark:text-slate-400">
+        <div className="pt-8 border-t border-slate-200 text-center text-sm text-slate-500">
           <p>© {currentYear} DishDetective. All rights reserved.</p>
         </div>
       </div>

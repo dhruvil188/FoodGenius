@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
+import Hero from "@/components/Hero"; // Import the Hero component
 import {
   Dialog,
   DialogContent,
@@ -399,107 +400,8 @@ export default function Home() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Hero Section */}
-            <section className="pt-8 pb-16 overflow-hidden relative">
-              <div className="absolute inset-0 z-0 opacity-5">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PGNpcmNsZSBjeD0iMzYiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjM2IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSIzNiIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iMzYiIGN5PSI0OCIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMzYiIHI9IjEiLz48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIxIi8+PGNpcmNsZSBjeD0iMjQiIGN5PSIxMiIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iNDgiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjM2IiByPSIxIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIyNCIgcj0iMSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjQ4IiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjQ4IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iMSIvPjwvZz48L3N2Zz4=')]"
-                  style={{ color: 'currentColor' }}
-                />
-              </div>
-              
-              <div className="container max-w-7xl mx-auto px-4">
-                <div className="flex flex-col lg:flex-row items-center gap-12">
-                  <motion.div 
-                    className="lg:w-1/2 text-center lg:text-left"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Badge className="mb-5 bg-primary/10 text-primary border-none py-1.5 px-4 text-sm">
-                      AI-POWERED FOOD RECOGNITION
-                    </Badge>
-                    <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
-                      <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
-                        Snap, Analyze, Cook
-                      </span>
-                    </h1>
-                    <p className="text-xl text-slate-600 mb-8 max-w-xl">
-                      Turn any food photo into a detailed recipe with ingredients, 
-                      step-by-step instructions, and nutritional information using our 
-                      advanced AI technology.
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                      <Button 
-                        size="lg"
-                        onClick={scrollToUpload}
-                        className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-8 shadow-md py-6 text-lg"
-                      >
-                        <i className="fas fa-camera mr-2"></i> 
-                        Try It Now
-                      </Button>
-                      <Button 
-                        size="lg"
-                        variant="outline"
-                        className="rounded-full px-8 border-2 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all py-6 text-lg"
-                      >
-                        <i className="fas fa-info-circle mr-2"></i> 
-                        Learn More
-                      </Button>
-                    </div>
-                    
-                    <div className="mt-10 flex items-center gap-4 justify-center lg:justify-start text-sm text-slate-500">
-                      <div className="flex -space-x-2">
-                        <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/17.jpg" alt="" />
-                        <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/4.jpg" alt="" />
-                        <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/3.jpg" alt="" />
-                      </div>
-                      <p>Trusted by <span className="font-medium text-slate-700">14,000+</span> home cooks</p>
-                    </div>
-                  </motion.div>
-                  
-                  <motion.div 
-                    className="lg:w-1/2"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    <div className="relative">
-                      <div className="bg-gradient-to-br from-primary/10 to-emerald-600/10 rounded-[2.5rem] p-4 sm:p-8 shadow-xl">
-                        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                          <img 
-                            src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" 
-                            alt="Chocolate lava cake being analyzed"
-                            className="w-full h-72 sm:h-96 object-cover"
-                          />
-                          <div className="p-6">
-                            <div className="flex items-center justify-between mb-4">
-                              <h3 className="text-xl font-semibold text-slate-800">Chocolate Lava Cake</h3>
-                              <Badge variant="outline" className="bg-primary/10 text-primary border-none">
-                                Identified
-                              </Badge>
-                            </div>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              <Badge variant="secondary" className="rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">Dessert</Badge>
-                              <Badge variant="secondary" className="rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">Chocolate</Badge>
-                              <Badge variant="secondary" className="rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">Baking</Badge>
-                            </div>
-                            <div className="w-full bg-slate-100 h-2 rounded-full mb-1">
-                              <div className="bg-primary h-2 rounded-full w-[85%]"></div>
-                            </div>
-                            <p className="text-sm text-slate-500">Recipe analysis complete (85%)</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Decorative elements */}
-                      <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-amber-300 to-amber-500 rounded-full opacity-70 blur-2xl"></div>
-                      <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-primary to-emerald-400 rounded-full opacity-70 blur-2xl"></div>
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-            </section>
+            {/* Hero Section - Using our proper Hero component with TypeScript interfaces */}
+            <Hero />
 
             {/* Featured Foods Section */}
             <section className="py-20 bg-white">

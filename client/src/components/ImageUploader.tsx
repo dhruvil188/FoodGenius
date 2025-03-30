@@ -147,7 +147,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
-      <Card className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-slate-200 dark:border-slate-700 overflow-hidden">
+      <Card className="bg-white rounded-2xl shadow-lg border-slate-200 overflow-hidden">
         <CardContent className="p-6">
           <motion.h3 
             className="text-2xl font-serif font-semibold mb-6 text-center gradient-text"
@@ -167,7 +167,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               setFileName(null);
             }}
           >
-            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 dark:bg-slate-700/50 p-1 mb-8">
+            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 p-1 mb-8">
               <TabsTrigger 
                 value="upload" 
                 className="flex items-center justify-center gap-2 rounded-full data-[state=active]:shadow-lg"
@@ -188,8 +188,8 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               <motion.div 
                 className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-300 ${
                   selectedImage 
-                    ? 'border-primary/20 bg-primary/5 dark:border-primary/30 dark:bg-primary/10' 
-                    : 'border-slate-200 dark:border-slate-700 hover:border-primary/30 hover:bg-slate-50 dark:hover:border-primary/30 dark:hover:bg-slate-800/50'
+                    ? 'border-primary/20 bg-primary/5' 
+                    : 'border-slate-200 hover:border-primary/30 hover:bg-slate-50'
                 }`}
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={handleDragOver}
@@ -216,19 +216,20 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                       exit={{ opacity: 0 }}
                     >
                       <motion.div 
-                        className="text-6xl text-primary/40 dark:text-primary/60 flex justify-center"
+                        className="text-6xl flex justify-center gap-4"
                         animate={{ y: [0, -10, 0] }}
                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <i className="fas fa-cloud-upload-alt"></i>
+                        <i className="fas fa-utensils text-primary/80"></i>
+                        <i className="fas fa-cloud-upload-alt text-primary/60"></i>
                       </motion.div>
                       <div className="space-y-2 max-w-md mx-auto">
                         <h4 className="text-lg font-medium">Drag & drop your food image</h4>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="text-sm text-slate-500">
                           or click to browse your device
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
-                          Supports JPG, PNG files up to 5MB
+                        <p className="text-xs text-slate-400 mt-4">
+                          <i className="fas fa-info-circle mr-1"></i> Supports JPG, PNG files up to 5MB
                         </p>
                       </div>
                     </motion.div>
@@ -251,7 +252,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                             className="max-h-60 w-full object-cover"
                           />
                           <motion.button 
-                            className="absolute top-3 right-3 bg-white dark:bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center shadow-md text-red-500 hover:text-red-600 transition-colors"
+                            className="absolute top-3 right-3 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md text-red-500 hover:text-red-600 transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveImage();
@@ -264,7 +265,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                         </motion.div>
                         {fileName && (
                           <motion.p 
-                            className="mt-3 text-sm font-medium overflow-hidden text-ellipsis text-slate-600 dark:text-slate-300"
+                            className="mt-3 text-sm font-medium overflow-hidden text-ellipsis text-slate-600"
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
@@ -282,7 +283,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
             
             <TabsContent value="camera" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
               <motion.div 
-                className="camera-container relative bg-slate-100 dark:bg-slate-700 rounded-xl overflow-hidden shadow-md"
+                className="camera-container relative bg-slate-100 rounded-xl overflow-hidden shadow-md"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -322,7 +323,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                   >
                     <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                       <Button 
-                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-primary hover:text-primary/80 rounded-full size-14 shadow-lg border-none"
+                        className="bg-white hover:bg-slate-50 text-primary hover:text-primary/80 rounded-full size-14 shadow-lg border-none"
                         onClick={handleCapturePhoto}
                         disabled={!isCameraReady}
                         size="icon"
@@ -336,7 +337,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                     
                     <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                       <Button 
-                        className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full size-10 shadow-md"
+                        className="bg-white hover:bg-slate-50 text-slate-600 rounded-full size-10 shadow-md"
                         onClick={handleSwitchCamera}
                         disabled={!isCameraReady}
                         size="icon"
@@ -361,7 +362,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                         className="w-full h-full object-cover"
                       />
                       <motion.button 
-                        className="absolute top-3 right-3 bg-white dark:bg-slate-800 rounded-full w-10 h-10 flex items-center justify-center shadow-md text-red-500 hover:text-red-600 transition-colors"
+                        className="absolute top-3 right-3 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md text-red-500 hover:text-red-600 transition-colors"
                         onClick={handleRemoveImage}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
@@ -381,7 +382,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                     transition={{ duration: 1.5, repeat: Infinity }}
                   >
                     <i className="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Initializing camera...</p>
+                    <p className="text-sm text-slate-500">Initializing camera...</p>
                   </motion.div>
                 </div>
               )}
@@ -399,7 +400,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               whileTap={{ scale: 0.95 }}
             >
               <Button 
-                className="bg-primary text-white font-medium rounded-full px-8 py-6 shadow-md hover:shadow-lg hover:bg-primary/90 dark:hover:bg-primary/80 transition-all"
+                className="bg-primary text-white font-medium rounded-full px-8 py-6 shadow-md hover:shadow-lg hover:bg-primary/90 transition-all"
                 disabled={!selectedImage || isAnalyzing}
                 onClick={handleAnalyzeImage}
                 size="lg"
@@ -423,12 +424,12 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
             
             {!selectedImage && (
               <motion.p 
-                className="mt-4 text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto"
+                className="mt-4 text-xs text-slate-500 max-w-xs mx-auto"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
-                Upload or capture an image of your food to get detailed cooking instructions and nutritional information
+                <i className="fas fa-info-circle mr-1"></i> Upload or capture an image of your food to get detailed cooking instructions and nutritional information
               </motion.p>
             )}
           </motion.div>

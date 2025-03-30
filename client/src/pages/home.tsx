@@ -6,6 +6,7 @@ import LoadingAnimation from "@/components/LoadingAnimation";
 import RecipeResults from "@/components/RecipeResults";
 import Footer from "@/components/Footer";
 import { type AnalyzeImageResponse } from "@shared/schema";
+import { apiRequest } from "@/lib/api";
 
 export default function Home() {
   const [stage, setStage] = useState<"upload" | "loading" | "results">("upload");
@@ -16,9 +17,21 @@ export default function Home() {
   const handleAnalyzeImage = (imageData: string) => {
     setSelectedImage(imageData);
     setStage("loading");
+    
+    // Directly use apiRequest from lib/api
+    apiRequest<AnalyzeImageResponse>('POST', '/api/analyze-image', { imageData })
+      .then((response) => {
+        console.log('Analysis successful:', response);
+        setAnalysisResult(response);
+        setStage("results");
+      })
+      .catch((error: any) => {
+        console.error('Error in image analysis:', error);
+        setStage("upload");
+      });
   };
   
-  // Handle successful analysis
+  // Handle successful analysis - kept for backward compatibility
   const handleAnalysisComplete = (result: AnalyzeImageResponse) => {
     setAnalysisResult(result);
     setStage("results");

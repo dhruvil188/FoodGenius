@@ -123,26 +123,14 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
     }
   }, [webcamRef]);
 
-  const handleAnalyzeImage = async () => {
+  const handleAnalyzeImage = () => {
     if (!selectedImage) return;
     
-    try {
-      setIsAnalyzing(true);
-      
-      await apiRequest('POST', '/api/analyze-image', { imageData: selectedImage });
-      
-      // If successful, notify parent component
-      onAnalyzeImage(selectedImage);
-    } catch (error) {
-      console.error('Error analyzing image:', error);
-      setIsAnalyzing(false);
-      
-      toast({
-        title: "Analysis Failed",
-        description: "Sorry, we couldn't analyze your image. Please try again.",
-        variant: "destructive"
-      });
-    }
+    setIsAnalyzing(true);
+    
+    // Don't call the API here anymore, just pass the image to the parent component
+    // which will handle the API call
+    onAnalyzeImage(selectedImage);
   };
 
   const videoConstraints = {

@@ -241,22 +241,34 @@ const howItWorksSteps = [
   {
     icon: "fa-camera",
     title: "Snap or Upload",
-    description: "Take a photo of any dish or upload an existing food image"
+    description: "Take a photo of any dish or upload an existing food image",
+    bgColor: "bg-green-100",
+    iconColor: "text-green-600",
+    contentIcon: "fa-image"
   },
   {
-    icon: "fa-magic",
+    icon: "fa-microchip",
     title: "AI Analysis",
-    description: "Our AI analyzes the image to identify ingredients and preparation"
+    description: "Our AI analyzes the image to identify ingredients and preparation",
+    bgColor: "bg-blue-100",
+    iconColor: "text-blue-600",
+    contentIcon: "fa-brain"
+  },
+  {
+    icon: "fa-book-open",
+    title: "Get Your Recipe",
+    description: "Receive a complete recipe with ingredients, instructions, and nutrition facts",
+    bgColor: "bg-purple-100",
+    iconColor: "text-purple-600",
+    contentIcon: "fa-clipboard-list"
   },
   {
     icon: "fa-utensils",
-    title: "Get Your Recipe",
-    description: "Receive a complete recipe with ingredients, instructions, and nutrition facts"
-  },
-  {
-    icon: "fa-check-circle",
     title: "Cook & Enjoy",
-    description: "Follow the interactive recipe steps and enjoy your homemade dish"
+    description: "Follow the interactive recipe steps and enjoy your homemade dish",
+    bgColor: "bg-orange-100",
+    iconColor: "text-orange-600",
+    contentIcon: "fa-smile-beam"
   }
 ];
 
@@ -711,48 +723,31 @@ export default function Home() {
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                     >
                       <div className="relative">
-                        <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-6 relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent animate-pulse"></div>
-                          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                            <circle 
-                              cx="50" 
-                              cy="50" 
-                              r="48" 
-                              fill="none" 
-                              stroke="url(#gradient-circle)" 
-                              strokeWidth="1" 
-                              strokeDasharray="0.5 8" 
-                              className="animate-spin-slow"
-                            />
-                            <defs>
-                              <linearGradient id="gradient-circle" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="rgba(16, 185, 129, 0.2)" />
-                                <stop offset="100%" stopColor="rgba(5, 150, 105, 0.05)" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
+                        <div className={`w-24 h-24 ${step.bgColor} rounded-full flex items-center justify-center mx-auto mb-8 relative overflow-hidden shadow-md`}>
+                          <div className="absolute inset-0 bg-white/30 rounded-full m-1"></div>
+                          <div className="absolute inset-0 bg-gradient-radial from-white/20 via-transparent to-transparent"></div>
+                          {index < howItWorksSteps.length - 1 && (
+                            <div className="hidden lg:block absolute top-1/2 left-full w-full h-0.5 border-t-2 border-dashed border-slate-200 -translate-y-1/2"></div>
+                          )}
                           <motion.div
                             animate={{ 
-                              scale: [1, 1.1, 1],
+                              scale: [1, 1.08, 1],
                             }}
                             transition={{ 
-                              duration: 2,
+                              duration: 3,
                               repeat: Infinity,
                               repeatType: "loop"
                             }}
                             className="relative z-10"
                           >
-                            <i className={`fas ${step.icon} text-2xl text-primary drop-shadow-md`}></i>
+                            <i className={`fas ${step.contentIcon} text-3xl ${step.iconColor}`}></i>
                           </motion.div>
                         </div>
-                        {index < howItWorksSteps.length - 1 && (
-                          <div className="hidden lg:block absolute top-10 left-full w-full h-0.5 bg-gradient-to-r from-primary/20 to-emerald-400/20 transform -translate-x-10"></div>
-                        )}
                       </div>
-                      <h3 className="text-xl font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
+                      <h3 className="text-xl font-semibold mb-3 text-slate-800">
                         {step.title}
                       </h3>
-                      <p className="text-slate-600">{step.description}</p>
+                      <p className="text-slate-600 text-sm">{step.description}</p>
                     </motion.div>
                   ))}
                 </div>

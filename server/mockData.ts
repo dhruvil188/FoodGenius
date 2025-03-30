@@ -5,19 +5,39 @@ import { AnalyzeImageResponse } from "@shared/schema";
  */
 export const getMockAnalysisResponse = (): AnalyzeImageResponse => {
   return {
-    foodName: "Pasta Carbonara",
-    description: "A rich and creamy Italian pasta dish made with eggs, cheese, pancetta, and black pepper.",
-    tags: ["Italian", "Pasta", "Dinner", "Creamy", "Quick"],
+    foodName: "Pasta Carbonara (Spaghetti alla Carbonara)",
+    description: "A rich and creamy Italian pasta dish that originated in Rome, traditionally made with eggs, hard cheese, cured pork, and black pepper. This iconic dish gained popularity after World War II and is now considered one of Italy's most treasured culinary classics, typically served as a primo piatto (first course).",
+    tags: ["Italian", "Roman Cuisine", "Pasta", "Dinner", "Creamy", "Quick", "Egg-based", "Cured Pork", "Stovetop Cooking", "Savory", "Al Dente"],
     recipes: [
       {
-        title: "Classic Pasta Carbonara",
-        description: "Traditional Roman pasta dish with a creamy egg sauce, pancetta, and Pecorino Romano cheese.",
-        prepTime: "10 minutes",
-        cookTime: "15 minutes",
-        totalTime: "25 minutes",
+        title: "Authentic Roman Pasta alla Carbonara",
+        description: "The quintessential Roman pasta dish featuring a silky, creamy sauce made from raw eggs that cook gently from the heat of freshly boiled pasta. This authentic version uses traditional guanciale (cured pork jowl) and a combination of Pecorino Romano and Parmigiano Reggiano cheeses for the perfect balance of salty, savory flavors.",
+        prepTime: "10 minutes active preparation",
+        cookTime: "15 minutes of careful attention",
+        totalTime: "25 minutes from start to finish",
         servings: 4,
-        difficulty: "Intermediate",
-        tags: ["Italian", "Quick dinner", "Egg-based"],
+        servingSize: "85g dry pasta per person (about 1.5 cups cooked)",
+        difficulty: "Intermediate - requires quick timing and temperature control",
+        tags: ["Italian", "Roman Specialty", "Egg-based", "Quick dinner", "Gluten-free adaptable", "Dinner party worthy", "No cream added"],
+        chefTips: [
+          "The key to silky carbonara is working quickly off the heat - too hot and the eggs scramble, too cool and they won't form a sauce",
+          "Use room temperature eggs to prevent them from cooling the pasta too quickly",
+          "Authentic carbonara never contains cream - the creaminess comes from properly emulsified eggs and cheese",
+          "The pasta water is crucial - its starchiness helps bind the sauce, so be sure to reserve some before draining"
+        ],
+        commonMistakes: [
+          "Adding eggs to pasta while still on heat, causing them to scramble instead of forming a silky sauce",
+          "Not using enough black pepper - 'carbonara' refers to the black pepper resembling coal dust",
+          "Adding cream, which is not traditional and changes the authentic texture",
+          "Overcooking the pasta - it should be truly al dente as it will continue cooking slightly in the hot pan"
+        ],
+        storageInstructions: "Carbonara is best enjoyed immediately after preparation. If you must store leftovers, refrigerate in an airtight container for up to 2 days. The texture will change significantly upon reheating.",
+        reheatingMethods: "To reheat, add a splash of water and warm gently over low heat, stirring constantly. Better yet, carbonara can be repurposed into a frittata by mixing with additional eggs and baking.",
+        beveragePairings: [
+          "Frascati - a crisp, dry white wine from the Rome region, traditional pairing",
+          "Pinot Grigio - light bodied white with good acidity to cut through the richness",
+          "Sparkling water with lemon - for a non-alcoholic option that refreshes the palate"
+        ],
         ingredients: [
           "400g (14oz) spaghetti or bucatini pasta",
           "150g (5oz) pancetta or guanciale, diced",
@@ -45,20 +65,31 @@ export const getMockAnalysisResponse = (): AnalyzeImageResponse => {
         ],
         nutritionInfo: {
           calories: 550,
-          protein: "25g",
-          carbs: "65g",
-          fats: "22g",
-          fiber: "3g",
-          sugar: "2g",
+          protein: "25g (50% of daily recommended intake)",
+          carbs: "65g (22% of daily recommended intake)",
+          fats: "22g (34% of daily recommended intake)",
+          fiber: "3g (12% of daily recommended intake)",
+          sugar: "2g (2% of daily recommended intake)",
+          sodium: "860mg (37% of daily recommended intake)",
+          vitamins: [
+            "Vitamin A: 15% DV (from eggs)",
+            "Vitamin D: 22% DV (from eggs and cheese)",
+            "Calcium: 35% DV (primarily from Pecorino and Parmigiano)",
+            "Iron: 18% DV (from enriched pasta and eggs)",
+            "B12: 40% DV (from animal products)"
+          ],
           healthyAlternatives: [
-            "Use whole wheat pasta for more fiber",
-            "Substitute turkey bacon for a lighter version",
-            "Use 2 whole eggs and 2 egg whites instead of 3 whole eggs and 1 yolk to reduce fat"
+            "Use whole wheat pasta for more fiber (increases fiber to 8g per serving)",
+            "Substitute turkey bacon for a lighter version (reduces fat to 14g per serving)",
+            "Use 2 whole eggs and 2 egg whites instead of 3 whole eggs and 1 yolk to reduce fat (saves approximately 5g of fat per serving)",
+            "For gluten-free diets, use certified gluten-free pasta made from rice or corn flour (maintains similar calorie count)"
           ],
           dietaryNotes: [
-            "High in protein from eggs and cheese",
-            "Contains significant amount of saturated fat from pancetta and cheese",
-            "Good source of calcium from the cheeses"
+            "High in protein from eggs and cheese (excellent for muscle maintenance)",
+            "Contains significant amount of saturated fat from pancetta and cheese (25% of daily limit)",
+            "Good source of calcium from the cheeses (supports bone health)",
+            "Moderate glycemic index when made with traditional pasta (consider whole grain for lower GI)",
+            "High in cholesterol (approximately 215mg per serving) primarily from egg yolks"
           ]
         },
         variations: [
@@ -92,19 +123,22 @@ export const getMockAnalysisResponse = (): AnalyzeImageResponse => {
         ],
         sideDishSuggestions: [
           {
-            name: "Italian Green Salad",
-            description: "A simple salad with mixed greens, cherry tomatoes, and balsamic vinaigrette",
-            preparationTime: "5 minutes"
+            name: "Insalata Mista (Mixed Italian Salad)",
+            description: "A refreshing side salad with crisp mixed greens, sweet cherry tomatoes, thinly sliced red onions, and cucumber dressed with high-quality extra virgin olive oil, aged balsamic vinegar, and a pinch of flaky sea salt",
+            preparationTime: "5 minutes active work",
+            pairingReason: "The bright acidity and fresh crunch of this salad provides a perfect counterbalance to the rich, creamy texture of the carbonara, cleansing the palate between bites"
           },
           {
-            name: "Garlic Bread",
-            description: "Crusty Italian bread with garlic butter and herbs",
-            preparationTime: "10 minutes"
+            name: "Pane all'Aglio (Italian Garlic Bread)",
+            description: "Crusty ciabatta bread sliced and brushed with a compound butter made from unsalted butter, fresh garlic, Italian parsley, and a touch of Parmigiano-Reggiano, then toasted until golden brown",
+            preparationTime: "10 minutes including baking time",
+            pairingReason: "The aromatic garlic and herbs complement the savory flavors of the carbonara while the crusty bread provides a perfect vehicle for soaking up any extra sauce"
           },
           {
-            name: "Roasted Asparagus",
-            description: "Fresh asparagus roasted with olive oil, lemon, and Parmesan",
-            preparationTime: "15 minutes"
+            name: "Asparagi al Forno (Roasted Asparagus with Lemon)",
+            description: "Fresh asparagus spears tossed with extra virgin olive oil, lemon zest, and freshly ground black pepper, then roasted until tender-crisp and finished with freshly grated Parmigiano-Reggiano and a squeeze of lemon juice",
+            preparationTime: "15 minutes including roasting time",
+            pairingReason: "The slightly bitter, earthy flavor of asparagus and bright lemon notes cut through the richness of the carbonara, while the shared Parmigiano cheese creates flavor harmony between the dishes"
           }
         ]
       },

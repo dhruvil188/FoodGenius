@@ -72,6 +72,8 @@ export const nutritionInfoSchema = z.object({
   fats: z.string().optional(),
   fiber: z.string().optional(),
   sugar: z.string().optional(),
+  sodium: z.string().optional(),
+  vitamins: z.array(z.string()).optional(),
   healthyAlternatives: z.array(z.string()).optional(),
   dietaryNotes: z.array(z.string()).optional(),
 });
@@ -82,6 +84,7 @@ export const sideDishSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   preparationTime: z.string().optional(),
+  pairingReason: z.string().optional(),
 });
 
 export type SideDish = z.infer<typeof sideDishSchema>;
@@ -101,10 +104,16 @@ export const recipeSchema = z.object({
   cookTime: z.string().optional(),
   totalTime: z.string().optional(),
   servings: z.number().optional(),
+  servingSize: z.string().optional(),
   difficulty: z.string().optional(),
   tags: z.array(z.string()).optional(),
   ingredients: z.array(z.string()),
   instructions: z.array(z.string()),
+  chefTips: z.array(z.string()).optional(),
+  commonMistakes: z.array(z.string()).optional(),
+  storageInstructions: z.string().optional(),
+  reheatingMethods: z.string().optional(),
+  beveragePairings: z.array(z.string()).optional(),
   imageUrl: z.string().optional(),
   nutritionInfo: nutritionInfoSchema.optional(),
   variations: z.array(recipeVariationSchema).optional(),

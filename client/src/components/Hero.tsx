@@ -745,126 +745,220 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Interactive animated benefits with enhanced visuals */}
-          <div className="flex justify-center mt-10 gap-8">
-            {[
-              { icon: "fa-clock", label: "Fast Analysis", color: "from-green-500 to-emerald-400", description: "Get results in seconds" },
-              { icon: "fa-bullseye", label: "Precise Results", color: "from-blue-500 to-cyan-400", description: "AI-powered accuracy" },
-              { icon: "fa-utensils", label: "Ready to Cook", color: "from-amber-500 to-orange-400", description: "Step-by-step guidance" }
-            ].map((benefit, index) => (
-              <motion.div
-                key={`benefit-${index}`}
-                className="text-center"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 1.2 + (index * 0.2), duration: 0.5 }}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              >
-                <motion.div 
-                  className={`w-14 h-14 mx-auto rounded-full bg-gradient-to-r ${benefit.color} flex items-center justify-center text-white shadow-md mb-2 relative`}
-                  whileHover={{ 
-                    scale: 1.1,
-                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                  }}
-                >
-                  {/* Animated ripple effect */}
+          {/* Advanced Interactive Showcase */}
+          <div className="mt-10 mb-20 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative">
+              {/* Left panel - Process Steps with advanced styling */}
+              <div className="flex flex-col items-start justify-center">
+                {[
+                  { step: 1, title: "Snap", description: "Capture or upload any food photo", icon: "fa-camera", color: "bg-gradient-to-r from-green-500 to-emerald-400", lightColor: "bg-green-50", textColor: "text-emerald-500", borderColor: "border-emerald-200" },
+                  { step: 2, title: "Process", description: "AI analyzes ingredients & structure", icon: "fa-bolt", color: "bg-gradient-to-r from-blue-500 to-cyan-400", lightColor: "bg-blue-50", textColor: "text-blue-500", borderColor: "border-blue-200" },
+                  { step: 3, title: "Cook", description: "Follow your detailed custom recipe", icon: "fa-utensils", color: "bg-gradient-to-r from-amber-500 to-yellow-400", lightColor: "bg-amber-50", textColor: "text-amber-500", borderColor: "border-amber-200" }
+                ].map((item, index) => (
                   <motion.div
-                    className="absolute inset-0 rounded-full"
+                    key={`step-${index}`}
+                    className="flex items-start mb-8 w-full relative z-10"
+                    initial={{ x: -50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ 
+                      delay: 0.2 + (index * 0.2), 
+                      duration: 0.7,
+                      type: "spring",
+                      stiffness: 100
+                    }}
+                  >
+                    {/* Connecting Line */}
+                    {index < 2 && (
+                      <motion.div 
+                        className="absolute left-7 top-14 w-0.5 bg-gradient-to-b from-current to-gray-200 h-10"
+                        style={{ color: index === 0 ? "#10b981" : "#3b82f6" }}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 40, opacity: 1 }}
+                        transition={{ delay: 0.7 + (index * 0.3), duration: 0.4 }}
+                      />
+                    )}
+                    
+                    {/* Step Circle */}
+                    <div className="mr-4 relative">
+                      <motion.div 
+                        className={`flex-shrink-0 h-14 w-14 rounded-full ${item.color} shadow-md flex items-center justify-center text-white font-medium text-lg relative z-10`}
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                      >
+                        <i className={`fas ${item.icon}`}></i>
+                      </motion.div>
+                      
+                      {/* Outer Pulse Animation */}
+                      <motion.div
+                        className={`absolute -inset-1 rounded-full opacity-40 ${item.lightColor}`}
+                        animate={{ 
+                          scale: [1, 1.2, 1],
+                          opacity: [0.4, 0.15, 0.4]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          delay: index * 0.3
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Step Content */}
+                    <div className={`flex-1 ${item.lightColor} rounded-lg p-3 border ${item.borderColor} shadow-sm`}>
+                      <div className="flex items-center mb-1">
+                        <div className={`${item.textColor} font-semibold mr-2`}>Step {item.step}</div>
+                        <div className="text-gray-800 font-bold">{item.title}</div>
+                      </div>
+                      <p className="text-gray-600 text-sm">{item.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Right panel - Interactive Metrics */}
+              <div className="flex flex-col items-end justify-center">
+                {[
+                  { title: "Recognition Accuracy", value: "96%", icon: "fa-bullseye", color: "text-green-500", bgColor: "bg-green-50", borderColor: "border-green-200" },
+                  { title: "Average Recipe Time", value: "12s", icon: "fa-bolt", color: "text-blue-500", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
+                  { title: "Ingredients Detected", value: "98%", icon: "fa-check-circle", color: "text-amber-500", bgColor: "bg-amber-50", borderColor: "border-amber-200" }
+                ].map((metric, index) => (
+                  <motion.div
+                    key={`metric-${index}`}
+                    className={`mb-8 ${metric.bgColor} p-4 rounded-lg shadow-sm border ${metric.borderColor} w-full`}
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ 
+                      delay: 0.3 + (index * 0.2), 
+                      duration: 0.7,
+                      type: "spring",
+                      stiffness: 100
+                    }}
+                    whileHover={{ 
+                      y: -5,
+                      boxShadow: "0 12px 20px -10px rgba(0, 0, 0, 0.1)"
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-gray-700 font-medium">{metric.title}</div>
+                      <div className={`h-10 w-10 ${metric.bgColor} rounded-full flex items-center justify-center ${metric.color} border ${metric.borderColor}`}>
+                        <i className={`fas ${metric.icon}`}></i>
+                      </div>
+                    </div>
+                    
+                    <motion.div 
+                      className={`text-2xl font-bold ${metric.color} mt-2`}
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ 
+                        delay: 0.8 + (index * 0.3),
+                        type: "spring",
+                        stiffness: 300
+                      }}
+                    >
+                      {metric.value}
+                    </motion.div>
+                    
+                    {/* Progress Bar Visualization */}
+                    <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <motion.div 
+                        className={`h-full rounded-full bg-gradient-to-r ${index === 0 ? 'from-green-400 to-green-500' : index === 1 ? 'from-blue-400 to-blue-500' : 'from-amber-400 to-amber-500'}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: index === 0 ? '96%' : index === 1 ? '100%' : '98%' }}
+                        transition={{ delay: 1 + (index * 0.2), duration: 1, ease: "easeOut" }}
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              
+              {/* Floating decorative elements */}
+              <div className="absolute inset-0 -z-10 pointer-events-none">
+                {/* Animated dots in background */}
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={`dot-${i}`}
+                    className="absolute rounded-full bg-green-500/10 w-2 h-2"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                    }}
                     animate={{
-                      boxShadow: [
-                        '0 0 0 0px rgba(255, 255, 255, 0.4)',
-                        '0 0 0 10px rgba(255, 255, 255, 0)'
-                      ],
-                      scale: [1, 1.1]
+                      opacity: [0.1, 0.5, 0.1],
+                      scale: [1, 1.2, 1],
                     }}
                     transition={{
+                      duration: 3 + Math.random() * 2,
                       repeat: Infinity,
-                      duration: 1.5,
-                      delay: index * 0.3
+                      delay: Math.random() * 2,
+                      ease: "easeInOut"
                     }}
                   />
-                  <i className={`fas ${benefit.icon} text-lg`}></i>
-                </motion.div>
-                <div className="text-sm font-medium text-gray-700">{benefit.label}</div>
-                <div className="text-xs text-gray-500 mt-1">{benefit.description}</div>
-              </motion.div>
-            ))}
-          </div>
-          
-          {/* Interactive demo visualization */}
-          <div className="mt-16 mb-10 relative">
-            <div className="max-w-3xl mx-auto">
-              <motion.div 
-                className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border border-green-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.5, duration: 0.6 }}
-              >
-                <div className="text-center mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800">See How It Works</h3>
-                  <p className="text-sm text-gray-600">Watch how Dish Detective transforms food images into detailed recipes</p>
-                </div>
+                ))}
                 
-                <motion.div 
-                  className="relative h-16 rounded-lg bg-white shadow-sm overflow-hidden border border-gray-200"
-                  whileHover={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)" }}
-                >
-                  {/* Process visualization */}
-                  <div className="absolute inset-y-0 left-0 w-4/12 bg-gradient-to-r from-green-100 to-green-50 flex items-center justify-center border-r border-green-100">
-                    <div className="text-green-600 text-sm font-medium flex items-center">
-                      <i className="fas fa-camera mr-2"></i>
-                      Upload
-                    </div>
-                  </div>
-                  
-                  <motion.div 
-                    className="absolute inset-y-0 left-4/12 w-4/12 bg-gradient-to-r from-blue-100 to-blue-50 flex items-center justify-center border-r border-blue-100"
-                    initial={{ x: -30, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 2.0, duration: 0.4 }}
-                  >
-                    <div className="text-blue-600 text-sm font-medium flex items-center">
-                      <i className="fas fa-microchip mr-2"></i>
-                      Analyze
-                    </div>
-                  </motion.div>
-                  
-                  <motion.div 
-                    className="absolute inset-y-0 left-8/12 w-4/12 bg-gradient-to-r from-amber-100 to-amber-50 flex items-center justify-center"
-                    initial={{ x: -30, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 2.2, duration: 0.4 }}
-                  >
-                    <div className="text-amber-600 text-sm font-medium flex items-center">
-                      <i className="fas fa-book-open mr-2"></i>
-                      Recipe
-                    </div>
-                  </motion.div>
-                  
-                  {/* Animated progress indicator */}
-                  <motion.div 
-                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-amber-500"
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{ delay: 2.5, duration: 1.5 }}
+                {/* SVG curved connection lines */}
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <motion.path
+                    d="M30,20 Q50,50 70,20"
+                    stroke="rgba(16, 185, 129, 0.1)"
+                    strokeWidth="0.5"
+                    fill="none"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1.5, delay: 0.5 }}
                   />
-                </motion.div>
-                
-                <div className="flex justify-center mt-6">
-                  <motion.button
-                    className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md flex items-center space-x-2"
-                    whileHover={{ scale: 1.03, boxShadow: "0 6px 20px rgba(0, 0, 0, 0.12)" }}
-                    whileTap={{ scale: 0.98 }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 2.8, duration: 0.4 }}
-                    onClick={() => navigate('#upload-section')}
-                  >
-                    <i className="fas fa-arrow-circle-right mr-1"></i>
-                    <span>Try It Now</span>
-                  </motion.button>
-                </div>
-              </motion.div>
+                  <motion.path
+                    d="M30,50 Q50,20 70,50"
+                    stroke="rgba(59, 130, 246, 0.1)"
+                    strokeWidth="0.5"
+                    fill="none"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1.5, delay: 0.7 }}
+                  />
+                  <motion.path
+                    d="M30,80 Q50,50 70,80"
+                    stroke="rgba(245, 158, 11, 0.1)"
+                    strokeWidth="0.5"
+                    fill="none"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1.5, delay: 0.9 }}
+                  />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Bottom CTA button */}
+            <div className="flex justify-center mt-10">
+              <motion.button
+                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-full font-medium shadow-lg flex items-center space-x-2 group"
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: "0 20px 40px -10px rgba(16, 185, 129, 0.3)"
+                }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('#upload-section')}
+              >
+                <motion.span
+                  initial={{ x: 0 }}
+                  whileHover={{ x: 5 }}
+                  transition={{ type: "spring", stiffness: 500 }}
+                  className="inline-flex items-center"
+                >
+                  <i className="fas fa-camera mr-2"></i>
+                  Try It Now
+                  <motion.i 
+                    className="fas fa-long-arrow-alt-right ml-2 transition-all duration-300"
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ 
+                      duration: 1.5, 
+                      repeat: Infinity,
+                      repeatType: "reverse"
+                    }}
+                  />
+                </motion.span>
+              </motion.button>
             </div>
           </div>
         </div>

@@ -71,7 +71,7 @@ const featuredFoods = [
   },
   {
     name: "Berry Smoothie Bowl",
-    image: "https://images.unsplash.com/photo-1626790680787-de5e9a07bcf2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    image: "https://images.unsplash.com/photo-1637226743029-3022d652fdd5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1025&q=80",
     tags: ["Breakfast", "Healthy", "Vegan"],
     recipe: {
       foodName: "Berry Smoothie Bowl",
@@ -112,7 +112,7 @@ const featuredFoods = [
   },
   {
     name: "Butter Chicken",
-    image: "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80",
+    image: "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=884&q=80",
     tags: ["Indian", "Spicy", "Dinner"],
     recipe: {
       foodName: "Butter Chicken",

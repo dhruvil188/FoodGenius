@@ -358,14 +358,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   recipe.ingredients.map((ing: any) => {
                     // Handle objects that might be returned instead of strings
                     if (ing === null || ing === undefined) return "";
-                    if (typeof ing === 'object') return JSON.stringify(ing);
+                    
+                    // If it's an object with item and quantity properties (common format from Gemini API)
+                    if (typeof ing === 'object') {
+                      if (ing.item && ing.quantity) {
+                        let formattedIngredient = `${ing.quantity} ${ing.item}`;
+                        
+                        // Add preparation note if available
+                        if (ing.prep && ing.prep !== "null") {
+                          formattedIngredient += `, ${ing.prep}`;
+                        }
+                        
+                        // Add quality information if available
+                        if (ing.quality && ing.quality !== "null") {
+                          formattedIngredient += ` (${ing.quality})`;
+                        }
+                        
+                        return formattedIngredient;
+                      }
+                      
+                      // If it has a name property
+                      if (ing.name) {
+                        let formatted = ing.name;
+                        if (ing.amount) formatted = `${ing.amount} ${formatted}`;
+                        if (ing.notes) formatted += ` - ${ing.notes}`;
+                        return formatted;
+                      }
+                      
+                      // If all else fails, turn it into a JSON string
+                      return JSON.stringify(ing);
+                    }
+                    
                     return String(ing);
                   }) : [],
                 instructions: Array.isArray(recipe.instructions) ? 
                   recipe.instructions.map((inst: any) => {
                     // Handle objects that might be returned instead of strings
                     if (inst === null || inst === undefined) return "";
-                    if (typeof inst === 'object') return JSON.stringify(inst);
+                    
+                    if (typeof inst === 'object') {
+                      // For numbered instruction objects (common format)
+                      if (inst.number && inst.instruction) {
+                        return String(inst.instruction);
+                      }
+                      
+                      // For step objects with action and ingredients
+                      if (inst.action) {
+                        let formattedStep = inst.action;
+                        
+                        // Include ingredients if available
+                        if (inst.ingredients) {
+                          if (Array.isArray(inst.ingredients) && inst.ingredients.length > 0) {
+                            formattedStep += ` ${inst.ingredients.join(', ')}`;
+                          } else if (typeof inst.ingredients === 'string') {
+                            formattedStep += ` ${inst.ingredients}`;
+                          }
+                        }
+                        
+                        // Add any additional details
+                        if (inst.duration) {
+                          formattedStep += ` for ${inst.duration}`;
+                        }
+                        
+                        if (inst.note) {
+                          formattedStep += ` (${inst.note})`;
+                        }
+                        
+                        return formattedStep;
+                      }
+                      
+                      // For step objects with text or description
+                      if (inst.text) return String(inst.text);
+                      if (inst.description) return String(inst.description);
+                      if (inst.step) return String(inst.step);
+                      
+                      // If all else fails, turn it into a JSON string but formatted more nicely
+                      return JSON.stringify(inst);
+                    }
+                    
                     return String(inst);
                   }) : [],
                 tags: Array.isArray(recipe.tags) ? 

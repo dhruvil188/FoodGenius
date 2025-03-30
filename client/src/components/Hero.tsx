@@ -745,220 +745,284 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Advanced Interactive Showcase */}
-          <div className="mt-10 mb-20 max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative">
-              {/* Left panel - Process Steps with advanced styling */}
-              <div className="flex flex-col items-start justify-center">
-                {[
-                  { step: 1, title: "Snap", description: "Capture or upload any food photo", icon: "fa-camera", color: "bg-gradient-to-r from-green-500 to-emerald-400", lightColor: "bg-green-50", textColor: "text-emerald-500", borderColor: "border-emerald-200" },
-                  { step: 2, title: "Process", description: "AI analyzes ingredients & structure", icon: "fa-bolt", color: "bg-gradient-to-r from-blue-500 to-cyan-400", lightColor: "bg-blue-50", textColor: "text-blue-500", borderColor: "border-blue-200" },
-                  { step: 3, title: "Cook", description: "Follow your detailed custom recipe", icon: "fa-utensils", color: "bg-gradient-to-r from-amber-500 to-yellow-400", lightColor: "bg-amber-50", textColor: "text-amber-500", borderColor: "border-amber-200" }
-                ].map((item, index) => (
-                  <motion.div
-                    key={`step-${index}`}
-                    className="flex items-start mb-8 w-full relative z-10"
-                    initial={{ x: -50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ 
-                      delay: 0.2 + (index * 0.2), 
-                      duration: 0.7,
-                      type: "spring",
-                      stiffness: 100
-                    }}
-                  >
-                    {/* Connecting Line */}
-                    {index < 2 && (
-                      <motion.div 
-                        className="absolute left-7 top-14 w-0.5 bg-gradient-to-b from-current to-gray-200 h-10"
-                        style={{ color: index === 0 ? "#10b981" : "#3b82f6" }}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 40, opacity: 1 }}
-                        transition={{ delay: 0.7 + (index * 0.3), duration: 0.4 }}
-                      />
-                    )}
-                    
-                    {/* Step Circle */}
-                    <div className="mr-4 relative">
-                      <motion.div 
-                        className={`flex-shrink-0 h-14 w-14 rounded-full ${item.color} shadow-md flex items-center justify-center text-white font-medium text-lg relative z-10`}
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      >
-                        <i className={`fas ${item.icon}`}></i>
-                      </motion.div>
-                      
-                      {/* Outer Pulse Animation */}
-                      <motion.div
-                        className={`absolute -inset-1 rounded-full opacity-40 ${item.lightColor}`}
-                        animate={{ 
-                          scale: [1, 1.2, 1],
-                          opacity: [0.4, 0.15, 0.4]
-                        }}
-                        transition={{ 
-                          duration: 2,
-                          repeat: Infinity,
-                          repeatType: "reverse",
-                          delay: index * 0.3
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Step Content */}
-                    <div className={`flex-1 ${item.lightColor} rounded-lg p-3 border ${item.borderColor} shadow-sm`}>
-                      <div className="flex items-center mb-1">
-                        <div className={`${item.textColor} font-semibold mr-2`}>Step {item.step}</div>
-                        <div className="text-gray-800 font-bold">{item.title}</div>
-                      </div>
-                      <p className="text-gray-600 text-sm">{item.description}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-              
-              {/* Right panel - Interactive Metrics */}
-              <div className="flex flex-col items-end justify-center">
-                {[
-                  { title: "Recognition Accuracy", value: "96%", icon: "fa-bullseye", color: "text-green-500", bgColor: "bg-green-50", borderColor: "border-green-200" },
-                  { title: "Average Recipe Time", value: "12s", icon: "fa-bolt", color: "text-blue-500", bgColor: "bg-blue-50", borderColor: "border-blue-200" },
-                  { title: "Ingredients Detected", value: "98%", icon: "fa-check-circle", color: "text-amber-500", bgColor: "bg-amber-50", borderColor: "border-amber-200" }
-                ].map((metric, index) => (
-                  <motion.div
-                    key={`metric-${index}`}
-                    className={`mb-8 ${metric.bgColor} p-4 rounded-lg shadow-sm border ${metric.borderColor} w-full`}
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ 
-                      delay: 0.3 + (index * 0.2), 
-                      duration: 0.7,
-                      type: "spring",
-                      stiffness: 100
-                    }}
-                    whileHover={{ 
-                      y: -5,
-                      boxShadow: "0 12px 20px -10px rgba(0, 0, 0, 0.1)"
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="text-gray-700 font-medium">{metric.title}</div>
-                      <div className={`h-10 w-10 ${metric.bgColor} rounded-full flex items-center justify-center ${metric.color} border ${metric.borderColor}`}>
-                        <i className={`fas ${metric.icon}`}></i>
-                      </div>
-                    </div>
-                    
-                    <motion.div 
-                      className={`text-2xl font-bold ${metric.color} mt-2`}
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ 
-                        delay: 0.8 + (index * 0.3),
-                        type: "spring",
-                        stiffness: 300
+          {/* Immersive 3D Recipe Journey Showcase */}
+          <div className="mt-10 mb-24 relative">
+            <div className="max-w-5xl mx-auto px-4 relative">
+              {/* Perspective container and 3D effect */}
+              <div className="relative overflow-hidden rounded-3xl shadow-2xl" style={{ height: '540px' }}>
+                {/* Animated gradient background with noise overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 overflow-hidden">
+                  {/* Noise texture overlay */}
+                  <div className="absolute inset-0 opacity-10" style={{ 
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    backgroundSize: 'cover',
+                  }}></div>
+                  
+                  {/* Animated particle effects */}
+                  {[...Array(30)].map((_, i) => (
+                    <motion.div
+                      key={`particle-${i}`}
+                      className="absolute rounded-full bg-white"
+                      style={{
+                        width: Math.random() * 4 + 1 + "px",
+                        height: Math.random() * 4 + 1 + "px",
+                        left: `${Math.random() * 100}%`,
+                        top: `${Math.random() * 100}%`,
+                        opacity: Math.random() * 0.3,
                       }}
+                      animate={{
+                        y: [0, -100],
+                        opacity: [0, 0.5, 0],
+                      }}
+                      transition={{
+                        duration: Math.random() * 10 + 10,
+                        repeat: Infinity,
+                        ease: "linear",
+                        delay: Math.random() * 10,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Main Content */}
+                <div className="relative z-10 h-full flex flex-col items-center justify-center text-white">
+                  {/* 3D Device Frame with Perspective */}
+                  <motion.div 
+                    className="relative transform-gpu w-full max-w-md mx-auto"
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    style={{ perspective: "1000px" }}
+                  >
+                    {/* Device mockup */}
+                    <motion.div 
+                      className="bg-black rounded-3xl p-4 shadow-2xl overflow-hidden border-8 border-gray-900"
+                      initial={{ rotateX: 30 }}
+                      animate={{ rotateX: 20 }}
+                      transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
                     >
-                      {metric.value}
+                      {/* Screen */}
+                      <div className="bg-black rounded-2xl overflow-hidden relative">
+                        {/* Phone status bar */}
+                        <div className="bg-black text-white text-xs px-4 py-2 flex items-center justify-between">
+                          <div>9:41</div>
+                          <div className="flex items-center gap-1">
+                            <i className="fas fa-signal"></i>
+                            <i className="fas fa-wifi"></i>
+                            <i className="fas fa-battery-full"></i>
+                          </div>
+                        </div>
+                        
+                        {/* AI Analysis Process */}
+                        <div className="bg-gray-900 h-72 relative overflow-hidden">
+                          {/* Grid background */}
+                          <motion.div 
+                            className="absolute inset-0"
+                            style={{ 
+                              backgroundImage: "linear-gradient(to right, rgba(20, 160, 120, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(20, 160, 120, 0.1) 1px, transparent 1px)",
+                              backgroundSize: "20px 20px"
+                            }}
+                            animate={{
+                              backgroundPosition: ["0px 0px", "20px 20px"]
+                            }}
+                            transition={{
+                              duration: 5,
+                              ease: "linear",
+                              repeat: Infinity
+                            }}
+                          />
+                          
+                          {/* Center Food Image */}
+                          <motion.div 
+                            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 rounded-xl overflow-hidden border-2 border-emerald-400 shadow-lg"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.5, delay: 0.5 }}
+                          >
+                            <div 
+                              className="w-full h-full bg-cover bg-center" 
+                              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80')" }}
+                            />
+                            
+                            {/* Scanning effect */}
+                            <motion.div 
+                              className="absolute left-0 right-0 h-1 bg-emerald-400"
+                              initial={{ top: "0%" }}
+                              animate={{ top: "100%" }}
+                              transition={{ 
+                                duration: 1.5, 
+                                repeat: Infinity,
+                                repeatType: "loop",
+                                ease: "linear"
+                              }}
+                            />
+                          </motion.div>
+                          
+                          {/* Floating recognition tags */}
+                          {[
+                            { label: "Salad", delay: 1.2, x: -70, y: -30 },
+                            { label: "Avocado", delay: 1.5, x: 60, y: -40 },
+                            { label: "Tomato", delay: 1.8, x: -60, y: 50 },
+                            { label: "Feta", delay: 2.1, x: 75, y: 30 }
+                          ].map((item, index) => (
+                            <motion.div
+                              key={`tag-${index}`}
+                              className="absolute px-2 py-1 bg-emerald-900/70 backdrop-blur-sm text-emerald-100 rounded-lg text-xs border border-emerald-700/50 left-1/2 top-1/2"
+                              initial={{ opacity: 0, x: item.x, y: item.y, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.4, delay: item.delay }}
+                            >
+                              <div className="flex items-center">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse"></div>
+                                {item.label}
+                              </div>
+                            </motion.div>
+                          ))}
+                          
+                          {/* Connecting lines from center to tags */}
+                          <svg className="absolute inset-0 w-full h-full">
+                            {[
+                              { x1: "50%", y1: "50%", x2: "35%", y2: "40%", delay: 1.4 }, // Salad
+                              { x1: "50%", y1: "50%", x2: "65%", y2: "35%", delay: 1.7 }, // Avocado
+                              { x1: "50%", y1: "50%", x2: "35%", y2: "65%", delay: 2.0 }, // Tomato
+                              { x1: "50%", y1: "50%", x2: "68%", y2: "60%", delay: 2.3 }  // Feta
+                            ].map((line, index) => (
+                              <motion.line
+                                key={`line-${index}`}
+                                x1={line.x1}
+                                y1={line.y1}
+                                x2={line.x2}
+                                y2={line.y2}
+                                stroke="rgba(52, 211, 153, 0.5)"
+                                strokeWidth="1"
+                                strokeDasharray="4 2"
+                                initial={{ pathLength: 0, opacity: 0 }}
+                                animate={{ pathLength: 1, opacity: 0.6 }}
+                                transition={{ duration: 0.5, delay: line.delay }}
+                              />
+                            ))}
+                          </svg>
+                        </div>
+                        
+                        {/* Analysis Results Bar */}
+                        <div className="bg-black text-white p-4">
+                          <div className="flex items-center mb-3">
+                            <motion.div 
+                              className="w-2 h-2 bg-emerald-500 rounded-full mr-2"
+                              animate={{ scale: [1, 1.5, 1] }}
+                              transition={{ 
+                                duration: 2, 
+                                repeat: Infinity,
+                                repeatType: "loop"
+                              }}
+                            />
+                            <div className="text-sm font-semibold text-emerald-400">AI Analysis Complete</div>
+                          </div>
+                          
+                          {/* Progress bars */}
+                          <div className="space-y-2">
+                            {[
+                              { label: "Ingredient Detection", value: 98 },
+                              { label: "Recipe Generation", value: 100 }
+                            ].map((item, index) => (
+                              <div key={`progress-${index}`} className="space-y-1">
+                                <div className="flex justify-between text-xs opacity-80">
+                                  <div>{item.label}</div>
+                                  <div>{item.value}%</div>
+                                </div>
+                                <div className="h-1 bg-gray-800 rounded overflow-hidden">
+                                  <motion.div 
+                                    className="h-full bg-gradient-to-r from-emerald-500 to-green-400"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${item.value}%` }}
+                                    transition={{ duration: 1, delay: 2.5 + (index * 0.2) }}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
                     
-                    {/* Progress Bar Visualization */}
-                    <div className="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div 
-                        className={`h-full rounded-full bg-gradient-to-r ${index === 0 ? 'from-green-400 to-green-500' : index === 1 ? 'from-blue-400 to-blue-500' : 'from-amber-400 to-amber-500'}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: index === 0 ? '96%' : index === 1 ? '100%' : '98%' }}
-                        transition={{ delay: 1 + (index * 0.2), duration: 1, ease: "easeOut" }}
-                      />
-                    </div>
+                    {/* Reflection effect */}
+                    <div className="absolute -bottom-10 left-0 right-0 h-16 bg-gradient-to-b from-white/20 to-transparent blur-md rounded-full mx-auto" style={{ width: "80%" }}></div>
                   </motion.div>
-                ))}
+                  
+                  {/* Bottom title and metrics */}
+                  <div className="mt-8 text-center">
+                    <motion.h3 
+                      className="text-2xl font-bold mb-2"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    >
+                      Instant Recipe Recognition
+                    </motion.h3>
+                    
+                    <motion.p
+                      className="text-emerald-100/80 mb-6 max-w-md mx-auto"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.4 }}
+                    >
+                      Advanced AI instantly identifies ingredients and generates a detailed recipe tailored to your dish.
+                    </motion.p>
+                    
+                    {/* Key metrics */}
+                    <motion.div 
+                      className="flex justify-center gap-6 mt-4"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                    >
+                      {[
+                        { value: "96%", label: "Accuracy", icon: "fa-bullseye" },
+                        { value: "12s", label: "Average Time", icon: "fa-bolt" },
+                        { value: "5,280+", label: "Recipes", icon: "fa-book-open" }
+                      ].map((metric, index) => (
+                        <motion.div 
+                          key={`metric-${index}`}
+                          className="text-center"
+                          whileHover={{ y: -5, scale: 1.05 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <div className="flex flex-col items-center">
+                            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-2">
+                              <i className={`fas ${metric.icon} text-emerald-300`}></i>
+                            </div>
+                            <div className="text-xl font-bold">{metric.value}</div>
+                            <div className="text-xs text-emerald-100/70">{metric.label}</div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                    
+                    {/* CTA Button */}
+                    <motion.div
+                      className="mt-6"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.7 }}
+                    >
+                      <motion.button
+                        className="bg-white text-emerald-900 px-8 py-3 rounded-full font-semibold shadow-lg inline-flex items-center gap-2 hover:shadow-emerald-500/20 hover:shadow-xl transition-all duration-300"
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate('#upload-section')}
+                      >
+                        <i className="fas fa-camera"></i>
+                        <span>Try It Now</span>
+                        <motion.i 
+                          className="fas fa-chevron-right ml-1"
+                          animate={{ x: [0, 3, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        />
+                      </motion.button>
+                    </motion.div>
+                  </div>
+                </div>
               </div>
-              
-              {/* Floating decorative elements */}
-              <div className="absolute inset-0 -z-10 pointer-events-none">
-                {/* Animated dots in background */}
-                {[...Array(20)].map((_, i) => (
-                  <motion.div
-                    key={`dot-${i}`}
-                    className="absolute rounded-full bg-green-500/10 w-2 h-2"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                    }}
-                    animate={{
-                      opacity: [0.1, 0.5, 0.1],
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                      duration: 3 + Math.random() * 2,
-                      repeat: Infinity,
-                      delay: Math.random() * 2,
-                      ease: "easeInOut"
-                    }}
-                  />
-                ))}
-                
-                {/* SVG curved connection lines */}
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <motion.path
-                    d="M30,20 Q50,50 70,20"
-                    stroke="rgba(16, 185, 129, 0.1)"
-                    strokeWidth="0.5"
-                    fill="none"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.5, delay: 0.5 }}
-                  />
-                  <motion.path
-                    d="M30,50 Q50,20 70,50"
-                    stroke="rgba(59, 130, 246, 0.1)"
-                    strokeWidth="0.5"
-                    fill="none"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.5, delay: 0.7 }}
-                  />
-                  <motion.path
-                    d="M30,80 Q50,50 70,80"
-                    stroke="rgba(245, 158, 11, 0.1)"
-                    strokeWidth="0.5"
-                    fill="none"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.5, delay: 0.9 }}
-                  />
-                </svg>
-              </div>
-            </div>
-            
-            {/* Bottom CTA button */}
-            <div className="flex justify-center mt-10">
-              <motion.button
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-3 rounded-full font-medium shadow-lg flex items-center space-x-2 group"
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 20px 40px -10px rgba(16, 185, 129, 0.3)"
-                }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('#upload-section')}
-              >
-                <motion.span
-                  initial={{ x: 0 }}
-                  whileHover={{ x: 5 }}
-                  transition={{ type: "spring", stiffness: 500 }}
-                  className="inline-flex items-center"
-                >
-                  <i className="fas fa-camera mr-2"></i>
-                  Try It Now
-                  <motion.i 
-                    className="fas fa-long-arrow-alt-right ml-2 transition-all duration-300"
-                    animate={{ x: [0, 5, 0] }}
-                    transition={{ 
-                      duration: 1.5, 
-                      repeat: Infinity,
-                      repeatType: "reverse"
-                    }}
-                  />
-                </motion.span>
-              </motion.button>
             </div>
           </div>
         </div>

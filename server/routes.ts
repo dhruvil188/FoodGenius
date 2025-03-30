@@ -355,9 +355,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 beveragePairings: Array.isArray(recipe.beveragePairings) ? 
                   recipe.beveragePairings.map((pairing: any) => String(pairing || "")) : [],
                 ingredients: Array.isArray(recipe.ingredients) ? 
-                  recipe.ingredients.map((ing: any) => String(ing || "")) : [],
+                  recipe.ingredients.map((ing: any) => {
+                    // Handle objects that might be returned instead of strings
+                    if (ing === null || ing === undefined) return "";
+                    if (typeof ing === 'object') return JSON.stringify(ing);
+                    return String(ing);
+                  }) : [],
                 instructions: Array.isArray(recipe.instructions) ? 
-                  recipe.instructions.map((inst: any) => String(inst || "")) : [],
+                  recipe.instructions.map((inst: any) => {
+                    // Handle objects that might be returned instead of strings
+                    if (inst === null || inst === undefined) return "";
+                    if (typeof inst === 'object') return JSON.stringify(inst);
+                    return String(inst);
+                  }) : [],
                 tags: Array.isArray(recipe.tags) ? 
                   recipe.tags.map((tag: any) => String(tag || "")) : [],
                 nutritionInfo: recipe.nutritionInfo ? {

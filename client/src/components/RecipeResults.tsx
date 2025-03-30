@@ -303,21 +303,36 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         </div>
                         <span>
                           {/* Parse JSON if ingredient looks like a stringified object */}
-                          {ingredient.startsWith('{') && ingredient.endsWith('}') ? 
-                            (() => {
+                          {(() => {
+                            // Check if it starts with { character (for potentially stringified JSON objects)
+                            if (ingredient.startsWith('{') && ingredient.endsWith('}')) {
                               try {
                                 const parsedIngredient = JSON.parse(ingredient);
-                                // Return the most relevant property or stringify the object nicely
+                                
+                                // Handle ingredient objects with specific fields (common format from Gemini API)
+                                if (parsedIngredient.item && parsedIngredient.quantity) {
+                                  let formattedIngredient = `${parsedIngredient.quantity} ${parsedIngredient.item}`;
+                                  
+                                  // Add preparation note if available
+                                  if (parsedIngredient.prep && parsedIngredient.prep !== "null") {
+                                    formattedIngredient += `, ${parsedIngredient.prep}`;
+                                  }
+                                  
+                                  return formattedIngredient;
+                                }
+                                
+                                // For other formats, try to extract the most meaningful data
                                 return parsedIngredient.name || parsedIngredient.text || 
                                        parsedIngredient.description || parsedIngredient.ingredient || 
-                                       JSON.stringify(parsedIngredient, null, 2);
+                                       JSON.stringify(parsedIngredient);
                               } catch (e) {
                                 // If parsing fails, just return the original string
                                 return ingredient;
                               }
-                            })() 
-                            : ingredient
-                          }
+                            } else {
+                              return ingredient;
+                            }
+                          })()}
                         </span>
                       </li>
                     ))}
@@ -355,21 +370,47 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         <div>
                           <p className={completedSteps[selectedRecipeIndex]?.has(i) ? 'line-through opacity-70' : ''}>
                             {/* Parse JSON if step looks like a stringified object */}
-                            {step.startsWith('{') && step.endsWith('}') ? 
-                              (() => {
+                            {(() => {
+                              if (step.startsWith('{') && step.endsWith('}')) {
                                 try {
                                   const parsedStep = JSON.parse(step);
-                                  // Return the most relevant property or stringify the object nicely
+                                  
+                                  // For instruction objects with number and instruction fields
+                                  if (parsedStep.number && parsedStep.instruction) {
+                                    return parsedStep.instruction;
+                                  }
+                                  
+                                  // For step objects with specific fields
+                                  if (parsedStep.action && parsedStep.ingredients) {
+                                    let formattedStep = parsedStep.action;
+                                    
+                                    // Include ingredients if available
+                                    if (Array.isArray(parsedStep.ingredients) && parsedStep.ingredients.length > 0) {
+                                      formattedStep += ` ${parsedStep.ingredients.join(', ')}`;
+                                    } else if (typeof parsedStep.ingredients === 'string') {
+                                      formattedStep += ` ${parsedStep.ingredients}`;
+                                    }
+                                    
+                                    // Add any additional details
+                                    if (parsedStep.duration) {
+                                      formattedStep += ` for ${parsedStep.duration}`;
+                                    }
+                                    
+                                    return formattedStep;
+                                  }
+                                  
+                                  // For other formats, try to extract the most meaningful data
                                   return parsedStep.text || parsedStep.description || 
                                          parsedStep.instruction || parsedStep.step || 
-                                         JSON.stringify(parsedStep, null, 2);
+                                         JSON.stringify(parsedStep);
                                 } catch (e) {
                                   // If parsing fails, just return the original string
                                   return step;
                                 }
-                              })() 
-                              : step
-                            }
+                              } else {
+                                return step;
+                              }
+                            })()}
                           </p>
                         </div>
                       </motion.li>

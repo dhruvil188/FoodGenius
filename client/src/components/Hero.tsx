@@ -566,9 +566,114 @@ export default function Hero() {
           </motion.div>
         </div>
         
-        {/* Interactive visualization area */}
+        {/* Enhanced interactive visualization area with immersive food elements */}
         <div className="relative mb-24">
-          {/* Food icons positioned around the center */}
+          {/* Advanced animated background pattern */}
+          <div className="absolute inset-x-0 -top-10 -bottom-10 overflow-hidden">
+            <motion.div 
+              className="absolute inset-0 opacity-10"
+              style={{ 
+                backgroundImage: `radial-gradient(circle, rgba(34, 197, 94, 0.2) 1px, transparent 1px)`,
+                backgroundSize: '30px 30px',
+              }}
+              animate={{
+                backgroundPosition: ['0px 0px', '30px 30px']
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+
+            {/* Animated food ingredients floating in the background */}
+            {[
+              { icon: '🥑', size: 'w-8 h-8', top: '15%', left: '10%', duration: 25 },
+              { icon: '🍅', size: 'w-7 h-7', top: '60%', left: '8%', duration: 32 },
+              { icon: '🧄', size: 'w-6 h-6', top: '80%', left: '15%', duration: 28 },
+              { icon: '🍋', size: 'w-8 h-8', top: '25%', left: '85%', duration: 30 },
+              { icon: '🧂', size: 'w-5 h-5', top: '65%', left: '88%', duration: 26 },
+              { icon: '🌿', size: 'w-8 h-8', top: '40%', left: '92%', duration: 34 },
+              { icon: '🧅', size: 'w-6 h-6', top: '75%', left: '82%', duration: 31 },
+              { icon: '🥕', size: 'w-7 h-7', top: '10%', left: '75%', duration: 29 }
+            ].map((item, index) => (
+              <motion.div 
+                key={`ingredient-${index}`}
+                className={`absolute select-none ${item.size} flex items-center justify-center opacity-40 filter blur-[0.5px]`}
+                style={{ 
+                  top: item.top, 
+                  left: item.left,
+                }}
+                animate={{
+                  y: [0, -15, 0, 10, 0],
+                  x: [0, 8, -5, 5, 0],
+                  rotate: [0, 5, -5, 3, 0],
+                  scale: [1, 1.05, 0.95, 1.02, 1],
+                }}
+                transition={{
+                  duration: item.duration,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  ease: "easeInOut",
+                }}
+              >
+                <span className="text-2xl">{item.icon}</span>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Animated cooking process steps on the left side */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 hidden lg:block">
+            {[
+              { step: 1, color: "from-green-400 to-emerald-500", icon: "fa-camera", label: "Snap" },
+              { step: 2, color: "from-cyan-400 to-blue-500", icon: "fa-bolt", label: "Process" },
+              { step: 3, color: "from-amber-400 to-orange-500", icon: "fa-utensils", label: "Cook" }
+            ].map((item, index) => (
+              <motion.div
+                key={`process-${index}`}
+                className="mb-10 flex items-center relative"
+                initial={{ x: -50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.5 + (index * 0.2), duration: 0.6, type: "spring" }}
+              >
+                <motion.div 
+                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg text-white mr-4`}
+                  whileHover={{ 
+                    scale: 1.1,
+                    boxShadow: "0 0 15px rgba(34, 197, 94, 0.5)"
+                  }}
+                  animate={{
+                    boxShadow: [
+                      "0 0 0px rgba(34, 197, 94, 0)",
+                      "0 0 15px rgba(34, 197, 94, 0.5)",
+                      "0 0 0px rgba(34, 197, 94, 0)"
+                    ]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    delay: index * 1
+                  }}
+                >
+                  <i className={`fas ${item.icon}`}></i>
+                </motion.div>
+                <div>
+                  <div className="text-green-600 font-medium">{item.label}</div>
+                  <div className="text-xs text-gray-500">Step {item.step}</div>
+                </div>
+                {index < 2 && (
+                  <motion.div 
+                    className="absolute -bottom-7 left-6 h-5 w-0.5 bg-gray-200"
+                    initial={{ height: 0 }}
+                    animate={{ height: 20 }}
+                    transition={{ delay: 0.7 + (index * 0.2), duration: 0.4 }}
+                  />
+                )}
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Food icons positioned around the scanner */}
           {foodIcons.map((icon, index) => (
             <FoodIcon
               key={index}
@@ -585,10 +690,89 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-20"
+            className="mt-16 relative z-10"
           >
             <ScannerVisualization />
           </motion.div>
+
+          {/* Animated measurement lines */}
+          <div className="absolute inset-0 pointer-events-none">
+            <motion.div 
+              className="absolute top-1/2 left-20 w-16 h-0.5 bg-green-200"
+              initial={{ width: 0 }}
+              animate={{ width: 64 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+            />
+            <motion.div 
+              className="absolute top-1/2 right-20 w-16 h-0.5 bg-green-200"
+              initial={{ width: 0 }}
+              animate={{ width: 64 }}
+              transition={{ delay: 1.2, duration: 0.5 }}
+            />
+          </div>
+
+          {/* Animated cooking metrics on the right side */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block">
+            {[
+              { label: "Recognition Accuracy", value: "96%", icon: "fa-bullseye", color: "text-green-500" },
+              { label: "Average Recipe Time", value: "12s", icon: "fa-bolt", color: "text-amber-500" },
+              { label: "Ingredients Detected", value: "98%", icon: "fa-check-circle", color: "text-blue-500" }
+            ].map((item, index) => (
+              <motion.div
+                key={`metric-${index}`}
+                className="mb-8 text-right"
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.7 + (index * 0.2), duration: 0.6, type: "spring" }}
+              >
+                <div className="flex items-center justify-end">
+                  <div className="mr-3">
+                    <div className="text-gray-700 font-medium">{item.label}</div>
+                    <motion.div 
+                      className={`text-xl font-bold ${item.color}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.5 + (index * 0.3), duration: 0.8 }}
+                    >
+                      {item.value}
+                    </motion.div>
+                  </div>
+                  <div className={`w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center ${item.color}`}>
+                    <i className={`fas ${item.icon}`}></i>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Interactive animated benefits */}
+          <div className="flex justify-center mt-10 gap-8">
+            {[
+              { icon: "fa-clock", label: "Fast Analysis", color: "from-green-500 to-emerald-400" },
+              { icon: "fa-bullseye", label: "Precise Results", color: "from-blue-500 to-cyan-400" },
+              { icon: "fa-utensils", label: "Ready to Cook", color: "from-amber-500 to-orange-400" }
+            ].map((benefit, index) => (
+              <motion.div
+                key={`benefit-${index}`}
+                className="text-center"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 1.2 + (index * 0.2), duration: 0.5 }}
+                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              >
+                <motion.div 
+                  className={`w-12 h-12 mx-auto rounded-full bg-gradient-to-r ${benefit.color} flex items-center justify-center text-white shadow-md mb-2`}
+                  whileHover={{ 
+                    scale: 1.1,
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                  }}
+                >
+                  <i className={`fas ${benefit.icon}`}></i>
+                </motion.div>
+                <div className="text-sm font-medium text-gray-700">{benefit.label}</div>
+              </motion.div>
+            ))}
+          </div>
         </div>
         
         {/* Stats section */}

@@ -794,15 +794,34 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                             <i className="fas fa-flask"></i>
                           </span>
                           <div>
-                            <h5 className="text-lg font-medium text-blue-800 mb-2">{selectedRecipe.cookingScience.principle}</h5>
-                            <p className="text-slate-700 mb-3">{selectedRecipe.cookingScience.explanation}</p>
+                            <h5 className="text-lg font-medium text-blue-800 mb-2">Key Reactions</h5>
+                            {selectedRecipe.cookingScience.keyReactions && selectedRecipe.cookingScience.keyReactions.length > 0 && (
+                              <div className="mb-4">
+                                <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
+                                  {selectedRecipe.cookingScience.keyReactions.map((reaction, index) => (
+                                    <li key={index}>{reaction}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                             
-                            {selectedRecipe.cookingScience.tips && selectedRecipe.cookingScience.tips.length > 0 && (
+                            {selectedRecipe.cookingScience.techniquePurpose && selectedRecipe.cookingScience.techniquePurpose.length > 0 && (
+                              <div className="mb-4">
+                                <h6 className="text-sm font-medium mb-2">Technique Purpose:</h6>
+                                <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
+                                  {selectedRecipe.cookingScience.techniquePurpose.map((purpose, index) => (
+                                    <li key={index}>{purpose}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {selectedRecipe.cookingScience.safetyTips && selectedRecipe.cookingScience.safetyTips.length > 0 && (
                               <div className="mt-4 bg-white p-3 rounded-lg">
-                                <h6 className="text-sm font-medium mb-2">Application Tips:</h6>
+                                <h6 className="text-sm font-medium mb-2">Safety Tips:</h6>
                                 <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
-                                  {selectedRecipe.cookingScience.tips.map((tip, tipIndex) => (
-                                    <li key={tipIndex}>{tip}</li>
+                                  {selectedRecipe.cookingScience.safetyTips.map((tip, index) => (
+                                    <li key={index}>{tip}</li>
                                   ))}
                                 </ul>
                               </div>
@@ -1020,10 +1039,10 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             
             {/* Tab 5: YouTube Videos */}
             <TabsContent value="videos">
-              {selectedRecipe.youtubeVideos && selectedRecipe.youtubeVideos.length > 0 ? (
+              {result.youtubeVideos && result.youtubeVideos.length > 0 ? (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                    {selectedRecipe.youtubeVideos.map((video, i) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {result.youtubeVideos.map((video, i) => (
                       <Card key={i} className="overflow-hidden">
                         <div className="aspect-video bg-slate-100 relative overflow-hidden">
                           <a 

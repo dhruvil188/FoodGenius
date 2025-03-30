@@ -18,13 +18,13 @@ export default function Header() {
   return (
     <motion.header 
       className={`fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-transparent'
+        isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-white/80 backdrop-blur-sm border-b border-slate-100'
       }`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="container max-w-7xl mx-auto flex items-center justify-between">
         <motion.div 
           onClick={() => navigate('/')}
           className="cursor-pointer"
@@ -34,24 +34,23 @@ export default function Header() {
           <Logo size={isMobile ? 'small' : 'medium'} />
         </motion.div>
         
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-3">
           <Button 
             variant="outline"
-            size="sm"
-            className="hidden md:flex items-center gap-2 font-medium"
+            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
             onClick={() => navigate('/history')}
           >
-            <i className="fas fa-history"></i>
-            <span>View History</span>
+            <i className="fas fa-history mr-2"></i>
+            View History
           </Button>
           
           <Button 
-            size="sm"
-            className="flex items-center gap-2 font-medium bg-primary text-white hover:bg-primary/90"
+            className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
             onClick={() => navigate('/')}
           >
-            <i className="fas fa-camera"></i>
+            <i className="fas fa-camera mr-2"></i>
             <span className="hidden md:inline">Analyze Dish</span>
+            <span className="inline md:hidden">Analyze</span>
           </Button>
         </div>
       </div>

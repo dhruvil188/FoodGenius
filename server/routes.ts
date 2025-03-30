@@ -44,44 +44,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate content using Gemini API
       const prompt = `
-      Analyze this food image and provide:
-      1. The exact name of the dish
-      2. A brief description of the dish
-      3. Tags/categories (cuisine type, diet type, meal type)
-      4. 3 recipes for how to make this dish. For each recipe, include:
-         - Title
-         - Brief description
-         - Preparation time
-         - Cooking time
-         - Total time
-         - Servings
-         - Difficulty level
-         - Tags for dietary restrictions
-         - Ingredients list (detailed with measurements)
-         - Step-by-step instructions (be very specific and detailed)
-         - Nutritional information (calories, protein, carbs, fats, fiber, sugar)
-         - Healthy alternatives for ingredients
-         - Dietary notes (if high in something or good for certain diets)
-         - Recipe variations (spicy, buttery & rich, and non-spicy versions with their adjustments)
-         - Suggested side dishes that complement the main dish (name, brief description, preparation time)
+      You are a professional culinary consultant and food expert specializing in detailed recipe analysis.
+      
+      Analyze this food image in extreme detail and provide:
+      
+      1. The exact name of the dish with any regional variations or authentic naming
+      2. A comprehensive yet concise description of the dish including cultural context, origin, and traditional serving occasions
+      3. Detailed tags/categories (cuisine type, regional cuisine, diet type, meal type, cooking method, flavor profile, texture)
+      
+      4. 3 different recipes for how to make this dish - an authentic traditional version, a quick weeknight version, and a gourmet elevated version. For each recipe, include:
+         - Creative and descriptive title that captures the recipe's unique aspects
+         - Detailed description highlighting what makes this version special
+         - Precise preparation time, cooking time, and total time
+         - Exact servings with portion size information
+         - Specific difficulty level with brief explanation of what makes it that level
+         - Comprehensive dietary tags including allergies (gluten-free, dairy-free, nut-free, etc.)
+         - Complete ingredients list with precise measurements (both metric and imperial), prep notes for each ingredient, and quality indicators
+         - Step-by-step instructions with detailed professional chef techniques, visual cues for doneness, and time estimates for each step
+         - Complete nutritional profile (calories, protein, carbs, fats, fiber, sugar, sodium, vitamins)
+         - Healthy alternatives for key ingredients with specific substitution ratios and how they affect the final dish
+         - Detailed dietary notes (if high in particular nutrients, good for specific diets or health conditions)
+         - Recipe variations (spicy, buttery & rich, and non-spicy versions with precise adjustments and flavor profiles)
+         - Expert chef tips and common mistakes to avoid
+         - Storage instructions and reheating methods
+         - Wine or beverage pairing suggestions
+         - Complementary side dishes (name, description, preparation time, why they pair well)
       
       Format your response as a JSON object with the following structure:
       {
-        "foodName": "Name of the dish",
-        "description": "Brief description",
-        "tags": ["tag1", "tag2", "tag3"],
+        "foodName": "Complete authentic name of the dish",
+        "description": "Comprehensive description with cultural context",
+        "tags": ["cuisine", "regional", "diet type", "meal type", "cooking method", "flavor profile", "texture"],
         "recipes": [
           {
-            "title": "Recipe title",
-            "description": "Recipe description",
-            "prepTime": "Prep time",
-            "cookTime": "Cook time",
+            "title": "Descriptive recipe title",
+            "description": "Detailed recipe description with what makes it unique",
+            "prepTime": "Precise prep time",
+            "cookTime": "Precise cook time",
             "totalTime": "Total time", 
             "servings": number,
-            "difficulty": "Difficulty level",
-            "tags": ["tag1", "tag2"],
-            "ingredients": ["ingredient1", "ingredient2"],
-            "instructions": ["step1", "step2"],
+            "servingSize": "Description of portion size",
+            "difficulty": "Difficulty level with brief explanation",
+            "tags": ["dietary restriction", "allergy info"],
+            "ingredients": ["Detailed ingredient with measurement, prep note, and quality indicators"],
+            "instructions": ["Detailed step with technique, visual cues, and time"],
+            "chefTips": ["Professional cooking tips"],
+            "commonMistakes": ["Mistakes to avoid"],
+            "storageInstructions": "How to store and for how long",
+            "reheatingMethods": "Best ways to reheat",
+            "beveragePairings": ["Complementary drink suggestions"],
             "nutritionInfo": {
               "calories": number,
               "protein": "amount in grams",
@@ -89,38 +100,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
               "fats": "amount in grams",
               "fiber": "amount in grams",
               "sugar": "amount in grams",
-              "healthyAlternatives": ["alternative1", "alternative2"],
-              "dietaryNotes": ["note1", "note2"]
+              "sodium": "amount in mg",
+              "vitamins": ["key vitamins and minerals present"],
+              "healthyAlternatives": ["specific alternative with substitution ratio"],
+              "dietaryNotes": ["detailed note about nutritional benefits"]
             },
             "variations": [
               {
                 "type": "spicy",
-                "description": "Spicier version of the recipe",
-                "adjustments": ["adjustment1", "adjustment2"]
+                "description": "Detailed description of spicy version",
+                "adjustments": ["precise ingredient adjustments with measurements"]
               },
               {
                 "type": "buttery",
-                "description": "Rich and buttery version",
-                "adjustments": ["adjustment1", "adjustment2"]
+                "description": "Detailed description of rich and buttery version",
+                "adjustments": ["precise ingredient adjustments with measurements"]
               },
               {
                 "type": "non-spicy",
-                "description": "Mild version of the recipe",
-                "adjustments": ["adjustment1", "adjustment2"]
+                "description": "Detailed description of mild version",
+                "adjustments": ["precise ingredient adjustments with measurements"]
               }
             ],
             "sideDishSuggestions": [
               {
                 "name": "Side dish name",
-                "description": "Brief description",
-                "preparationTime": "Preparation time"
+                "description": "Detailed description",
+                "preparationTime": "Precise preparation time",
+                "pairingReason": "Why this complements the main dish"
               }
             ]
           }
         ]
       }
 
-      Ensure the JSON is valid with no trailing commas.
+      Ensure the JSON is valid with no trailing commas. Make your response extremely detailed, professional, and useful for both amateur and professional cooks, but still ensure the JSON is properly formatted and parseable.
       `;
 
       try {

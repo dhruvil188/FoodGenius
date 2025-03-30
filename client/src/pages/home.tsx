@@ -164,6 +164,53 @@ const featuredFoods = [
         }
       ]
     }
+  },
+  {
+    name: "Pasta Carbonara",
+    image: "https://images.pexels.com/photos/5949894/pexels-photo-5949894.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    tags: ["Italian", "Dinner", "Creamy"],
+    recipe: {
+      foodName: "Pasta Carbonara",
+      description: "Pasta Carbonara is a classic Italian pasta dish from Rome made with eggs, hard cheese, cured pork, and black pepper. The dish took its modern form and name in the middle of the 20th century, after World War II.",
+      tags: ["Italian", "Pasta", "Dinner", "Creamy", "Quick", "Egg-based"],
+      recipes: [
+        {
+          title: "Classic Pasta Carbonara",
+          description: "A traditional Roman pasta dish that combines eggs, Pecorino Romano cheese, pancetta and black pepper for a simple yet delicious meal.",
+          prepTime: "10 minutes",
+          cookTime: "15 minutes",
+          totalTime: "25 minutes",
+          servings: 4,
+          ingredients: [
+            "350g (12oz) spaghetti or bucatini",
+            "150g (5oz) pancetta or guanciale, diced",
+            "4 large egg yolks",
+            "1 whole egg",
+            "75g (2.5oz) Pecorino Romano cheese, finely grated",
+            "75g (2.5oz) Parmesan cheese, finely grated", 
+            "Black pepper, freshly ground",
+            "Salt for pasta water"
+          ],
+          instructions: [
+            "Bring a large pot of salted water to boil and cook pasta until al dente.",
+            "While pasta cooks, sauté the pancetta in a large pan until crispy.",
+            "In a bowl, whisk together egg yolks, whole egg, and grated cheeses.",
+            "Reserve 1 cup of pasta water, then drain pasta.",
+            "Working quickly, add hot pasta to the pan with pancetta (heat off).",
+            "Add a splash of pasta water, then pour in egg mixture, tossing rapidly.",
+            "Add more pasta water as needed to create a silky sauce.",
+            "Season generously with freshly ground black pepper.",
+            "Serve immediately with extra grated cheese on top."
+          ],
+          nutritionInfo: {
+            calories: 650,
+            protein: "32g",
+            carbs: "65g",
+            fats: "28g"
+          }
+        }
+      ]
+    }
   }
 ];
 

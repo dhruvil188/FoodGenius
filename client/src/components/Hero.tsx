@@ -76,31 +76,31 @@ export default function Hero() {
             transition={{ duration: 0.5 }}
             className="max-w-3xl mx-auto mb-12"
           >
-            <span className="inline-block px-3 py-1 text-sm font-medium text-primary bg-primary/10 rounded-full mb-4">
-              AI-Powered Food Recognition
+            <span className="inline-block px-4 py-1.5 text-sm font-medium text-primary bg-primary/10 rounded-full mb-5 tracking-wide">
+              AI-POWERED FOOD RECOGNITION
             </span>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
               From Food Photo to Delicious Recipe in Seconds
             </h1>
-            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-              Dish Detective analyzes your food photos using AI to instantly generate detailed recipes, nutritional information, and cooking instructions.
+            <p className="text-xl leading-relaxed text-slate-600 mb-10 max-w-2xl mx-auto">
+              Dish Detective analyzes your food photos using AI to instantly generate detailed recipes, nutritional information, and cooking instructions tailored just for you.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-white rounded-full px-8"
+                className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-10 shadow-md hover:shadow-lg transition-all py-6"
                 onClick={() => navigate('#upload-section')}
               >
-                <i className="fas fa-camera mr-2"></i> 
+                <i className="fas fa-camera mr-2.5"></i> 
                 Try it Now
               </Button>
               <Button 
                 size="lg"
                 variant="outline"
-                className="rounded-full px-8"
+                className="rounded-full px-10 border-2 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all py-6"
               >
-                <i className="fas fa-play-circle mr-2"></i> 
+                <i className="fas fa-play-circle mr-2.5"></i> 
                 Watch Demo
               </Button>
             </div>
@@ -116,25 +116,26 @@ export default function Hero() {
               <motion.div 
                 key={index}
                 variants={item}
-                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-100"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-4 mx-auto">
+                <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-xl flex items-center justify-center text-primary mb-5 mx-auto">
                   <i className={`fas ${feature.icon} text-xl`}></i>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-slate-600 text-sm">{feature.description}</p>
+                <h3 className="text-lg font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">{feature.title}</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </motion.section>
       
-      <div className="relative z-10">
+      <div className="relative z-10 my-8">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
           <div className="w-full border-t border-slate-200"></div>
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-slate-50 px-6 text-sm text-slate-500">
+          <span className="bg-slate-50 px-8 py-2 text-sm font-medium text-slate-500 rounded-full border border-slate-100 shadow-sm">
+            <i className="fas fa-arrow-down mr-2 text-primary"></i>
             Start by uploading a food image
           </span>
         </div>

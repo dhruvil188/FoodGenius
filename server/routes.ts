@@ -78,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       2. A comprehensive yet concise description of the dish including cultural context, origin, and traditional serving occasions
       3. Detailed tags/categories (cuisine type, regional cuisine, diet type, meal type, cooking method, flavor profile, texture)
       
-      4. 3 different recipes for how to make this dish - an authentic traditional version, a quick weeknight version, and a gourmet elevated version. For each recipe, include:
+      4. A single comprehensive, authentic recipe for how to make this dish. Include:
          - Creative and descriptive title that captures the recipe's unique aspects
          - Detailed description highlighting what makes this version special
          - Precise preparation time, cooking time, and total time

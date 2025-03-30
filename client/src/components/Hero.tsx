@@ -745,12 +745,12 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Interactive animated benefits */}
+          {/* Interactive animated benefits with enhanced visuals */}
           <div className="flex justify-center mt-10 gap-8">
             {[
-              { icon: "fa-clock", label: "Fast Analysis", color: "from-green-500 to-emerald-400" },
-              { icon: "fa-bullseye", label: "Precise Results", color: "from-blue-500 to-cyan-400" },
-              { icon: "fa-utensils", label: "Ready to Cook", color: "from-amber-500 to-orange-400" }
+              { icon: "fa-clock", label: "Fast Analysis", color: "from-green-500 to-emerald-400", description: "Get results in seconds" },
+              { icon: "fa-bullseye", label: "Precise Results", color: "from-blue-500 to-cyan-400", description: "AI-powered accuracy" },
+              { icon: "fa-utensils", label: "Ready to Cook", color: "from-amber-500 to-orange-400", description: "Step-by-step guidance" }
             ].map((benefit, index) => (
               <motion.div
                 key={`benefit-${index}`}
@@ -761,49 +761,111 @@ export default function Hero() {
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
                 <motion.div 
-                  className={`w-12 h-12 mx-auto rounded-full bg-gradient-to-r ${benefit.color} flex items-center justify-center text-white shadow-md mb-2`}
+                  className={`w-14 h-14 mx-auto rounded-full bg-gradient-to-r ${benefit.color} flex items-center justify-center text-white shadow-md mb-2 relative`}
                   whileHover={{ 
                     scale: 1.1,
                     boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                   }}
                 >
-                  <i className={`fas ${benefit.icon}`}></i>
+                  {/* Animated ripple effect */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    animate={{
+                      boxShadow: [
+                        '0 0 0 0px rgba(255, 255, 255, 0.4)',
+                        '0 0 0 10px rgba(255, 255, 255, 0)'
+                      ],
+                      scale: [1, 1.1]
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1.5,
+                      delay: index * 0.3
+                    }}
+                  />
+                  <i className={`fas ${benefit.icon} text-lg`}></i>
                 </motion.div>
                 <div className="text-sm font-medium text-gray-700">{benefit.label}</div>
+                <div className="text-xs text-gray-500 mt-1">{benefit.description}</div>
               </motion.div>
             ))}
           </div>
-        </div>
-        
-        {/* Stats section */}
-        <div className="mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {stats.map((stat, index) => (
+          
+          {/* Interactive demo visualization */}
+          <div className="mt-16 mb-10 relative">
+            <div className="max-w-3xl mx-auto">
               <motion.div 
-                key={index}
-                className="bg-white rounded-xl p-6 shadow-md border border-gray-100"
+                className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 shadow-sm border border-green-100"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index, duration: 0.5 }}
+                transition={{ delay: 1.5, duration: 0.6 }}
               >
-                <div className="text-center">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800">See How It Works</h3>
+                  <p className="text-sm text-gray-600">Watch how Dish Detective transforms food images into detailed recipes</p>
+                </div>
+                
+                <motion.div 
+                  className="relative h-16 rounded-lg bg-white shadow-sm overflow-hidden border border-gray-200"
+                  whileHover={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)" }}
+                >
+                  {/* Process visualization */}
+                  <div className="absolute inset-y-0 left-0 w-4/12 bg-gradient-to-r from-green-100 to-green-50 flex items-center justify-center border-r border-green-100">
+                    <div className="text-green-600 text-sm font-medium flex items-center">
+                      <i className="fas fa-camera mr-2"></i>
+                      Upload
+                    </div>
+                  </div>
+                  
                   <motion.div 
-                    className="text-4xl font-bold text-gray-900 mb-2"
-                    initial={{ scale: 0.8 }}
-                    whileInView={{ scale: 1 }}
-                    transition={{ 
-                      type: "spring",
-                      duration: 0.8, 
-                      delay: 0.5 + (0.1 * index) 
-                    }}
+                    className="absolute inset-y-0 left-4/12 w-4/12 bg-gradient-to-r from-blue-100 to-blue-50 flex items-center justify-center border-r border-blue-100"
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 2.0, duration: 0.4 }}
                   >
-                    <CountUp end={stat.value} duration={2} separator="," />
-                    <span className="text-green-600">{stat.suffix}</span>
+                    <div className="text-blue-600 text-sm font-medium flex items-center">
+                      <i className="fas fa-microchip mr-2"></i>
+                      Analyze
+                    </div>
                   </motion.div>
-                  <div className="text-gray-600">{stat.label}</div>
+                  
+                  <motion.div 
+                    className="absolute inset-y-0 left-8/12 w-4/12 bg-gradient-to-r from-amber-100 to-amber-50 flex items-center justify-center"
+                    initial={{ x: -30, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 2.2, duration: 0.4 }}
+                  >
+                    <div className="text-amber-600 text-sm font-medium flex items-center">
+                      <i className="fas fa-book-open mr-2"></i>
+                      Recipe
+                    </div>
+                  </motion.div>
+                  
+                  {/* Animated progress indicator */}
+                  <motion.div 
+                    className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-amber-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: "100%" }}
+                    transition={{ delay: 2.5, duration: 1.5 }}
+                  />
+                </motion.div>
+                
+                <div className="flex justify-center mt-6">
+                  <motion.button
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-5 py-2 rounded-full text-sm font-medium shadow-md flex items-center space-x-2"
+                    whileHover={{ scale: 1.03, boxShadow: "0 6px 20px rgba(0, 0, 0, 0.12)" }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 2.8, duration: 0.4 }}
+                    onClick={() => navigate('#upload-section')}
+                  >
+                    <i className="fas fa-arrow-circle-right mr-1"></i>
+                    <span>Try It Now</span>
+                  </motion.button>
                 </div>
               </motion.div>
-            ))}
+            </div>
           </div>
         </div>
         

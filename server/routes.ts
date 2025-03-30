@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import {
   analyzeImageRequestSchema,
   analyzeImageResponseSchema,
@@ -21,7 +21,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Define the model to use for image analysis
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-pro",
+    generationConfig: {
+      temperature: 0.4,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,
+    },
+    safetySettings: [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+    ],
+  });
 
   app.post("/api/analyze-image", async (req: Request, res: Response) => {
     try {
@@ -138,9 +164,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
 
       try {
-        // Generate content using the Gemini API
-        const result = await model.generateContent([prompt, ...imageParts]);
-        const response = await result.response;
+        // Start a chat session and send message with the food image
+        const chatSession = model.startChat({
+          history: [],
+        });
+        
+        const result = await chatSession.sendMessage([prompt, ...imageParts]);
+        const response = result.response;
         const text = response.text();
 
         // Extract the JSON from the response - handle multiple possible formats

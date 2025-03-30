@@ -17,7 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize the Google Generative AI API with the user-provided key
   const genAI = new GoogleGenerativeAI(
-    process.env.GEMINI_API_KEY || "AIzaSyBPdE26_ZZpOg5Ru91QJ9Ihp1TodQKQsZo"
+    process.env.GEMINI_API_KEY || "AIzaSyCWVuSm3Dq_htbl2FgoQ_r5Fsw5N-mDTvc"
   );
 
   // Define the model to use for image analysis

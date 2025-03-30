@@ -309,7 +309,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Validate the response against our schema
           try {
-            const validatedResponse = analyzeImageResponseSchema.parse(normalizedData);
+            // Log the structure of the data before validation to debug
+            console.log("Normalized data structure (for debugging):", 
+              JSON.stringify({
+                foodName: typeof normalizedData.foodName,
+                description: typeof normalizedData.description,
+                tags: Array.isArray(normalizedData.tags) ? "array" : typeof normalizedData.tags,
+                recipes: Array.isArray(normalizedData.recipes) ? 
+                  normalizedData.recipes.map((r: any) => ({
+                    title: typeof r.title,
+                    description: typeof r.description,
+                    nutritionInfo: r.nutritionInfo ? {
+                      calories: typeof r.nutritionInfo.calories,
+                      protein: typeof r.nutritionInfo.protein,
+                      carbs: typeof r.nutritionInfo.carbs,
+                      fats: typeof r.nutritionInfo.fats,
+                    } : "missing"
+                  })) : "not-array"
+              }, null, 2)
+            );
+            
+            // Special handling for nested objects within the response
+            const finalData = {
+              // Convert top-level fields to strings
+              foodName: String(normalizedData.foodName || ""),
+              description: String(normalizedData.description || ""),
+              tags: Array.isArray(normalizedData.tags) ? 
+                normalizedData.tags.map((tag: any) => String(tag || "")) : [],
+              recipes: normalizedData.recipes?.map((recipe: any) => ({
+                ...recipe,
+                // Convert all property values to strings if they're not already
+                title: String(recipe.title || ""),
+                description: String(recipe.description || ""),
+                prepTime: String(recipe.prepTime || ""),
+                cookTime: String(recipe.cookTime || ""),
+                totalTime: String(recipe.totalTime || ""),
+                servingSize: String(recipe.servingSize || ""),
+                difficulty: String(recipe.difficulty || ""),
+                storageInstructions: String(recipe.storageInstructions || ""),
+                reheatingMethods: String(recipe.reheatingMethods || ""),
+                chefTips: Array.isArray(recipe.chefTips) ? 
+                  recipe.chefTips.map((tip: any) => String(tip || "")) : [],
+                commonMistakes: Array.isArray(recipe.commonMistakes) ? 
+                  recipe.commonMistakes.map((mistake: any) => String(mistake || "")) : [],
+                beveragePairings: Array.isArray(recipe.beveragePairings) ? 
+                  recipe.beveragePairings.map((pairing: any) => String(pairing || "")) : [],
+                ingredients: Array.isArray(recipe.ingredients) ? 
+                  recipe.ingredients.map((ing: any) => String(ing || "")) : [],
+                instructions: Array.isArray(recipe.instructions) ? 
+                  recipe.instructions.map((inst: any) => String(inst || "")) : [],
+                tags: Array.isArray(recipe.tags) ? 
+                  recipe.tags.map((tag: any) => String(tag || "")) : [],
+                nutritionInfo: recipe.nutritionInfo ? {
+                  ...recipe.nutritionInfo,
+                  protein: String(recipe.nutritionInfo.protein || "0g"),
+                  carbs: String(recipe.nutritionInfo.carbs || "0g"),
+                  fats: String(recipe.nutritionInfo.fats || "0g"),
+                  fiber: String(recipe.nutritionInfo.fiber || "0g"),
+                  sugar: String(recipe.nutritionInfo.sugar || "0g"),
+                  sodium: recipe.nutritionInfo.sodium ? String(recipe.nutritionInfo.sodium) : undefined,
+                  vitamins: Array.isArray(recipe.nutritionInfo.vitamins) ? 
+                    recipe.nutritionInfo.vitamins.map((v: any) => String(v || "")) : [],
+                  healthyAlternatives: Array.isArray(recipe.nutritionInfo.healthyAlternatives) ? 
+                    recipe.nutritionInfo.healthyAlternatives.map((alt: any) => String(alt || "")) : [],
+                  dietaryNotes: Array.isArray(recipe.nutritionInfo.dietaryNotes) ? 
+                    recipe.nutritionInfo.dietaryNotes.map((note: any) => String(note || "")) : []
+                } : {
+                  calories: 0,
+                  protein: "0g",
+                  carbs: "0g",
+                  fats: "0g",
+                  fiber: "0g",
+                  sugar: "0g",
+                  healthyAlternatives: [],
+                  dietaryNotes: []
+                },
+                variations: Array.isArray(recipe.variations) ? 
+                  recipe.variations.map((v: any) => ({
+                    type: String(v.type || ""),
+                    description: String(v.description || ""),
+                    adjustments: Array.isArray(v.adjustments) ? 
+                      v.adjustments.map((adj: any) => String(adj || "")) : []
+                  })) : [],
+                sideDishSuggestions: Array.isArray(recipe.sideDishSuggestions) ? 
+                  recipe.sideDishSuggestions.map((s: any) => ({
+                    name: String(s.name || ""),
+                    description: String(s.description || ""),
+                    preparationTime: String(s.preparationTime || ""),
+                    pairingReason: String(s.pairingReason || "")
+                  })) : []
+              }))
+            };
+            
+            const validatedResponse = analyzeImageResponseSchema.parse(finalData);
             return res.status(200).json(validatedResponse);
           } catch (validationErr) {
             console.error("Schema validation error:", validationErr);

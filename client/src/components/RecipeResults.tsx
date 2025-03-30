@@ -9,7 +9,14 @@ import {
   type NutritionInfo, 
   type RecipeVariation, 
   type SideDish, 
-  type YoutubeVideo 
+  type YoutubeVideo, 
+  type EquipmentItem,
+  type TechniqueDetail,
+  type CulturalContext,
+  type PresentationGuidance,
+  type CookingScience,
+  type SensoryGuidance,
+  type IngredientGroup
 } from '@shared/schema';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -275,12 +282,18 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
           
           {/* Tabbed Interface */}
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-6">
-            <TabsList className="grid grid-cols-4 mb-6 p-1 rounded-full bg-slate-100 dark:bg-slate-800">
+            <TabsList className="grid grid-cols-6 mb-6 p-1 rounded-full bg-slate-100 dark:bg-slate-800">
               <TabsTrigger value="instructions" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-list-ol mr-2"></i> Instructions
               </TabsTrigger>
               <TabsTrigger value="nutrition" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-apple-alt mr-2"></i> Nutrition
+              </TabsTrigger>
+              <TabsTrigger value="techniques" className="flex items-center rounded-full data-[state=active]:shadow-md">
+                <i className="fas fa-utensils mr-2"></i> Techniques
+              </TabsTrigger>
+              <TabsTrigger value="cultural" className="flex items-center rounded-full data-[state=active]:shadow-md">
+                <i className="fas fa-globe-americas mr-2"></i> Culture
               </TabsTrigger>
               <TabsTrigger value="videos" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-video mr-2"></i> Videos
@@ -790,7 +803,397 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
               )}
             </TabsContent>
             
-            {/* Tab 3: YouTube Videos */}
+            {/* Tab 3: Cooking Techniques */}
+            <TabsContent value="techniques" className="space-y-6">
+              {/* Equipment Section */}
+              {selectedRecipe.equipment && selectedRecipe.equipment.length > 0 && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Required Equipment</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedRecipe.equipment.map((item, i) => (
+                      <Card key={i} className="bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="bg-white p-3 rounded-full text-primary">
+                              <i className="fas fa-utensils"></i>
+                            </div>
+                            <div>
+                              <h5 className="font-medium">{item.name}</h5>
+                              {item.description && <p className="text-sm text-slate-600 mt-1">{item.description}</p>}
+                              
+                              {item.alternatives && item.alternatives.length > 0 && (
+                                <div className="mt-2">
+                                  <span className="text-xs font-medium text-slate-500">Alternatives:</span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {item.alternatives.map((alt, j) => (
+                                      <Badge key={j} variant="outline" className="text-xs bg-white">
+                                        {alt}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {item.difficultyToUse && (
+                                <Badge 
+                                  variant="outline" 
+                                  className={`mt-2 text-xs ${
+                                    item.difficultyToUse.toLowerCase().includes('easy') ? 'bg-green-50 text-green-700' : 
+                                    item.difficultyToUse.toLowerCase().includes('medium') ? 'bg-yellow-50 text-yellow-700' : 
+                                    'bg-red-50 text-red-700'
+                                  }`}
+                                >
+                                  {item.difficultyToUse}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Ingredient Groups */}
+              {selectedRecipe.ingredientGroups && selectedRecipe.ingredientGroups.length > 0 && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Ingredient Groups</h4>
+                  <div className="space-y-4">
+                    {selectedRecipe.ingredientGroups.map((group, i) => (
+                      <div key={i} className="p-4 bg-white rounded-lg border border-slate-200">
+                        <h5 className="font-medium text-lg mb-2">{group.groupName}</h5>
+                        {group.preparationNotes && (
+                          <p className="text-sm text-slate-600 mb-3 italic">{group.preparationNotes}</p>
+                        )}
+                        <ul className="space-y-1">
+                          {group.ingredients.map((ingredient, j) => (
+                            <li key={j} className="flex items-start gap-2">
+                              <span className="text-primary mt-1">
+                                <i className="fas fa-check-circle"></i>
+                              </span>
+                              <span>{ingredient}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Technique Details */}
+              {selectedRecipe.techniqueDetails && selectedRecipe.techniqueDetails.length > 0 && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Professional Techniques</h4>
+                  <div className="space-y-4">
+                    {selectedRecipe.techniqueDetails.map((technique, i) => (
+                      <div key={i} className="p-4 bg-white rounded-lg border border-slate-200">
+                        <h5 className="font-medium text-lg text-primary mb-2">{technique.name}</h5>
+                        <p className="text-slate-700 mb-3">{technique.description}</p>
+                        
+                        {technique.visualCues && technique.visualCues.length > 0 && (
+                          <div className="mb-3">
+                            <h6 className="text-sm font-medium text-slate-700 mb-1">Visual Cues</h6>
+                            <ul className="space-y-1">
+                              {technique.visualCues.map((cue, j) => (
+                                <li key={j} className="flex items-start gap-2 text-sm">
+                                  <span className="text-green-500 mt-0.5">
+                                    <i className="fas fa-eye"></i>
+                                  </span>
+                                  <span>{cue}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {technique.commonErrors && technique.commonErrors.length > 0 && (
+                          <div>
+                            <h6 className="text-sm font-medium text-slate-700 mb-1">Common Errors</h6>
+                            <ul className="space-y-1">
+                              {technique.commonErrors.map((error, j) => (
+                                <li key={j} className="flex items-start gap-2 text-sm">
+                                  <span className="text-red-500 mt-0.5">
+                                    <i className="fas fa-exclamation-triangle"></i>
+                                  </span>
+                                  <span>{error}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Cooking Science */}
+              {selectedRecipe.cookingScience && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Science Behind the Recipe</h4>
+                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                    {selectedRecipe.cookingScience.keyReactions && selectedRecipe.cookingScience.keyReactions.length > 0 && (
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2">Key Reactions</h5>
+                        <ul className="space-y-2">
+                          {selectedRecipe.cookingScience.keyReactions.map((reaction, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-blue-500 mt-1">
+                                <i className="fas fa-flask"></i>
+                              </span>
+                              <span>{reaction}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.cookingScience.techniquePurpose && selectedRecipe.cookingScience.techniquePurpose.length > 0 && (
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2">Why These Techniques Work</h5>
+                        <ul className="space-y-2">
+                          {selectedRecipe.cookingScience.techniquePurpose.map((purpose, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-purple-500 mt-1">
+                                <i className="fas fa-magic"></i>
+                              </span>
+                              <span>{purpose}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.cookingScience.safetyTips && selectedRecipe.cookingScience.safetyTips.length > 0 && (
+                      <div>
+                        <h5 className="font-medium mb-2">Safety Considerations</h5>
+                        <ul className="space-y-2">
+                          {selectedRecipe.cookingScience.safetyTips.map((tip, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-red-500 mt-1">
+                                <i className="fas fa-shield-alt"></i>
+                              </span>
+                              <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Sensory Guidance */}
+              {selectedRecipe.sensoryGuidance && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Sensory Guide</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {selectedRecipe.sensoryGuidance.tasteProgression && selectedRecipe.sensoryGuidance.tasteProgression.length > 0 && (
+                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <i className="fas fa-utensils text-yellow-500"></i>
+                          <h5 className="font-medium">Taste Progression</h5>
+                        </div>
+                        <ul className="space-y-2">
+                          {selectedRecipe.sensoryGuidance.tasteProgression.map((taste, i) => (
+                            <li key={i} className="text-sm">{taste}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.sensoryGuidance.aromaIndicators && selectedRecipe.sensoryGuidance.aromaIndicators.length > 0 && (
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <i className="fas fa-wind text-green-500"></i>
+                          <h5 className="font-medium">Aroma Indicators</h5>
+                        </div>
+                        <ul className="space-y-2">
+                          {selectedRecipe.sensoryGuidance.aromaIndicators.map((aroma, i) => (
+                            <li key={i} className="text-sm">{aroma}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.sensoryGuidance.textureDescriptors && selectedRecipe.sensoryGuidance.textureDescriptors.length > 0 && (
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <i className="fas fa-hand-paper text-blue-500"></i>
+                          <h5 className="font-medium">Texture Profile</h5>
+                        </div>
+                        <ul className="space-y-2">
+                          {selectedRecipe.sensoryGuidance.textureDescriptors.map((texture, i) => (
+                            <li key={i} className="text-sm">{texture}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Success Indicators */}
+              {selectedRecipe.successIndicators && selectedRecipe.successIndicators.length > 0 && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Success Indicators</h4>
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                    <ul className="space-y-2">
+                      {selectedRecipe.successIndicators.map((indicator, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-green-600 mt-1">
+                            <i className="fas fa-check-circle"></i>
+                          </span>
+                          <span>{indicator}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Tab 4: Cultural Context */}
+            <TabsContent value="cultural" className="space-y-6">
+              {/* Cultural Context */}
+              {selectedRecipe.culturalContext && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Cultural Context</h4>
+                  <div className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
+                    {selectedRecipe.culturalContext.origin && (
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <i className="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                          Geographic Origin
+                        </h5>
+                        <p className="text-slate-700">{selectedRecipe.culturalContext.origin}</p>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.culturalContext.history && (
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <i className="fas fa-book-open text-amber-500 mr-2"></i>
+                          Historical Background
+                        </h5>
+                        <p className="text-slate-700">{selectedRecipe.culturalContext.history}</p>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.culturalContext.traditionalServing && (
+                      <div className="mb-4">
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <i className="fas fa-concierge-bell text-green-500 mr-2"></i>
+                          Traditional Serving
+                        </h5>
+                        <p className="text-slate-700">{selectedRecipe.culturalContext.traditionalServing}</p>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.culturalContext.festiveRelevance && selectedRecipe.culturalContext.festiveRelevance.length > 0 && (
+                      <div>
+                        <h5 className="font-medium mb-2 flex items-center">
+                          <i className="fas fa-calendar-day text-purple-500 mr-2"></i>
+                          Festive Significance
+                        </h5>
+                        <ul className="space-y-1">
+                          {selectedRecipe.culturalContext.festiveRelevance.map((occasion, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-purple-400 mt-1">
+                                <i className="fas fa-star"></i>
+                              </span>
+                              <span>{occasion}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Presentation Guidance */}
+              {selectedRecipe.presentationGuidance && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Presentation Guide</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {selectedRecipe.presentationGuidance.platingSuggestions && selectedRecipe.presentationGuidance.platingSuggestions.length > 0 && (
+                      <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <i className="fas fa-utensils text-slate-500"></i>
+                          <h5 className="font-medium">Plating Ideas</h5>
+                        </div>
+                        <ul className="space-y-2">
+                          {selectedRecipe.presentationGuidance.platingSuggestions.map((suggestion, i) => (
+                            <li key={i} className="text-sm flex items-start gap-2">
+                              <span className="text-slate-400 mt-1">•</span>
+                              <span>{suggestion}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.presentationGuidance.garnishingTips && selectedRecipe.presentationGuidance.garnishingTips.length > 0 && (
+                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <i className="fas fa-leaf text-orange-500"></i>
+                          <h5 className="font-medium">Garnishing Tips</h5>
+                        </div>
+                        <ul className="space-y-2">
+                          {selectedRecipe.presentationGuidance.garnishingTips.map((tip, i) => (
+                            <li key={i} className="text-sm flex items-start gap-2">
+                              <span className="text-orange-400 mt-1">•</span>
+                              <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.presentationGuidance.photoTips && selectedRecipe.presentationGuidance.photoTips.length > 0 && (
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center gap-2 mb-3">
+                          <i className="fas fa-camera text-blue-500"></i>
+                          <h5 className="font-medium">Photography Tips</h5>
+                        </div>
+                        <ul className="space-y-2">
+                          {selectedRecipe.presentationGuidance.photoTips.map((tip, i) => (
+                            <li key={i} className="text-sm flex items-start gap-2">
+                              <span className="text-blue-400 mt-1">•</span>
+                              <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Meal Planning Notes */}
+              {selectedRecipe.mealPlanningNotes && selectedRecipe.mealPlanningNotes.length > 0 && (
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Meal Planning Suggestions</h4>
+                  <div className="p-4 bg-teal-50 rounded-lg border border-teal-100">
+                    <ul className="space-y-2">
+                      {selectedRecipe.mealPlanningNotes.map((note, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">
+                            <i className="fas fa-calendar-check"></i>
+                          </span>
+                          <span>{note}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            {/* Tab 5: YouTube Videos */}
             <TabsContent value="videos">
               {result.youtubeVideos && result.youtubeVideos.length > 0 ? (
                 <div className="space-y-6">

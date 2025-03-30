@@ -400,12 +400,20 @@ export default function Home() {
                     <a href="#how-it-works" className="text-slate-600 hover:text-primary font-medium transition-colors">How It Works</a>
                     <a href="#testimonials" className="text-slate-600 hover:text-primary font-medium transition-colors">Testimonials</a>
                   </nav>
-                  <Button 
-                    onClick={scrollToUpload} 
-                    className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
-                  >
-                    Try It Now
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      variant="outline"
+                      className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
+                    >
+                      View History
+                    </Button>
+                    <Button 
+                      onClick={scrollToUpload} 
+                      className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
+                    >
+                      Analyze Dish
+                    </Button>
+                  </div>
                 </div>
               </div>
             </header>
@@ -573,6 +581,8 @@ export default function Home() {
                 {/* Recipe Dialog */}
                 <Dialog open={featuredRecipeOpen} onOpenChange={setFeaturedRecipeOpen}>
                   <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+                    <DialogTitle className="sr-only">Recipe Details</DialogTitle>
+                    <DialogDescription className="sr-only">Detailed recipe information with ingredients, instructions, and nutritional facts.</DialogDescription>
                     {selectedFeaturedRecipe && (
                       <div>
                         <div className="relative h-48 sm:h-64 overflow-hidden">
@@ -917,49 +927,60 @@ export default function Home() {
             {/* Footer */}
             <footer className="bg-slate-900 text-white py-12">
               <div className="container max-w-7xl mx-auto px-4">
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                  <div className="mb-8 md:mb-0">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                  <div>
                     <div className="flex items-center gap-3 mb-4">
                       <Logo size="small" animated={false} />
                       <span className="font-bold text-xl">Dish<span className="text-primary">Detective</span></span>
                     </div>
-                    <p className="text-slate-400 text-sm max-w-xs">
+                    <p className="text-slate-400 text-sm mb-4">
                       AI-powered food recognition application that turns photos into detailed recipes instantly.
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      © {new Date().getFullYear()} Dish Detective. All rights reserved.
                     </p>
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-10">
-                    <div>
-                      <h4 className="font-semibold mb-4 text-lg">Features</h4>
-                      <ul className="space-y-2 text-slate-400">
-                        <li><a href="#" className="hover:text-primary transition-colors">Image Analysis</a></li>
-                        <li><a href="#" className="hover:text-primary transition-colors">Recipe Library</a></li>
-                        <li><a href="#" className="hover:text-primary transition-colors">Nutritional Info</a></li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-4 text-lg">About</h4>
-                      <ul className="space-y-2 text-slate-400">
-                        <li><a href="#" className="hover:text-primary transition-colors">Our Story</a></li>
-                        <li><a href="#" className="hover:text-primary transition-colors">How It Works</a></li>
-                        <li><a href="#" className="hover:text-primary transition-colors">Testimonials</a></li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-4 text-lg">Contact</h4>
-                      <ul className="space-y-2 text-slate-400">
-                        <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
-                        <li><a href="#" className="hover:text-primary transition-colors">Feedback</a></li>
-                        <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-                      </ul>
-                    </div>
+                  <div>
+                    <h4 className="font-semibold mb-4 text-lg">Features</h4>
+                    <ul className="space-y-2 text-slate-400 text-sm">
+                      <li><a href="#" className="hover:text-primary transition-colors">Image Analysis</a></li>
+                      <li><a href="#" className="hover:text-primary transition-colors">Recipe Library</a></li>
+                      <li><a href="#" className="hover:text-primary transition-colors">Nutritional Info</a></li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-4 text-lg">About</h4>
+                    <ul className="space-y-2 text-slate-400 text-sm">
+                      <li><a href="#" className="hover:text-primary transition-colors">Our Story</a></li>
+                      <li><a href="#how-it-works" className="hover:text-primary transition-colors">How It Works</a></li>
+                      <li><a href="#testimonials" className="hover:text-primary transition-colors">Testimonials</a></li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-semibold mb-4 text-lg">Contact</h4>
+                    <ul className="space-y-2 text-slate-400 text-sm">
+                      <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
+                      <li><a href="#" className="hover:text-primary transition-colors">Feedback</a></li>
+                      <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
+                    </ul>
                   </div>
                 </div>
                 
-                <div className="border-t border-slate-800 mt-10 pt-10 flex flex-col md:flex-row justify-between items-center">
-                  <p className="text-slate-500 text-sm mb-4 md:mb-0">
-                    © {new Date().getFullYear()} Dish Detective. All rights reserved.
-                  </p>
+                <div className="border-t border-slate-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                  <div className="flex space-x-6 mb-4 md:mb-0">
+                    <a href="#" className="text-slate-400 hover:text-primary transition-colors text-sm">
+                      Terms of Service
+                    </a>
+                    <a href="#" className="text-slate-400 hover:text-primary transition-colors text-sm">
+                      Privacy Policy
+                    </a>
+                    <a href="#" className="text-slate-400 hover:text-primary transition-colors text-sm">
+                      Cookie Policy
+                    </a>
+                  </div>
                   <div className="flex space-x-4">
                     <a href="#" className="text-slate-400 hover:text-primary transition-colors">
                       <i className="fab fa-twitter text-lg"></i>

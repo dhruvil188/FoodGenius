@@ -9,10 +9,9 @@ import { apiRequest } from '@/lib/api';
 
 interface ImageUploaderProps {
   onAnalyzeImage: (imageData: string) => void;
-  onDemoMode?: () => void;
 }
 
-export default function ImageUploader({ onAnalyzeImage, onDemoMode }: ImageUploaderProps) {
+export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
   const [activeTab, setActiveTab] = useState('upload');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -440,24 +439,7 @@ export default function ImageUploader({ onAnalyzeImage, onDemoMode }: ImageUploa
                 </Button>
               </motion.div>
               
-              {/* Demo Mode Button */}
-              {onDemoMode && (
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button 
-                    className="bg-gradient-to-r from-amber-500 to-orange-600 text-white font-medium rounded-full px-6 py-6 shadow-md hover:shadow-lg hover:from-amber-500/95 hover:to-orange-600/95 transition-all"
-                    onClick={onDemoMode}
-                    size="lg"
-                  >
-                    <div className="flex items-center gap-2">
-                      <i className="fas fa-vial text-lg"></i>
-                      <span className="font-semibold tracking-wide">Try Demo Mode</span>
-                    </div>
-                  </Button>
-                </motion.div>
-              )}
+
             </div>
             
             {!selectedImage && (

@@ -313,256 +313,271 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                 <Progress value={currentProgress} className="h-2" />
               </div>
               
-              <div className="space-y-6">
-                <div>
-                  <h5 className="text-lg font-semibold mb-3 food-gradient-text">Ingredients</h5>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {selectedRecipe.ingredients.map((ingredient, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <div className="min-w-4 pt-0.5">
-                          <i className="fas fa-check-circle text-primary"></i>
-                        </div>
-                        <span>
-                          {/* Parse JSON if ingredient looks like a stringified object */}
-                          {(() => {
-                            // Check if it starts with { character (for potentially stringified JSON objects)
-                            if (ingredient.startsWith('{') && ingredient.endsWith('}')) {
-                              try {
-                                const parsedIngredient = JSON.parse(ingredient);
-                                
-                                // Handle ingredient objects with specific fields (common format from Gemini API)
-                                if (parsedIngredient.item && parsedIngredient.quantity) {
-                                  let formattedIngredient = `${parsedIngredient.quantity} ${parsedIngredient.item}`;
-                                  
-                                  // Add preparation note if available
-                                  if (parsedIngredient.prep && parsedIngredient.prep !== "null") {
-                                    formattedIngredient += `, ${parsedIngredient.prep}`;
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Left column - Ingredients */}
+                <div className="md:col-span-1">
+                  <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
+                    <h5 className="text-lg font-semibold mb-4 food-gradient-text">Ingredients</h5>
+                    
+                    {/* Standard list of ingredients */}
+                    <ul className="space-y-2">
+                      {selectedRecipe.ingredients.map((ingredient, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Checkbox 
+                            id={`ingredient-${selectedRecipeIndex}-${i}`}
+                            className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          />
+                          <label 
+                            htmlFor={`ingredient-${selectedRecipeIndex}-${i}`}
+                            className="text-sm cursor-pointer flex items-start gap-1"
+                          >
+                            <span className="font-medium text-slate-600 min-w-5">
+                              {i + 1}.
+                            </span>
+                            <span>
+                              {/* Parse JSON if ingredient looks like a stringified object */}
+                              {(() => {
+                                // Check if it starts with { character (for potentially stringified JSON objects)
+                                if (typeof ingredient === 'string' && ingredient.startsWith('{') && ingredient.endsWith('}')) {
+                                  try {
+                                    const parsedIngredient = JSON.parse(ingredient);
+                                    
+                                    // Handle ingredient objects with specific fields (common format from Gemini API)
+                                    if (parsedIngredient.item && parsedIngredient.quantity) {
+                                      let formattedIngredient = `${parsedIngredient.quantity} ${parsedIngredient.item}`;
+                                      
+                                      // Add preparation note if available
+                                      if (parsedIngredient.prep && parsedIngredient.prep !== "null") {
+                                        formattedIngredient += `, ${parsedIngredient.prep}`;
+                                      }
+                                      
+                                      return formattedIngredient;
+                                    }
+                                    
+                                    // For other formats, try to extract the most meaningful data
+                                    return parsedIngredient.name || parsedIngredient.text || 
+                                          parsedIngredient.description || parsedIngredient.ingredient || 
+                                          JSON.stringify(parsedIngredient);
+                                  } catch (e) {
+                                    // If parsing fails, just return the original string
+                                    return ingredient;
                                   }
-                                  
-                                  return formattedIngredient;
+                                } else {
+                                  return ingredient;
                                 }
-                                
-                                // For other formats, try to extract the most meaningful data
-                                return parsedIngredient.name || parsedIngredient.text || 
-                                       parsedIngredient.description || parsedIngredient.ingredient || 
-                                       JSON.stringify(parsedIngredient);
-                              } catch (e) {
-                                // If parsing fails, just return the original string
-                                return ingredient;
-                              }
-                            } else {
-                              return ingredient;
-                            }
-                          })()}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                              })()}
+                            </span>
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
                 
-                <Separator />
-                
-                {/* Chef Tips Section if available */}
-                {selectedRecipe.chefTips && selectedRecipe.chefTips.length > 0 && (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <i className="fas fa-lightbulb text-amber-500"></i>
-                      <h5 className="text-lg font-semibold food-gradient-text">Chef's Pro Tips</h5>
-                    </div>
-                    <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
-                      <ul className="space-y-2">
-                        {selectedRecipe.chefTips.map((tip, i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <span className="text-amber-500 mt-1">
-                              <i className="fas fa-star"></i>
-                            </span>
-                            <span>{tip}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <h5 className="text-lg font-semibold mb-3 food-gradient-text">Cooking Instructions</h5>
-                  <ol className="space-y-4">
-                    {selectedRecipe.instructions.map((step, i) => (
-                      <motion.li 
-                        key={i}
-                        className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
-                          completedSteps[selectedRecipeIndex]?.has(i) 
-                            ? 'bg-green-50 text-green-900' 
-                            : 'bg-white'
-                        }`}
-                        whileHover={{ x: 5 }}
-                      >
-                        <div 
-                          className="mt-0.5"
-                          ref={(el) => {
-                            // Store reference to the checkbox container
-                            stepRefs.current[i] = el;
-                          }}
+                {/* Right column - Instructions */}
+                <div className="md:col-span-2 space-y-6">
+                  <div>
+                    <h5 className="text-lg font-semibold mb-3 food-gradient-text">Cooking Instructions</h5>
+                    <ol className="space-y-4">
+                      {selectedRecipe.instructions.map((step, i) => (
+                        <motion.li 
+                          key={i}
+                          className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
+                            completedSteps[selectedRecipeIndex]?.has(i) 
+                              ? 'bg-green-50 text-green-900' 
+                              : 'bg-white'
+                          }`}
+                          whileHover={{ x: 5 }}
                         >
-                          <Checkbox 
-                            checked={completedSteps[selectedRecipeIndex]?.has(i)}
-                            onCheckedChange={() => toggleStepCompletion(selectedRecipeIndex, i)}
-                            className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          />
-                        </div>
-                        <div>
-                          <p className={completedSteps[selectedRecipeIndex]?.has(i) ? 'line-through opacity-70' : ''}>
-                            {/* Parse JSON if step looks like a stringified object */}
-                            {(() => {
-                              if (step.startsWith('{') && step.endsWith('}')) {
-                                try {
-                                  const parsedStep = JSON.parse(step);
-                                  
-                                  // For instruction objects with number and instruction fields
-                                  if (parsedStep.number && parsedStep.instruction) {
-                                    return parsedStep.instruction;
-                                  }
-                                  
-                                  // For step objects with specific fields
-                                  if (parsedStep.action && parsedStep.ingredients) {
-                                    let formattedStep = parsedStep.action;
+                          <div 
+                            className="mt-0.5"
+                            ref={(el) => {
+                              // Store reference to the checkbox container
+                              stepRefs.current[i] = el;
+                            }}
+                          >
+                            <Checkbox 
+                              checked={completedSteps[selectedRecipeIndex]?.has(i)}
+                              onCheckedChange={() => toggleStepCompletion(selectedRecipeIndex, i)}
+                              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                          </div>
+                          <div>
+                            <p className={completedSteps[selectedRecipeIndex]?.has(i) ? 'line-through opacity-70' : ''}>
+                              {/* Parse JSON if step looks like a stringified object */}
+                              {(() => {
+                                if (typeof step === 'string' && step.startsWith('{') && step.endsWith('}')) {
+                                  try {
+                                    const parsedStep = JSON.parse(step);
                                     
-                                    // Include ingredients if available
-                                    if (Array.isArray(parsedStep.ingredients) && parsedStep.ingredients.length > 0) {
-                                      formattedStep += ` ${parsedStep.ingredients.join(', ')}`;
-                                    } else if (typeof parsedStep.ingredients === 'string') {
-                                      formattedStep += ` ${parsedStep.ingredients}`;
+                                    // For instruction objects with number and instruction fields
+                                    if (parsedStep.number && parsedStep.instruction) {
+                                      return parsedStep.instruction;
                                     }
                                     
-                                    // Add any additional details
-                                    if (parsedStep.duration) {
-                                      formattedStep += ` for ${parsedStep.duration}`;
+                                    // For step objects with specific fields
+                                    if (parsedStep.action && parsedStep.ingredients) {
+                                      let formattedStep = parsedStep.action;
+                                      
+                                      // Include ingredients if available
+                                      if (Array.isArray(parsedStep.ingredients) && parsedStep.ingredients.length > 0) {
+                                        formattedStep += ` ${parsedStep.ingredients.join(', ')}`;
+                                      } else if (typeof parsedStep.ingredients === 'string') {
+                                        formattedStep += ` ${parsedStep.ingredients}`;
+                                      }
+                                      
+                                      // Add any additional details
+                                      if (parsedStep.duration) {
+                                        formattedStep += ` for ${parsedStep.duration}`;
+                                      }
+                                      
+                                      return formattedStep;
                                     }
                                     
-                                    return formattedStep;
+                                    // For other formats, try to extract the most meaningful data
+                                    return parsedStep.text || parsedStep.description || 
+                                          parsedStep.instruction || parsedStep.step || 
+                                          JSON.stringify(parsedStep);
+                                  } catch (e) {
+                                    // If parsing fails, just return the original string
+                                    return step;
                                   }
-                                  
-                                  // For other formats, try to extract the most meaningful data
-                                  return parsedStep.text || parsedStep.description || 
-                                         parsedStep.instruction || parsedStep.step || 
-                                         JSON.stringify(parsedStep);
-                                } catch (e) {
-                                  // If parsing fails, just return the original string
+                                } else {
                                   return step;
                                 }
-                              } else {
-                                return step;
-                              }
-                            })()}
-                          </p>
-                        </div>
-                      </motion.li>
-                    ))}
-                  </ol>
-                </div>
-                
-                {/* Common Mistakes to Avoid */}
-                {selectedRecipe.commonMistakes && selectedRecipe.commonMistakes.length > 0 && (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <i className="fas fa-exclamation-triangle text-orange-500"></i>
-                      <h5 className="text-lg font-semibold food-gradient-text">Common Mistakes to Avoid</h5>
-                    </div>
-                    <div className="p-4 bg-red-50 rounded-lg border border-red-100">
-                      <ul className="space-y-2">
-                        {selectedRecipe.commonMistakes.map((mistake, i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <span className="text-red-500 mt-1">
-                              <i className="fas fa-times-circle"></i>
-                            </span>
-                            <span>{mistake}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-
-                {/* Storage & Reheating */}
-                {(selectedRecipe.storageInstructions || selectedRecipe.reheatingMethods) && (
-                  <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedRecipe.storageInstructions && (
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <i className="fas fa-archive text-blue-600"></i>
-                          <h5 className="font-semibold">Storage Instructions</h5>
-                        </div>
-                        <p className="text-slate-700">{selectedRecipe.storageInstructions}</p>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.reheatingMethods && (
-                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
-                        <div className="flex items-center gap-2 mb-2">
-                          <i className="fas fa-temperature-high text-orange-600"></i>
-                          <h5 className="font-semibold">Reheating Methods</h5>
-                        </div>
-                        <p className="text-slate-700">{selectedRecipe.reheatingMethods}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Beverage Pairings */}
-                {selectedRecipe.beveragePairings && selectedRecipe.beveragePairings.length > 0 && (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <i className="fas fa-wine-glass-alt text-purple-600"></i>
-                      <h5 className="text-lg font-semibold food-gradient-text">Beverage Pairings</h5>
-                    </div>
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
-                      <div className="flex flex-wrap gap-2">
-                        {selectedRecipe.beveragePairings.map((beverage, i) => (
-                          <Badge 
-                            key={i} 
-                            variant="outline" 
-                            className="bg-white border border-purple-200 text-purple-800 py-1.5 px-3"
-                          >
-                            <i className="fas fa-glass-cheers mr-1"></i> {beverage}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Side Dish Suggestions */}
-                {selectedRecipe.sideDishSuggestions && selectedRecipe.sideDishSuggestions.length > 0 && (
-                  <div className="mt-8">
-                    <h5 className="text-lg font-semibold mb-3 food-gradient-text">Recommended Side Dishes</h5>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {selectedRecipe.sideDishSuggestions.map((sideDish, i) => (
-                        <Card key={i} className="bg-slate-50 hover:bg-slate-100 transition-colors">
-                          <CardHeader className="py-3 px-4">
-                            <CardTitle className="text-md font-medium">{sideDish.name}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="py-2 px-4">
-                            {sideDish.description && (
-                              <p className="text-sm text-slate-600 mb-2">{sideDish.description}</p>
-                            )}
-                            <div className="flex flex-wrap gap-2">
-                              {sideDish.preparationTime && (
-                                <Badge variant="outline" className="text-xs">
-                                  <i className="fas fa-clock mr-1"></i> {sideDish.preparationTime}
-                                </Badge>
-                              )}
-                              {sideDish.pairingReason && (
-                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                  <i className="fas fa-check-circle mr-1"></i> {sideDish.pairingReason}
-                                </Badge>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
+                              })()}
+                            </p>
+                          </div>
+                        </motion.li>
                       ))}
-                    </div>
+                    </ol>
                   </div>
-                )}
+                  
+                  {/* Chef Tips Section if available */}
+                  {selectedRecipe.chefTips && selectedRecipe.chefTips.length > 0 && (
+                    <div className="mb-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <i className="fas fa-lightbulb text-amber-500"></i>
+                        <h5 className="text-lg font-semibold food-gradient-text">Chef's Pro Tips</h5>
+                      </div>
+                      <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                        <ul className="space-y-2">
+                          {selectedRecipe.chefTips.map((tip, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-amber-500 mt-1">
+                                <i className="fas fa-star"></i>
+                              </span>
+                              <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Common Mistakes to Avoid */}
+                  {selectedRecipe.commonMistakes && selectedRecipe.commonMistakes.length > 0 && (
+                    <div className="mb-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <i className="fas fa-exclamation-triangle text-orange-500"></i>
+                        <h5 className="text-lg font-semibold food-gradient-text">Common Mistakes to Avoid</h5>
+                      </div>
+                      <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                        <ul className="space-y-2">
+                          {selectedRecipe.commonMistakes.map((mistake, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className="text-red-500 mt-1">
+                                <i className="fas fa-times-circle"></i>
+                              </span>
+                              <span>{mistake}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Storage & Reheating */}
+                  {(selectedRecipe.storageInstructions || selectedRecipe.reheatingMethods) && (
+                    <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {selectedRecipe.storageInstructions && (
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                          <div className="flex items-center gap-2 mb-2">
+                            <i className="fas fa-archive text-blue-600"></i>
+                            <h5 className="font-semibold">Storage Instructions</h5>
+                          </div>
+                          <p className="text-slate-700">{selectedRecipe.storageInstructions}</p>
+                        </div>
+                      )}
+                      
+                      {selectedRecipe.reheatingMethods && (
+                        <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                          <div className="flex items-center gap-2 mb-2">
+                            <i className="fas fa-temperature-high text-orange-600"></i>
+                            <h5 className="font-semibold">Reheating Methods</h5>
+                          </div>
+                          <p className="text-slate-700">{selectedRecipe.reheatingMethods}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Beverage Pairings */}
+                  {selectedRecipe.beveragePairings && selectedRecipe.beveragePairings.length > 0 && (
+                    <div className="mb-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <i className="fas fa-wine-glass-alt text-purple-600"></i>
+                        <h5 className="text-lg font-semibold food-gradient-text">Beverage Pairings</h5>
+                      </div>
+                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedRecipe.beveragePairings.map((beverage, i) => (
+                            <Badge 
+                              key={i} 
+                              variant="outline" 
+                              className="bg-white border border-purple-200 text-purple-800 py-1.5 px-3"
+                            >
+                              <i className="fas fa-glass-cheers mr-1"></i> {beverage}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Side Dish Suggestions */}
+                  {selectedRecipe.sideDishSuggestions && selectedRecipe.sideDishSuggestions.length > 0 && (
+                    <div className="mt-8">
+                      <h5 className="text-lg font-semibold mb-3 food-gradient-text">Recommended Side Dishes</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {selectedRecipe.sideDishSuggestions.map((sideDish, i) => (
+                          <Card key={i} className="bg-slate-50 hover:bg-slate-100 transition-colors">
+                            <CardHeader className="py-3 px-4">
+                              <CardTitle className="text-md font-medium">{sideDish.name}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="py-2 px-4">
+                              {sideDish.description && (
+                                <p className="text-sm text-slate-600 mb-2">{sideDish.description}</p>
+                              )}
+                              <div className="flex flex-wrap gap-2">
+                                {sideDish.preparationTime && (
+                                  <Badge variant="outline" className="text-xs">
+                                    <i className="fas fa-clock mr-1"></i> {sideDish.preparationTime}
+                                  </Badge>
+                                )}
+                                {sideDish.pairingReason && (
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                    <i className="fas fa-check-circle mr-1"></i> {sideDish.pairingReason}
+                                  </Badge>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </TabsContent>
             
@@ -572,114 +587,352 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="bg-slate-50">
-                      <CardHeader className="py-3 px-4 border-b border-slate-200">
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-chart-pie text-primary"></i>
-                          <CardTitle className="text-md font-medium">Nutrition Facts</CardTitle>
-                        </div>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Calories</CardTitle>
                       </CardHeader>
-                      <CardContent className="py-4 px-4">
-                        {/* Calories with visual indicator */}
-                        {selectedRecipe.nutritionInfo.calories && (
-                          <div className="mb-4">
-                            <div className="flex justify-between mb-1">
-                              <span className="font-semibold text-slate-800">Calories</span>
-                              <span className="font-bold text-primary">{selectedRecipe.nutritionInfo.calories}</span>
-                            </div>
-                            <div className="w-full h-2 bg-slate-100 rounded-full">
-                              <div 
-                                className="h-2 bg-primary rounded-full" 
-                                style={{ 
-                                  width: `${Math.min(100, (selectedRecipe.nutritionInfo.calories / 2000) * 100)}%` 
-                                }}
-                              ></div>
-                            </div>
-                            <div className="flex justify-between mt-1">
-                              <span className="text-xs text-slate-500">0</span>
-                              <span className="text-xs text-slate-500">% of 2000 cal daily value</span>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Macronutrients with styled bars */}
-                        <div className="space-y-3">
-                          {selectedRecipe.nutritionInfo.protein && (
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span className="text-slate-700">
-                                  <i className="fas fa-dumbbell text-xs mr-1 text-blue-500"></i> Protein
-                                </span>
-                                <span className="font-medium">{selectedRecipe.nutritionInfo.protein}</span>
-                              </div>
-                              <div className="w-full h-1.5 bg-slate-100 rounded-full">
-                                <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '65%' }}></div>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {selectedRecipe.nutritionInfo.carbs && (
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span className="text-slate-700">
-                                  <i className="fas fa-bread-slice text-xs mr-1 text-amber-500"></i> Carbs
-                                </span>
-                                <span className="font-medium">{selectedRecipe.nutritionInfo.carbs}</span>
-                              </div>
-                              <div className="w-full h-1.5 bg-slate-100 rounded-full">
-                                <div className="h-1.5 bg-amber-500 rounded-full" style={{ width: '75%' }}></div>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {selectedRecipe.nutritionInfo.fats && (
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span className="text-slate-700">
-                                  <i className="fas fa-oil-can text-xs mr-1 text-yellow-500"></i> Fats
-                                </span>
-                                <span className="font-medium">{selectedRecipe.nutritionInfo.fats}</span>
-                              </div>
-                              <div className="w-full h-1.5 bg-slate-100 rounded-full">
-                                <div className="h-1.5 bg-yellow-500 rounded-full" style={{ width: '40%' }}></div>
-                              </div>
-                            </div>
-                          )}
+                      <CardContent>
+                        <div className="text-3xl font-bold food-gradient-text">
+                          {selectedRecipe.nutritionInfo.calories || 'N/A'}
                         </div>
-                        
-                        {/* Additional nutrients */}
-                        <div className="mt-4 pt-4 border-t border-slate-200">
-                          <div className="grid grid-cols-2 gap-3">
-                            {selectedRecipe.nutritionInfo.fiber && (
-                              <div className="flex flex-col">
-                                <span className="text-xs text-slate-500">Fiber</span>
-                                <span className="font-medium">{selectedRecipe.nutritionInfo.fiber}</span>
-                              </div>
-                            )}
-                            
-                            {selectedRecipe.nutritionInfo.sugar && (
-                              <div className="flex flex-col">
-                                <span className="text-xs text-slate-500">Sugar</span>
-                                <span className="font-medium">{selectedRecipe.nutritionInfo.sugar}</span>
-                              </div>
-                            )}
-                            
-                            {selectedRecipe.nutritionInfo.sodium && (
-                              <div className="flex flex-col">
-                                <span className="text-xs text-slate-500">Sodium</span>
-                                <span className="font-medium">{selectedRecipe.nutritionInfo.sodium}</span>
-                              </div>
-                            )}
+                        <p className="text-xs text-slate-500 mt-1">per serving</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-slate-50">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Protein</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold food-gradient-text">
+                          {selectedRecipe.nutritionInfo.protein || 'N/A'}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">per serving</p>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-slate-50">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-md">Carbohydrates</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold food-gradient-text">
+                          {selectedRecipe.nutritionInfo.carbohydrates || 'N/A'}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">per serving</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="food-gradient-text">Macronutrients</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm font-medium">Fat</span>
+                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.fat || 'N/A'}</span>
+                            </div>
+                            <Progress value={60} className="h-2" />
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm font-medium">Saturated Fat</span>
+                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.saturatedFat || 'N/A'}</span>
+                            </div>
+                            <Progress value={40} className="h-2" />
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm font-medium">Fiber</span>
+                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.fiber || 'N/A'}</span>
+                            </div>
+                            <Progress value={25} className="h-2" />
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-sm font-medium">Sugar</span>
+                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.sugar || 'N/A'}</span>
+                            </div>
+                            <Progress value={30} className="h-2" />
                           </div>
                         </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="food-gradient-text">Vitamins & Minerals</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 gap-3">
+                          {selectedRecipe.nutritionInfo.vitamins && selectedRecipe.nutritionInfo.vitamins.map((vitamin, index) => (
+                            <Badge key={index} variant="outline" className="justify-center py-1.5 bg-slate-50">
+                              {vitamin}
+                            </Badge>
+                          ))}
+                          
+                          {selectedRecipe.nutritionInfo.minerals && selectedRecipe.nutritionInfo.minerals.map((mineral, index) => (
+                            <Badge key={index} variant="outline" className="justify-center py-1.5 bg-slate-50">
+                              {mineral}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  {/* Dietary Information */}
+                  {selectedRecipe.nutritionInfo.dietaryInfo && selectedRecipe.nutritionInfo.dietaryInfo.length > 0 && (
+                    <div className="mb-6">
+                      <h5 className="text-lg font-semibold mb-3 food-gradient-text">Dietary Information</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedRecipe.nutritionInfo.dietaryInfo.map((info, i) => (
+                          <Badge 
+                            key={i} 
+                            variant="outline" 
+                            className="py-1.5 px-3"
+                          >
+                            {info === 'Vegetarian' && <i className="fas fa-leaf text-green-600 mr-1"></i>}
+                            {info === 'Vegan' && <i className="fas fa-seedling text-green-600 mr-1"></i>}
+                            {info === 'Gluten-Free' && <i className="fas fa-ban text-red-600 mr-1"></i>}
+                            {info === 'Dairy-Free' && <i className="fas fa-cheese text-yellow-600 mr-1"></i>}
+                            {info === 'Low Carb' && <i className="fas fa-bread-slice text-orange-600 mr-1"></i>}
+                            {info === 'Keto' && <i className="fas fa-bacon text-red-600 mr-1"></i>}
+                            {info}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <i className="fas fa-info-circle text-4xl text-slate-300 mb-3"></i>
+                  <p className="text-slate-500">No nutritional information available for this recipe.</p>
+                </div>
+              )}
+            </TabsContent>
+            
+            {/* Tab 3: Techniques */}
+            <TabsContent value="techniques">
+              <div className="space-y-8">
+                {/* Equipment and Tools */}
+                {selectedRecipe.equipmentNeeded && selectedRecipe.equipmentNeeded.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="text-xl font-semibold mb-4 food-gradient-text">Equipment & Tools</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {selectedRecipe.equipmentNeeded.map((equipment, i) => (
+                        <div key={i} className="flex items-start gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                          <span className="text-green-600 mt-0.5">
+                            <i className="fas fa-utensil-spoon"></i>
+                          </span>
+                          <div>
+                            <h5 className="text-md font-medium">{equipment.name}</h5>
+                            {equipment.purpose && (
+                              <p className="text-sm text-slate-600 mt-1">{equipment.purpose}</p>
+                            )}
+                            {equipment.alternatives && (
+                              <div className="mt-2">
+                                <span className="text-xs text-slate-500">Alternatives: </span>
+                                <span className="text-xs font-medium">{equipment.alternatives}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Cooking Techniques */}
+                {selectedRecipe.techniques && selectedRecipe.techniques.length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="text-xl font-semibold mb-4 food-gradient-text">Key Cooking Techniques</h4>
+                    <div className="space-y-4">
+                      {selectedRecipe.techniques.map((technique, i) => (
+                        <Card key={i} className="overflow-hidden">
+                          <CardHeader className="p-4 pb-2 bg-slate-50">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              <i className="fas fa-fire-alt text-amber-500"></i>
+                              {technique.name}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-3">
+                            <p className="text-slate-700 mb-3">{technique.description}</p>
+                            
+                            {technique.tips && technique.tips.length > 0 && (
+                              <div className="mt-3">
+                                <h6 className="text-sm font-medium mb-2">Tips for Success:</h6>
+                                <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
+                                  {technique.tips.map((tip, tipIndex) => (
+                                    <li key={tipIndex}>{tip}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Kitchen Science */}
+                {selectedRecipe.cookingScience && (
+                  <div className="mb-8">
+                    <h4 className="text-xl font-semibold mb-4 food-gradient-text">Kitchen Science</h4>
+                    <Card className="bg-blue-50 border border-blue-100">
+                      <CardContent className="p-5">
+                        <div className="flex items-start gap-3">
+                          <span className="text-blue-600 text-xl mt-1">
+                            <i className="fas fa-flask"></i>
+                          </span>
+                          <div>
+                            <h5 className="text-lg font-medium text-blue-800 mb-2">{selectedRecipe.cookingScience.principle}</h5>
+                            <p className="text-slate-700 mb-3">{selectedRecipe.cookingScience.explanation}</p>
+                            
+                            {selectedRecipe.cookingScience.tips && selectedRecipe.cookingScience.tips.length > 0 && (
+                              <div className="mt-4 bg-white p-3 rounded-lg">
+                                <h6 className="text-sm font-medium mb-2">Application Tips:</h6>
+                                <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
+                                  {selectedRecipe.cookingScience.tips.map((tip, tipIndex) => (
+                                    <li key={tipIndex}>{tip}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+                
+                {/* Sensory Guidance */}
+                {selectedRecipe.sensoryGuidance && (
+                  <div className="mb-6">
+                    <h4 className="text-xl font-semibold mb-4 food-gradient-text">Sensory Cooking Guide</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Visual Cues */}
+                      {selectedRecipe.sensoryGuidance.visualCues && (
+                        <Card className="border-l-4 border-l-yellow-400">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-md flex items-center gap-2">
+                              <i className="fas fa-eye text-yellow-500"></i> Visual Cues
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <p className="text-sm text-slate-700">{selectedRecipe.sensoryGuidance.visualCues}</p>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      {/* Aroma Indicators */}
+                      {selectedRecipe.sensoryGuidance.aromaIndicators && (
+                        <Card className="border-l-4 border-l-purple-400">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-md flex items-center gap-2">
+                              <i className="fas fa-nose text-purple-500"></i> Aroma Indicators
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <p className="text-sm text-slate-700">{selectedRecipe.sensoryGuidance.aromaIndicators}</p>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      {/* Texture Indicators */}
+                      {selectedRecipe.sensoryGuidance.textureIndicators && (
+                        <Card className="border-l-4 border-l-blue-400">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-md flex items-center gap-2">
+                              <i className="fas fa-hand-paper text-blue-500"></i> Texture Indicators
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <p className="text-sm text-slate-700">{selectedRecipe.sensoryGuidance.textureIndicators}</p>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      {/* Sound Cues */}
+                      {selectedRecipe.sensoryGuidance.soundCues && (
+                        <Card className="border-l-4 border-l-green-400">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-md flex items-center gap-2">
+                              <i className="fas fa-volume-up text-green-500"></i> Sound Cues
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <p className="text-sm text-slate-700">{selectedRecipe.sensoryGuidance.soundCues}</p>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            {/* Tab 4: Cultural Context */}
+            <TabsContent value="cultural">
+              {selectedRecipe.culturalContext ? (
+                <div className="space-y-6">
+                  {/* Origin and History */}
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="food-gradient-text flex items-center gap-2">
+                        <i className="fas fa-map-marker-alt"></i> Origin & History
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {selectedRecipe.culturalContext.origin && (
+                        <div className="mb-4">
+                          <h5 className="font-medium mb-2">Origin</h5>
+                          <p className="text-slate-700">{selectedRecipe.culturalContext.origin}</p>
+                        </div>
+                      )}
+                      
+                      {selectedRecipe.culturalContext.history && (
+                        <div className="mb-4">
+                          <h5 className="font-medium mb-2">Historical Background</h5>
+                          <p className="text-slate-700">{selectedRecipe.culturalContext.history}</p>
+                        </div>
+                      )}
+                      
+                      {selectedRecipe.culturalContext.significance && (
+                        <div>
+                          <h5 className="font-medium mb-2">Cultural Significance</h5>
+                          <p className="text-slate-700">{selectedRecipe.culturalContext.significance}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Traditional Serving Context */}
+                  {selectedRecipe.culturalContext.traditionalServing && (
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="food-gradient-text flex items-center gap-2">
+                          <i className="fas fa-utensils"></i> Traditional Serving
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-slate-700 mb-4">{selectedRecipe.culturalContext.traditionalServing}</p>
                         
-                        {/* Vitamins and Minerals */}
-                        {selectedRecipe.nutritionInfo.vitamins && selectedRecipe.nutritionInfo.vitamins.length > 0 && (
-                          <div className="mt-4 pt-3 border-t border-slate-200">
-                            <span className="text-xs font-medium text-slate-500 block mb-2">Vitamins & Minerals</span>
-                            <div className="flex flex-wrap gap-1">
-                              {selectedRecipe.nutritionInfo.vitamins.map((vitamin, i) => (
-                                <Badge key={i} variant="outline" className="bg-green-50 text-green-700 border-green-100 text-xs">
-                                  {vitamin}
+                        {selectedRecipe.culturalContext.occasions && (
+                          <div className="mt-4">
+                            <h5 className="font-medium mb-3">Occasions & Celebrations</h5>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedRecipe.culturalContext.occasions.map((occasion, i) => (
+                                <Badge key={i} variant="outline" className="py-1 px-3 bg-slate-50">
+                                  {occasion}
                                 </Badge>
                               ))}
                             </div>
@@ -687,592 +940,169 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         )}
                       </CardContent>
                     </Card>
-                    
-                    <Card className="bg-slate-50">
-                      <CardHeader className="py-3 px-4 border-b border-slate-200">
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-leaf text-green-600"></i>
-                          <CardTitle className="text-md font-medium">Dietary Benefits</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="py-4 px-4">
-                        {selectedRecipe.nutritionInfo.dietaryNotes && selectedRecipe.nutritionInfo.dietaryNotes.length > 0 ? (
-                          <div className="space-y-3">
-                            {selectedRecipe.nutritionInfo.dietaryNotes.map((note, i) => (
-                              <div key={i} className="flex items-start gap-2 p-2 bg-green-50 rounded-lg">
-                                <span className="text-green-600 mt-0.5">
-                                  <i className="fas fa-check-circle"></i>
-                                </span>
-                                <span className="text-slate-700 text-sm">{note}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-40 text-center">
-                            <i className="fas fa-seedling text-slate-300 text-3xl mb-2"></i>
-                            <p className="text-sm text-slate-500">No dietary notes available</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-slate-50">
-                      <CardHeader className="py-3 px-4 border-b border-slate-200">
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-exchange-alt text-teal-600"></i>
-                          <CardTitle className="text-md font-medium">Healthier Alternatives</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="py-4 px-4">
-                        {selectedRecipe.nutritionInfo.healthyAlternatives && selectedRecipe.nutritionInfo.healthyAlternatives.length > 0 ? (
-                          <div className="space-y-3">
-                            {selectedRecipe.nutritionInfo.healthyAlternatives.map((alternative, i) => {
-                              // Check if alternative contains "→" or "to" to identify substitution pattern
-                              const isSubstitution = alternative.includes('→') || alternative.includes(' to ') || alternative.includes('instead of');
-                              
-                              if (isSubstitution) {
-                                // Parse substitution format
-                                let original, replacement;
-                                if (alternative.includes('→')) {
-                                  [original, replacement] = alternative.split('→').map(s => s.trim());
-                                } else if (alternative.includes(' to ')) {
-                                  [original, replacement] = alternative.split(' to ').map(s => s.trim());
-                                } else if (alternative.includes('instead of')) {
-                                  const parts = alternative.split('instead of');
-                                  replacement = parts[0].trim();
-                                  original = parts[1].trim();
-                                } else {
-                                  original = alternative;
-                                  replacement = '';
-                                }
-                                
-                                return (
-                                  <div key={i} className="flex items-center p-2 bg-teal-50 rounded-lg">
-                                    <div className="flex-1 truncate text-sm text-slate-700">
-                                      {original}
-                                    </div>
-                                    <div className="mx-2 text-teal-600">
-                                      <i className="fas fa-arrow-right"></i>
-                                    </div>
-                                    <div className="flex-1 truncate text-sm font-medium text-teal-700">
-                                      {replacement}
-                                    </div>
-                                  </div>
-                                );
-                              } else {
-                                return (
-                                  <div key={i} className="p-2 bg-teal-50 rounded-lg">
-                                    <span className="text-sm text-slate-700">{alternative}</span>
-                                  </div>
-                                );
-                              }
-                            })}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-40 text-center">
-                            <i className="fas fa-carrot text-slate-300 text-3xl mb-2"></i>
-                            <p className="text-sm text-slate-500">No alternatives available</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
+                  )}
                   
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {selectedRecipe.nutritionInfo.protein && 
-                      renderNutritionBadge("Protein", selectedRecipe.nutritionInfo.protein, "medium")}
-                    
-                    {selectedRecipe.nutritionInfo.carbs && 
-                      renderNutritionBadge("Carbs", selectedRecipe.nutritionInfo.carbs, "medium")}
-                      
-                    {selectedRecipe.nutritionInfo.fats && 
-                      renderNutritionBadge("Fats", selectedRecipe.nutritionInfo.fats, "medium")}
-                    
-                    {selectedRecipe.nutritionInfo.fiber && 
-                      renderNutritionBadge("Fiber", selectedRecipe.nutritionInfo.fiber, "low")}
-                      
-                    {selectedRecipe.nutritionInfo.sugar && 
-                      renderNutritionBadge("Sugar", selectedRecipe.nutritionInfo.sugar, "high")}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <i className="fas fa-info-circle text-3xl text-slate-300 mb-3"></i>
-                  <p className="text-slate-500">Nutritional information not available for this recipe.</p>
-                </div>
-              )}
-            </TabsContent>
-            
-            {/* Tab 3: Cooking Techniques */}
-            <TabsContent value="techniques" className="space-y-6">
-              {/* Equipment Section */}
-              {selectedRecipe.equipment && selectedRecipe.equipment.length > 0 && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Required Equipment</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedRecipe.equipment.map((item, i) => (
-                      <Card key={i} className="bg-slate-50 hover:bg-slate-100 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3">
-                            <div className="bg-white p-3 rounded-full text-primary">
-                              <i className="fas fa-utensils"></i>
-                            </div>
-                            <div>
-                              <h5 className="font-medium">{item.name}</h5>
-                              {item.description && <p className="text-sm text-slate-600 mt-1">{item.description}</p>}
+                  {/* Presentation Guidance */}
+                  {selectedRecipe.presentationGuidance && (
+                    <div className="mb-6">
+                      <h4 className="text-xl font-semibold mb-4 food-gradient-text">Presentation Guidance</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Plating Suggestions */}
+                        {selectedRecipe.presentationGuidance.platingSuggestions && (
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-md flex items-center gap-2">
+                                <i className="fas fa-palette text-purple-500"></i> Plating Suggestions
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-slate-700">{selectedRecipe.presentationGuidance.platingSuggestions}</p>
+                            </CardContent>
+                          </Card>
+                        )}
+                        
+                        {/* Garnishing */}
+                        {selectedRecipe.presentationGuidance.garnishIdeas && (
+                          <Card>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-md flex items-center gap-2">
+                                <i className="fas fa-leaf text-green-500"></i> Garnish Ideas
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-slate-700">{selectedRecipe.presentationGuidance.garnishIdeas}</p>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Regional Variations */}
+                  {selectedRecipe.culturalContext.regionalVariations && selectedRecipe.culturalContext.regionalVariations.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="text-xl font-semibold mb-4 food-gradient-text">Regional Variations</h4>
+                      <div className="grid grid-cols-1 gap-4">
+                        {selectedRecipe.culturalContext.regionalVariations.map((variation, i) => (
+                          <Card key={i} className="bg-slate-50 hover:bg-slate-100 transition-colors">
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-lg">{variation.region}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-slate-700">{variation.description}</p>
                               
-                              {item.alternatives && item.alternatives.length > 0 && (
-                                <div className="mt-2">
-                                  <span className="text-xs font-medium text-slate-500">Alternatives:</span>
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {item.alternatives.map((alt, j) => (
-                                      <Badge key={j} variant="outline" className="text-xs bg-white">
-                                        {alt}
+                              {variation.uniqueIngredients && (
+                                <div className="mt-3">
+                                  <h6 className="text-sm font-medium mb-2">Unique Ingredients:</h6>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {variation.uniqueIngredients.map((ingredient, index) => (
+                                      <Badge key={index} variant="outline" className="bg-white">
+                                        {ingredient}
                                       </Badge>
                                     ))}
                                   </div>
                                 </div>
                               )}
-                              
-                              {item.difficultyToUse && (
-                                <Badge 
-                                  variant="outline" 
-                                  className={`mt-2 text-xs ${
-                                    item.difficultyToUse.toLowerCase().includes('easy') ? 'bg-green-50 text-green-700' : 
-                                    item.difficultyToUse.toLowerCase().includes('medium') ? 'bg-yellow-50 text-yellow-700' : 
-                                    'bg-red-50 text-red-700'
-                                  }`}
-                                >
-                                  {item.difficultyToUse}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {/* Ingredient Groups */}
-              {selectedRecipe.ingredientGroups && selectedRecipe.ingredientGroups.length > 0 && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Ingredient Groups</h4>
-                  <div className="space-y-4">
-                    {selectedRecipe.ingredientGroups.map((group, i) => (
-                      <div key={i} className="p-4 bg-white rounded-lg border border-slate-200">
-                        <h5 className="font-medium text-lg mb-2">{group.groupName}</h5>
-                        {group.preparationNotes && (
-                          <p className="text-sm text-slate-600 mb-3 italic">{group.preparationNotes}</p>
-                        )}
-                        <ul className="space-y-1">
-                          {group.ingredients.map((ingredient, j) => (
-                            <li key={j} className="flex items-start gap-2">
-                              <span className="text-primary mt-1">
-                                <i className="fas fa-check-circle"></i>
-                              </span>
-                              <span>{ingredient}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Technique Details */}
-              {selectedRecipe.techniqueDetails && selectedRecipe.techniqueDetails.length > 0 && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Professional Techniques</h4>
-                  <div className="space-y-4">
-                    {selectedRecipe.techniqueDetails.map((technique, i) => (
-                      <div key={i} className="p-4 bg-white rounded-lg border border-slate-200">
-                        <h5 className="font-medium text-lg text-primary mb-2">{technique.name}</h5>
-                        <p className="text-slate-700 mb-3">{technique.description}</p>
-                        
-                        {technique.visualCues && technique.visualCues.length > 0 && (
-                          <div className="mb-3">
-                            <h6 className="text-sm font-medium text-slate-700 mb-1">Visual Cues</h6>
-                            <ul className="space-y-1">
-                              {technique.visualCues.map((cue, j) => (
-                                <li key={j} className="flex items-start gap-2 text-sm">
-                                  <span className="text-green-500 mt-0.5">
-                                    <i className="fas fa-eye"></i>
-                                  </span>
-                                  <span>{cue}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {technique.commonErrors && technique.commonErrors.length > 0 && (
-                          <div>
-                            <h6 className="text-sm font-medium text-slate-700 mb-1">Common Errors</h6>
-                            <ul className="space-y-1">
-                              {technique.commonErrors.map((error, j) => (
-                                <li key={j} className="flex items-start gap-2 text-sm">
-                                  <span className="text-red-500 mt-0.5">
-                                    <i className="fas fa-exclamation-triangle"></i>
-                                  </span>
-                                  <span>{error}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Cooking Science */}
-              {selectedRecipe.cookingScience && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Science Behind the Recipe</h4>
-                  <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                    {selectedRecipe.cookingScience.keyReactions && selectedRecipe.cookingScience.keyReactions.length > 0 && (
-                      <div className="mb-4">
-                        <h5 className="font-medium mb-2">Key Reactions</h5>
-                        <ul className="space-y-2">
-                          {selectedRecipe.cookingScience.keyReactions.map((reaction, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-blue-500 mt-1">
-                                <i className="fas fa-flask"></i>
-                              </span>
-                              <span>{reaction}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.cookingScience.techniquePurpose && selectedRecipe.cookingScience.techniquePurpose.length > 0 && (
-                      <div className="mb-4">
-                        <h5 className="font-medium mb-2">Why These Techniques Work</h5>
-                        <ul className="space-y-2">
-                          {selectedRecipe.cookingScience.techniquePurpose.map((purpose, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-purple-500 mt-1">
-                                <i className="fas fa-magic"></i>
-                              </span>
-                              <span>{purpose}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.cookingScience.safetyTips && selectedRecipe.cookingScience.safetyTips.length > 0 && (
-                      <div>
-                        <h5 className="font-medium mb-2">Safety Considerations</h5>
-                        <ul className="space-y-2">
-                          {selectedRecipe.cookingScience.safetyTips.map((tip, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-red-500 mt-1">
-                                <i className="fas fa-shield-alt"></i>
-                              </span>
-                              <span>{tip}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Sensory Guidance */}
-              {selectedRecipe.sensoryGuidance && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Sensory Guide</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {selectedRecipe.sensoryGuidance.tasteProgression && selectedRecipe.sensoryGuidance.tasteProgression.length > 0 && (
-                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-                        <div className="flex items-center gap-2 mb-3">
-                          <i className="fas fa-utensils text-yellow-500"></i>
-                          <h5 className="font-medium">Taste Progression</h5>
-                        </div>
-                        <ul className="space-y-2">
-                          {selectedRecipe.sensoryGuidance.tasteProgression.map((taste, i) => (
-                            <li key={i} className="text-sm">{taste}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.sensoryGuidance.aromaIndicators && selectedRecipe.sensoryGuidance.aromaIndicators.length > 0 && (
-                      <div className="p-4 bg-green-50 rounded-lg border border-green-100">
-                        <div className="flex items-center gap-2 mb-3">
-                          <i className="fas fa-wind text-green-500"></i>
-                          <h5 className="font-medium">Aroma Indicators</h5>
-                        </div>
-                        <ul className="space-y-2">
-                          {selectedRecipe.sensoryGuidance.aromaIndicators.map((aroma, i) => (
-                            <li key={i} className="text-sm">{aroma}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.sensoryGuidance.textureDescriptors && selectedRecipe.sensoryGuidance.textureDescriptors.length > 0 && (
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                        <div className="flex items-center gap-2 mb-3">
-                          <i className="fas fa-hand-paper text-blue-500"></i>
-                          <h5 className="font-medium">Texture Profile</h5>
-                        </div>
-                        <ul className="space-y-2">
-                          {selectedRecipe.sensoryGuidance.textureDescriptors.map((texture, i) => (
-                            <li key={i} className="text-sm">{texture}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Success Indicators */}
-              {selectedRecipe.successIndicators && selectedRecipe.successIndicators.length > 0 && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Success Indicators</h4>
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-100">
-                    <ul className="space-y-2">
-                      {selectedRecipe.successIndicators.map((indicator, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className="text-green-600 mt-1">
-                            <i className="fas fa-check-circle"></i>
-                          </span>
-                          <span>{indicator}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-
-            {/* Tab 4: Cultural Context */}
-            <TabsContent value="cultural" className="space-y-6">
-              {/* Cultural Context */}
-              {selectedRecipe.culturalContext && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Cultural Context</h4>
-                  <div className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
-                    {selectedRecipe.culturalContext.origin && (
-                      <div className="mb-4">
-                        <h5 className="font-medium mb-2 flex items-center">
-                          <i className="fas fa-map-marker-alt text-red-500 mr-2"></i>
-                          Geographic Origin
-                        </h5>
-                        <p className="text-slate-700">{selectedRecipe.culturalContext.origin}</p>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.culturalContext.history && (
-                      <div className="mb-4">
-                        <h5 className="font-medium mb-2 flex items-center">
-                          <i className="fas fa-book-open text-amber-500 mr-2"></i>
-                          Historical Background
-                        </h5>
-                        <p className="text-slate-700">{selectedRecipe.culturalContext.history}</p>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.culturalContext.traditionalServing && (
-                      <div className="mb-4">
-                        <h5 className="font-medium mb-2 flex items-center">
-                          <i className="fas fa-concierge-bell text-green-500 mr-2"></i>
-                          Traditional Serving
-                        </h5>
-                        <p className="text-slate-700">{selectedRecipe.culturalContext.traditionalServing}</p>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.culturalContext.festiveRelevance && selectedRecipe.culturalContext.festiveRelevance.length > 0 && (
-                      <div>
-                        <h5 className="font-medium mb-2 flex items-center">
-                          <i className="fas fa-calendar-day text-purple-500 mr-2"></i>
-                          Festive Significance
-                        </h5>
-                        <ul className="space-y-1">
-                          {selectedRecipe.culturalContext.festiveRelevance.map((occasion, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-purple-400 mt-1">
-                                <i className="fas fa-star"></i>
-                              </span>
-                              <span>{occasion}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Presentation Guidance */}
-              {selectedRecipe.presentationGuidance && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Presentation Guide</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {selectedRecipe.presentationGuidance.platingSuggestions && selectedRecipe.presentationGuidance.platingSuggestions.length > 0 && (
-                      <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <div className="flex items-center gap-2 mb-3">
-                          <i className="fas fa-utensils text-slate-500"></i>
-                          <h5 className="font-medium">Plating Ideas</h5>
-                        </div>
-                        <ul className="space-y-2">
-                          {selectedRecipe.presentationGuidance.platingSuggestions.map((suggestion, i) => (
-                            <li key={i} className="text-sm flex items-start gap-2">
-                              <span className="text-slate-400 mt-1">•</span>
-                              <span>{suggestion}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.presentationGuidance.garnishingTips && selectedRecipe.presentationGuidance.garnishingTips.length > 0 && (
-                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
-                        <div className="flex items-center gap-2 mb-3">
-                          <i className="fas fa-leaf text-orange-500"></i>
-                          <h5 className="font-medium">Garnishing Tips</h5>
-                        </div>
-                        <ul className="space-y-2">
-                          {selectedRecipe.presentationGuidance.garnishingTips.map((tip, i) => (
-                            <li key={i} className="text-sm flex items-start gap-2">
-                              <span className="text-orange-400 mt-1">•</span>
-                              <span>{tip}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {selectedRecipe.presentationGuidance.photoTips && selectedRecipe.presentationGuidance.photoTips.length > 0 && (
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                        <div className="flex items-center gap-2 mb-3">
-                          <i className="fas fa-camera text-blue-500"></i>
-                          <h5 className="font-medium">Photography Tips</h5>
-                        </div>
-                        <ul className="space-y-2">
-                          {selectedRecipe.presentationGuidance.photoTips.map((tip, i) => (
-                            <li key={i} className="text-sm flex items-start gap-2">
-                              <span className="text-blue-400 mt-1">•</span>
-                              <span>{tip}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Meal Planning Notes */}
-              {selectedRecipe.mealPlanningNotes && selectedRecipe.mealPlanningNotes.length > 0 && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Meal Planning Suggestions</h4>
-                  <div className="p-4 bg-teal-50 rounded-lg border border-teal-100">
-                    <ul className="space-y-2">
-                      {selectedRecipe.mealPlanningNotes.map((note, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className="text-teal-500 mt-1">
-                            <i className="fas fa-calendar-check"></i>
-                          </span>
-                          <span>{note}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+              ) : (
+                <div className="text-center py-10">
+                  <i className="fas fa-globe text-4xl text-slate-300 mb-3"></i>
+                  <p className="text-slate-500">No cultural context available for this recipe.</p>
                 </div>
               )}
             </TabsContent>
             
             {/* Tab 5: YouTube Videos */}
             <TabsContent value="videos">
-              {result.youtubeVideos && result.youtubeVideos.length > 0 ? (
+              {selectedRecipe.youtubeVideos && selectedRecipe.youtubeVideos.length > 0 ? (
                 <div className="space-y-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <i className="fas fa-video text-red-600"></i>
-                    <h5 className="text-lg font-semibold food-gradient-text">Recipe Tutorial Videos</h5>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {result.youtubeVideos.map((video, index) => (
-                      <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
-                        <div className="aspect-video relative cursor-pointer group">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                    {selectedRecipe.youtubeVideos.map((video, i) => (
+                      <Card key={i} className="overflow-hidden">
+                        <div className="aspect-video bg-slate-100 relative overflow-hidden">
                           <a 
                             href={`https://www.youtube.com/watch?v=${video.videoId}`} 
-                            target="_blank" 
+                            target="_blank"
                             rel="noopener noreferrer"
                           >
                             <img 
-                              src={video.thumbnailUrl || `https://i.ytimg.com/vi/${video.videoId}/mqdefault.jpg`}
-                              alt={video.title}
-                              className="w-full h-full object-cover"
+                              src={video.thumbnailUrl} 
+                              alt={video.title} 
+                              className="w-full h-full object-cover transition-transform hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                               <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center">
-                                <i className="fas fa-play text-white text-2xl"></i>
+                                <i className="fas fa-play text-white text-xl"></i>
                               </div>
                             </div>
                           </a>
                         </div>
                         <CardContent className="p-4">
-                          <h4 className="font-medium mb-1 line-clamp-2 hover:text-primary">
-                            <a 
-                              href={`https://www.youtube.com/watch?v=${video.videoId}`} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                            >
-                              {video.title}
-                            </a>
-                          </h4>
+                          <a 
+                            href={`https://www.youtube.com/watch?v=${video.videoId}`} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-primary transition-colors"
+                          >
+                            <h4 className="font-medium text-lg line-clamp-2 mb-1">{video.title}</h4>
+                          </a>
                           <div className="flex items-center text-sm text-slate-500 mb-2">
-                            <i className="fas fa-user-circle mr-1"></i>
-                            <span>{video.channelTitle || "YouTube Channel"}</span>
+                            <span>{video.channelTitle}</span>
+                            <span className="mx-2">•</span>
+                            <span>{new Date(video.publishedAt).toLocaleDateString()}</span>
                           </div>
-                          {video.description && (
-                            <p className="text-sm text-slate-600 line-clamp-2">{video.description}</p>
-                          )}
+                          <p className="text-sm text-slate-600 line-clamp-2">{video.description}</p>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <i className="fas fa-video-slash text-3xl text-slate-300 mb-3"></i>
-                  <p className="text-slate-500">No tutorial videos available for this recipe.</p>
+                <div className="text-center py-10">
+                  <i className="fas fa-video text-4xl text-slate-300 mb-3"></i>
+                  <p className="text-slate-500">No video tutorials available for this recipe.</p>
                 </div>
               )}
             </TabsContent>
             
-            {/* Tab 4: Cooking History */}
+            {/* Tab 6: Recipe History */}
             <TabsContent value="history">
               {savedRecipes.length > 0 ? (
-                <div className="space-y-4">
-                  <h5 className="text-lg font-semibold mb-3 gradient-text">Your Cooking History</h5>
-                  <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-6">
+                  <h4 className="text-xl font-semibold mb-4">Your Recently Viewed Recipes</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {savedRecipes.map((savedRecipe, index) => (
-                      <Card key={index} className="bg-white">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h6 className="font-semibold">{savedRecipe.foodName}</h6>
-                              <p className="text-sm text-slate-500 line-clamp-1">{savedRecipe.description}</p>
-                            </div>
-                            <Button 
-                              variant="outline" 
-                              className="text-primary"
-                              onClick={() => handleLoadSavedRecipe(savedRecipe)}
-                            >
-                              <i className="fas fa-utensils mr-1"></i> Cook Again
-                            </Button>
+                      <Card 
+                        key={index}
+                        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleLoadSavedRecipe(savedRecipe)}
+                      >
+                        <div className="aspect-square bg-slate-100 relative">
+                          {/* We don't have the actual image URL from history, so using a placeholder */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-slate-800 to-slate-600 flex items-center justify-center text-white">
+                            <i className="fas fa-utensils text-4xl"></i>
+                          </div>
+                        </div>
+                        <CardContent className="p-3">
+                          <h5 className="font-medium line-clamp-1">{savedRecipe.foodName}</h5>
+                          <p className="text-xs text-slate-500 mt-1 line-clamp-2">{savedRecipe.description}</p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {savedRecipe.tags.slice(0, 2).map((tag, i) => (
+                              <Badge key={i} variant="outline" className="text-xs py-0 px-1">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {savedRecipe.tags.length > 2 && (
+                              <Badge variant="outline" className="text-xs py-0 px-1">
+                                +{savedRecipe.tags.length - 2} more
+                              </Badge>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
@@ -1280,38 +1110,21 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <i className="fas fa-history text-3xl text-slate-300 mb-3"></i>
-                  <p className="text-slate-500">No cooking history available yet. Recipes you analyze will appear here.</p>
+                <div className="text-center py-10">
+                  <i className="fas fa-history text-4xl text-slate-300 mb-3"></i>
+                  <p className="text-slate-500">No recipe history available yet. Analyze more dishes to build your history!</p>
                 </div>
               )}
             </TabsContent>
           </Tabs>
+          
+          <div className="flex justify-center mt-8">
+            <Button onClick={onTryAnother} className="rounded-full">
+              <i className="fas fa-camera mr-2"></i> Try Another Dish
+            </Button>
+          </div>
         </CardContent>
       </Card>
-      
-      <div className="text-center">
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Button 
-            variant="outline" 
-            className="bg-white hover:bg-slate-50 text-slate-700 font-medium border border-slate-300 rounded-full px-6 py-3"
-            onClick={() => {
-              // Trigger a small confetti burst when changing images
-              triggerConfetti({
-                particleCount: 50,
-                spread: 60,
-                origin: { y: 0.8 }
-              });
-              onTryAnother();
-            }}
-          >
-            <i className="fas fa-redo mr-2"></i> Try Another Image
-          </Button>
-        </motion.div>
-      </div>
     </motion.section>
   );
 }

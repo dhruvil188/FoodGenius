@@ -829,60 +829,151 @@ export default function Home() {
                 </motion.div>
                 
                 {/* Animated Recipe Output Showcase */}
-                <div className="relative mx-auto max-w-5xl rounded-2xl overflow-hidden shadow-2xl mb-16 bg-white border border-slate-200">
+                <div className="relative mx-auto max-w-5xl rounded-2xl overflow-hidden shadow-xl mb-16 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700">
                   {/* Phone Frame Header */}
-                  <div className="bg-slate-900 py-4 px-6 flex items-center">
+                  <div className="bg-black py-4 px-6 flex items-center border-b border-slate-700">
                     <div className="flex space-x-2">
                       <div className="w-3 h-3 rounded-full bg-red-500"></div>
                       <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                       <div className="w-3 h-3 rounded-full bg-green-500"></div>
                     </div>
                     <div className="flex-1 text-center text-white text-sm font-medium">
-                      dishdetective.app
+                      <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent font-bold">dishdetective.app</span>
+                    </div>
+                    <div className="flex space-x-3">
+                      <i className="fas fa-wifi text-slate-400 text-xs"></i>
+                      <i className="fas fa-battery-three-quarters text-slate-400 text-xs"></i>
                     </div>
                   </div>
                   
                   {/* Recipe Content */}
-                  <div className="flex flex-col lg:flex-row p-4 gap-6">
-                    {/* Food Image */}
+                  <div className="flex flex-col lg:flex-row p-0">
+                    {/* Food Image Column */}
                     <motion.div 
-                      className="w-full lg:w-2/5 rounded-xl overflow-hidden relative"
-                      initial={{ opacity: 0, x: -40 }}
-                      whileInView={{ opacity: 1, x: 0 }}
+                      className="w-full lg:w-5/12 relative"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.7 }}
+                      transition={{ duration: 0.5 }}
                     >
-                      <img 
-                        src="https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg" 
-                        alt="Butter Chicken Dish" 
-                        className="w-full h-[300px] object-cover"
-                      />
-                      <div className="absolute top-4 left-4 bg-black/70 text-white rounded-lg px-3 py-1 text-sm font-medium">
-                        <i className="fas fa-check-circle mr-2 text-green-400"></i>
-                        Identified: Butter Chicken
+                      {/* Toolbar with camera icon */}
+                      <div className="absolute top-0 left-0 right-0 z-10 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/80 to-transparent">
+                        <div className="flex items-center">
+                          <i className="fas fa-camera text-white mr-2"></i>
+                          <span className="text-white text-sm font-medium">Food Detector</span>
+                        </div>
+                        <motion.div 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ 
+                            delay: 0.5, 
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 20
+                          }}
+                          className="bg-green-500 text-white text-xs px-2 py-1 rounded-full flex items-center"
+                        >
+                          <i className="fas fa-check-circle mr-1"></i>
+                          <span>Analyzed</span>
+                        </motion.div>
+                      </div>
+                      
+                      {/* Main Image */}
+                      <div className="relative overflow-hidden h-full">
+                        <img 
+                          src="https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg" 
+                          alt="Butter Chicken Dish" 
+                          className="w-full h-full object-cover object-center"
+                        />
+                        
+                        {/* Image scanning effect */}
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent"
+                          initial={{ top: '-100%' }}
+                          animate={{ top: '100%' }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatType: "loop",
+                            ease: "linear"
+                          }}
+                        />
+                        
+                        {/* AI Recognition Results */}
+                        <motion.div 
+                          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent py-3 px-4"
+                          initial={{ y: 50, opacity: 0 }}
+                          whileInView={{ y: 0, opacity: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 0.2, duration: 0.5 }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-xs text-green-400 font-medium flex items-center mb-1">
+                                <i className="fas fa-check-circle mr-1"></i>
+                                <span>IDENTIFIED WITH 98% CONFIDENCE</span>
+                              </div>
+                              <h3 className="text-white text-xl font-bold">Butter Chicken</h3>
+                            </div>
+                            
+                            <motion.div
+                              className="bg-white/10 backdrop-blur-sm p-2 rounded-full"
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              <i className="fas fa-heart text-red-500"></i>
+                            </motion.div>
+                          </div>
+                          
+                          <div className="flex mt-2 gap-2">
+                            {["Indian", "Curry", "Spicy", "Popular"].map((tag, i) => (
+                              <div key={i} className="bg-white/10 backdrop-blur-sm rounded-full px-2 py-1 text-white text-xs">
+                                {tag}
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
                       </div>
                     </motion.div>
                     
-                    {/* Recipe Info with Tabs */}
-                    <div className="w-full lg:w-3/5">
-                      <Tabs defaultValue="ingredients" className="w-full">
-                        <TabsList className="w-full">
-                          <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-                          <TabsTrigger value="instructions">Steps</TabsTrigger>
-                          <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
-                          <TabsTrigger value="tips">Pro Tips</TabsTrigger>
-                        </TabsList>
-                        
-                        <AnimatePresence mode="wait">
-                          <TabsContent value="ingredients" className="mt-4">
-                            <motion.div
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -20 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Butter Chicken Ingredients</h3>
-                              <div className="space-y-2">
+                    {/* Recipe Info Column */}
+                    <div className="w-full lg:w-7/12 bg-white p-5">
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        <Tabs defaultValue="ingredients" className="w-full">
+                          <TabsList className="w-full mb-4 bg-slate-100">
+                            <TabsTrigger value="ingredients" className="text-xs sm:text-sm">Ingredients</TabsTrigger>
+                            <TabsTrigger value="instructions" className="text-xs sm:text-sm">Steps</TabsTrigger>
+                            <TabsTrigger value="nutrition" className="text-xs sm:text-sm">Nutrition</TabsTrigger>
+                            <TabsTrigger value="tips" className="text-xs sm:text-sm">Pro Tips</TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="ingredients">
+                            <div className="relative">
+                              {/* Floating "Recipe Detected" badge */}
+                              <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3, duration: 0.5 }}
+                                className="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg"
+                              >
+                                <i className="fas fa-bolt mr-1"></i>
+                                <span>AI Generated</span>
+                              </motion.div>
+                              
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-bold text-slate-800">Butter Chicken Ingredients</h3>
+                                <div className="flex items-center text-xs text-slate-500">
+                                  <i className="fas fa-clock mr-1"></i>
+                                  <span>Prep: 30min</span>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-0">
                                 {[
                                   "800g boneless chicken thighs",
                                   "1 cup plain yogurt",
@@ -893,182 +984,310 @@ export default function Home() {
                                   "4 tbsp butter",
                                   "1 large onion, finely chopped",
                                   "4 cloves garlic, minced",
-                                  "2 tbsp ginger, grated",
-                                  "2 cups tomato puree",
-                                  "1 cup heavy cream",
-                                  "Fresh cilantro for garnish"
+                                  "2 tbsp ginger, grated"
                                 ].map((ingredient, index) => (
                                   <motion.div 
                                     key={index}
-                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50"
+                                    className="flex items-center gap-3 py-2 border-b border-slate-100 group"
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ duration: 0.3, delay: index * 0.05 }}
+                                    whileHover={{ backgroundColor: 'rgba(240, 253, 244, 0.5)' }}
                                   >
-                                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 transition-all duration-300 group-hover:bg-green-500 group-hover:text-white">
                                       <i className="fas fa-check text-xs"></i>
                                     </div>
-                                    <span className="text-slate-700">{ingredient}</span>
+                                    <span className="text-slate-700 text-sm">{ingredient}</span>
                                   </motion.div>
                                 ))}
                               </div>
-                            </motion.div>
+                              
+                              <div className="mt-4 pt-2 text-right">
+                                <button className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-md font-medium hover:bg-primary/20 transition-colors">
+                                  <i className="fas fa-shopping-cart mr-1"></i>
+                                  Add to Shopping List
+                                </button>
+                              </div>
+                            </div>
                           </TabsContent>
                           
-                          <TabsContent value="instructions" className="mt-4">
-                            <motion.div
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -20 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Cooking Instructions</h3>
-                              <div className="space-y-3">
+                          <TabsContent value="instructions">
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center mb-3">
+                                <h3 className="text-lg font-bold text-slate-800">Cooking Steps</h3>
+                                <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                                  <i className="fas fa-clock mr-1"></i>
+                                  40 min cook time
+                                </span>
+                              </div>
+                              
+                              <div className="relative">
+                                {/* Timeline connector */}
+                                <div className="absolute left-4 top-5 bottom-4 w-0.5 bg-green-100"></div>
+                                
+                                {/* Steps with timeline */}
                                 {[
-                                  "In a bowl, mix yogurt, lemon juice, and spices for the marinade.",
-                                  "Add chicken pieces and marinate for at least 2 hours.",
-                                  "Heat butter in a large pan. Cook chicken until browned.",
-                                  "In the same pan, add onions, garlic, ginger. Sauté until golden.",
-                                  "Add tomato puree and simmer for 15 minutes.",
-                                  "Return chicken to the pan, add cream, and simmer for 10-15 minutes.",
-                                  "Season with salt, garnish with cilantro, and serve with naan or rice."
+                                  "Mix yogurt, lemon juice, and spices for the marinade",
+                                  "Add chicken pieces and marinate for at least 2 hours",
+                                  "Heat butter in a large pan and cook chicken until browned",
+                                  "In the same pan, add onions, garlic, ginger and sauté until golden",
+                                  "Add tomato puree and simmer for 15 minutes until sauce thickens"
                                 ].map((step, index) => (
                                   <motion.div 
                                     key={index}
-                                    className="flex gap-4 p-2"
+                                    className="flex gap-4 relative z-10 mb-4"
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3, delay: index * 0.08 }}
                                   >
-                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-medium">
+                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white border-2 border-green-400 text-green-600 flex items-center justify-center font-bold shadow-sm">
                                       {index + 1}
                                     </div>
-                                    <div className="text-slate-700">{step}</div>
+                                    <div className="bg-white rounded-lg shadow-sm p-3 border border-slate-100 flex-1">
+                                      <p className="text-slate-700 text-sm">{step}</p>
+                                    </div>
                                   </motion.div>
                                 ))}
                               </div>
-                            </motion.div>
+                              
+                              <motion.div 
+                                className="flex justify-center pt-2"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 1 }}
+                              >
+                                <button className="bg-primary text-white text-sm px-4 py-2 rounded-full shadow-md hover:bg-green-600 transition-colors">
+                                  <i className="fas fa-play-circle mr-1"></i>
+                                  Watch Video Tutorial
+                                </button>
+                              </motion.div>
+                            </div>
                           </TabsContent>
                           
-                          <TabsContent value="nutrition" className="mt-4">
-                            <motion.div
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -20 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Nutritional Information</h3>
-                              <div className="grid grid-cols-2 gap-4">
+                          <TabsContent value="nutrition">
+                            <div>
+                              <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-slate-800">Nutrition Facts</h3>
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                  Per Serving
+                                </span>
+                              </div>
+                            
+                              <div className="grid grid-cols-2 gap-3">
                                 <motion.div 
-                                  className="bg-green-50 rounded-lg p-3 relative overflow-hidden"
-                                  whileHover={{ scale: 1.03 }}
+                                  className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 relative overflow-hidden border border-green-200"
+                                  whileHover={{ scale: 1.02 }}
                                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                                 >
                                   <div className="absolute right-0 top-0 opacity-10">
-                                    <i className="fas fa-fire text-5xl text-green-500"></i>
+                                    <i className="fas fa-fire text-4xl text-green-500"></i>
                                   </div>
                                   <p className="text-xs uppercase font-semibold text-green-700">Calories</p>
-                                  <p className="text-2xl font-bold text-green-800">580</p>
-                                  <p className="text-xs text-green-600">per serving</p>
+                                  <div className="flex items-end">
+                                    <p className="text-2xl font-bold text-green-800">580</p>
+                                    <p className="text-xs text-green-600 ml-1 mb-1">kcal</p>
+                                  </div>
+                                  <div className="w-full h-1 bg-green-200 rounded-full mt-1">
+                                    <motion.div 
+                                      className="h-full bg-green-500 rounded-full"
+                                      initial={{ width: 0 }}
+                                      animate={{ width: '65%' }}
+                                      transition={{ delay: 0.5, duration: 0.8 }}
+                                    />
+                                  </div>
                                 </motion.div>
                                 
                                 <motion.div 
-                                  className="bg-blue-50 rounded-lg p-3 relative overflow-hidden"
-                                  whileHover={{ scale: 1.03 }}
+                                  className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 relative overflow-hidden border border-blue-200"
+                                  whileHover={{ scale: 1.02 }}
                                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                                 >
                                   <div className="absolute right-0 top-0 opacity-10">
-                                    <i className="fas fa-drumstick-bite text-5xl text-blue-500"></i>
+                                    <i className="fas fa-drumstick-bite text-4xl text-blue-500"></i>
                                   </div>
                                   <p className="text-xs uppercase font-semibold text-blue-700">Protein</p>
-                                  <p className="text-2xl font-bold text-blue-800">42g</p>
-                                  <p className="text-xs text-blue-600">excellent source</p>
+                                  <div className="flex items-end">
+                                    <p className="text-2xl font-bold text-blue-800">42g</p>
+                                    <p className="text-xs text-blue-600 ml-1 mb-1">84% DV</p>
+                                  </div>
+                                  <div className="w-full h-1 bg-blue-200 rounded-full mt-1">
+                                    <motion.div 
+                                      className="h-full bg-blue-500 rounded-full"
+                                      initial={{ width: 0 }}
+                                      animate={{ width: '84%' }}
+                                      transition={{ delay: 0.6, duration: 0.8 }}
+                                    />
+                                  </div>
                                 </motion.div>
                                 
                                 <motion.div 
-                                  className="bg-amber-50 rounded-lg p-3 relative overflow-hidden"
-                                  whileHover={{ scale: 1.03 }}
+                                  className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-3 relative overflow-hidden border border-amber-200"
+                                  whileHover={{ scale: 1.02 }}
                                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                                 >
                                   <div className="absolute right-0 top-0 opacity-10">
-                                    <i className="fas fa-bread-slice text-5xl text-amber-500"></i>
+                                    <i className="fas fa-bread-slice text-4xl text-amber-500"></i>
                                   </div>
                                   <p className="text-xs uppercase font-semibold text-amber-700">Carbs</p>
-                                  <p className="text-2xl font-bold text-amber-800">18g</p>
-                                  <p className="text-xs text-amber-600">low-carb friendly</p>
+                                  <div className="flex items-end">
+                                    <p className="text-2xl font-bold text-amber-800">18g</p>
+                                    <p className="text-xs text-amber-600 ml-1 mb-1">6% DV</p>
+                                  </div>
+                                  <div className="w-full h-1 bg-amber-200 rounded-full mt-1">
+                                    <motion.div 
+                                      className="h-full bg-amber-500 rounded-full"
+                                      initial={{ width: 0 }}
+                                      animate={{ width: '6%' }}
+                                      transition={{ delay: 0.7, duration: 0.8 }}
+                                    />
+                                  </div>
                                 </motion.div>
                                 
                                 <motion.div 
-                                  className="bg-purple-50 rounded-lg p-3 relative overflow-hidden"
-                                  whileHover={{ scale: 1.03 }}
+                                  className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 relative overflow-hidden border border-purple-200"
+                                  whileHover={{ scale: 1.02 }}
                                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                                 >
                                   <div className="absolute right-0 top-0 opacity-10">
-                                    <i className="fas fa-cheese text-5xl text-purple-500"></i>
+                                    <i className="fas fa-cheese text-4xl text-purple-500"></i>
                                   </div>
                                   <p className="text-xs uppercase font-semibold text-purple-700">Fats</p>
-                                  <p className="text-2xl font-bold text-purple-800">38g</p>
-                                  <p className="text-xs text-purple-600">primarily from dairy</p>
+                                  <div className="flex items-end">
+                                    <p className="text-2xl font-bold text-purple-800">38g</p>
+                                    <p className="text-xs text-purple-600 ml-1 mb-1">58% DV</p>
+                                  </div>
+                                  <div className="w-full h-1 bg-purple-200 rounded-full mt-1">
+                                    <motion.div 
+                                      className="h-full bg-purple-500 rounded-full"
+                                      initial={{ width: 0 }}
+                                      animate={{ width: '58%' }}
+                                      transition={{ delay: 0.8, duration: 0.8 }}
+                                    />
+                                  </div>
                                 </motion.div>
                               </div>
-                            </motion.div>
+                              
+                              <div className="mt-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <div className="text-xs text-slate-500 font-medium uppercase mb-2">Health Insights</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {[
+                                    { text: "High Protein", color: "bg-blue-100 text-blue-800" },
+                                    { text: "Low Carb", color: "bg-green-100 text-green-800" },
+                                    { text: "Gluten Free", color: "bg-amber-100 text-amber-800" },
+                                    { text: "Keto Friendly", color: "bg-purple-100 text-purple-800" }
+                                  ].map((badge, i) => (
+                                    <span key={i} className={`text-xs px-2 py-1 rounded-full ${badge.color}`}>
+                                      {badge.text}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
                           </TabsContent>
                           
-                          <TabsContent value="tips" className="mt-4">
-                            <motion.div
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -20 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <h3 className="text-lg font-semibold text-slate-800 mb-3">Chef's Pro Tips</h3>
+                          <TabsContent value="tips">
+                            <div>
+                              <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-slate-800">Chef's Pro Tips</h3>
+                                <div className="flex items-center">
+                                  <i className="fas fa-star text-yellow-400"></i>
+                                  <i className="fas fa-star text-yellow-400"></i>
+                                  <i className="fas fa-star text-yellow-400"></i>
+                                  <i className="fas fa-star text-yellow-400"></i>
+                                  <i className="fas fa-star-half-alt text-yellow-400"></i>
+                                </div>
+                              </div>
+                              
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="bg-amber-50 border border-amber-100 rounded-lg p-3 mb-4"
+                              >
+                                <div className="flex gap-2 items-start">
+                                  <div className="text-amber-500 mt-1">
+                                    <i className="fas fa-lightbulb text-lg"></i>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-amber-800 text-sm">Chef's Secret</h4>
+                                    <p className="text-amber-700 text-sm">For authentic flavor, add kasuri methi (dried fenugreek leaves) in the last 5 minutes of cooking.</p>
+                                  </div>
+                                </div>
+                              </motion.div>
+                              
                               <div className="space-y-3">
                                 {[
-                                  "For deeper flavor, toast whole spices and grind them fresh",
-                                  "The longer the marinating time, the more tender and flavorful the chicken",
-                                  "Kasuri methi (dried fenugreek leaves) adds authentic flavor - add at the end",
+                                  "Toast whole spices and grind them fresh for deeper flavor",
+                                  "Marinate chicken overnight for more tender and flavorful results",
                                   "For a lighter version, substitute half the cream with coconut milk",
                                   "Let the dish rest for 10 minutes before serving to allow flavors to meld"
                                 ].map((tip, index) => (
                                   <motion.div 
                                     key={index}
-                                    className="flex items-start gap-3 p-2"
+                                    className="flex items-start gap-3 p-2 border-b border-slate-100"
                                     initial={{ opacity: 0, x: 10 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.3, delay: index * 0.08 }}
+                                    transition={{ duration: 0.3, delay: 0.3 + index * 0.08 }}
                                   >
-                                    <div className="mt-1 text-amber-500">
-                                      <i className="fas fa-lightbulb"></i>
+                                    <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
+                                      <i className="fas fa-check text-xs"></i>
                                     </div>
-                                    <p className="text-slate-700">{tip}</p>
+                                    <p className="text-slate-700 text-sm">{tip}</p>
                                   </motion.div>
                                 ))}
                               </div>
-                            </motion.div>
+                              
+                              <motion.div 
+                                className="mt-4 flex justify-between"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.8 }}
+                              >
+                                <button className="text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-md hover:bg-slate-200 transition-colors">
+                                  <i className="fas fa-share-alt mr-1"></i>
+                                  Share Recipe
+                                </button>
+                                
+                                <button className="text-xs bg-primary text-white px-3 py-1.5 rounded-md hover:bg-green-600 transition-colors">
+                                  <i className="fas fa-bookmark mr-1"></i>
+                                  Save Recipe
+                                </button>
+                              </motion.div>
+                            </div>
                           </TabsContent>
-                        </AnimatePresence>
-                      </Tabs>
-                      
-                      {/* Interactive Elements Hint */}
-                      <motion.div 
-                        className="mt-4 text-center"
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ delay: 1, duration: 0.5 }}
-                      >
-                        <p className="text-sm text-slate-500 italic">
-                          <i className="fas fa-mouse-pointer text-primary mr-1"></i> 
-                          Explore tabs above to see more recipe details
-                        </p>
+                        </Tabs>
                       </motion.div>
                     </div>
                   </div>
                   
-                  {/* AI Generation Indicator */}
-                  <div className="bg-slate-100 py-3 px-6 text-sm text-slate-500 flex items-center justify-center">
+                  {/* AI Generation Footer with Stats */}
+                  <div className="bg-slate-900 py-3 px-6 text-xs text-slate-400 flex items-center justify-between border-t border-slate-700">
                     <div className="flex items-center">
-                      <i className="fas fa-robot mr-2 text-primary"></i>
-                      <span>Generated by AI in 2.8 seconds</span>
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ 
+                          delay: 0.5, 
+                          type: "spring",
+                          stiffness: 260,
+                          damping: 20
+                        }}
+                        className="w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center mr-2"
+                      >
+                        <i className="fas fa-robot text-white"></i>
+                      </motion.div>
+                      <span>Generated by Gemini AI in 2.8 seconds</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center">
+                        <i className="fas fa-database mr-1 text-slate-500"></i>
+                        <span>5,280+ recipes</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-globe-americas mr-1 text-slate-500"></i>
+                        <span>120+ cuisines</span>
+                      </div>
                     </div>
                   </div>
                 </div>

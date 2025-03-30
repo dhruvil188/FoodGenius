@@ -1,4 +1,4 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -9,8 +9,12 @@ import {
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { getMockAnalysisResponse } from "./mockData";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Flag to enable development mode with mock data when API quota is exceeded
+  const USE_MOCK_DATA_ON_QUOTA_EXCEEDED = true;
+  
   // Initialize the Google Generative AI API with the user-provided key
   const genAI = new GoogleGenerativeAI(
     process.env.GEMINI_API_KEY || "AIzaSyBPdE26_ZZpOg5Ru91QJ9Ihp1TodQKQsZo"
@@ -153,6 +157,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Check if it's a quota or rate limit error (status code 429)
         if (apiError.status === 429) {
+          // If in development mode, use mock data for demo purposes when quota is exceeded
+          if (USE_MOCK_DATA_ON_QUOTA_EXCEEDED) {
+            console.log("API quota exceeded, using mock data in development mode");
+            
+            // Use mock recipe data for carbonara pasta with a notice about mock mode
+            const mockResponse = getMockAnalysisResponse();
+            mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE)`;
+            mockResponse.description = `${mockResponse.description} [Using fallback demo data due to API quota limits]`;
+            
+            return res.status(200).json(mockResponse);
+          }
+          
+          // In production mode, return the actual error
           return res.status(429).json({
             error: "API quota exceeded",
             details: "The Gemini API quota has been exceeded. Please try again later or upgrade your API plan.",
@@ -190,6 +207,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: err instanceof Error ? err.message : "Unknown error" 
       });
     }
+  });
+
+  // Add a demo API endpoint for development/testing without consuming API quota
+  app.get("/api/analyze-image/demo", (_req: Request, res: Response) => {
+    console.log("Using demo mode data for development");
+    
+    // Get mock data and mark it as demo mode
+    const mockResponse = getMockAnalysisResponse();
+    mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE)`;
+    mockResponse.description = `${mockResponse.description} [Using demo data]`;
+    
+    return res.status(200).json(mockResponse);
   });
 
   const httpServer = createServer(app);

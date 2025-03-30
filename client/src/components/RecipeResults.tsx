@@ -301,7 +301,24 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         <div className="min-w-4 pt-0.5">
                           <i className="fas fa-check-circle text-primary"></i>
                         </div>
-                        <span>{ingredient}</span>
+                        <span>
+                          {/* Parse JSON if ingredient looks like a stringified object */}
+                          {ingredient.startsWith('{') && ingredient.endsWith('}') ? 
+                            (() => {
+                              try {
+                                const parsedIngredient = JSON.parse(ingredient);
+                                // Return the most relevant property or stringify the object nicely
+                                return parsedIngredient.name || parsedIngredient.text || 
+                                       parsedIngredient.description || parsedIngredient.ingredient || 
+                                       JSON.stringify(parsedIngredient, null, 2);
+                              } catch (e) {
+                                // If parsing fails, just return the original string
+                                return ingredient;
+                              }
+                            })() 
+                            : ingredient
+                          }
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -337,7 +354,22 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         </div>
                         <div>
                           <p className={completedSteps[selectedRecipeIndex]?.has(i) ? 'line-through opacity-70' : ''}>
-                            {step}
+                            {/* Parse JSON if step looks like a stringified object */}
+                            {step.startsWith('{') && step.endsWith('}') ? 
+                              (() => {
+                                try {
+                                  const parsedStep = JSON.parse(step);
+                                  // Return the most relevant property or stringify the object nicely
+                                  return parsedStep.text || parsedStep.description || 
+                                         parsedStep.instruction || parsedStep.step || 
+                                         JSON.stringify(parsedStep, null, 2);
+                                } catch (e) {
+                                  // If parsing fails, just return the original string
+                                  return step;
+                                }
+                              })() 
+                              : step
+                            }
                           </p>
                         </div>
                       </motion.li>

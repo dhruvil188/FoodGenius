@@ -147,15 +147,20 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
-      <Card className="bg-white rounded-2xl shadow-lg border-slate-200 overflow-hidden">
-        <CardContent className="p-6">
+      <Card className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+        <CardContent className="p-8">
           <motion.h3 
-            className="text-2xl font-serif font-semibold mb-6 text-center gradient-text"
+            className="text-2xl font-semibold mb-8 text-center"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Upload or Capture Your Dish
+            <span className="relative">
+              <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
+                Upload or Capture Your Dish
+              </span>
+              <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-600/40 to-primary/40 rounded-full"></span>
+            </span>
           </motion.h3>
           
           <Tabs 
@@ -167,19 +172,19 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               setFileName(null);
             }}
           >
-            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 p-1 mb-8">
+            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 p-1.5 mb-8 border border-slate-200">
               <TabsTrigger 
                 value="upload" 
-                className="flex items-center justify-center gap-2 rounded-full data-[state=active]:shadow-lg"
+                className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-2.5"
               >
-                <i className="fas fa-cloud-upload-alt"></i>
+                <i className="fas fa-cloud-upload-alt text-primary"></i>
                 <span className="font-medium">Upload Image</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="camera" 
-                className="flex items-center justify-center gap-2 rounded-full data-[state=active]:shadow-lg"
+                className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-2.5"
               >
-                <i className="fas fa-camera"></i>
+                <i className="fas fa-camera text-primary"></i>
                 <span className="font-medium">Take Photo</span>
               </TabsTrigger>
             </TabsList>
@@ -400,23 +405,32 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               whileTap={{ scale: 0.95 }}
             >
               <Button 
-                className="bg-primary text-white font-medium rounded-full px-8 py-6 shadow-md hover:shadow-lg hover:bg-primary/90 transition-all"
+                className="bg-gradient-to-r from-primary to-emerald-600 text-white font-medium rounded-full px-10 py-6 shadow-md hover:shadow-lg hover:from-primary/95 hover:to-emerald-600/95 transition-all"
                 disabled={!selectedImage || isAnalyzing}
                 onClick={handleAnalyzeImage}
                 size="lg"
               >
                 {isAnalyzing ? (
-                  <div className="flex items-center gap-2">
-                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Analyzing...
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-5 h-5">
+                      <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-25 animate-ping"></div>
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <span className="font-semibold tracking-wide">Analyzing Dish...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <i className="fas fa-magic text-lg"></i>
-                    <span>Analyze Image</span>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <i className="fas fa-magic text-lg"></i>
+                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                      </span>
+                    </div>
+                    <span className="font-semibold tracking-wide">Analyze This Dish</span>
                   </div>
                 )}
               </Button>

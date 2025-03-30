@@ -4,7 +4,6 @@ import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
-import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,7 +35,6 @@ export default function Header() {
         </motion.div>
         
         <div className="flex items-center gap-2 md:gap-4">
-          <ModeToggle />
           <Button 
             variant="outline"
             size="sm"

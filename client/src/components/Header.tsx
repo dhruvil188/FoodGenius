@@ -1,59 +1,62 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { Logo } from './Logo';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useLocation } from 'wouter';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { scrollY } = useScroll();
+  const isMobile = useIsMobile();
+  const [location, navigate] = useLocation();
+  
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 50);
+  });
+  
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <i className="fas fa-utensils text-2xl text-primary"></i>
-          <h1 className="text-2xl font-semibold font-heading">
-            <span className="gradient-text">Dish</span>
-            <span className="text-slate-700">Detective</span>
-          </h1>
-        </div>
+    <motion.header 
+      className={`fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 transition-all duration-300 ${
+        isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-transparent'
+      }`}
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <motion.div 
+          onClick={() => navigate('/')}
+          className="cursor-pointer"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Logo size={isMobile ? 'small' : 'medium'} />
+        </motion.div>
         
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        <div className="flex items-center gap-2 md:gap-4">
+          <ModeToggle />
           <Button 
-            variant="ghost" 
+            variant="outline"
             size="sm"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-slate-600"
+            className="hidden md:flex items-center gap-2 font-medium"
+            onClick={() => navigate('/history')}
           >
-            <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+            <i className="fas fa-history"></i>
+            <span>View History</span>
+          </Button>
+          
+          <Button 
+            size="sm"
+            className="flex items-center gap-2 font-medium bg-primary text-white hover:bg-primary/90"
+            onClick={() => navigate('/')}
+          >
+            <i className="fas fa-camera"></i>
+            <span className="hidden md:inline">Analyze Dish</span>
           </Button>
         </div>
-        
-        <nav className="hidden md:block">
-          <ul className="flex space-x-6 text-sm">
-            <li><a href="#" className="text-slate-600 hover:text-primary transition-colors">How it works</a></li>
-            <li><a href="#" className="text-slate-600 hover:text-primary transition-colors">Recipe Collection</a></li>
-            <li>
-              <Button className="bg-primary hover:bg-primary-dark rounded-full">
-                Sign Up
-              </Button>
-            </li>
-          </ul>
-        </nav>
       </div>
-      
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white py-4 px-4 shadow-md">
-          <ul className="space-y-3">
-            <li><a href="#" className="block text-slate-600 hover:text-primary transition-colors py-2">How it works</a></li>
-            <li><a href="#" className="block text-slate-600 hover:text-primary transition-colors py-2">Recipe Collection</a></li>
-            <li className="pt-2">
-              <Button className="bg-primary hover:bg-primary-dark rounded-full w-full">
-                Sign Up
-              </Button>
-            </li>
-          </ul>
-        </div>
-      )}
-    </header>
+    </motion.header>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
 
 interface RecipeResultsProps {
   result: AnalyzeImageResponse;
@@ -59,14 +60,41 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     }
   };
   
+  // Reference to the checkbox elements for confetti
+  const stepRefs = useRef<(HTMLElement | null)[]>([]);
+  
   const toggleStepCompletion = (recipeIndex: number, stepIndex: number) => {
     setCompletedSteps(prev => {
       const newCompletedSteps = { ...prev };
-      if (newCompletedSteps[recipeIndex].has(stepIndex)) {
-        newCompletedSteps[recipeIndex].delete(stepIndex);
-      } else {
+      const isCompleting = !newCompletedSteps[recipeIndex].has(stepIndex);
+      
+      if (isCompleting) {
+        // Adding a completed step
         newCompletedSteps[recipeIndex].add(stepIndex);
+        
+        // Trigger confetti from the checkbox element if available
+        const stepElement = stepRefs.current[stepIndex];
+        if (stepElement) {
+          fireConfettiFromElement(stepElement);
+        }
+        
+        // If this completes the recipe, celebrate
+        const totalSteps = selectedRecipe.instructions.length;
+        if (newCompletedSteps[recipeIndex].size === totalSteps) {
+          setTimeout(() => {
+            celebrateRecipeCompletion();
+            toast({
+              title: "Recipe Complete! 🎉",
+              description: "Great job! You've completed all the cooking steps.",
+              duration: 5000,
+            });
+          }, 300);
+        }
+      } else {
+        // Removing a completed step
+        newCompletedSteps[recipeIndex].delete(stepIndex);
       }
+      
       return newCompletedSteps;
     });
   };
@@ -141,11 +169,11 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
               />
             </div>
             <div className="w-full md:w-2/3">
-              <Badge variant="success" className="mb-2 bg-green-100 text-green-800 hover:bg-green-200">
+              <Badge variant="outline" className="mb-2 bg-green-100 text-green-800 hover:bg-green-200">
                 Identified Dish
               </Badge>
               
-              <h3 className="text-2xl font-bold font-heading mb-2">{result.foodName}</h3>
+              <h3 className="text-2xl font-bold font-heading mb-2 food-gradient-text">{result.foodName}</h3>
               <p className="text-slate-600 mb-4">{result.description}</p>
               
               <div className="flex flex-wrap gap-2 mb-4">
@@ -242,14 +270,14 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
           
           {/* Tabbed Interface */}
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-6">
-            <TabsList className="grid grid-cols-3 mb-6">
-              <TabsTrigger value="instructions" className="flex items-center">
+            <TabsList className="grid grid-cols-3 mb-6 p-1 rounded-full bg-slate-100 dark:bg-slate-800">
+              <TabsTrigger value="instructions" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-list-ol mr-2"></i> Instructions
               </TabsTrigger>
-              <TabsTrigger value="nutrition" className="flex items-center">
+              <TabsTrigger value="nutrition" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-apple-alt mr-2"></i> Nutrition
               </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center">
+              <TabsTrigger value="history" className="flex items-center rounded-full data-[state=active]:shadow-md">
                 <i className="fas fa-history mr-2"></i> History
               </TabsTrigger>
             </TabsList>
@@ -266,7 +294,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
               
               <div className="space-y-6">
                 <div>
-                  <h5 className="text-lg font-semibold mb-3">Ingredients</h5>
+                  <h5 className="text-lg font-semibold mb-3 food-gradient-text">Ingredients</h5>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {selectedRecipe.ingredients.map((ingredient, i) => (
                       <li key={i} className="flex items-start gap-2">
@@ -282,7 +310,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                 <Separator />
                 
                 <div>
-                  <h5 className="text-lg font-semibold mb-3">Cooking Instructions</h5>
+                  <h5 className="text-lg font-semibold mb-3 food-gradient-text">Cooking Instructions</h5>
                   <ol className="space-y-4">
                     {selectedRecipe.instructions.map((step, i) => (
                       <motion.li 
@@ -294,7 +322,13 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         }`}
                         whileHover={{ x: 5 }}
                       >
-                        <div className="mt-0.5">
+                        <div 
+                          className="mt-0.5"
+                          ref={(el) => {
+                            // Store reference to the checkbox container
+                            stepRefs.current[i] = el;
+                          }}
+                        >
                           <Checkbox 
                             checked={completedSteps[selectedRecipeIndex]?.has(i)}
                             onCheckedChange={() => toggleStepCompletion(selectedRecipeIndex, i)}
@@ -314,7 +348,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                 {/* Side Dish Suggestions */}
                 {selectedRecipe.sideDishSuggestions && selectedRecipe.sideDishSuggestions.length > 0 && (
                   <div className="mt-8">
-                    <h5 className="text-lg font-semibold mb-3">Recommended Side Dishes</h5>
+                    <h5 className="text-lg font-semibold mb-3 food-gradient-text">Recommended Side Dishes</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {selectedRecipe.sideDishSuggestions.map((sideDish, i) => (
                         <Card key={i} className="bg-slate-50">
@@ -454,7 +488,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             <TabsContent value="history">
               {savedRecipes.length > 0 ? (
                 <div className="space-y-4">
-                  <h5 className="text-lg font-semibold mb-3">Your Cooking History</h5>
+                  <h5 className="text-lg font-semibold mb-3 gradient-text">Your Cooking History</h5>
                   <div className="grid grid-cols-1 gap-4">
                     {savedRecipes.map((savedRecipe, index) => (
                       <Card key={index} className="bg-white">
@@ -489,13 +523,26 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       </Card>
       
       <div className="text-center">
-        <Button 
-          variant="outline" 
-          className="bg-white hover:bg-slate-50 text-slate-700 font-medium border border-slate-300 rounded-full px-6 py-3"
-          onClick={onTryAnother}
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <i className="fas fa-redo mr-2"></i> Try Another Image
-        </Button>
+          <Button 
+            variant="outline" 
+            className="bg-white hover:bg-slate-50 text-slate-700 font-medium border border-slate-300 rounded-full px-6 py-3"
+            onClick={() => {
+              // Trigger a small confetti burst when changing images
+              triggerConfetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { y: 0.8 }
+              });
+              onTryAnother();
+            }}
+          >
+            <i className="fas fa-redo mr-2"></i> Try Another Image
+          </Button>
+        </motion.div>
       </div>
     </motion.section>
   );

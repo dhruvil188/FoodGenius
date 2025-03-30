@@ -27,7 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const featuredFoods = [
   {
     name: "Avocado Toast",
-    image: "https://images.unsplash.com/photo-1588137378783-f23d106a4d76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80",
+    image: "https://images.pexels.com/photos/704569/pexels-photo-704569.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     tags: ["Breakfast", "Healthy", "Quick"],
     recipe: {
       foodName: "Avocado Toast",
@@ -71,7 +71,7 @@ const featuredFoods = [
   },
   {
     name: "Berry Smoothie Bowl",
-    image: "https://images.unsplash.com/photo-1637226743029-3022d652fdd5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1025&q=80",
+    image: "https://images.pexels.com/photos/1099680/pexels-photo-1099680.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     tags: ["Breakfast", "Healthy", "Vegan"],
     recipe: {
       foodName: "Berry Smoothie Bowl",
@@ -112,7 +112,7 @@ const featuredFoods = [
   },
   {
     name: "Butter Chicken",
-    image: "https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=884&q=80",
+    image: "https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     tags: ["Indian", "Spicy", "Dinner"],
     recipe: {
       foodName: "Butter Chicken",

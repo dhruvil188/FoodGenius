@@ -38,6 +38,15 @@ export default function Header() {
           <Button 
             variant="outline"
             className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
+            onClick={() => navigate('/library')}
+          >
+            <i className="fas fa-book mr-2"></i>
+            Recipe Library
+          </Button>
+          
+          <Button 
+            variant="outline"
+            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
             onClick={() => navigate('/history')}
           >
             <i className="fas fa-history mr-2"></i>

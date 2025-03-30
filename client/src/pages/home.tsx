@@ -828,37 +828,49 @@ export default function Home() {
                   </p>
                 </motion.div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                   {[
                     {
                       icon: "fa-camera-retro",
                       title: "Instant Image Analysis",
-                      description: "Our AI can recognize thousands of dishes from a single photo, giving you accurate results in seconds"
+                      description: "Our AI can recognize thousands of dishes from a single photo, giving you accurate results in seconds",
+                      bgColor: "bg-green-100",
+                      iconColor: "text-green-600"
                     },
                     {
-                      icon: "fa-utensils",
+                      icon: "fa-book-open",
                       title: "Complete Recipes",
-                      description: "Get detailed ingredients, step-by-step instructions, and cooking times for any dish"
+                      description: "Get detailed ingredients, step-by-step instructions, and cooking times for any dish",
+                      bgColor: "bg-blue-100",
+                      iconColor: "text-blue-600"
                     },
                     {
                       icon: "fa-chart-pie",
                       title: "Nutrition Facts",
-                      description: "Understand the nutritional profile of your meals with detailed macro and micronutrient information"
+                      description: "Understand the nutritional profile of your meals with detailed macro and micronutrient information",
+                      bgColor: "bg-purple-100",
+                      iconColor: "text-purple-600"
                     },
                     {
                       icon: "fa-sliders-h",
                       title: "Recipe Variations",
-                      description: "Customize recipes to your taste with spicy, mild, or dietary-specific variations"
+                      description: "Customize recipes to your taste with spicy, mild, or dietary-specific variations",
+                      bgColor: "bg-amber-100",
+                      iconColor: "text-amber-600"
                     },
                     {
                       icon: "fa-lightbulb",
                       title: "Cooking Tips",
-                      description: "Learn professional techniques and avoid common mistakes with expert cooking advice"
+                      description: "Learn professional techniques and avoid common mistakes with expert cooking advice",
+                      bgColor: "bg-rose-100",
+                      iconColor: "text-rose-600"
                     },
                     {
                       icon: "fa-mobile-alt",
                       title: "Use Anywhere",
-                      description: "Take photos directly or upload existing images from your gallery, works on any device"
+                      description: "Take photos directly or upload existing images from your gallery, works on any device",
+                      bgColor: "bg-cyan-100",
+                      iconColor: "text-cyan-600"
                     }
                   ].map((feature, index) => (
                     <motion.div 
@@ -869,12 +881,24 @@ export default function Home() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: index * 0.05 }}
                     >
-                      <div className="w-14 h-14 bg-gradient-to-br from-primary/10 to-emerald-400/10 rounded-xl flex items-center justify-center mb-5 relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div className="absolute -inset-1 bg-gradient-to-br from-emerald-500/20 to-primary/20 blur-md opacity-0 group-hover:opacity-70 transition-opacity"></div>
-                        <i className={`fas ${feature.icon} text-xl text-primary group-hover:scale-110 transition-transform relative z-10`}></i>
+                      <div className={`w-16 h-16 ${feature.bgColor} rounded-xl flex items-center justify-center mb-5 relative overflow-hidden group`}>
+                        <div className="absolute inset-0 bg-white/30 rounded-lg m-1"></div>
+                        <div className="absolute inset-0 bg-gradient-radial from-white/20 via-transparent to-transparent"></div>
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.08, 1],
+                          }}
+                          transition={{ 
+                            duration: 3,
+                            repeat: Infinity,
+                            repeatType: "loop"
+                          }}
+                          className="relative z-10"
+                        >
+                          <i className={`fas ${feature.icon} text-2xl ${feature.iconColor}`}></i>
+                        </motion.div>
                       </div>
-                      <h3 className="text-lg font-semibold mb-3 bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">{feature.title}</h3>
+                      <h3 className="text-lg font-semibold mb-3 text-slate-800">{feature.title}</h3>
                       <p className="text-slate-600 text-sm">{feature.description}</p>
                     </motion.div>
                   ))}

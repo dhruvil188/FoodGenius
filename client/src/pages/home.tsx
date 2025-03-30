@@ -387,36 +387,15 @@ export default function Home() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Navigation */}
-            <header className="border-b border-slate-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-              <div className="container max-w-7xl mx-auto px-4 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Logo size="small" animated={false} />
-                    <span className="font-bold text-xl text-slate-800">Dish<span className="text-primary">Detective</span></span>
-                  </div>
-                  <nav className="hidden md:flex items-center gap-8">
-                    <a href="#features" className="text-slate-600 hover:text-primary font-medium transition-colors">Features</a>
-                    <a href="#how-it-works" className="text-slate-600 hover:text-primary font-medium transition-colors">How It Works</a>
-                    <a href="#testimonials" className="text-slate-600 hover:text-primary font-medium transition-colors">Testimonials</a>
-                  </nav>
-                  <div className="flex items-center gap-3">
-                    <Button 
-                      variant="outline"
-                      className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
-                    >
-                      View History
-                    </Button>
-                    <Button 
-                      onClick={scrollToUpload} 
-                      className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
-                    >
-                      Analyze Dish
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </header>
+            {/* Navigation buttons */}
+            <div className="container max-w-7xl mx-auto px-4 py-4 mt-4 flex justify-center">
+              <Button 
+                onClick={scrollToUpload} 
+                className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
+              >
+                Analyze Dish
+              </Button>
+            </div>
 
             {/* Hero Section */}
             <section className="pt-16 lg:pt-24 pb-16 overflow-hidden relative">
@@ -925,79 +904,8 @@ export default function Home() {
             </section>
 
             {/* Footer */}
-            <footer className="bg-slate-900 text-white py-12">
-              <div className="container max-w-7xl mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <Logo size="small" animated={false} />
-                      <span className="font-bold text-xl">Dish<span className="text-primary">Detective</span></span>
-                    </div>
-                    <p className="text-slate-400 text-sm mb-4">
-                      AI-powered food recognition application that turns photos into detailed recipes instantly.
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      © {new Date().getFullYear()} Dish Detective. All rights reserved.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-4 text-lg">Features</h4>
-                    <ul className="space-y-2 text-slate-400 text-sm">
-                      <li><a href="#" className="hover:text-primary transition-colors">Image Analysis</a></li>
-                      <li><a href="#" className="hover:text-primary transition-colors">Recipe Library</a></li>
-                      <li><a href="#" className="hover:text-primary transition-colors">Nutritional Info</a></li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-4 text-lg">About</h4>
-                    <ul className="space-y-2 text-slate-400 text-sm">
-                      <li><a href="#" className="hover:text-primary transition-colors">Our Story</a></li>
-                      <li><a href="#how-it-works" className="hover:text-primary transition-colors">How It Works</a></li>
-                      <li><a href="#testimonials" className="hover:text-primary transition-colors">Testimonials</a></li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-semibold mb-4 text-lg">Contact</h4>
-                    <ul className="space-y-2 text-slate-400 text-sm">
-                      <li><a href="#" className="hover:text-primary transition-colors">Support</a></li>
-                      <li><a href="#" className="hover:text-primary transition-colors">Feedback</a></li>
-                      <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="border-t border-slate-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-                  <div className="flex space-x-6 mb-4 md:mb-0">
-                    <a href="#" className="text-slate-400 hover:text-primary transition-colors text-sm">
-                      Terms of Service
-                    </a>
-                    <a href="#" className="text-slate-400 hover:text-primary transition-colors text-sm">
-                      Privacy Policy
-                    </a>
-                    <a href="#" className="text-slate-400 hover:text-primary transition-colors text-sm">
-                      Cookie Policy
-                    </a>
-                  </div>
-                  <div className="flex space-x-4">
-                    <a href="#" className="text-slate-400 hover:text-primary transition-colors">
-                      <i className="fab fa-twitter text-lg"></i>
-                    </a>
-                    <a href="#" className="text-slate-400 hover:text-primary transition-colors">
-                      <i className="fab fa-instagram text-lg"></i>
-                    </a>
-                    <a href="#" className="text-slate-400 hover:text-primary transition-colors">
-                      <i className="fab fa-facebook text-lg"></i>
-                    </a>
-                    <a href="#" className="text-slate-400 hover:text-primary transition-colors">
-                      <i className="fab fa-pinterest text-lg"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </footer>
+            {/* Spacer to replace footer */}
+            <div className="pb-12"></div>
           </motion.div>
         )}
         

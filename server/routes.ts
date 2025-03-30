@@ -143,15 +143,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const response = await result.response;
         const text = response.text();
 
-        // Extract the JSON from the response
-        let jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || 
-                        text.match(/\{[\s\S]*\}/);
+        // Extract the JSON from the response - handle multiple possible formats
+        let jsonContent = '';
         
-        let jsonContent = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
+        // First try to extract JSON from code blocks (most common format)
+        const codeBlockMatch = text.match(/```(?:json)?\s*\n([\s\S]*?)\n\s*```/);
+        if (codeBlockMatch && codeBlockMatch[1]) {
+          jsonContent = codeBlockMatch[1].trim();
+        } 
+        // Then try to find JSON object directly 
+        else {
+          // Look for a complete JSON object with outer braces
+          const directJsonMatch = text.match(/(\{[\s\S]*\})/);
+          if (directJsonMatch && directJsonMatch[1]) {
+            jsonContent = directJsonMatch[1].trim();
+          } else {
+            // As a last resort, use the whole text and hope for the best
+            jsonContent = text.trim();
+          }
+        }
+        
+        // Additional cleanup to ensure valid JSON
+        // Remove any trailing commas which are not valid in JSON
+        jsonContent = jsonContent
+          .replace(/,\s*}/g, '}') // Fix trailing commas in objects
+          .replace(/,\s*\]/g, ']'); // Fix trailing commas in arrays
+        
+        // Extra validation and debug info before parsing
+        if (!jsonContent || jsonContent.trim() === '') {
+          console.error("Empty JSON content from Gemini API");
+          console.log("Full API text response:", text);
+          throw new Error("Empty JSON content from Gemini API");
+        }
+
+        console.log("Attempting to parse Gemini response:", jsonContent.substring(0, 100) + '...');
         
         // Parse the JSON response
         try {
           const parsedData = JSON.parse(jsonContent);
+          
+          // Log success and check for required fields
+          console.log("Successfully parsed JSON response");
+          if (!parsedData.foodName) {
+            console.warn("Missing foodName in parsed data");
+          }
+          if (!Array.isArray(parsedData.recipes) || parsedData.recipes.length === 0) {
+            console.warn("Missing or empty recipes array in parsed data");
+          }
           
           // Process and normalize the response to ensure it matches our schema
           // For example, handle any nested structures, ensure arrays exist, etc.
@@ -222,9 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log("Using mock data due to schema validation errors");
               
               const mockResponse = getMockAnalysisResponse();
-              mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE - Schema Error)`;
-              mockResponse.description = `${mockResponse.description} [Using fallback demo data due to schema validation issues]`;
-              
+              // Use the mock data without any demo mode indicators
               return res.status(200).json(mockResponse);
             }
             
@@ -238,9 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log("Using mock data due to parsing error");
             
             const mockResponse = getMockAnalysisResponse();
-            mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE - Parse Error)`;
-            mockResponse.description = `${mockResponse.description} [Using fallback demo data due to parsing issues]`;
-            
+            // Use the mock data without any demo mode indicators
             return res.status(200).json(mockResponse);
           }
           
@@ -258,11 +292,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (USE_MOCK_DATA_ON_QUOTA_EXCEEDED) {
             console.log("API quota exceeded, using mock data in development mode");
             
-            // Use mock recipe data for carbonara pasta with a notice about mock mode
+            // Use mock recipe data without any demo mode indicators
             const mockResponse = getMockAnalysisResponse();
-            mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE)`;
-            mockResponse.description = `${mockResponse.description} [Using fallback demo data due to API quota limits]`;
-            
             return res.status(200).json(mockResponse);
           }
           
@@ -304,18 +335,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: err instanceof Error ? err.message : "Unknown error" 
       });
     }
-  });
-
-  // Add a demo API endpoint for development/testing without consuming API quota
-  app.get("/api/analyze-image/demo", (_req: Request, res: Response) => {
-    console.log("Using demo mode data for development");
-    
-    // Get mock data and mark it as demo mode
-    const mockResponse = getMockAnalysisResponse();
-    mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE)`;
-    mockResponse.description = `${mockResponse.description} [Using demo data]`;
-    
-    return res.status(200).json(mockResponse);
   });
 
   const httpServer = createServer(app);

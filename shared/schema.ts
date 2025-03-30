@@ -76,6 +76,13 @@ export const nutritionInfoSchema = z.object({
   vitamins: z.array(z.string()).optional(),
   healthyAlternatives: z.array(z.string()).optional(),
   dietaryNotes: z.array(z.string()).optional(),
+  macronutrientRatio: z.object({
+    protein: z.number().optional(),
+    carbs: z.number().optional(),
+    fats: z.number().optional(),
+  }).optional(),
+  allergens: z.array(z.string()).optional(),
+  dietaryCompliance: z.array(z.string()).optional(),
 });
 
 export type NutritionInfo = z.infer<typeof nutritionInfoSchema>;
@@ -108,18 +115,82 @@ export const youtubeVideoSchema = z.object({
 
 export type YoutubeVideo = z.infer<typeof youtubeVideoSchema>;
 
+export const equipmentItemSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  alternatives: z.array(z.string()).optional(),
+  difficultyToUse: z.string().optional(),
+});
+
+export type EquipmentItem = z.infer<typeof equipmentItemSchema>;
+
+export const techniqueDetailSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  visualCues: z.array(z.string()).optional(),
+  commonErrors: z.array(z.string()).optional(),
+});
+
+export type TechniqueDetail = z.infer<typeof techniqueDetailSchema>;
+
+export const culturalContextSchema = z.object({
+  origin: z.string().optional(),
+  history: z.string().optional(),
+  traditionalServing: z.string().optional(),
+  festiveRelevance: z.array(z.string()).optional(),
+});
+
+export type CulturalContext = z.infer<typeof culturalContextSchema>;
+
+export const presentationGuidanceSchema = z.object({
+  platingSuggestions: z.array(z.string()).optional(),
+  garnishingTips: z.array(z.string()).optional(),
+  photoTips: z.array(z.string()).optional(),
+});
+
+export type PresentationGuidance = z.infer<typeof presentationGuidanceSchema>;
+
+export const cookingScienceSchema = z.object({
+  keyReactions: z.array(z.string()).optional(),
+  techniquePurpose: z.array(z.string()).optional(),
+  safetyTips: z.array(z.string()).optional(),
+});
+
+export type CookingScience = z.infer<typeof cookingScienceSchema>;
+
+export const sensoryGuidanceSchema = z.object({
+  tasteProgression: z.array(z.string()).optional(),
+  aromaIndicators: z.array(z.string()).optional(),
+  textureDescriptors: z.array(z.string()).optional(),
+});
+
+export type SensoryGuidance = z.infer<typeof sensoryGuidanceSchema>;
+
+export const ingredientGroupSchema = z.object({
+  groupName: z.string(),
+  ingredients: z.array(z.string()),
+  preparationNotes: z.string().optional(),
+});
+
+export type IngredientGroup = z.infer<typeof ingredientGroupSchema>;
+
 export const recipeSchema = z.object({
   title: z.string(),
   description: z.string(),
   prepTime: z.string().optional(),
   cookTime: z.string().optional(),
   totalTime: z.string().optional(),
+  activeTime: z.string().optional(),
+  passiveTime: z.string().optional(),
   servings: z.number().optional(),
   servingSize: z.string().optional(),
   difficulty: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  equipment: z.array(equipmentItemSchema).optional(),
+  ingredientGroups: z.array(ingredientGroupSchema).optional(),
   ingredients: z.array(z.string()),
   instructions: z.array(z.string()),
+  techniqueDetails: z.array(techniqueDetailSchema).optional(),
   chefTips: z.array(z.string()).optional(),
   commonMistakes: z.array(z.string()).optional(),
   storageInstructions: z.string().optional(),
@@ -129,6 +200,12 @@ export const recipeSchema = z.object({
   nutritionInfo: nutritionInfoSchema.optional(),
   variations: z.array(recipeVariationSchema).optional(),
   sideDishSuggestions: z.array(sideDishSchema).optional(),
+  culturalContext: culturalContextSchema.optional(),
+  presentationGuidance: presentationGuidanceSchema.optional(),
+  cookingScience: cookingScienceSchema.optional(),
+  sensoryGuidance: sensoryGuidanceSchema.optional(),
+  mealPlanningNotes: z.array(z.string()).optional(),
+  successIndicators: z.array(z.string()).optional(),
 });
 
 export const analyzeImageResponseSchema = z.object({

@@ -72,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate content using Gemini API
       const prompt = `
-      You are a professional culinary consultant and food expert specializing in detailed recipe analysis.
+      You are a professional culinary consultant, food scientist, and master chef specializing in detailed recipe analysis and development.
       
       Analyze this food image in extreme detail and provide:
       
@@ -83,20 +83,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       4. A single comprehensive, authentic recipe for how to make this dish. Include:
          - Creative and descriptive title that captures the recipe's unique aspects
          - Detailed description highlighting what makes this version special
-         - Precise preparation time, cooking time, and total time
+         - Precise preparation time, cooking time, and total time (also include active vs passive time breakdown)
          - Exact servings with portion size information
          - Specific difficulty level with brief explanation of what makes it that level
          - Comprehensive dietary tags including allergies (gluten-free, dairy-free, nut-free, etc.)
-         - Complete ingredients list with precise measurements (both metric and imperial), prep notes for each ingredient, and quality indicators
+         - Complete list of required equipment and tools with descriptions and alternatives
+         - Complete ingredients list organized by preparation stage or component with precise measurements, prep notes, and quality indicators
          - Step-by-step instructions with detailed professional chef techniques, visual cues for doneness, and time estimates for each step
-         - Complete nutritional profile (calories, protein, carbs, fats, fiber, sugar, sodium, vitamins)
-         - Healthy alternatives for key ingredients with specific substitution ratios and how they affect the final dish
-         - Detailed dietary notes (if high in particular nutrients, good for specific diets or health conditions)
-         - Recipe variations (spicy, buttery & rich, and non-spicy versions with precise adjustments and flavor profiles)
+         - Technique details explaining complex cooking methods with visual cues and common errors
+         - Complete nutritional profile with macronutrient breakdown, allergens, and dietary compliance information
+         - Cultural context including origin, history, traditional serving customs, and festive relevance
+         - Plating and presentation guidance with garnishing tips and photography suggestions
+         - Science behind the recipe explaining key reactions and techniques
+         - Sensory guidance describing taste progression, aroma indicators, and texture descriptors
+         - Success indicators showing how to recognize when each step is done correctly
+         - Healthy alternatives for key ingredients with specific substitution ratios
+         - Detailed dietary notes and meal planning suggestions
+         - Recipe variations with precise adjustments and flavor profiles
          - Expert chef tips and common mistakes to avoid
          - Storage instructions and reheating methods
          - Wine or beverage pairing suggestions
-         - Complementary side dishes (name, description, preparation time, why they pair well)
+         - Complementary side dishes with preparation details
       
       Format your response as a JSON object with the following structure:
       {
@@ -109,18 +116,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
             "description": "Detailed recipe description with what makes it unique",
             "prepTime": "Precise prep time",
             "cookTime": "Precise cook time",
-            "totalTime": "Total time", 
+            "totalTime": "Total time",
+            "activeTime": "Time requiring active cooking",
+            "passiveTime": "Time not requiring active attention",
             "servings": number,
             "servingSize": "Description of portion size",
             "difficulty": "Difficulty level with brief explanation",
             "tags": ["dietary restriction", "allergy info"],
-            "ingredients": ["Detailed ingredient with measurement, prep note, and quality indicators"],
-            "instructions": ["Detailed step with technique, visual cues, and time"],
+            "equipment": [
+              {
+                "name": "Equipment name",
+                "description": "What it's used for in this recipe",
+                "alternatives": ["Alternative tools if available"],
+                "difficultyToUse": "How challenging this tool is to use properly"
+              }
+            ],
+            "ingredientGroups": [
+              {
+                "groupName": "Component or preparation stage name",
+                "ingredients": ["Detailed ingredients with measurements"],
+                "preparationNotes": "Special notes about preparing this group"
+              }
+            ],
+            "ingredients": ["Complete list of all ingredients with measurements"],
+            "instructions": ["Detailed steps with technique information"],
+            "techniqueDetails": [
+              {
+                "name": "Technique name",
+                "description": "Detailed explanation of the technique",
+                "visualCues": ["How to tell when done correctly"],
+                "commonErrors": ["Mistakes to avoid with this technique"]
+              }
+            ],
             "chefTips": ["Professional cooking tips"],
             "commonMistakes": ["Mistakes to avoid"],
             "storageInstructions": "How to store and for how long",
             "reheatingMethods": "Best ways to reheat",
             "beveragePairings": ["Complementary drink suggestions"],
+            "successIndicators": ["How to know each critical step is done correctly"],
             "nutritionInfo": {
               "calories": number,
               "protein": "amount in grams",
@@ -131,22 +164,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               "sodium": "amount in mg",
               "vitamins": ["key vitamins and minerals present"],
               "healthyAlternatives": ["specific alternative with substitution ratio"],
-              "dietaryNotes": ["detailed note about nutritional benefits"]
+              "dietaryNotes": ["detailed note about nutritional benefits"],
+              "macronutrientRatio": {
+                "protein": number as percentage,
+                "carbs": number as percentage,
+                "fats": number as percentage
+              },
+              "allergens": ["Common allergens present in the recipe"],
+              "dietaryCompliance": ["Diets this recipe complies with"]
             },
             "variations": [
               {
-                "type": "spicy",
-                "description": "Detailed description of spicy version",
-                "adjustments": ["precise ingredient adjustments with measurements"]
-              },
-              {
-                "type": "buttery",
-                "description": "Detailed description of rich and buttery version",
-                "adjustments": ["precise ingredient adjustments with measurements"]
-              },
-              {
-                "type": "non-spicy",
-                "description": "Detailed description of mild version",
+                "type": "variation type",
+                "description": "Detailed description of this variation",
                 "adjustments": ["precise ingredient adjustments with measurements"]
               }
             ],
@@ -157,7 +187,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 "preparationTime": "Precise preparation time",
                 "pairingReason": "Why this complements the main dish"
               }
-            ]
+            ],
+            "culturalContext": {
+              "origin": "Geographic origin of the dish",
+              "history": "Brief history of the dish's development",
+              "traditionalServing": "How it's traditionally served",
+              "festiveRelevance": ["Holidays or celebrations associated with this dish"]
+            },
+            "presentationGuidance": {
+              "platingSuggestions": ["Professional plating ideas"],
+              "garnishingTips": ["Effective garnishing techniques"],
+              "photoTips": ["How to take appealing photos of the dish"]
+            },
+            "cookingScience": {
+              "keyReactions": ["Important chemical/cooking reactions"],
+              "techniquePurpose": ["Scientific reasons for specific techniques"],
+              "safetyTips": ["Food safety considerations"]
+            },
+            "sensoryGuidance": {
+              "tasteProgression": ["How flavors develop during eating"],
+              "aromaIndicators": ["What smells indicate doneness or quality"],
+              "textureDescriptors": ["Detailed texture profiles and how to achieve them"]
+            },
+            "mealPlanningNotes": ["Suggestions for incorporating into meal plans"]
           }
         ]
       }

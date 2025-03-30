@@ -673,108 +673,143 @@ export const expandedRecipes: AnalyzeImageResponse[] = [
         difficulty: "Intermediate",
         tags: ["Indian", "Curry", "Chicken", "Creamy", "Aromatic"],
         ingredients: [
-          "2 cups Greek yogurt (full-fat preferred)",
-          "1 English cucumber (or 2 Persian cucumbers)",
-          "2-3 cloves garlic, minced or grated",
-          "2 tablespoons extra virgin olive oil, plus more for drizzling",
-          "1 tablespoon fresh lemon juice",
-          "2 tablespoons fresh dill, finely chopped",
-          "1 tablespoon fresh mint, finely chopped (optional)",
-          "1/2 teaspoon sea salt, or to taste",
-          "1/4 teaspoon freshly ground black pepper"
+          "For the marinade:",
+          "1.5 pounds (700g) boneless, skinless chicken thighs, cut into chunks",
+          "1 cup plain yogurt",
+          "2 tablespoons lemon juice",
+          "3 cloves garlic, minced",
+          "1 tablespoon ginger, grated",
+          "2 teaspoons garam masala",
+          "1 teaspoon ground turmeric",
+          "1 teaspoon ground cumin",
+          "1 teaspoon Kashmiri red chili powder (or regular chili powder)",
+          "1 teaspoon salt",
+          
+          "For the sauce:",
+          "4 tablespoons unsalted butter, divided",
+          "1 large onion, finely chopped",
+          "1 tablespoon ginger, grated",
+          "4 cloves garlic, minced",
+          "1 green chili, minced (optional)",
+          "2 teaspoons ground coriander",
+          "1 tablespoon garam masala",
+          "1 teaspoon ground cumin",
+          "14 oz (400g) tomato puree or passata",
+          "1 tablespoon tomato paste",
+          "1 teaspoon Kashmiri red chili powder (or to taste)",
+          "1 cup heavy cream",
+          "1 tablespoon sugar",
+          "Salt to taste",
+          "2 tablespoons fresh cilantro, chopped (plus more for garnish)",
+          "1 tablespoon dried fenugreek leaves (kasoori methi)"
         ],
         instructions: [
-          "If your Greek yogurt isn't thick enough, place it in a cheesecloth-lined strainer set over a bowl and let it drain in the refrigerator for 1-2 hours.",
-          "Peel the cucumber if desired (traditional Greek tzatziki often leaves the peel on if using unwaxed cucumbers). Cut in half lengthwise and scoop out the seeds with a spoon.",
-          "Grate the cucumber using the large holes of a box grater.",
-          "Place the grated cucumber in a clean kitchen towel or several layers of cheesecloth. Squeeze firmly to remove as much liquid as possible.",
-          "In a medium bowl, combine the drained yogurt, squeezed cucumber, minced garlic, olive oil, lemon juice, dill, mint (if using), salt, and pepper.",
-          "Mix well and taste for seasoning, adjusting with more salt, pepper, or lemon juice as needed.",
-          "Cover and refrigerate for at least 2 hours before serving to allow the flavors to meld.",
-          "Before serving, drizzle with a little extra olive oil and garnish with additional fresh herbs if desired."
+          "For the marinade:",
+          "In a large bowl, combine yogurt, lemon juice, garlic, ginger, garam masala, turmeric, cumin, chili powder, and salt.",
+          "Add chicken pieces to the marinade and mix well to coat. Cover and refrigerate for at least 4 hours, preferably overnight.",
+          
+          "For the sauce:",
+          "In a large heavy-bottomed pot or Dutch oven, melt 2 tablespoons of butter over medium heat.",
+          "Add the onions and cook until soft and translucent, about 5-6 minutes.",
+          "Add the ginger and garlic, and cook for another 1-2 minutes until fragrant.",
+          "Add the green chili (if using), ground coriander, garam masala, and cumin. Cook for 30 seconds to toast the spices.",
+          "Add the tomato puree and tomato paste. Simmer for 15-20 minutes until the sauce thickens and takes on a deeper color.",
+          "While the sauce is simmering, cook the marinated chicken:",
+          "Preheat your oven to 450°F (230°C) or heat your grill to medium-high.",
+          "Remove chicken from the marinade, shaking off excess. Discard the remaining marinade.",
+          "For oven method: arrange chicken pieces on a baking sheet lined with foil and bake for 15 minutes until slightly charred on the edges.",
+          "For stovetop method: heat 1 tablespoon of butter in a large skillet over medium-high heat and cook the chicken in batches until browned and cooked through, about 8-10 minutes.",
+          "Transfer the cooked chicken to the simmering sauce.",
+          "Reduce heat to low and stir in the heavy cream, remaining 1 tablespoon of butter, and sugar.",
+          "Let simmer for 8-10 minutes on low heat. Adjust salt to taste.",
+          "Crush the dried fenugreek leaves between your palms and add to the curry. Stir well.",
+          "Turn off the heat and add the fresh cilantro, reserving some for garnish.",
+          "Let the curry rest for 5-10 minutes before serving.",
+          "Serve hot with steamed basmati rice, naan bread, and additional cilantro for garnish."
         ],
         chefTips: [
-          "The key to thick, authentic tzatziki is removing excess moisture from both the yogurt and cucumber",
-          "Use full-fat Greek yogurt for the creamiest texture and richest flavor",
-          "Let the tzatziki sit in the fridge for at least 2 hours (preferably overnight) for the best flavor development",
-          "The garlic flavor intensifies as it sits, so you might want to start with less and add more to taste"
+          "For the most authentic flavor, cook the chicken in a tandoor or grill it to get charred edges before adding to the sauce",
+          "Marinating the chicken overnight is key for the most tender, flavorful results",
+          "Dried fenugreek leaves (kasoori methi) are essential for authentic butter chicken flavor and shouldn't be skipped",
+          "Let the finished dish rest for at least 10 minutes before serving to allow the flavors to meld"
         ],
         commonMistakes: [
-          "Not draining the cucumber well enough, which makes the tzatziki watery",
-          "Using regular yogurt instead of Greek yogurt, resulting in runny tzatziki",
-          "Adding too much garlic initially - remember the flavor gets stronger as it sits",
-          "Over-seasoning before letting the flavors develop"
+          "Not giving the sauce enough time to simmer and develop flavor",
+          "Using low-fat yogurt in the marinade, which can curdle more easily",
+          "Adding all the spices at once rather than layering them at different stages",
+          "Rushing the cooking process - butter chicken needs slow, gentle heat to develop its rich flavor"
         ],
         nutritionInfo: {
-          calories: 85,
-          protein: "5g",
-          carbs: "3g",
-          fats: "6g",
-          fiber: "0.5g",
-          sugar: "2g",
-          sodium: "120mg",
+          calories: 480,
+          protein: "35g",
+          carbs: "12g",
+          fats: "32g",
+          fiber: "2g",
+          sugar: "8g",
+          sodium: "620mg",
           vitamins: [
-            "Vitamin A: 2% DV",
-            "Vitamin C: 5% DV",
-            "Calcium: 8% DV"
+            "Vitamin A: 25% DV",
+            "Vitamin C: 10% DV",
+            "Calcium: 15% DV",
+            "Iron: 20% DV"
           ],
           healthyAlternatives: [
-            "Use low-fat Greek yogurt to reduce calories and fat",
-            "For a dairy-free version, use coconut yogurt (though this won't be traditional)",
-            "Add grated carrots or radishes for extra nutrition and color"
+            "Use boneless, skinless chicken breast instead of thighs to reduce fat",
+            "Substitute light coconut milk for some or all of the heavy cream",
+            "Use Greek yogurt instead of heavy cream for a tangier, lower-fat sauce"
           ],
           dietaryNotes: [
-            "Excellent source of probiotics from yogurt",
-            "Naturally gluten-free",
-            "Low in carbohydrates and suitable for many low-carb diets"
+            "Naturally gluten-free when served with rice or gluten-free naan",
+            "High in protein from chicken",
+            "Contains anti-inflammatory properties from turmeric and ginger"
           ]
         },
         variations: [
           {
-            type: "spicy",
-            description: "A version with added heat",
+            type: "vegetarian",
+            description: "A plant-based version using paneer cheese",
             adjustments: [
-              "Add 1/2 teaspoon of red pepper flakes or Aleppo pepper",
-              "Include 1 finely diced jalapeño with seeds removed",
-              "Mix in 1/2 teaspoon of hot paprika"
+              "Replace chicken with 1.5 pounds (700g) of paneer cheese cut into cubes",
+              "Add 1 cup of mixed vegetables like peas, bell peppers, and carrots",
+              "Reduce marinating time to 1 hour since paneer doesn't need tenderizing"
             ]
           },
           {
-            type: "herbed",
-            description: "An extra-aromatic version with more herbs",
+            type: "coconut",
+            description: "A coconut-based version with South Indian influences",
             adjustments: [
-              "Double the amount of fresh dill and mint",
-              "Add 1 tablespoon of fresh oregano",
-              "Include 1 tablespoon of fresh parsley"
+              "Replace heavy cream with 1 cup full-fat coconut milk",
+              "Add 1 teaspoon curry leaves (fresh or dried)",
+              "Include 2 tablespoons unsweetened shredded coconut in the sauce"
             ]
           }
         ],
         sideDishSuggestions: [
           {
-            name: "Warm Pita Bread",
-            description: "Soft Greek-style pita bread, warmed and cut into triangles",
-            preparationTime: "5 minutes",
-            pairingReason: "The classic vehicle for enjoying tzatziki as a dip"
+            name: "Garlic Naan",
+            description: "Soft, pillowy Indian flatbread brushed with garlic butter",
+            preparationTime: "30 minutes (if making from scratch)",
+            pairingReason: "Perfect for scooping up the rich, flavorful sauce"
           },
           {
-            name: "Grilled Souvlaki Skewers",
-            description: "Skewers of marinated grilled meat or vegetables",
-            preparationTime: "30 minutes (plus marinating time)",
-            pairingReason: "Tzatziki is the traditional accompaniment to souvlaki"
+            name: "Jeera Rice (Cumin Rice)",
+            description: "Fragrant basmati rice flavored with cumin seeds",
+            preparationTime: "25 minutes",
+            pairingReason: "The aromatic rice complements the creamy curry without competing with its flavors"
           },
           {
-            name: "Fresh Vegetable Crudités",
-            description: "Assorted fresh vegetables like bell peppers, carrots, and cucumber",
+            name: "Cucumber Raita",
+            description: "Cooling yogurt dip with cucumber, mint, and spices",
             preparationTime: "10 minutes",
-            pairingReason: "A healthy, crisp option for enjoying the creamy dip"
+            pairingReason: "Provides a refreshing contrast to the rich, spiced curry"
           }
         ],
-        storageInstructions: "Store in an airtight container in the refrigerator for up to 3 days. The garlic flavor will intensify over time.",
-        reheatingMethods: "Tzatziki is served cold and does not require reheating.",
+        storageInstructions: "Store in an airtight container in the refrigerator for up to 3 days. The flavor will actually improve overnight as the spices meld.",
+        reheatingMethods: "Reheat gently in a saucepan over low heat, stirring occasionally. Add a splash of cream if the sauce has thickened too much. Microwaving is acceptable but use medium power and stir halfway through.",
         beveragePairings: [
-          "Dry white Greek wine such as Assyrtiko",
-          "Ouzo - traditional Greek anise-flavored aperitif",
-          "Light lager beer"
+          "Indian Kingfisher or Taj Mahal lager beer",
+          "Riesling or Gewürztraminer - slightly sweet white wines that balance the spices",
+          "Lassi - traditional Indian yogurt-based drink, either sweet or mango-flavored"
         ]
       }
     ]

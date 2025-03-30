@@ -387,15 +387,8 @@ export default function Home() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Navigation buttons */}
-            <div className="container max-w-7xl mx-auto px-4 py-4 mt-4 flex justify-center">
-              <Button 
-                onClick={scrollToUpload} 
-                className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
-              >
-                Analyze Dish
-              </Button>
-            </div>
+            {/* Top padding for content */}
+            <div className="pt-16"></div>
 
             {/* Hero Section */}
             <section className="pt-16 lg:pt-24 pb-16 overflow-hidden relative">

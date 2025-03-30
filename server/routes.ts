@@ -153,13 +153,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const parsedData = JSON.parse(jsonContent);
           
-          // Validate the response against our schema
-          const validatedResponse = analyzeImageResponseSchema.parse(parsedData);
+          // Process and normalize the response to ensure it matches our schema
+          // For example, handle any nested structures, ensure arrays exist, etc.
+          const normalizedData = {
+            ...parsedData,
+            recipes: parsedData.recipes?.map((recipe: any) => ({
+              ...recipe,
+              // Ensure required fields have defaults if missing
+              servings: recipe.servings || 4,
+              ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+              instructions: Array.isArray(recipe.instructions) ? recipe.instructions : [],
+              // Handle variations edge cases (if it exists but isn't in expected format)
+              variations: Array.isArray(recipe.variations) ? recipe.variations.map((v: any) => ({
+                type: v.type || 'spicy',
+                description: v.description || '',
+                adjustments: Array.isArray(v.adjustments) ? v.adjustments : []
+              })) : [],
+              // Handle nutrition info edge cases
+              nutritionInfo: recipe.nutritionInfo ? {
+                ...recipe.nutritionInfo,
+                // Handle calories whether it's a number or string containing a number
+                calories: typeof recipe.nutritionInfo.calories === 'number' ? 
+                  recipe.nutritionInfo.calories : 
+                  (typeof recipe.nutritionInfo.calories === 'string' ? 
+                    parseInt(recipe.nutritionInfo.calories, 10) || 0 : 0),
+                // Ensure required fields exist with proper formats
+                protein: recipe.nutritionInfo.protein?.toString() || "0g",
+                carbs: recipe.nutritionInfo.carbs?.toString() || "0g",
+                fats: recipe.nutritionInfo.fats?.toString() || "0g",
+                fiber: recipe.nutritionInfo.fiber?.toString() || "0g",
+                sugar: recipe.nutritionInfo.sugar?.toString() || "0g",
+                // Handle optional fields
+                sodium: recipe.nutritionInfo.sodium?.toString() || undefined,
+                vitamins: Array.isArray(recipe.nutritionInfo.vitamins) ? 
+                  recipe.nutritionInfo.vitamins : [],
+                // Handle complex structures that might come as arrays or objects
+                healthyAlternatives: Array.isArray(recipe.nutritionInfo.healthyAlternatives) ? 
+                  recipe.nutritionInfo.healthyAlternatives.map((alt: any) => 
+                    typeof alt === 'string' ? alt : 
+                    (alt.ingredient && alt.alternative ? 
+                      `${alt.ingredient} → ${alt.alternative} (${alt.effect || 'alternative'})` : 
+                      JSON.stringify(alt)
+                    )
+                  ) : [],
+                dietaryNotes: Array.isArray(recipe.nutritionInfo.dietaryNotes) ? 
+                  recipe.nutritionInfo.dietaryNotes.map((note: any) => typeof note === 'string' ? note : JSON.stringify(note)) : []
+              } : {
+                calories: 0,
+                protein: "0g",
+                carbs: "0g",
+                fats: "0g",
+                fiber: "0g",
+                sugar: "0g",
+                healthyAlternatives: [],
+                dietaryNotes: []
+              }
+            })) || []
+          };
           
-          return res.status(200).json(validatedResponse);
+          // Validate the response against our schema
+          try {
+            const validatedResponse = analyzeImageResponseSchema.parse(normalizedData);
+            return res.status(200).json(validatedResponse);
+          } catch (validationErr) {
+            console.error("Schema validation error:", validationErr);
+            
+            if (USE_MOCK_DATA_ON_QUOTA_EXCEEDED) {
+              console.log("Using mock data due to schema validation errors");
+              
+              const mockResponse = getMockAnalysisResponse();
+              mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE - Schema Error)`;
+              mockResponse.description = `${mockResponse.description} [Using fallback demo data due to schema validation issues]`;
+              
+              return res.status(200).json(mockResponse);
+            }
+            
+            throw validationErr;
+          }
         } catch (err) {
           console.error("Error parsing Gemini API response:", err);
           console.log("Raw response:", text);
+          
+          if (USE_MOCK_DATA_ON_QUOTA_EXCEEDED) {
+            console.log("Using mock data due to parsing error");
+            
+            const mockResponse = getMockAnalysisResponse();
+            mockResponse.foodName = `${mockResponse.foodName} (DEMO MODE - Parse Error)`;
+            mockResponse.description = `${mockResponse.description} [Using fallback demo data due to parsing issues]`;
+            
+            return res.status(200).json(mockResponse);
+          }
           
           return res.status(500).json({ 
             error: "Could not parse the AI response properly",

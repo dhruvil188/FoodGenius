@@ -341,6 +341,28 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                 
                 <Separator />
                 
+                {/* Chef Tips Section if available */}
+                {selectedRecipe.chefTips && selectedRecipe.chefTips.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <i className="fas fa-lightbulb text-amber-500"></i>
+                      <h5 className="text-lg font-semibold food-gradient-text">Chef's Pro Tips</h5>
+                    </div>
+                    <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                      <ul className="space-y-2">
+                        {selectedRecipe.chefTips.map((tip, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-amber-500 mt-1">
+                              <i className="fas fa-star"></i>
+                            </span>
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h5 className="text-lg font-semibold mb-3 food-gradient-text">Cooking Instructions</h5>
                   <ol className="space-y-4">
@@ -418,13 +440,83 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                   </ol>
                 </div>
                 
+                {/* Common Mistakes to Avoid */}
+                {selectedRecipe.commonMistakes && selectedRecipe.commonMistakes.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <i className="fas fa-exclamation-triangle text-orange-500"></i>
+                      <h5 className="text-lg font-semibold food-gradient-text">Common Mistakes to Avoid</h5>
+                    </div>
+                    <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                      <ul className="space-y-2">
+                        {selectedRecipe.commonMistakes.map((mistake, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-red-500 mt-1">
+                              <i className="fas fa-times-circle"></i>
+                            </span>
+                            <span>{mistake}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {/* Storage & Reheating */}
+                {(selectedRecipe.storageInstructions || selectedRecipe.reheatingMethods) && (
+                  <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedRecipe.storageInstructions && (
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center gap-2 mb-2">
+                          <i className="fas fa-archive text-blue-600"></i>
+                          <h5 className="font-semibold">Storage Instructions</h5>
+                        </div>
+                        <p className="text-slate-700">{selectedRecipe.storageInstructions}</p>
+                      </div>
+                    )}
+                    
+                    {selectedRecipe.reheatingMethods && (
+                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                        <div className="flex items-center gap-2 mb-2">
+                          <i className="fas fa-temperature-high text-orange-600"></i>
+                          <h5 className="font-semibold">Reheating Methods</h5>
+                        </div>
+                        <p className="text-slate-700">{selectedRecipe.reheatingMethods}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Beverage Pairings */}
+                {selectedRecipe.beveragePairings && selectedRecipe.beveragePairings.length > 0 && (
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <i className="fas fa-wine-glass-alt text-purple-600"></i>
+                      <h5 className="text-lg font-semibold food-gradient-text">Beverage Pairings</h5>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedRecipe.beveragePairings.map((beverage, i) => (
+                          <Badge 
+                            key={i} 
+                            variant="outline" 
+                            className="bg-white border border-purple-200 text-purple-800 py-1.5 px-3"
+                          >
+                            <i className="fas fa-glass-cheers mr-1"></i> {beverage}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Side Dish Suggestions */}
                 {selectedRecipe.sideDishSuggestions && selectedRecipe.sideDishSuggestions.length > 0 && (
                   <div className="mt-8">
                     <h5 className="text-lg font-semibold mb-3 food-gradient-text">Recommended Side Dishes</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {selectedRecipe.sideDishSuggestions.map((sideDish, i) => (
-                        <Card key={i} className="bg-slate-50">
+                        <Card key={i} className="bg-slate-50 hover:bg-slate-100 transition-colors">
                           <CardHeader className="py-3 px-4">
                             <CardTitle className="text-md font-medium">{sideDish.name}</CardTitle>
                           </CardHeader>
@@ -432,11 +524,18 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                             {sideDish.description && (
                               <p className="text-sm text-slate-600 mb-2">{sideDish.description}</p>
                             )}
-                            {sideDish.preparationTime && (
-                              <Badge variant="outline" className="text-xs">
-                                <i className="fas fa-clock mr-1"></i> {sideDish.preparationTime}
-                              </Badge>
-                            )}
+                            <div className="flex flex-wrap gap-2">
+                              {sideDish.preparationTime && (
+                                <Badge variant="outline" className="text-xs">
+                                  <i className="fas fa-clock mr-1"></i> {sideDish.preparationTime}
+                                </Badge>
+                              )}
+                              {sideDish.pairingReason && (
+                                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                  <i className="fas fa-check-circle mr-1"></i> {sideDish.pairingReason}
+                                </Badge>
+                              )}
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
@@ -452,81 +551,207 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="bg-slate-50">
-                      <CardHeader className="py-3 px-4">
-                        <CardTitle className="text-md font-medium">Nutrition Facts</CardTitle>
+                      <CardHeader className="py-3 px-4 border-b border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <i className="fas fa-chart-pie text-primary"></i>
+                          <CardTitle className="text-md font-medium">Nutrition Facts</CardTitle>
+                        </div>
                       </CardHeader>
-                      <CardContent className="py-2 px-4">
-                        <ul className="space-y-2">
-                          {selectedRecipe.nutritionInfo.calories && (
-                            <li className="flex justify-between">
-                              <span className="font-medium">Calories:</span>
-                              <span>{selectedRecipe.nutritionInfo.calories}</span>
-                            </li>
-                          )}
+                      <CardContent className="py-4 px-4">
+                        {/* Calories with visual indicator */}
+                        {selectedRecipe.nutritionInfo.calories && (
+                          <div className="mb-4">
+                            <div className="flex justify-between mb-1">
+                              <span className="font-semibold text-slate-800">Calories</span>
+                              <span className="font-bold text-primary">{selectedRecipe.nutritionInfo.calories}</span>
+                            </div>
+                            <div className="w-full h-2 bg-slate-100 rounded-full">
+                              <div 
+                                className="h-2 bg-primary rounded-full" 
+                                style={{ 
+                                  width: `${Math.min(100, (selectedRecipe.nutritionInfo.calories / 2000) * 100)}%` 
+                                }}
+                              ></div>
+                            </div>
+                            <div className="flex justify-between mt-1">
+                              <span className="text-xs text-slate-500">0</span>
+                              <span className="text-xs text-slate-500">% of 2000 cal daily value</span>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Macronutrients with styled bars */}
+                        <div className="space-y-3">
                           {selectedRecipe.nutritionInfo.protein && (
-                            <li className="flex justify-between">
-                              <span>Protein:</span>
-                              <span>{selectedRecipe.nutritionInfo.protein}</span>
-                            </li>
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-700">
+                                  <i className="fas fa-dumbbell text-xs mr-1 text-blue-500"></i> Protein
+                                </span>
+                                <span className="font-medium">{selectedRecipe.nutritionInfo.protein}</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full">
+                                <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '65%' }}></div>
+                              </div>
+                            </div>
                           )}
+                          
                           {selectedRecipe.nutritionInfo.carbs && (
-                            <li className="flex justify-between">
-                              <span>Carbs:</span>
-                              <span>{selectedRecipe.nutritionInfo.carbs}</span>
-                            </li>
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-700">
+                                  <i className="fas fa-bread-slice text-xs mr-1 text-amber-500"></i> Carbs
+                                </span>
+                                <span className="font-medium">{selectedRecipe.nutritionInfo.carbs}</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full">
+                                <div className="h-1.5 bg-amber-500 rounded-full" style={{ width: '75%' }}></div>
+                              </div>
+                            </div>
                           )}
+                          
                           {selectedRecipe.nutritionInfo.fats && (
-                            <li className="flex justify-between">
-                              <span>Fats:</span>
-                              <span>{selectedRecipe.nutritionInfo.fats}</span>
-                            </li>
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span className="text-slate-700">
+                                  <i className="fas fa-oil-can text-xs mr-1 text-yellow-500"></i> Fats
+                                </span>
+                                <span className="font-medium">{selectedRecipe.nutritionInfo.fats}</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-slate-100 rounded-full">
+                                <div className="h-1.5 bg-yellow-500 rounded-full" style={{ width: '40%' }}></div>
+                              </div>
+                            </div>
                           )}
-                          {selectedRecipe.nutritionInfo.fiber && (
-                            <li className="flex justify-between">
-                              <span>Fiber:</span>
-                              <span>{selectedRecipe.nutritionInfo.fiber}</span>
-                            </li>
-                          )}
-                          {selectedRecipe.nutritionInfo.sugar && (
-                            <li className="flex justify-between">
-                              <span>Sugar:</span>
-                              <span>{selectedRecipe.nutritionInfo.sugar}</span>
-                            </li>
-                          )}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-slate-50">
-                      <CardHeader className="py-3 px-4">
-                        <CardTitle className="text-md font-medium">Dietary Notes</CardTitle>
-                      </CardHeader>
-                      <CardContent className="py-2 px-4">
-                        {selectedRecipe.nutritionInfo.dietaryNotes && selectedRecipe.nutritionInfo.dietaryNotes.length > 0 ? (
-                          <ul className="list-disc pl-5 space-y-1">
-                            {selectedRecipe.nutritionInfo.dietaryNotes.map((note, i) => (
-                              <li key={i} className="text-sm">{note}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-sm text-slate-500">No dietary notes available</p>
+                        </div>
+                        
+                        {/* Additional nutrients */}
+                        <div className="mt-4 pt-4 border-t border-slate-200">
+                          <div className="grid grid-cols-2 gap-3">
+                            {selectedRecipe.nutritionInfo.fiber && (
+                              <div className="flex flex-col">
+                                <span className="text-xs text-slate-500">Fiber</span>
+                                <span className="font-medium">{selectedRecipe.nutritionInfo.fiber}</span>
+                              </div>
+                            )}
+                            
+                            {selectedRecipe.nutritionInfo.sugar && (
+                              <div className="flex flex-col">
+                                <span className="text-xs text-slate-500">Sugar</span>
+                                <span className="font-medium">{selectedRecipe.nutritionInfo.sugar}</span>
+                              </div>
+                            )}
+                            
+                            {selectedRecipe.nutritionInfo.sodium && (
+                              <div className="flex flex-col">
+                                <span className="text-xs text-slate-500">Sodium</span>
+                                <span className="font-medium">{selectedRecipe.nutritionInfo.sodium}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Vitamins and Minerals */}
+                        {selectedRecipe.nutritionInfo.vitamins && selectedRecipe.nutritionInfo.vitamins.length > 0 && (
+                          <div className="mt-4 pt-3 border-t border-slate-200">
+                            <span className="text-xs font-medium text-slate-500 block mb-2">Vitamins & Minerals</span>
+                            <div className="flex flex-wrap gap-1">
+                              {selectedRecipe.nutritionInfo.vitamins.map((vitamin, i) => (
+                                <Badge key={i} variant="outline" className="bg-green-50 text-green-700 border-green-100 text-xs">
+                                  {vitamin}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </CardContent>
                     </Card>
                     
                     <Card className="bg-slate-50">
-                      <CardHeader className="py-3 px-4">
-                        <CardTitle className="text-md font-medium">Healthier Alternatives</CardTitle>
+                      <CardHeader className="py-3 px-4 border-b border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <i className="fas fa-leaf text-green-600"></i>
+                          <CardTitle className="text-md font-medium">Dietary Benefits</CardTitle>
+                        </div>
                       </CardHeader>
-                      <CardContent className="py-2 px-4">
-                        {selectedRecipe.nutritionInfo.healthyAlternatives && selectedRecipe.nutritionInfo.healthyAlternatives.length > 0 ? (
-                          <ul className="list-disc pl-5 space-y-1">
-                            {selectedRecipe.nutritionInfo.healthyAlternatives.map((alternative, i) => (
-                              <li key={i} className="text-sm">{alternative}</li>
+                      <CardContent className="py-4 px-4">
+                        {selectedRecipe.nutritionInfo.dietaryNotes && selectedRecipe.nutritionInfo.dietaryNotes.length > 0 ? (
+                          <div className="space-y-3">
+                            {selectedRecipe.nutritionInfo.dietaryNotes.map((note, i) => (
+                              <div key={i} className="flex items-start gap-2 p-2 bg-green-50 rounded-lg">
+                                <span className="text-green-600 mt-0.5">
+                                  <i className="fas fa-check-circle"></i>
+                                </span>
+                                <span className="text-slate-700 text-sm">{note}</span>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         ) : (
-                          <p className="text-sm text-slate-500">No alternatives available</p>
+                          <div className="flex flex-col items-center justify-center h-40 text-center">
+                            <i className="fas fa-seedling text-slate-300 text-3xl mb-2"></i>
+                            <p className="text-sm text-slate-500">No dietary notes available</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-slate-50">
+                      <CardHeader className="py-3 px-4 border-b border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <i className="fas fa-exchange-alt text-teal-600"></i>
+                          <CardTitle className="text-md font-medium">Healthier Alternatives</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="py-4 px-4">
+                        {selectedRecipe.nutritionInfo.healthyAlternatives && selectedRecipe.nutritionInfo.healthyAlternatives.length > 0 ? (
+                          <div className="space-y-3">
+                            {selectedRecipe.nutritionInfo.healthyAlternatives.map((alternative, i) => {
+                              // Check if alternative contains "→" or "to" to identify substitution pattern
+                              const isSubstitution = alternative.includes('→') || alternative.includes(' to ') || alternative.includes('instead of');
+                              
+                              if (isSubstitution) {
+                                // Parse substitution format
+                                let original, replacement;
+                                if (alternative.includes('→')) {
+                                  [original, replacement] = alternative.split('→').map(s => s.trim());
+                                } else if (alternative.includes(' to ')) {
+                                  [original, replacement] = alternative.split(' to ').map(s => s.trim());
+                                } else if (alternative.includes('instead of')) {
+                                  const parts = alternative.split('instead of');
+                                  replacement = parts[0].trim();
+                                  original = parts[1].trim();
+                                } else {
+                                  original = alternative;
+                                  replacement = '';
+                                }
+                                
+                                return (
+                                  <div key={i} className="flex items-center p-2 bg-teal-50 rounded-lg">
+                                    <div className="flex-1 truncate text-sm text-slate-700">
+                                      {original}
+                                    </div>
+                                    <div className="mx-2 text-teal-600">
+                                      <i className="fas fa-arrow-right"></i>
+                                    </div>
+                                    <div className="flex-1 truncate text-sm font-medium text-teal-700">
+                                      {replacement}
+                                    </div>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <div key={i} className="p-2 bg-teal-50 rounded-lg">
+                                    <span className="text-sm text-slate-700">{alternative}</span>
+                                  </div>
+                                );
+                              }
+                            })}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-40 text-center">
+                            <i className="fas fa-carrot text-slate-300 text-3xl mb-2"></i>
+                            <p className="text-sm text-slate-500">No alternatives available</p>
+                          </div>
                         )}
                       </CardContent>
                     </Card>

@@ -13,11 +13,11 @@ import { getMockAnalysisResponse } from "./mockData";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flag to enable development mode with mock data when API quota is exceeded
-  const USE_MOCK_DATA_ON_QUOTA_EXCEEDED = true;
+  const USE_MOCK_DATA_ON_QUOTA_EXCEEDED = false;
   
   // Initialize the Google Generative AI API with the user-provided key
   const genAI = new GoogleGenerativeAI(
-    process.env.GEMINI_API_KEY || "AIzaSyCWVuSm3Dq_htbl2FgoQ_r5Fsw5N-mDTvc"
+    process.env.GEMINI_API_KEY || ""
   );
 
   // Define the model to use for image analysis
@@ -264,7 +264,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               return res.status(200).json(mockResponse);
             }
             
-            throw validationErr;
+            return res.status(500).json({
+              error: "Invalid AI response",
+              details: "The AI service provided a response that doesn't match our expected format. Please try again with a clearer food image."
+            });
           }
         } catch (err) {
           console.error("Error parsing Gemini API response:", err);

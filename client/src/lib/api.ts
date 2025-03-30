@@ -25,7 +25,23 @@ export async function apiRequest<T = any>(
       throw error;
     }
     
-    return await response.json();
+    // Handle the JSON parsing error specifically
+    try {
+      const jsonData = await response.json();
+      
+      // For the analyze-image endpoint, verify we have actual content
+      if (url === '/api/analyze-image' && (!jsonData.foodName || !jsonData.recipes || jsonData.recipes.length === 0)) {
+        throw new Error("The AI service couldn't properly analyze the image. Please try with a clearer food image.");
+      }
+      
+      return jsonData;
+    } catch (parseError) {
+      console.error("JSON parsing error:", parseError);
+      const error: any = new Error("Failed to parse server response");
+      error.status = 500;
+      error.originalError = parseError;
+      throw error;
+    }
   } catch (error) {
     console.error("API request error:", error);
     throw error;

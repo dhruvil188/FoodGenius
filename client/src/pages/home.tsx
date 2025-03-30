@@ -64,11 +64,30 @@ export default function Home() {
         console.error('Error in image analysis:', error);
         setStage("upload");
         
-        toast({
-          title: "Analysis Failed",
-          description: "We couldn't analyze your image. Please try again with a clearer photo.",
-          variant: "destructive",
-        });
+        // Check if it's a quota exceeded error
+        if (error.status === 429) {
+          toast({
+            title: "API Quota Exceeded",
+            description: "Our AI service has reached its quota limit. Please try again later.",
+            variant: "destructive",
+          });
+        } 
+        // Check if it's a file size issue
+        else if (error.status === 413) {
+          toast({
+            title: "Image Too Large",
+            description: "The image you uploaded is too large. Please use an image under 5MB.",
+            variant: "destructive",
+          });
+        }
+        // Generic error for other cases
+        else {
+          toast({
+            title: "Analysis Failed",
+            description: "We couldn't analyze your image. Please try again with a clearer photo.",
+            variant: "destructive",
+          });
+        }
       });
   };
   

@@ -13,6 +13,18 @@ export async function apiRequest<T = any>(
 ): Promise<T> {
   try {
     const response = await baseApiRequest(method, url, data);
+    
+    // Check for non-2xx response
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      // Create a custom error object with status and error details from the response
+      const error: any = new Error(errorData.error || response.statusText);
+      error.status = response.status;
+      error.details = errorData.details || null;
+      error.retryAfter = errorData.retryAfter || null;
+      throw error;
+    }
+    
     return await response.json();
   } catch (error) {
     console.error("API request error:", error);
@@ -34,12 +46,27 @@ export function useApi() {
   ): Promise<T> => {
     try {
       return await apiRequest<T>(method, url, data);
-    } catch (error) {
-      toast({
-        title: "Request Failed",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      // Check for specific error status codes
+      if (error.status === 429) {
+        toast({
+          title: "API Quota Exceeded",
+          description: error.details || "We've hit our API rate limit. Please try again later.",
+          variant: "destructive",
+        });
+      } else if (error.status === 413) {
+        toast({
+          title: "File Too Large",
+          description: error.details || "The file you tried to upload is too large.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Request Failed",
+          description: error instanceof Error ? error.message : "Unknown error occurred",
+          variant: "destructive",
+        });
+      }
       throw error;
     }
   };

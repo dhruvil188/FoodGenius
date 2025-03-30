@@ -26,53 +26,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // Featured food cards with recipe data
 const featuredFoods = [
   {
-    name: "Pasta Carbonara",
-    image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=715&q=80",
-    tags: ["Italian", "Dinner", "Creamy"],
-    recipe: {
-      foodName: "Pasta Carbonara",
-      description: "Pasta Carbonara is a classic Italian pasta dish from Rome made with eggs, hard cheese, cured pork, and black pepper. The dish took its modern form and name in the middle of the 20th century, after World War II.",
-      tags: ["Italian", "Pasta", "Dinner", "Creamy", "Quick", "Egg-based"],
-      recipes: [
-        {
-          title: "Classic Pasta Carbonara",
-          description: "A traditional Roman pasta dish that combines eggs, Pecorino Romano cheese, pancetta and black pepper for a simple yet delicious meal.",
-          prepTime: "10 minutes",
-          cookTime: "15 minutes",
-          totalTime: "25 minutes",
-          servings: 4,
-          ingredients: [
-            "350g (12oz) spaghetti or bucatini",
-            "150g (5oz) pancetta or guanciale, diced",
-            "4 large egg yolks",
-            "1 whole egg",
-            "75g (2.5oz) Pecorino Romano cheese, finely grated",
-            "75g (2.5oz) Parmesan cheese, finely grated", 
-            "Black pepper, freshly ground",
-            "Salt for pasta water"
-          ],
-          instructions: [
-            "Bring a large pot of salted water to boil and cook pasta until al dente.",
-            "While pasta cooks, sauté the pancetta in a large pan until crispy.",
-            "In a bowl, whisk together egg yolks, whole egg, and grated cheeses.",
-            "Reserve 1 cup of pasta water, then drain pasta.",
-            "Working quickly, add hot pasta to the pan with pancetta (heat off).",
-            "Add a splash of pasta water, then pour in egg mixture, tossing rapidly.",
-            "Add more pasta water as needed to create a silky sauce.",
-            "Season generously with freshly ground black pepper.",
-            "Serve immediately with extra grated cheese on top."
-          ],
-          nutritionInfo: {
-            calories: 650,
-            protein: "32g",
-            carbs: "65g",
-            fats: "28g"
-          }
-        }
-      ]
-    }
-  },
-  {
     name: "Avocado Toast",
     image: "https://images.unsplash.com/photo-1588137378783-f23d106a4d76?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=735&q=80",
     tags: ["Breakfast", "Healthy", "Quick"],
@@ -99,18 +52,59 @@ const featuredFoods = [
             "Microgreens or sprouts for garnish (optional)"
           ],
           instructions: [
-            "Toast your bread slices until golden brown and crisp.",
+            "Toast the bread until golden and crisp.",
             "Cut the avocado in half, remove the pit, and scoop the flesh into a bowl.",
-            "Add lemon juice, salt, and mash with a fork to your desired consistency.",
-            "Spread the mashed avocado evenly over the toasted bread.",
-            "Drizzle with olive oil, sprinkle with red pepper flakes and black pepper.",
-            "Top with microgreens if using, and serve immediately."
+            "Add lemon juice, salt, and mash with a fork to desired consistency (chunky or smooth).",
+            "Spread the mashed avocado onto the toast.",
+            "Drizzle with olive oil and sprinkle with red pepper flakes and black pepper.",
+            "Top with microgreens if desired and serve immediately."
           ],
           nutritionInfo: {
-            calories: 290,
+            calories: 320,
             protein: "5g",
-            carbs: "22g",
-            fats: "21g"
+            carbs: "30g",
+            fats: "22g"
+          }
+        }
+      ]
+    }
+  },
+  {
+    name: "Berry Smoothie Bowl",
+    image: "https://images.unsplash.com/photo-1626790680787-de5e9a07bcf2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+    tags: ["Breakfast", "Healthy", "Vegan"],
+    recipe: {
+      foodName: "Berry Smoothie Bowl",
+      description: "A smoothie bowl is a thick blend of fruits, vegetables, and other nutritious ingredients served in a bowl and topped with granola, fruits, nuts, seeds, or other toppings. It's essentially a smoothie that's thick enough to eat with a spoon.",
+      tags: ["Breakfast", "Healthy", "Vegan", "Dairy-Free", "Gluten-Free", "No-Cook"],
+      recipes: [
+        {
+          title: "Mixed Berry Smoothie Bowl",
+          description: "A vibrant, antioxidant-rich breakfast bowl featuring a blend of mixed berries topped with crunchy, nutritious ingredients for a satisfying start to your day.",
+          prepTime: "10 minutes",
+          cookTime: "0 minutes",
+          totalTime: "10 minutes",
+          servings: 1,
+          ingredients: [
+            "1 cup frozen mixed berries (strawberries, blueberries, raspberries)",
+            "1 frozen banana",
+            "1/4 cup plant-based milk (almond, oat, or coconut)",
+            "1 tbsp chia seeds",
+            "1 tbsp almond or peanut butter (optional)",
+            "For toppings: sliced fresh fruits, granola, coconut flakes, more chia seeds, hemp seeds, honey or maple syrup (optional)"
+          ],
+          instructions: [
+            "Add frozen berries, banana, plant milk, chia seeds, and nut butter to a blender.",
+            "Blend until smooth and thick. If too thick, add a splash more milk.",
+            "The mixture should be thicker than a regular smoothie - you should be able to eat it with a spoon.",
+            "Pour into a bowl and arrange toppings artfully on top.",
+            "Serve immediately before it melts."
+          ],
+          nutritionInfo: {
+            calories: 350,
+            protein: "8g",
+            carbs: "65g",
+            fats: "10g"
           }
         }
       ]
@@ -166,47 +160,6 @@ const featuredFoods = [
             protein: "42g",
             carbs: "18g",
             fats: "38g"
-          }
-        }
-      ]
-    }
-  },
-  {
-    name: "Berry Smoothie Bowl",
-    image: "https://images.unsplash.com/photo-1626074353765-517a681e40be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80",
-    tags: ["Breakfast", "Healthy", "Vegan"],
-    recipe: {
-      foodName: "Berry Smoothie Bowl",
-      description: "A smoothie bowl is a thick blend of fruits, vegetables, and other nutritious ingredients served in a bowl and topped with granola, fruits, nuts, seeds, or other toppings. It's essentially a smoothie that's thick enough to eat with a spoon.",
-      tags: ["Breakfast", "Healthy", "Vegan", "Dairy-Free", "Gluten-Free", "No-Cook"],
-      recipes: [
-        {
-          title: "Mixed Berry Smoothie Bowl",
-          description: "A vibrant, antioxidant-rich breakfast bowl featuring a blend of mixed berries topped with crunchy, nutritious ingredients for a satisfying start to your day.",
-          prepTime: "10 minutes",
-          cookTime: "0 minutes",
-          totalTime: "10 minutes",
-          servings: 1,
-          ingredients: [
-            "1 cup frozen mixed berries (strawberries, blueberries, raspberries)",
-            "1 frozen banana",
-            "1/4 cup plant-based milk (almond, oat, or coconut)",
-            "1 tbsp chia seeds",
-            "1 tbsp almond or peanut butter (optional)",
-            "For toppings: sliced fresh fruits, granola, coconut flakes, more chia seeds, hemp seeds, honey or maple syrup (optional)"
-          ],
-          instructions: [
-            "Add frozen berries, banana, plant milk, chia seeds, and nut butter to a blender.",
-            "Blend until smooth and thick. If too thick, add a splash more milk.",
-            "The mixture should be thicker than a regular smoothie - you should be able to eat it with a spoon.",
-            "Pour into a bowl and arrange toppings artfully on top.",
-            "Serve immediately before it melts."
-          ],
-          nutritionInfo: {
-            calories: 350,
-            protein: "8g",
-            carbs: "65g",
-            fats: "10g"
           }
         }
       ]
@@ -456,8 +409,8 @@ export default function Home() {
                       <div className="bg-gradient-to-br from-primary/10 to-emerald-600/10 rounded-[2.5rem] p-4 sm:p-8 shadow-xl">
                         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                           <img 
-                            src="https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=722&q=80" 
-                            alt="Food dish being analyzed"
+                            src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" 
+                            alt="Chocolate lava cake being analyzed"
                             className="w-full h-72 sm:h-96 object-cover"
                           />
                           <div className="p-6">

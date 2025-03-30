@@ -9,9 +9,10 @@ import { apiRequest } from '@/lib/api';
 
 interface ImageUploaderProps {
   onAnalyzeImage: (imageData: string) => void;
+  onDemoMode?: () => void;
 }
 
-export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
+export default function ImageUploader({ onAnalyzeImage, onDemoMode }: ImageUploaderProps) {
   const [activeTab, setActiveTab] = useState('upload');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -400,41 +401,64 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                className="bg-gradient-to-r from-primary to-emerald-600 text-white font-medium rounded-full px-10 py-6 shadow-md hover:shadow-lg hover:from-primary/95 hover:to-emerald-600/95 transition-all"
-                disabled={!selectedImage || isAnalyzing}
-                onClick={handleAnalyzeImage}
-                size="lg"
+            {/* Buttons container */}
+            <div className="flex flex-col md:flex-row justify-center items-center gap-4">
+              {/* Analyze Button */}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {isAnalyzing ? (
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-5 h-5">
-                      <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-25 animate-ping"></div>
-                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                <Button 
+                  className="bg-gradient-to-r from-primary to-emerald-600 text-white font-medium rounded-full px-10 py-6 shadow-md hover:shadow-lg hover:from-primary/95 hover:to-emerald-600/95 transition-all"
+                  disabled={!selectedImage || isAnalyzing}
+                  onClick={handleAnalyzeImage}
+                  size="lg"
+                >
+                  {isAnalyzing ? (
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-5 h-5">
+                        <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-25 animate-ping"></div>
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </div>
+                      <span className="font-semibold tracking-wide">Analyzing Dish...</span>
                     </div>
-                    <span className="font-semibold tracking-wide">Analyzing Dish...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <i className="fas fa-magic text-lg"></i>
-                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                      </span>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <i className="fas fa-magic text-lg"></i>
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                        </span>
+                      </div>
+                      <span className="font-semibold tracking-wide">Analyze This Dish</span>
                     </div>
-                    <span className="font-semibold tracking-wide">Analyze This Dish</span>
-                  </div>
-                )}
-              </Button>
-            </motion.div>
+                  )}
+                </Button>
+              </motion.div>
+              
+              {/* Demo Mode Button */}
+              {onDemoMode && (
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button 
+                    className="bg-gradient-to-r from-amber-500 to-orange-600 text-white font-medium rounded-full px-6 py-6 shadow-md hover:shadow-lg hover:from-amber-500/95 hover:to-orange-600/95 transition-all"
+                    onClick={onDemoMode}
+                    size="lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fas fa-vial text-lg"></i>
+                      <span className="font-semibold tracking-wide">Try Demo Mode</span>
+                    </div>
+                  </Button>
+                </motion.div>
+              )}
+            </div>
             
             {!selectedImage && (
               <motion.p 

@@ -523,10 +523,11 @@ export default function Home() {
                   <div className="w-full md:w-3/5 bg-gray-50">
                     <Tabs defaultValue="ingredients" className="w-full">
                       <TabsList className="p-0 bg-gray-100 border-b rounded-none h-auto w-full">
-                        <TabsTrigger className="py-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="ingredients">Ingredients</TabsTrigger>
-                        <TabsTrigger className="py-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="steps">Steps</TabsTrigger>
-                        <TabsTrigger className="py-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="nutrition">Nutrition</TabsTrigger>
-                        <TabsTrigger className="py-1 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="tips">Pro Tips</TabsTrigger>
+                        <TabsTrigger className="text-sm py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="ingredients">Ingredients</TabsTrigger>
+                        <TabsTrigger className="text-sm py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="steps">Steps</TabsTrigger>
+                        <TabsTrigger className="text-sm py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="nutrition">Nutrition</TabsTrigger>
+                        <TabsTrigger className="text-sm py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="tips">Pro Tips</TabsTrigger>
+                        <TabsTrigger className="text-sm py-2 px-3 data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none data-[state=active]:bg-transparent data-[state=active]:text-primary" value="videos">Videos</TabsTrigger>
                       </TabsList>
                     
                       <TabsContent value="ingredients" className="p-4 m-0 border-none">
@@ -669,6 +670,89 @@ export default function Home() {
                         <div className="mt-4 p-3 bg-amber-50 rounded-lg text-sm">
                           <h4 className="font-medium text-amber-800 mb-1">Perfect Pairing</h4>
                           <p className="text-amber-700">Serve with garlic naan bread and basmati rice to complete this authentic Indian meal.</p>
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="videos" className="p-4 m-0 border-none">
+                        <div className="flex justify-between mb-3">
+                          <h3 className="font-bold text-lg">Tutorial Videos</h3>
+                          <div className="flex items-center">
+                            <span className="bg-red-100 text-red-800 text-xs rounded-full px-2 py-1 flex items-center">
+                              <i className="fas fa-play-circle mr-1"></i>
+                              Watch & Learn
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          {/* Video 1 */}
+                          <div className="rounded-lg overflow-hidden border border-slate-200">
+                            <div className="aspect-video bg-slate-100 relative">
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-red-600 rounded-full w-14 h-14 flex items-center justify-center shadow-lg">
+                                  <i className="fas fa-play text-white text-2xl"></i>
+                                </div>
+                                <img 
+                                  src="https://i.ytimg.com/vi/a03U45jFxOI/maxresdefault.jpg" 
+                                  alt="Butter Chicken Recipe"
+                                  className="absolute inset-0 w-full h-full object-cover z-[-1]"
+                                />
+                              </div>
+                            </div>
+                            <div className="p-3">
+                              <h4 className="font-medium text-base">Butter Chicken Recipe | Restaurant Style</h4>
+                              <div className="flex justify-between mt-2 text-xs text-slate-500">
+                                <span>Chef Ranveer Brar</span>
+                                <span>10:28</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Video 2 */}
+                          <div className="rounded-lg overflow-hidden border border-slate-200">
+                            <div className="aspect-video bg-slate-100 relative">
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-red-600 rounded-full w-14 h-14 flex items-center justify-center shadow-lg">
+                                  <i className="fas fa-play text-white text-2xl"></i>
+                                </div>
+                                <img 
+                                  src="https://i.ytimg.com/vi/4WCd135Upd8/maxresdefault.jpg" 
+                                  alt="Easy Butter Chicken Recipe"
+                                  className="absolute inset-0 w-full h-full object-cover z-[-1]"
+                                />
+                              </div>
+                            </div>
+                            <div className="p-3">
+                              <h4 className="font-medium text-base">Easy Butter Chicken at Home | Authentic Indian Recipe</h4>
+                              <div className="flex justify-between mt-2 text-xs text-slate-500">
+                                <span>Get Curried</span>
+                                <span>8:45</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Video 3 */}
+                          <div className="rounded-lg overflow-hidden border border-slate-200">
+                            <div className="aspect-video bg-slate-100 relative">
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="bg-red-600 rounded-full w-14 h-14 flex items-center justify-center shadow-lg">
+                                  <i className="fas fa-play text-white text-2xl"></i>
+                                </div>
+                                <img 
+                                  src="https://i.ytimg.com/vi/MWzxDPVtF8g/maxresdefault.jpg" 
+                                  alt="Authentic Butter Chicken"
+                                  className="absolute inset-0 w-full h-full object-cover z-[-1]"
+                                />
+                              </div>
+                            </div>
+                            <div className="p-3">
+                              <h4 className="font-medium text-base">The Secret to Perfect Butter Chicken | Murgh Makhani</h4>
+                              <div className="flex justify-between mt-2 text-xs text-slate-500">
+                                <span>Cooking With Sukhi</span>
+                                <span>12:37</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </TabsContent>
                     </Tabs>

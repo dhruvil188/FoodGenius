@@ -56,7 +56,7 @@ const howItWorksSteps = [
     description: "Take a photo of any dish or upload an existing food image",
     bgColor: "bg-green-100",
     iconColor: "text-green-600",
-    contentIcon: "fa-image"
+    animation: "photo-snap" // Custom animation
   },
   {
     icon: "fa-microchip",
@@ -64,7 +64,7 @@ const howItWorksSteps = [
     description: "Our AI analyzes the image to identify ingredients and preparation",
     bgColor: "bg-blue-100",
     iconColor: "text-blue-600",
-    contentIcon: "fa-brain"
+    animation: "ai-processing" // Custom animation
   },
   {
     icon: "fa-book-open",
@@ -72,7 +72,7 @@ const howItWorksSteps = [
     description: "Receive a complete recipe with ingredients, instructions, and nutrition facts",
     bgColor: "bg-purple-100",
     iconColor: "text-purple-600",
-    contentIcon: "fa-clipboard-list"
+    animation: "recipe-reveal" // Custom animation
   },
   {
     icon: "fa-utensils",
@@ -80,7 +80,7 @@ const howItWorksSteps = [
     description: "Follow the interactive recipe steps and enjoy your homemade dish",
     bgColor: "bg-orange-100",
     iconColor: "text-orange-600",
-    contentIcon: "fa-smile-beam"
+    animation: "cooking-enjoyment" // Custom animation
   }
 ];
 
@@ -229,21 +229,172 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  {/* Step number circle with icon */}
-                  <div className={`rounded-full ${step.bgColor} w-16 h-16 mx-auto mb-4 flex items-center justify-center`}>
-                    <i className={`fas ${step.icon} text-2xl ${step.iconColor}`}></i>
-                  </div>
+                  {/* Advanced animated icon with fancy effects */}
+                  <motion.div 
+                    className={`relative overflow-hidden rounded-xl shadow-lg ${step.bgColor} h-36 w-36 mx-auto mb-6 flex items-center justify-center`}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 100, 
+                      duration: 0.8,
+                      delay: index * 0.2
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)"
+                    }}
+                  >
+                    {/* Animated background elements */}
+                    <motion.div 
+                      className="absolute inset-0 opacity-10"
+                      animate={{
+                        backgroundPosition: ['0% 0%', '100% 100%'],
+                      }}
+                      transition={{ 
+                        duration: 8, 
+                        ease: "linear", 
+                        repeat: Infinity,
+                        repeatType: "reverse" 
+                      }}
+                      style={{
+                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 10%)',
+                        backgroundSize: '20px 20px',
+                      }}
+                    />
+                    
+                    {/* Main icon animation differs based on the step */}
+                    {step.animation === "photo-snap" && (
+                      <div className="relative">
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.1, 1],
+                            rotateZ: [0, -5, 0, 5, 0]
+                          }}
+                          transition={{ 
+                            duration: 3, 
+                            repeat: Infinity,
+                            repeatType: "loop"
+                          }}
+                        >
+                          <i className={`fas ${step.icon} text-4xl ${step.iconColor}`}></i>
+                        </motion.div>
+                        <motion.div 
+                          className="absolute -top-3 -right-3 text-white text-xs"
+                          animate={{ opacity: [0, 1, 0] }}
+                          transition={{ 
+                            duration: 2, 
+                            repeat: Infinity,
+                            repeatType: "loop",
+                            times: [0, 0.1, 0.2]
+                          }}
+                        >
+                          <i className="fas fa-circle text-white text-sm"></i>
+                        </motion.div>
+                      </div>
+                    )}
+                    
+                    {step.animation === "ai-processing" && (
+                      <motion.div
+                        animate={{ 
+                          rotateY: [0, 360],
+                        }}
+                        transition={{ 
+                          duration: 4, 
+                          repeat: Infinity,
+                          ease: "linear"
+                        }}
+                      >
+                        <i className={`fas ${step.icon} text-4xl ${step.iconColor}`}></i>
+                        <motion.div
+                          className="absolute inset-0 mix-blend-screen"
+                          animate={{
+                            background: [
+                              'radial-gradient(circle, rgba(30,144,255,0.4) 0%, transparent 50%)',
+                              'radial-gradient(circle, rgba(30,144,255,0.6) 50%, transparent 100%)',
+                              'radial-gradient(circle, rgba(30,144,255,0.4) 0%, transparent 50%)',
+                            ],
+                          }}
+                          transition={{ 
+                            duration: 3, 
+                            repeat: Infinity
+                          }}
+                        />
+                      </motion.div>
+                    )}
+                    
+                    {step.animation === "recipe-reveal" && (
+                      <div className="relative">
+                        <motion.div
+                          animate={{ 
+                            rotateZ: [0, -3, 0, 3, 0],
+                            y: [0, -5, 0]
+                          }}
+                          transition={{ 
+                            duration: 4, 
+                            repeat: Infinity
+                          }}
+                        >
+                          <i className={`fas ${step.icon} text-4xl ${step.iconColor}`}></i>
+                        </motion.div>
+                        <motion.div 
+                          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full flex items-center justify-center"
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ 
+                            opacity: [0, 1, 0],
+                            scale: [0.5, 1.2, 0.5]
+                          }}
+                          transition={{ 
+                            duration: 5, 
+                            repeat: Infinity,
+                            repeatType: "loop",
+                            times: [0, 0.5, 1]
+                          }}
+                        >
+                          <i className="fas fa-utensils text-4xl text-purple-300 opacity-40"></i>
+                        </motion.div>
+                      </div>
+                    )}
+                    
+                    {step.animation === "cooking-enjoyment" && (
+                      <div className="relative">
+                        <motion.div
+                          animate={{ 
+                            y: [0, -10, 0],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{ 
+                            duration: 2, 
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                          }}
+                        >
+                          <i className={`fas ${step.icon} text-4xl ${step.iconColor}`}></i>
+                        </motion.div>
+                        <motion.div 
+                          className="absolute -bottom-3 left-0 right-0 text-center"
+                          animate={{ 
+                            y: [10, 0, 10],
+                            opacity: [0, 1, 0]
+                          }}
+                          transition={{ 
+                            duration: 3, 
+                            repeat: Infinity
+                          }}
+                        >
+                          <i className="fas fa-heart text-red-400 text-sm"></i>
+                          <i className="fas fa-star text-yellow-400 text-sm ml-1"></i>
+                          <i className="fas fa-heart text-red-400 text-sm ml-1"></i>
+                        </motion.div>
+                      </div>
+                    )}
+                  </motion.div>
                   
                   {/* Title */}
-                  <h3 className="text-xl font-bold mb-2">{step.title}</h3>
+                  <h3 className="text-xl font-bold mb-3">{step.title}</h3>
                   
                   {/* Description */}
-                  <p className="text-slate-600 mb-4">{step.description}</p>
-                  
-                  {/* Illustration */}
-                  <div className="mt-2 h-24 w-24 mx-auto mb-4 flex items-center justify-center">
-                    <i className={`fas ${step.contentIcon} text-4xl text-slate-400`}></i>
-                  </div>
+                  <p className="text-slate-600">{step.description}</p>
                 </motion.div>
               ))}
             </div>

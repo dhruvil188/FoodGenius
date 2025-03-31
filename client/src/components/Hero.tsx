@@ -519,9 +519,7 @@ export default function Hero() {
         </div>
         
         {/* Ultra minimal transition between stats and featured dishes */}
-        <div className="py-1">
-          <div className="h-px bg-slate-100 max-w-5xl mx-auto"></div>
-        </div>
+        {/* No transition - removing space completely */}
       </div>
     </section>
   );

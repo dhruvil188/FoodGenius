@@ -91,7 +91,6 @@ export default function Home() {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const uploadSectionRef = useRef<HTMLDivElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
   
   // Scroll to the upload section if a deep link is used
   useEffect(() => {
@@ -131,9 +130,6 @@ export default function Home() {
             spread: 70,
             origin: { y: 0.6 }
           });
-          
-          // Scroll to the results section after a short delay
-          resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
         }, 500);
         
         toast({
@@ -783,7 +779,6 @@ export default function Home() {
                 {stage === "results" && analysisResult && selectedImage && (
                   <motion.div
                     key="results"
-                    ref={resultsRef}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}

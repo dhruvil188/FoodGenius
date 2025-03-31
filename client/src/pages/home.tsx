@@ -591,6 +591,16 @@ export default function Home() {
                   </DialogContent>
                 </Dialog>
               </div>
+              
+              {/* Transition between Featured Dishes and How It Works */}
+              <div className="py-10 flex flex-col items-center">
+                <div className="w-24 h-1.5 bg-gradient-to-r from-amber-500/10 via-amber-500 to-amber-500/10 rounded-full mb-2"></div>
+                <div className="w-16 h-1 bg-gradient-to-r from-amber-500/10 via-amber-500/60 to-amber-500/10 rounded-full"></div>
+                <div className="mt-4 bg-white/50 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-medium text-slate-500 inline-flex items-center">
+                  <i className="fas fa-arrow-down mr-1.5 text-amber-500"></i>
+                  See how it works
+                </div>
+              </div>
             </section>
 
             {/* How It Works Section */}
@@ -654,6 +664,16 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+              
+              {/* Transition between How It Works and Testimonials */}
+              <div className="py-10 flex flex-col items-center">
+                <div className="w-24 h-1.5 bg-gradient-to-r from-blue-500/10 via-blue-500 to-blue-500/10 rounded-full mb-2"></div>
+                <div className="w-16 h-1 bg-gradient-to-r from-blue-500/10 via-blue-500/60 to-blue-500/10 rounded-full"></div>
+                <div className="mt-4 bg-white/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-medium text-slate-500 inline-flex items-center">
+                  <i className="fas fa-users mr-1.5 text-blue-500"></i>
+                  What people say
+                </div>
+              </div>
             </section>
 
             {/* Testimonials Section */}
@@ -705,6 +725,16 @@ export default function Home() {
                       </div>
                     </motion.div>
                   ))}
+                </div>
+              </div>
+              
+              {/* Transition between Testimonials and Recipe Magic sections */}
+              <div className="py-10 flex flex-col items-center">
+                <div className="w-24 h-1.5 bg-gradient-to-r from-purple-500/10 via-purple-500 to-purple-500/10 rounded-full mb-2"></div>
+                <div className="w-16 h-1 bg-gradient-to-r from-purple-500/10 via-purple-500/60 to-purple-500/10 rounded-full"></div>
+                <div className="mt-4 bg-white/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-medium text-slate-500 inline-flex items-center">
+                  <i className="fas fa-magic mr-1.5 text-purple-500"></i>
+                  See it in action
                 </div>
               </div>
             </section>

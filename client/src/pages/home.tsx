@@ -447,6 +447,149 @@ export default function Home() {
           </div>
         </section>
         
+        {/* Recipe Magic in Action Section */}
+        <section id="recipe-magic" className="py-16 bg-white">
+          <div className="container max-w-7xl mx-auto px-4">
+            <motion.div 
+              className="text-center mb-10"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
+                AI-POWERED RECIPES
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Recipe <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Magic</span> In Action
+              </h2>
+              <p className="text-slate-600 max-w-2xl mx-auto">
+                Take a look at the incredible recipe insights our AI generates from a single food photo.
+              </p>
+            </motion.div>
+            
+            <motion.div 
+              className="max-w-4xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
+                <div className="bg-black text-white p-2 flex items-center">
+                  <div className="flex space-x-2 mr-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  </div>
+                  <div className="flex-1 text-center text-green-400 text-sm">dishdetective.app</div>
+                  <div className="flex space-x-2">
+                    <div className="w-4 h-4"><i className="fas fa-wifi text-xs"></i></div>
+                    <div className="w-4 h-4"><i className="fas fa-battery-full text-xs"></i></div>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col md:flex-row">
+                  {/* Left panel - food image */}
+                  <div className="relative w-full md:w-2/5 bg-gray-800">
+                    <img 
+                      src="https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
+                      alt="Butter Chicken" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-lg px-3 py-1 shadow-sm">
+                      <div className="flex items-center">
+                        <i className="fas fa-utensils text-slate-700 mr-2"></i>
+                        <span className="font-medium">Food Detector</span>
+                      </div>
+                    </div>
+                    <div className="absolute top-4 right-4 bg-green-500 text-white rounded-full px-3 py-1 text-sm shadow-sm flex items-center">
+                      <i className="fas fa-check-circle mr-1"></i>
+                      <span>Analyzed</span>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent text-white p-4">
+                      <div className="text-xs text-green-400 mb-1">ANALYZED WITH 91% CONFIDENCE</div>
+                      <h3 className="text-xl font-bold mb-1">Butter Chicken</h3>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="text-xs bg-gray-800 bg-opacity-70 px-2 py-1 rounded">Indian</span>
+                        <span className="text-xs bg-gray-800 bg-opacity-70 px-2 py-1 rounded">Curry</span>
+                        <span className="text-xs bg-gray-800 bg-opacity-70 px-2 py-1 rounded">Spicy</span>
+                        <span className="text-xs bg-gray-800 bg-opacity-70 px-2 py-1 rounded">Popular</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Right panel - recipe info */}
+                  <div className="w-full md:w-3/5 bg-gray-50">
+                    <div className="p-2 bg-gray-100 border-b flex">
+                      <div className="px-3 py-1 font-medium text-primary border-b-2 border-primary">Ingredients</div>
+                      <div className="px-3 py-1 text-gray-500">Steps</div>
+                      <div className="px-3 py-1 text-gray-500">Nutrition</div>
+                      <div className="px-3 py-1 text-gray-500">Pro Tips</div>
+                    </div>
+                    
+                    <div className="p-4">
+                      <div className="flex justify-between mb-3">
+                        <h3 className="font-bold text-lg">Butter Chicken Ingredients</h3>
+                        <div className="flex items-center">
+                          <span className="bg-green-100 text-green-800 text-xs rounded-full px-2 py-1 flex items-center">
+                            <i className="fas fa-robot mr-1"></i>
+                            AI Generated
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <ul className="space-y-2">
+                        {[
+                          "800g boneless chicken thighs",
+                          "1 cup plain yogurt",
+                          "2 tbsp lemon juice",
+                          "2 tsp garam masala",
+                          "2 tsp ground cumin",
+                          "2 tsp ground turmeric",
+                          "4 tbsp butter",
+                          "1 large onion, finely chopped",
+                          "4 cloves garlic, minced",
+                          "2 tbsp ginger, grated"
+                        ].map((ingredient, idx) => (
+                          <li key={idx} className="flex items-center">
+                            <div className="mr-2 text-green-500"><i className="fas fa-check"></i></div>
+                            <span>{ingredient}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <button className="mt-4 w-full text-sm bg-white border border-green-500 text-green-600 py-1 px-3 rounded flex items-center justify-center">
+                        <i className="fas fa-shopping-cart mr-2"></i>
+                        Add to Shopping List
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-800 text-white p-2 flex justify-between items-center text-xs">
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2">
+                      <i className="fas fa-robot text-white text-xs"></i>
+                    </div>
+                    <span>AI-Powered Recipe Detection</span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                      <i className="fas fa-book mr-1"></i>
+                      <span>5,280+ recipes</span>
+                    </div>
+                    <div className="flex items-center">
+                      <i className="fas fa-globe-americas mr-1"></i>
+                      <span>120+ cuisines</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+        
         {/* Features Section */}
         <section id="features" className="py-16 bg-gradient-to-b from-white to-slate-50">
           <div className="container max-w-7xl mx-auto px-4">

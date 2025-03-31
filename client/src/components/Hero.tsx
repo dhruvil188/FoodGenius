@@ -215,7 +215,11 @@ interface FloatingIngredient {
   opacity: number;
 }
 
-export default function Hero() {
+interface HeroProps {
+  onGetStarted?: () => void;
+}
+
+export default function Hero({ onGetStarted }: HeroProps) {
   const [location, navigate] = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   
@@ -348,7 +352,7 @@ export default function Hero() {
               <Button 
                 size="lg"
                 className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white rounded-full px-8 shadow-lg hover:shadow-xl transition-all py-6 group"
-                onClick={() => navigate('#upload-section')}
+                onClick={onGetStarted || (() => navigate('#upload-section'))}
               >
                 <i className="fas fa-camera mr-2.5 group-hover:animate-pulse"></i> 
                 Try It Now

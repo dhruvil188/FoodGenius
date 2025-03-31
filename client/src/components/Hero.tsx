@@ -108,11 +108,11 @@ const FloatingIngredient = ({
   zIndex = 0,
   animationDuration = 20
 }: FloatingIngredientProps) => {
-  // Random movement animation values
-  const floatY = Math.random() * 30 + 15; // Increased vertical float distance
-  const floatX = Math.random() * 25 + 10; // Horizontal float distance
-  const rotateAmount = Math.random() * 12 + 8; // Increased rotation amount
-  const duration = 8 + Math.random() * 7; // Shorter animation duration for more noticeable movement
+  // Random movement animation values with greatly enhanced floating
+  const floatY = Math.random() * 70 + 40; // Significantly increased vertical float distance
+  const floatX = Math.random() * 60 + 30; // Significantly increased horizontal float distance
+  const rotateAmount = Math.random() * 25 + 15; // Much larger rotation for dramatic effect
+  const duration = 6 + Math.random() * 4; // Even shorter animation duration for very noticeable movement
   
   return (
     <motion.div
@@ -253,22 +253,64 @@ export default function Hero({ onGetStarted }: HeroProps) {
     { icon: 'fa-share-alt', title: 'Share Easily', description: 'Share your culinary creations with friends and family', delay: 0.6 }
   ];
   
-  // Floating ingredients in the background
+  // Significantly expanded floating ingredients across the entire page
   const floatingIngredients: FloatingIngredient[] = [
-    { icon: 'fa-apple-alt', size: 40, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-600', opacity: 0.45 },
-    { icon: 'fa-carrot', size: 46, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-600', opacity: 0.5 },
-    { icon: 'fa-lemon', size: 40, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.4 },
-    { icon: 'fa-pepper-hot', size: 38, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.45 },
-    { icon: 'fa-egg', size: 42, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-500', opacity: 0.4 },
-    { icon: 'fa-cheese', size: 44, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-500', opacity: 0.5 },
-    { icon: 'fa-fish', size: 46, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-500', opacity: 0.45 },
-    { icon: 'fa-drumstick-bite', size: 42, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.45 },
-    { icon: 'fa-bread-slice', size: 44, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-600', opacity: 0.5 },
-    { icon: 'fa-pizza-slice', size: 46, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.45 },
-    { icon: 'fa-leaf', size: 36, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-600', opacity: 0.45 },
-    { icon: 'fa-seedling', size: 34, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-500', opacity: 0.4 },
-    { icon: 'fa-bacon', size: 44, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-500', opacity: 0.5 },
-    { icon: 'fa-cookie', size: 38, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-700', opacity: 0.45 },
+    // Original ingredients with some adjustments
+    { icon: 'fa-apple-alt', size: 48, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-600', opacity: 0.65 },
+    { icon: 'fa-carrot', size: 52, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-600', opacity: 0.7 },
+    { icon: 'fa-lemon', size: 46, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.6 },
+    { icon: 'fa-pepper-hot', size: 44, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.65 },
+    { icon: 'fa-egg', size: 48, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-500', opacity: 0.6 },
+    { icon: 'fa-cheese', size: 50, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-500', opacity: 0.7 },
+    { icon: 'fa-fish', size: 52, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-500', opacity: 0.65 },
+    { icon: 'fa-drumstick-bite', size: 48, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.65 },
+    { icon: 'fa-bread-slice', size: 50, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-600', opacity: 0.7 },
+    { icon: 'fa-pizza-slice', size: 52, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.65 },
+    { icon: 'fa-leaf', size: 42, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-600', opacity: 0.65 },
+    { icon: 'fa-seedling', size: 40, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-500', opacity: 0.6 },
+    { icon: 'fa-bacon', size: 50, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-500', opacity: 0.7 },
+    { icon: 'fa-cookie', size: 44, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-700', opacity: 0.65 },
+    
+    // Additional fruits and vegetables (first layer)
+    { icon: 'fa-apple-alt', size: 54, top: '5%', left: '45%', rotate: 8, delay: 0.4, color: 'text-red-500', opacity: 0.7 },
+    { icon: 'fa-lemon', size: 48, top: '20%', right: '45%', rotate: -12, delay: 1.4, color: 'text-yellow-400', opacity: 0.65 },
+    { icon: 'fa-pepper-hot', size: 42, top: '40%', right: '28%', rotate: 15, delay: 0.9, color: 'text-red-600', opacity: 0.65 },
+    { icon: 'fa-carrot', size: 56, top: '65%', left: '45%', rotate: -8, delay: 1.6, color: 'text-orange-500', opacity: 0.7 },
+    { icon: 'fa-leaf', size: 46, top: '88%', right: '48%', rotate: 5, delay: 0.5, color: 'text-green-500', opacity: 0.7 },
+    { icon: 'fa-seedling', size: 48, top: '12%', left: '55%', rotate: -5, delay: 1.1, color: 'text-green-600', opacity: 0.65 },
+    
+    // More fruits and vegetables (second layer)
+    { icon: 'fa-apple-alt', size: 42, top: '25%', right: '52%', rotate: 15, delay: 0.7, color: 'text-green-600', opacity: 0.6 }, // Green apple
+    { icon: 'fa-lemon', size: 46, top: '50%', left: '60%', rotate: -10, delay: 1.5, color: 'text-green-500', opacity: 0.65 }, // Lime
+    { icon: 'fa-egg', size: 40, top: '80%', right: '58%', rotate: 8, delay: 0.3, color: 'text-yellow-100', opacity: 0.5 },
+    { icon: 'fa-pepper-hot', size: 42, top: '35%', left: '35%', rotate: 12, delay: 1.2, color: 'text-green-500', opacity: 0.6 },
+    { icon: 'fa-carrot', size: 44, top: '75%', left: '55%', rotate: -15, delay: 0.8, color: 'text-orange-500', opacity: 0.65 },
+    
+    // Even more variety (third layer)
+    { icon: 'fa-apple-alt', size: 38, top: '17%', right: '63%', rotate: -8, delay: 1.7, color: 'text-red-500', opacity: 0.55 },
+    { icon: 'fa-leaf', size: 36, top: '42%', left: '52%', rotate: 10, delay: 0.5, color: 'text-green-600', opacity: 0.6 },
+    { icon: 'fa-lemon', size: 40, top: '65%', right: '45%', rotate: 15, delay: 1.3, color: 'text-yellow-400', opacity: 0.6 },
+    { icon: 'fa-pepper-hot', size: 35, top: '83%', left: '65%', rotate: -12, delay: 0.6, color: 'text-red-600', opacity: 0.55 },
+    { icon: 'fa-seedling', size: 34, top: '28%', left: '68%', rotate: 5, delay: 1.9, color: 'text-green-500', opacity: 0.55 },
+    
+    // Fruits and vegetables for bottom section
+    { icon: 'fa-apple-alt', size: 46, top: '92%', left: '15%', rotate: -5, delay: 0.2, color: 'text-red-500', opacity: 0.65 },
+    { icon: 'fa-carrot', size: 48, top: '95%', right: '20%', rotate: 8, delay: 1.4, color: 'text-orange-500', opacity: 0.7 },
+    { icon: 'fa-leaf', size: 42, top: '90%', left: '40%', rotate: -10, delay: 0.7, color: 'text-green-600', opacity: 0.65 },
+    { icon: 'fa-lemon', size: 44, top: '93%', right: '40%', rotate: 12, delay: 1.1, color: 'text-yellow-400', opacity: 0.65 },
+    
+    // Small floating elements (for more density)
+    { icon: 'fa-seedling', size: 28, top: '8%', left: '75%', rotate: 5, delay: 0.3, color: 'text-green-500', opacity: 0.5 },
+    { icon: 'fa-seedling', size: 26, top: '22%', right: '70%', rotate: -8, delay: 1.6, color: 'text-green-600', opacity: 0.45 },
+    { icon: 'fa-leaf', size: 30, top: '33%', left: '82%', rotate: 12, delay: 0.8, color: 'text-green-500', opacity: 0.5 },
+    { icon: 'fa-pepper-hot', size: 32, top: '58%', right: '75%', rotate: -15, delay: 1.9, color: 'text-red-500', opacity: 0.5 },
+    { icon: 'fa-apple-alt', size: 30, top: '78%', right: '80%', rotate: 8, delay: 0.4, color: 'text-red-600', opacity: 0.5 },
+    { icon: 'fa-lemon', size: 28, top: '90%', left: '78%', rotate: -10, delay: 1.5, color: 'text-yellow-500', opacity: 0.45 },
+    
+    // Extra large floating elements for visual impact
+    { icon: 'fa-apple-alt', size: 68, top: '18%', left: '90%', rotate: -15, delay: 0.9, color: 'text-red-500', opacity: 0.4 },
+    { icon: 'fa-carrot', size: 64, top: '45%', right: '90%', rotate: 12, delay: 1.8, color: 'text-orange-600', opacity: 0.35 },
+    { icon: 'fa-lemon', size: 62, top: '75%', left: '90%', rotate: -8, delay: 0.5, color: 'text-yellow-400', opacity: 0.35 }
   ];
   
   return (

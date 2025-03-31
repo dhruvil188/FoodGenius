@@ -202,7 +202,7 @@ export default function Home() {
         <section id="how-it-works" className="py-16 bg-slate-50 relative overflow-hidden">
           {/* Floating fruits for How It Works section */}
           <motion.div 
-            className="absolute text-red-500 text-5xl"
+            className="absolute text-red-500 text-5xl opacity-20"
             style={{ top: '10%', right: '5%' }}
             animate={{
               y: [0, -30, 0],
@@ -219,7 +219,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-green-500 text-4xl"
+            className="absolute text-green-500 text-4xl opacity-18"
             style={{ top: '15%', left: '8%' }}
             animate={{
               y: [0, -40, -20, -40, 0],
@@ -236,7 +236,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-orange-500 text-5xl"
+            className="absolute text-orange-500 text-5xl opacity-22"
             style={{ bottom: '15%', right: '8%' }}
             animate={{
               y: [0, -50, -25, -50, 0],
@@ -253,7 +253,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-yellow-500 text-4xl"
+            className="absolute text-yellow-500 text-4xl opacity-20"
             style={{ bottom: '10%', left: '10%' }}
             animate={{
               y: [0, -35, -15, -35, 0],
@@ -472,9 +472,9 @@ export default function Home() {
         
         {/* Recipe Magic in Action Section */}
         <section id="recipe-magic" className="py-16 bg-white relative overflow-hidden">
-          {/* Floating fruits for Recipe Magic section - more dynamic animations */}
+          {/* Floating fruits for Recipe Magic section - more dynamic animations with reduced opacity */}
           <motion.div 
-            className="absolute text-green-600 text-6xl opacity-60"
+            className="absolute text-green-600 text-6xl opacity-25"
             style={{ top: '5%', left: '5%' }}
             animate={{
               y: [0, -80, -40, -80, 0],
@@ -492,7 +492,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-yellow-500 text-5xl opacity-70"
+            className="absolute text-yellow-500 text-5xl opacity-22"
             style={{ top: '20%', right: '10%' }}
             animate={{
               y: [0, -60, -30, -60, 0],
@@ -510,7 +510,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-red-500 text-6xl opacity-65"
+            className="absolute text-red-500 text-6xl opacity-25"
             style={{ bottom: '15%', right: '8%' }}
             animate={{
               y: [0, -70, -35, -70, 0],
@@ -528,7 +528,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-orange-600 text-5xl opacity-70"
+            className="absolute text-orange-600 text-5xl opacity-20"
             style={{ bottom: '8%', left: '15%' }}
             animate={{
               y: [0, -50, -25, -50, 0],
@@ -545,9 +545,9 @@ export default function Home() {
             <i className="fas fa-carrot"></i>
           </motion.div>
           
-          {/* Additional smaller floating elements */}
+          {/* Additional smaller floating elements with reduced opacity */}
           <motion.div 
-            className="absolute text-green-500 text-3xl opacity-50"
+            className="absolute text-green-500 text-3xl opacity-18"
             style={{ top: '40%', left: '3%' }}
             animate={{
               y: [0, -30, -15, -30, 0],
@@ -564,7 +564,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-amber-600 text-3xl opacity-50"
+            className="absolute text-amber-600 text-3xl opacity-15"
             style={{ top: '60%', right: '3%' }}
             animate={{
               y: [0, -25, -12, -25, 0],
@@ -1057,9 +1057,9 @@ export default function Home() {
         <section ref={uploadSectionRef} id="upload-section" className="py-16 bg-gradient-to-br from-primary/5 to-emerald-600/5 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PGNpcmNsZSBjeD0iMzYiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjM2IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSIzNiIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iMzYiIGN5PSI0OCIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMzYiIHI9IjEiLz48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIxIi8+PGNpcmNsZSBjeD0iMjQiIGN5PSIxMiIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iNDgiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjM2IiByPSIxIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIyNCIgcj0iMSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjQ4IiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjQ4IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iMSIvPjwvZz48L3N2Zz4=')]" style={{ opacity: 0.3, color: '#10b981' }}></div>
           
-          {/* Floating fruits around the upload section with extremely active animations */}
+          {/* Floating fruits around the upload section with extremely active animations but reduced opacity */}
           <motion.div 
-            className="absolute text-green-500 text-7xl opacity-55"
+            className="absolute text-green-500 text-7xl opacity-20"
             style={{ top: '5%', right: '8%' }}
             animate={{
               y: [0, -100, -50, -100, 0],
@@ -1077,7 +1077,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-red-500 text-6xl opacity-60"
+            className="absolute text-red-500 text-6xl opacity-25"
             style={{ bottom: '10%', right: '15%' }}
             animate={{
               y: [0, -120, -60, -120, 0],
@@ -1095,7 +1095,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-orange-600 text-7xl opacity-50"
+            className="absolute text-orange-600 text-7xl opacity-20"
             style={{ top: '20%', left: '5%' }}
             animate={{
               y: [0, -90, -45, -90, 0],
@@ -1113,7 +1113,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-yellow-500 text-6xl opacity-60"
+            className="absolute text-yellow-500 text-6xl opacity-22"
             style={{ bottom: '15%', left: '10%' }}
             animate={{
               y: [0, -80, -40, -80, 0],
@@ -1130,9 +1130,9 @@ export default function Home() {
             <i className="fas fa-lemon"></i>
           </motion.div>
           
-          {/* Additional smaller elements */}
+          {/* Additional smaller elements with reduced opacity */}
           <motion.div 
-            className="absolute text-green-600 text-4xl opacity-50"
+            className="absolute text-green-600 text-4xl opacity-18"
             style={{ top: '60%', left: '20%' }}
             animate={{
               y: [0, -50, -25, -50, 0],
@@ -1149,7 +1149,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="absolute text-green-500 text-4xl opacity-45"
+            className="absolute text-green-500 text-4xl opacity-15"
             style={{ top: '40%', right: '25%' }}
             animate={{
               y: [0, -40, -20, -40, 0],
@@ -1166,7 +1166,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div 
-            className="absolute text-amber-500 text-3xl opacity-40"
+            className="absolute text-amber-500 text-3xl opacity-15"
             style={{ bottom: '50%', right: '5%' }}
             animate={{
               y: [0, -30, -15, -30, 0],

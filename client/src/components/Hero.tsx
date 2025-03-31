@@ -518,9 +518,9 @@ export default function Hero() {
           </div>
         </div>
         
-        {/* Minimal transition element between stats and featured dishes */}
-        <div className="py-3 flex flex-col items-center">
-          <div className="w-20 h-1 bg-gradient-to-r from-green-500/10 via-green-500 to-green-500/10 rounded-full"></div>
+        {/* Ultra minimal transition between stats and featured dishes */}
+        <div className="py-1">
+          <div className="h-px bg-slate-100 max-w-5xl mx-auto"></div>
         </div>
       </div>
     </section>

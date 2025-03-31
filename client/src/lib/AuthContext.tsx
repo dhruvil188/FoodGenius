@@ -20,15 +20,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check for active session on component mount
-    const checkSession = async () => {
+    const setupAuth = async () => {
       try {
+        // Check for an active session
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user || null);
+        
+        // Subscribe to auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (_event, session) => {
+            setUser(session?.user || null);
+            setLoading(false);
+          }
+        );
+        
+        // Clean up the subscription when the component unmounts
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error) {
-        console.error('Error checking auth session:', error);
+        console.error('Error setting up authentication:', error);
         toast({
           title: 'Authentication Error',
-          description: 'Failed to load user session',
+          description: 'Failed to load authentication configuration',
           variant: 'destructive',
         });
       } finally {
@@ -36,24 +50,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    checkSession();
-
-    // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user || null);
-        setLoading(false);
-      }
-    );
-
+    // Start the setup process and store the cleanup function
+    const cleanup = setupAuth();
+    
+    // Return a cleanup function
     return () => {
-      subscription.unsubscribe();
+      // When cleanup is a promise that resolves to a function
+      if (cleanup instanceof Promise) {
+        cleanup.then(cleanupFn => {
+          if (typeof cleanupFn === 'function') {
+            cleanupFn();
+          }
+        }).catch(err => console.error('Cleanup error:', err));
+      }
     };
   }, [toast]);
 
   const handleSignIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+      
       const { error, data } = await signIn(email, password);
       
       if (error) {
@@ -81,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const handleSignUp = async (email: string, password: string) => {
     try {
       setLoading(true);
+      
       const { error, data } = await signUp(email, password);
       
       if (error) {
@@ -108,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const handleSignOut = async () => {
     try {
       setLoading(true);
+      
       await signOut();
       setUser(null);
       toast({

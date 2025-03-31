@@ -404,7 +404,7 @@ export default function Home() {
             <Hero />
 
             {/* Featured Foods Section */}
-            <section className="py-16 bg-white">
+            <section className="py-8 bg-white">
               <div className="container max-w-7xl mx-auto px-4">
                 <motion.div 
                   className="text-center mb-12"
@@ -592,10 +592,7 @@ export default function Home() {
                 </Dialog>
               </div>
               
-              {/* Ultra minimal transition between Featured Dishes and How It Works */}
-              <div className="py-1">
-                <div className="h-px bg-slate-100 max-w-5xl mx-auto"></div>
-              </div>
+              {/* No transition element - removed for ultra minimal spacing */}
             </section>
 
             {/* How It Works Section */}

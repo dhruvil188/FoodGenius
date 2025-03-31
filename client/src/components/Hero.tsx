@@ -80,6 +80,77 @@ const FloatingFoodImage = ({
   </motion.div>
 );
 
+// Floating Ingredient Component
+interface FloatingIngredientProps {
+  icon: string;
+  size: number;
+  top: string;
+  left?: string;
+  right?: string;
+  rotate?: number;
+  delay?: number;
+  color?: string;
+  opacity?: number;
+  zIndex?: number;
+  animationDuration?: number;
+}
+
+const FloatingIngredient = ({
+  icon,
+  size,
+  top,
+  left,
+  right,
+  rotate = 0,
+  delay = 0,
+  color = 'text-green-500',
+  opacity = 0.8,
+  zIndex = 0,
+  animationDuration = 20
+}: FloatingIngredientProps) => {
+  // Random float movement animation
+  const floatY = Math.random() * 15 + 5; // Random float distance
+  
+  return (
+    <motion.div
+      className={`absolute ${color}`}
+      style={{
+        top,
+        left,
+        right,
+        fontSize: `${size}px`,
+        opacity,
+        zIndex,
+      }}
+      initial={{ y: 0, rotate, opacity: 0 }}
+      animate={{ 
+        y: [0, -floatY, 0], 
+        rotate: [rotate, rotate + 5, rotate - 5, rotate],
+        opacity
+      }}
+      transition={{
+        y: { 
+          duration: animationDuration, 
+          repeat: Infinity,
+          repeatType: 'reverse',
+          ease: 'easeInOut',
+          delay
+        },
+        rotate: {
+          duration: animationDuration * 1.5,
+          repeat: Infinity,
+          repeatType: 'reverse',
+          ease: 'easeInOut',
+          delay: delay + 1
+        },
+        opacity: { duration: 1, delay }
+      }}
+    >
+      <i className={`fas ${icon}`}></i>
+    </motion.div>
+  );
+};
+
 // Recipe Step Component
 interface RecipeStepProps {
   number: number;
@@ -121,6 +192,18 @@ interface Feature {
   delay: number;
 }
 
+interface FloatingIngredient {
+  icon: string;
+  size: number;
+  top: string;
+  left?: string;
+  right?: string;
+  rotate: number;
+  delay: number;
+  color: string;
+  opacity: number;
+}
+
 export default function Hero() {
   const [location, navigate] = useLocation();
   const [isVisible, setIsVisible] = useState(false);
@@ -155,6 +238,24 @@ export default function Hero() {
     { icon: 'fa-share-alt', title: 'Share Easily', description: 'Share your culinary creations with friends and family', delay: 0.6 }
   ];
   
+  // Floating ingredients in the background
+  const floatingIngredients: FloatingIngredient[] = [
+    { icon: 'fa-apple-alt', size: 28, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-500', opacity: 0.3 },
+    { icon: 'fa-carrot', size: 32, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-500', opacity: 0.2 },
+    { icon: 'fa-lemon', size: 24, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.25 },
+    { icon: 'fa-pepper-hot', size: 20, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.2 },
+    { icon: 'fa-egg', size: 22, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-300', opacity: 0.25 },
+    { icon: 'fa-cheese', size: 26, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-400', opacity: 0.2 },
+    { icon: 'fa-fish', size: 30, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-400', opacity: 0.15 },
+    { icon: 'fa-drumstick-bite', size: 24, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.2 },
+    { icon: 'fa-bread-slice', size: 28, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-500', opacity: 0.2 },
+    { icon: 'fa-pizza-slice', size: 30, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.25 },
+    { icon: 'fa-leaf', size: 18, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-500', opacity: 0.3 },
+    { icon: 'fa-seedling', size: 16, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-400', opacity: 0.25 },
+    { icon: 'fa-bacon', size: 26, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-400', opacity: 0.2 },
+    { icon: 'fa-cookie', size: 20, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-600', opacity: 0.25 },
+  ];
+  
   return (
     <section className="relative overflow-hidden pt-16 pb-20">
       {/* Subtle background pattern */}
@@ -168,6 +269,24 @@ export default function Hero() {
       {/* Decorative shapes */}
       <div className="absolute top-20 right-[5%] w-64 h-64 bg-green-400/20 rounded-full blur-3xl -z-10"></div>
       <div className="absolute bottom-40 left-[10%] w-72 h-72 bg-emerald-300/20 rounded-full blur-3xl -z-10"></div>
+      
+      {/* Floating food ingredients */}
+      {floatingIngredients.map((ingredient, index) => (
+        <FloatingIngredient
+          key={index}
+          icon={ingredient.icon}
+          size={ingredient.size}
+          top={ingredient.top}
+          left={ingredient.left}
+          right={ingredient.right}
+          rotate={ingredient.rotate}
+          delay={ingredient.delay}
+          color={ingredient.color}
+          opacity={ingredient.opacity}
+          zIndex={-5}
+          animationDuration={15 + Math.random() * 10}
+        />
+      ))}
       
       {/* Main content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -313,7 +432,7 @@ export default function Hero() {
             
             {/* Nutrition badge */}
             <motion.div
-              className="absolute left-0 top-[20%] bg-white rounded-lg p-3 shadow-lg border border-gray-100 z-40"
+              className="absolute left-0 top-[20%] bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-gray-100 z-40"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.9, duration: 0.5, type: "spring" }}

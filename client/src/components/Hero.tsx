@@ -517,6 +517,11 @@ export default function Hero() {
             ))}
           </div>
         </div>
+        
+        {/* Transition element between stats and featured dishes */}
+        <div className="py-8 flex justify-center">
+          <div className="w-20 h-1.5 bg-gradient-to-r from-green-500/30 via-green-500 to-green-500/30 rounded-full"></div>
+        </div>
       </div>
     </section>
   );

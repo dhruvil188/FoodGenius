@@ -404,7 +404,7 @@ export default function Home() {
             <Hero />
 
             {/* Featured Foods Section */}
-            <section className="py-20 bg-white">
+            <section className="py-16 bg-white">
               <div className="container max-w-7xl mx-auto px-4">
                 <motion.div 
                   className="text-center mb-12"
@@ -592,14 +592,14 @@ export default function Home() {
                 </Dialog>
               </div>
               
-              {/* Minimal transition between Featured Dishes and How It Works */}
-              <div className="py-3 flex flex-col items-center">
-                <div className="w-20 h-1 bg-gradient-to-r from-amber-500/10 via-amber-500 to-amber-500/10 rounded-full"></div>
+              {/* Ultra minimal transition between Featured Dishes and How It Works */}
+              <div className="py-1">
+                <div className="h-px bg-slate-100 max-w-5xl mx-auto"></div>
               </div>
             </section>
 
             {/* How It Works Section */}
-            <section id="how-it-works" className="py-20 bg-slate-50">
+            <section id="how-it-works" className="py-16 bg-slate-50">
               <div className="container max-w-7xl mx-auto px-4">
                 <motion.div 
                   className="text-center mb-16"
@@ -660,14 +660,14 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Minimal transition between How It Works and Testimonials */}
-              <div className="py-3 flex flex-col items-center">
-                <div className="w-20 h-1 bg-gradient-to-r from-blue-500/10 via-blue-500 to-blue-500/10 rounded-full"></div>
+              {/* Ultra minimal transition between How It Works and Testimonials */}
+              <div className="py-1">
+                <div className="h-px bg-slate-100 max-w-5xl mx-auto"></div>
               </div>
             </section>
 
             {/* Testimonials Section */}
-            <section id="testimonials" className="py-20 bg-white relative overflow-hidden">
+            <section id="testimonials" className="py-16 bg-white relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-slate-50 to-white"></div>
               <div className="relative z-10 container max-w-7xl mx-auto px-4">
                 <motion.div 
@@ -718,14 +718,14 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Minimal transition between Testimonials and Recipe Magic sections */}
-              <div className="py-3 flex flex-col items-center">
-                <div className="w-20 h-1 bg-gradient-to-r from-purple-500/10 via-purple-500 to-purple-500/10 rounded-full"></div>
+              {/* Ultra minimal transition between Testimonials and Recipe Magic sections */}
+              <div className="py-1">
+                <div className="h-px bg-slate-100 max-w-5xl mx-auto"></div>
               </div>
             </section>
 
             {/* Features Section */}
-            <section id="features" className="py-20 bg-gradient-to-b from-white to-slate-50">
+            <section id="features" className="py-16 bg-gradient-to-b from-white to-slate-50">
               <div className="container max-w-7xl mx-auto px-4">
                 <motion.div 
                   className="text-center mb-16"

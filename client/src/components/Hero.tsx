@@ -518,14 +518,9 @@ export default function Hero() {
           </div>
         </div>
         
-        {/* Enhanced transition element between stats and featured dishes */}
-        <div className="py-6 flex flex-col items-center">
-          <div className="w-24 h-1.5 bg-gradient-to-r from-green-500/10 via-green-500 to-green-500/10 rounded-full mb-2"></div>
-          <div className="w-16 h-1 bg-gradient-to-r from-green-500/10 via-green-500/60 to-green-500/10 rounded-full"></div>
-          <div className="mt-4 bg-white/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-medium text-gray-500 inline-flex items-center">
-            <i className="fas fa-arrow-down mr-1.5 text-green-500"></i>
-            Continue exploring
-          </div>
+        {/* Minimal transition element between stats and featured dishes */}
+        <div className="py-3 flex flex-col items-center">
+          <div className="w-20 h-1 bg-gradient-to-r from-green-500/10 via-green-500 to-green-500/10 rounded-full"></div>
         </div>
       </div>
     </section>

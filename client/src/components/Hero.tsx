@@ -240,20 +240,20 @@ export default function Hero() {
   
   // Floating ingredients in the background
   const floatingIngredients: FloatingIngredient[] = [
-    { icon: 'fa-apple-alt', size: 28, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-500', opacity: 0.3 },
-    { icon: 'fa-carrot', size: 32, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-500', opacity: 0.2 },
-    { icon: 'fa-lemon', size: 24, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.25 },
-    { icon: 'fa-pepper-hot', size: 20, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.2 },
-    { icon: 'fa-egg', size: 22, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-300', opacity: 0.25 },
-    { icon: 'fa-cheese', size: 26, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-400', opacity: 0.2 },
-    { icon: 'fa-fish', size: 30, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-400', opacity: 0.15 },
-    { icon: 'fa-drumstick-bite', size: 24, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.2 },
-    { icon: 'fa-bread-slice', size: 28, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-500', opacity: 0.2 },
-    { icon: 'fa-pizza-slice', size: 30, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.25 },
-    { icon: 'fa-leaf', size: 18, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-500', opacity: 0.3 },
-    { icon: 'fa-seedling', size: 16, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-400', opacity: 0.25 },
-    { icon: 'fa-bacon', size: 26, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-400', opacity: 0.2 },
-    { icon: 'fa-cookie', size: 20, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-600', opacity: 0.25 },
+    { icon: 'fa-apple-alt', size: 40, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-600', opacity: 0.7 },
+    { icon: 'fa-carrot', size: 50, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-600', opacity: 0.8 },
+    { icon: 'fa-lemon', size: 45, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.7 },
+    { icon: 'fa-pepper-hot', size: 38, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.7 },
+    { icon: 'fa-egg', size: 42, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-500', opacity: 0.7 },
+    { icon: 'fa-cheese', size: 48, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-500', opacity: 0.8 },
+    { icon: 'fa-fish', size: 52, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-500', opacity: 0.7 },
+    { icon: 'fa-drumstick-bite', size: 44, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.7 },
+    { icon: 'fa-bread-slice', size: 46, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-600', opacity: 0.8 },
+    { icon: 'fa-pizza-slice', size: 50, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.7 },
+    { icon: 'fa-leaf', size: 36, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-600', opacity: 0.7 },
+    { icon: 'fa-seedling', size: 34, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-500', opacity: 0.7 },
+    { icon: 'fa-bacon', size: 48, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-500', opacity: 0.8 },
+    { icon: 'fa-cookie', size: 40, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-700', opacity: 0.7 },
   ];
   
   return (
@@ -283,7 +283,7 @@ export default function Hero() {
           delay={ingredient.delay}
           color={ingredient.color}
           opacity={ingredient.opacity}
-          zIndex={-5}
+          zIndex={5}
           animationDuration={15 + Math.random() * 10}
         />
       ))}

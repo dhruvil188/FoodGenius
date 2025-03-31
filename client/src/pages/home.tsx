@@ -685,74 +685,35 @@ export default function Home() {
                         </div>
                         
                         <div className="space-y-4">
-                          {/* Video 1 */}
-                          <div className="rounded-lg overflow-hidden border border-slate-200">
-                            <div className="aspect-video bg-slate-100 relative">
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-red-600 rounded-full w-14 h-14 flex items-center justify-center shadow-lg">
-                                  <i className="fas fa-play text-white text-2xl"></i>
+                          {/* Tutorial Video */}
+                          <a 
+                            href="https://www.youtube.com/watch?v=a03U45jFxOI" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="block"
+                          >
+                            <div className="bg-slate-50 rounded-lg overflow-hidden">
+                              <div className="aspect-video bg-slate-100 relative">
+                                <div className="absolute inset-0 flex items-center justify-center z-10">
+                                  <div className="bg-red-600 rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
+                                    <i className="fas fa-play text-white text-2xl"></i>
+                                  </div>
                                 </div>
                                 <img 
                                   src="https://i.ytimg.com/vi/a03U45jFxOI/maxresdefault.jpg" 
                                   alt="Butter Chicken Recipe"
-                                  className="absolute inset-0 w-full h-full object-cover z-[-1]"
+                                  className="absolute inset-0 w-full h-full object-cover"
                                 />
                               </div>
-                            </div>
-                            <div className="p-3">
-                              <h4 className="font-medium text-base">Butter Chicken Recipe | Restaurant Style</h4>
-                              <div className="flex justify-between mt-2 text-xs text-slate-500">
-                                <span>Chef Ranveer Brar</span>
-                                <span>10:28</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Video 2 */}
-                          <div className="rounded-lg overflow-hidden border border-slate-200">
-                            <div className="aspect-video bg-slate-100 relative">
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-red-600 rounded-full w-14 h-14 flex items-center justify-center shadow-lg">
-                                  <i className="fas fa-play text-white text-2xl"></i>
+                              <div className="p-4">
+                                <h4 className="font-semibold text-lg mb-1">Butter Chicken Recipe | Restaurant Style</h4>
+                                <div className="flex justify-between text-sm text-slate-500">
+                                  <span>Chef Ranveer Brar</span>
+                                  <span>10:28</span>
                                 </div>
-                                <img 
-                                  src="https://i.ytimg.com/vi/4WCd135Upd8/maxresdefault.jpg" 
-                                  alt="Easy Butter Chicken Recipe"
-                                  className="absolute inset-0 w-full h-full object-cover z-[-1]"
-                                />
                               </div>
                             </div>
-                            <div className="p-3">
-                              <h4 className="font-medium text-base">Easy Butter Chicken at Home | Authentic Indian Recipe</h4>
-                              <div className="flex justify-between mt-2 text-xs text-slate-500">
-                                <span>Get Curried</span>
-                                <span>8:45</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Video 3 */}
-                          <div className="rounded-lg overflow-hidden border border-slate-200">
-                            <div className="aspect-video bg-slate-100 relative">
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-red-600 rounded-full w-14 h-14 flex items-center justify-center shadow-lg">
-                                  <i className="fas fa-play text-white text-2xl"></i>
-                                </div>
-                                <img 
-                                  src="https://i.ytimg.com/vi/MWzxDPVtF8g/maxresdefault.jpg" 
-                                  alt="Authentic Butter Chicken"
-                                  className="absolute inset-0 w-full h-full object-cover z-[-1]"
-                                />
-                              </div>
-                            </div>
-                            <div className="p-3">
-                              <h4 className="font-medium text-base">The Secret to Perfect Butter Chicken | Murgh Makhani</h4>
-                              <div className="flex justify-between mt-2 text-xs text-slate-500">
-                                <span>Cooking With Sukhi</span>
-                                <span>12:37</span>
-                              </div>
-                            </div>
-                          </div>
+                          </a>
                         </div>
                       </TabsContent>
                     </Tabs>

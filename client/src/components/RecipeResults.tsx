@@ -375,10 +375,10 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                     {/* Grocery Buttons */}
                     <div className="mt-5 flex flex-col space-y-2">
                       <h6 className="text-sm font-semibold mb-1">Get Groceries:</h6>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2">
                         <Button
                           variant="outline"
-                          className="flex-1 bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
+                          className="w-full bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
                           onClick={() => window.open('https://www.ubereats.com', '_blank')}
                         >
                           <i className="fas fa-shopping-basket mr-2"></i>
@@ -386,7 +386,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         </Button>
                         <Button
                           variant="outline"
-                          className="flex-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
+                          className="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
                           onClick={() => window.open('https://www.amazon.com/fresh', '_blank')}
                         >
                           <i className="fas fa-shopping-cart mr-2"></i>

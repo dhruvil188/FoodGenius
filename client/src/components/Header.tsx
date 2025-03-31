@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
+  const { user } = useAuth();
   
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -47,10 +49,10 @@ export default function Header() {
           <Button 
             variant="outline"
             className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
-            onClick={() => navigate('/history')}
+            onClick={() => navigate('/account')}
           >
-            <i className="fas fa-history mr-2"></i>
-            View History
+            <i className={`fas ${user ? 'fa-user' : 'fa-sign-in-alt'} mr-2`}></i>
+            {user ? 'My Account' : 'Sign In'}
           </Button>
           
           <Button 

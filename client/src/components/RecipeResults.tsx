@@ -23,6 +23,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/lib/AuthContext';
+import { saveRecipe } from '@/lib/supabase';
 import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
 
 interface RecipeResultsProps {
@@ -38,8 +40,10 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
   const [completedSteps, setCompletedSteps] = useState<Record<number, Set<number>>>({});
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const [savedRecipes, setSavedRecipes] = useState<AnalyzeImageResponse[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
   // Initialize completed steps for each recipe
   useEffect(() => {
@@ -62,6 +66,18 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     
     // Add current recipe to history
     saveToHistory(result);
+    
+    // Check for saved recipe from user profile
+    const savedRecipeJson = localStorage.getItem('selectedSavedRecipe');
+    if (savedRecipeJson) {
+      try {
+        const savedRecipe = JSON.parse(savedRecipeJson);
+        handleLoadSavedRecipe(savedRecipe);
+        localStorage.removeItem('selectedSavedRecipe');
+      } catch (error) {
+        console.error('Error loading selected saved recipe:', error);
+      }
+    }
   }, [result]);
   
   const saveToHistory = (recipeData: AnalyzeImageResponse) => {
@@ -71,6 +87,56 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       const updatedHistory = [...savedRecipes, recipeData].slice(-10); // Keep last 10 recipes
       setSavedRecipes(updatedHistory);
       localStorage.setItem('dishDetectiveSavedRecipes', JSON.stringify(updatedHistory));
+    }
+  };
+  
+  const handleSaveRecipeToAccount = async () => {
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to save recipes to your account',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      await saveRecipe(result, imageUrl);
+      
+      toast({
+        title: 'Recipe saved',
+        description: 'This recipe has been saved to your account',
+      });
+      
+      // Trigger a small confetti celebration
+      triggerConfetti({
+        particleCount: 50,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    } catch (error: any) {
+      console.error('Error saving recipe:', error);
+      toast({
+        title: 'Save failed',
+        description: error.message || 'There was a problem saving this recipe',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const handleLoadSavedRecipe = (savedRecipe: AnalyzeImageResponse) => {
+    // If a saved recipe is loaded from the user's profile, use it as the current recipe
+    if (savedRecipe) {
+      // You might need to reformat the saved recipe data or perform other transformations here
+      // For now, we're just showing a toast notification
+      toast({
+        title: 'Recipe loaded',
+        description: `Loaded ${savedRecipe.foodName} from your saved recipes`,
+      });
     }
   };
   
@@ -149,16 +215,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     );
   };
   
-  const handleLoadSavedRecipe = (savedRecipe: AnalyzeImageResponse) => {
-    toast({
-      title: "Recipe Loaded",
-      description: `Loaded recipe for ${savedRecipe.foodName}`,
-    });
-    
-    // In a real app, this would replace the current result with the saved one
-    // For now, we'll just switch to the first tab
-    setSelectedTab("instructions");
-  };
+  // This function is already defined above
   
   return (
     <motion.section 
@@ -1160,7 +1217,16 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             </TabsContent>
           </Tabs>
           
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 gap-4">
+            <Button 
+              onClick={handleSaveRecipeToAccount}
+              disabled={isSaving}
+              className="rounded-full bg-primary/90 hover:bg-primary"
+            >
+              <i className={`fas ${isSaving ? 'fa-spinner fa-spin' : 'fa-save'} mr-2`}></i>
+              {isSaving ? 'Saving...' : 'Save to My Account'}
+            </Button>
+            
             <Button onClick={onTryAnother} className="rounded-full">
               <i className="fas fa-camera mr-2"></i> Try Another Dish
             </Button>

@@ -199,7 +199,76 @@ export default function Home() {
         <Hero onGetStarted={scrollToUpload} />
         
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-16 bg-slate-50">
+        <section id="how-it-works" className="py-16 bg-slate-50 relative overflow-hidden">
+          {/* Floating fruits for How It Works section */}
+          <motion.div 
+            className="absolute text-red-500 text-5xl"
+            style={{ top: '10%', right: '5%' }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, 20, 0],
+              rotate: [0, 10, 0, -10, 0]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-apple-alt"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-green-500 text-4xl"
+            style={{ top: '15%', left: '8%' }}
+            animate={{
+              y: [0, -40, -20, -40, 0],
+              x: [0, 30, 60, 30, 0],
+              rotate: [5, 15, 5, -5, 5]
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-leaf"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-orange-500 text-5xl"
+            style={{ bottom: '15%', right: '8%' }}
+            animate={{
+              y: [0, -50, -25, -50, 0],
+              x: [0, -30, -60, -30, 0],
+              rotate: [-5, -15, -5, 5, -5]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-carrot"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-yellow-500 text-4xl"
+            style={{ bottom: '10%', left: '10%' }}
+            animate={{
+              y: [0, -35, -15, -35, 0],
+              x: [0, 25, 50, 25, 0],
+              rotate: [0, 15, 0, -15, 0]
+            }}
+            transition={{
+              duration: 9,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-lemon"></i>
+          </motion.div>
+          
           <div className="container max-w-7xl mx-auto px-4">
             <motion.div 
               className="text-center mb-16"
@@ -402,8 +471,116 @@ export default function Home() {
         </section>
         
         {/* Recipe Magic in Action Section */}
-        <section id="recipe-magic" className="py-16 bg-white">
-          <div className="container max-w-7xl mx-auto px-4">
+        <section id="recipe-magic" className="py-16 bg-white relative overflow-hidden">
+          {/* Floating fruits for Recipe Magic section - more dynamic animations */}
+          <motion.div 
+            className="absolute text-green-600 text-6xl opacity-60"
+            style={{ top: '5%', left: '5%' }}
+            animate={{
+              y: [0, -80, -40, -80, 0],
+              x: [0, 60, 120, 60, 0],
+              rotate: [0, 20, 0, -20, 0],
+              scale: [1, 1.2, 1, 0.8, 1]
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-pepper-hot"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-yellow-500 text-5xl opacity-70"
+            style={{ top: '20%', right: '10%' }}
+            animate={{
+              y: [0, -60, -30, -60, 0],
+              x: [0, -40, -80, -40, 0],
+              rotate: [10, 30, 10, -10, 10],
+              scale: [1, 1.1, 1, 0.9, 1]
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-lemon"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-red-500 text-6xl opacity-65"
+            style={{ bottom: '15%', right: '8%' }}
+            animate={{
+              y: [0, -70, -35, -70, 0],
+              x: [0, -50, -100, -50, 0],
+              rotate: [-5, -25, -5, 15, -5],
+              scale: [1, 1.2, 1, 0.8, 1]
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-apple-alt"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-orange-600 text-5xl opacity-70"
+            style={{ bottom: '8%', left: '15%' }}
+            animate={{
+              y: [0, -50, -25, -50, 0],
+              x: [0, 40, 80, 40, 0],
+              rotate: [5, 25, 5, -15, 5],
+              scale: [1, 1.1, 1, 0.9, 1]
+            }}
+            transition={{
+              duration: 16,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-carrot"></i>
+          </motion.div>
+          
+          {/* Additional smaller floating elements */}
+          <motion.div 
+            className="absolute text-green-500 text-3xl opacity-50"
+            style={{ top: '40%', left: '3%' }}
+            animate={{
+              y: [0, -30, -15, -30, 0],
+              x: [0, 20, 40, 20, 0],
+              rotate: [0, 15, 0, -15, 0]
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-leaf"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-amber-600 text-3xl opacity-50"
+            style={{ top: '60%', right: '3%' }}
+            animate={{
+              y: [0, -25, -12, -25, 0],
+              x: [0, -15, -30, -15, 0],
+              rotate: [0, -15, 0, 15, 0]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-cookie"></i>
+          </motion.div>
+          
+          <div className="container max-w-7xl mx-auto px-4 relative z-10">
             <motion.div 
               className="text-center mb-10"
               initial={{ opacity: 0, y: 20 }}
@@ -877,8 +1054,134 @@ export default function Home() {
         </section>
         
         {/* Upload Section */}
-        <section ref={uploadSectionRef} id="upload-section" className="py-16 bg-gradient-to-br from-primary/5 to-emerald-600/5 relative">
+        <section ref={uploadSectionRef} id="upload-section" className="py-16 bg-gradient-to-br from-primary/5 to-emerald-600/5 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PGNpcmNsZSBjeD0iMzYiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjM2IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSIzNiIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iMzYiIGN5PSI0OCIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMzYiIHI9IjEiLz48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIxIi8+PGNpcmNsZSBjeD0iMjQiIGN5PSIxMiIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iNDgiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjM2IiByPSIxIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIyNCIgcj0iMSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjQ4IiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjQ4IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iMSIvPjwvZz48L3N2Zz4=')]" style={{ opacity: 0.3, color: '#10b981' }}></div>
+          
+          {/* Floating fruits around the upload section with extremely active animations */}
+          <motion.div 
+            className="absolute text-green-500 text-7xl opacity-55"
+            style={{ top: '5%', right: '8%' }}
+            animate={{
+              y: [0, -100, -50, -100, 0],
+              x: [0, -80, -160, -80, 0],
+              rotate: [0, 45, 0, -45, 0],
+              scale: [1, 1.3, 1, 0.7, 1]
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-pepper-hot"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-red-500 text-6xl opacity-60"
+            style={{ bottom: '10%', right: '15%' }}
+            animate={{
+              y: [0, -120, -60, -120, 0],
+              x: [0, -70, -140, -70, 0],
+              rotate: [10, 55, 10, -35, 10],
+              scale: [1, 1.2, 1, 0.8, 1]
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-apple-alt"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-orange-600 text-7xl opacity-50"
+            style={{ top: '20%', left: '5%' }}
+            animate={{
+              y: [0, -90, -45, -90, 0],
+              x: [0, 100, 200, 100, 0],
+              rotate: [-10, -55, -10, 35, -10],
+              scale: [1, 1.3, 1, 0.7, 1]
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-carrot"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-yellow-500 text-6xl opacity-60"
+            style={{ bottom: '15%', left: '10%' }}
+            animate={{
+              y: [0, -80, -40, -80, 0],
+              x: [0, 60, 120, 60, 0],
+              rotate: [5, 40, 5, -30, 5],
+              scale: [1, 1.2, 1, 0.8, 1]
+            }}
+            transition={{
+              duration: 14,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-lemon"></i>
+          </motion.div>
+          
+          {/* Additional smaller elements */}
+          <motion.div 
+            className="absolute text-green-600 text-4xl opacity-50"
+            style={{ top: '60%', left: '20%' }}
+            animate={{
+              y: [0, -50, -25, -50, 0],
+              x: [0, 30, 60, 30, 0],
+              rotate: [0, 30, 0, -30, 0]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-leaf"></i>
+          </motion.div>
+          
+          <motion.div 
+            className="absolute text-green-500 text-4xl opacity-45"
+            style={{ top: '40%', right: '25%' }}
+            animate={{
+              y: [0, -40, -20, -40, 0],
+              x: [0, -20, -40, -20, 0],
+              rotate: [0, -20, 0, 20, 0]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-seedling"></i>
+          </motion.div>
+
+          <motion.div 
+            className="absolute text-amber-500 text-3xl opacity-40"
+            style={{ bottom: '50%', right: '5%' }}
+            animate={{
+              y: [0, -30, -15, -30, 0],
+              x: [0, -15, -30, -15, 0],
+              rotate: [0, -15, 0, 15, 0]
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              repeatType: "loop"
+            }}
+          >
+            <i className="fas fa-cookie"></i>
+          </motion.div>
+          
           <div className="container max-w-7xl mx-auto px-4 relative z-10">
             <motion.div 
               className="text-center mb-10"

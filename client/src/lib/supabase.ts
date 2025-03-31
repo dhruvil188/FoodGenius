@@ -5,11 +5,19 @@ import { type AnalyzeImageResponse } from '@shared/schema';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-// Log status without exposing actual values
-console.log('Supabase configuration:', 
-  supabaseUrl ? 'URL is configured' : 'URL is missing',
-  supabaseAnonKey ? 'Key is configured' : 'Key is missing'
-);
+// Enhanced debug logging to help identify issues
+console.log('Supabase configuration:', {
+  url: supabaseUrl ? `${supabaseUrl.substring(0, 10)}...` : 'URL is missing',
+  key: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 5)}...` : 'Key is missing',
+  urlType: typeof supabaseUrl,
+  keyType: typeof supabaseAnonKey,
+  envVars: {
+    hasDotEnv: typeof import.meta.env.VITE_SUPABASE_URL === 'string',
+    mode: import.meta.env.MODE,
+    isProd: import.meta.env.PROD,
+    isDev: import.meta.env.DEV
+  }
+});
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

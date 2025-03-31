@@ -49,7 +49,7 @@ export default function Contact() {
             Get in <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Touch</span>
           </h1>
           <p className="text-slate-600 max-w-2xl mx-auto">
-            Have questions about Recipe from Image? We're here to help you turn food photos into delicious recipes.
+            Have questions about Recipe Snap? We're here to help you turn food photos into delicious recipes.
           </p>
         </div>
 
@@ -188,11 +188,11 @@ export default function Contact() {
         {/* SEO content - hidden visually but available for search engines */}
         <div className="mt-24 text-center">
           <h2 className="text-2xl font-bold mb-4">
-            Recipe from Image - Your AI Food Recognition Tool
+            Recipe Snap - Your AI Food Recognition Tool
           </h2>
           <div className="max-w-3xl mx-auto text-slate-600">
             <p className="mb-4">
-              Recipe from Image is the leading AI-powered solution for transforming food photos into detailed recipes. 
+              Recipe Snap is the leading AI-powered solution for transforming food photos into detailed recipes. 
               Our innovative platform uses advanced image recognition technology to identify ingredients, cooking methods, 
               and cultural contexts of dishes captured in photos.
             </p>
@@ -202,7 +202,7 @@ export default function Contact() {
               our food image analyzer provides accurate recipes in seconds.
             </p>
             <p>
-              Recipe from Image offers a suite of features including nutritional analysis, cooking tips, 
+              Recipe Snap offers a suite of features including nutritional analysis, cooking tips, 
               ingredient substitutions, and more - all from a simple photo. Experience the future of cooking 
               with our visual recipe tool.
             </p>

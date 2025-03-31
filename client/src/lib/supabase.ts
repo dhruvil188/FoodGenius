@@ -1,14 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 import { type AnalyzeImageResponse } from '@shared/schema';
 
-// Initialize Supabase client using environment variables
-// Access environment variables using import.meta.env
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Initialize Supabase client using environment variables from Vite
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase credentials are missing. Authentication will not work.');
-}
+// Log status without exposing actual values
+console.log('Supabase configuration:', 
+  supabaseUrl ? 'URL is configured' : 'URL is missing',
+  supabaseAnonKey ? 'Key is configured' : 'Key is missing'
+);
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 

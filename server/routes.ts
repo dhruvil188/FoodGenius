@@ -14,6 +14,25 @@ import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Endpoint to provide environment variables to the client
+  app.get("/api/environment", (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({
+      SUPABASE_URL: process.env.SUPABASE_URL || "",
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || "",
+    }));
+  });
+  
+  // Test endpoint to verify environment variables are available
+  app.get("/api/test-environment", (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify({
+      SUPABASE_URL: process.env.SUPABASE_URL || "",
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? "Key exists (masked)" : "",
+      NODE_ENV: process.env.NODE_ENV || "",
+    }));
+  });
+
   // Flag to enable development mode with mock data when API quota is exceeded
   const USE_MOCK_DATA_ON_QUOTA_EXCEEDED = false;
   

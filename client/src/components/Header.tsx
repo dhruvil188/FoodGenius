@@ -55,7 +55,15 @@ export default function Header() {
           
           <Button 
             className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              if (location === '/') {
+                // If already on home page, scroll to the upload section
+                document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                // If on another page, navigate to home with the upload section anchor
+                navigate('/#upload-section');
+              }
+            }}
           >
             <i className="fas fa-camera mr-2"></i>
             <span className="hidden md:inline">Analyze Dish</span>

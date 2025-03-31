@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Logo } from './Logo';
+import { Link } from 'wouter';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -46,14 +47,14 @@ export default function Footer() {
               <h4 className="font-semibold text-sm mb-3 text-slate-800">Resources</h4>
               <ul className="space-y-2 text-sm">
                 <li className="text-slate-500 hover:text-primary transition-colors">
-                  <a href="#" className="flex items-center gap-1">
-                    <i className="fas fa-book"></i> Cooking Guide
-                  </a>
+                  <Link href="/library" className="flex items-center gap-1">
+                    <i className="fas fa-book"></i> Recipe Library
+                  </Link>
                 </li>
                 <li className="text-slate-500 hover:text-primary transition-colors">
-                  <a href="#" className="flex items-center gap-1">
-                    <i className="fas fa-question-circle"></i> Help Center
-                  </a>
+                  <Link href="/contact" className="flex items-center gap-1">
+                    <i className="fas fa-envelope"></i> Contact Us
+                  </Link>
                 </li>
                 <li className="text-slate-500 hover:text-primary transition-colors">
                   <a href="#" className="flex items-center gap-1">
@@ -86,8 +87,20 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="pt-8 border-t border-slate-200 text-center text-sm text-slate-500">
-          <p>© {currentYear} DishDetective. All rights reserved.</p>
+        <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
+          <p>© {currentYear} Recipe from Image. All rights reserved.</p>
+          
+          <div className="flex space-x-4 mt-4 md:mt-0">
+            <Link href="/contact" className="hover:text-primary transition-colors">
+              Contact
+            </Link>
+            <a href="#" className="hover:text-primary transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#" className="hover:text-primary transition-colors">
+              Terms of Service
+            </a>
+          </div>
         </div>
       </div>
     </motion.footer>

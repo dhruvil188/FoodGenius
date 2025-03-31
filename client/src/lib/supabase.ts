@@ -19,7 +19,27 @@ console.log('Supabase configuration:', {
   }
 });
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Enhanced Supabase client with additional options for better error handling and browser compatibility
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce', // Using PKCE flow for enhanced security in browser environments
+  },
+  global: {
+    // Increase timeouts for network stability
+    fetch: (url, options = {}) => {
+      return fetch(url, {
+        ...options,
+        // Credentials needed for cookies to be sent in cross-origin requests
+        credentials: 'include',
+        // Longer timeout to handle possible network delays
+        signal: AbortSignal.timeout(30000), // 30 seconds
+      });
+    },
+  },
+});
 
 // Define types for our database
 export type User = {

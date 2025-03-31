@@ -129,7 +129,7 @@ export function Logo({ size = 'medium', animated = true }: { size?: 'small' | 'm
       </Wrapper>
       <div className={`font-bold ${sizes[size].text} tracking-tight`}>
         <span className="bg-gradient-to-r from-emerald-500 to-primary bg-clip-text text-transparent">Recipe</span>
-        <span className="text-slate-800">from Image</span>
+        <span className="text-slate-800">Snap</span>
       </div>
     </div>
   );

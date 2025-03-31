@@ -88,7 +88,7 @@ export default function Footer() {
         </div>
         
         <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-          <p>© {currentYear} Recipe from Image. All rights reserved.</p>
+          <p>© {currentYear} Recipe Snap. All rights reserved.</p>
           
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link href="/contact" className="hover:text-primary transition-colors">

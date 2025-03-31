@@ -108,8 +108,11 @@ const FloatingIngredient = ({
   zIndex = 0,
   animationDuration = 20
 }: FloatingIngredientProps) => {
-  // Random float movement animation
-  const floatY = Math.random() * 15 + 5; // Random float distance
+  // Random movement animation values
+  const floatY = Math.random() * 30 + 15; // Increased vertical float distance
+  const floatX = Math.random() * 25 + 10; // Horizontal float distance
+  const rotateAmount = Math.random() * 12 + 8; // Increased rotation amount
+  const duration = 8 + Math.random() * 7; // Shorter animation duration for more noticeable movement
   
   return (
     <motion.div
@@ -122,24 +125,32 @@ const FloatingIngredient = ({
         opacity,
         zIndex,
       }}
-      initial={{ y: 0, rotate, opacity: 0 }}
+      initial={{ y: 0, x: 0, rotate, opacity: 0 }}
       animate={{ 
-        y: [0, -floatY, 0], 
-        rotate: [rotate, rotate + 5, rotate - 5, rotate],
+        y: [0, -floatY, -floatY/2, -floatY, 0], 
+        x: [0, floatX/2, floatX, floatX/2, 0],
+        rotate: [rotate, rotate + rotateAmount, rotate, rotate - rotateAmount, rotate],
         opacity
       }}
       transition={{
         y: { 
-          duration: animationDuration, 
+          duration, 
           repeat: Infinity,
-          repeatType: 'reverse',
+          repeatType: 'loop',
           ease: 'easeInOut',
           delay
         },
-        rotate: {
-          duration: animationDuration * 1.5,
+        x: { 
+          duration: duration * 1.2, 
           repeat: Infinity,
-          repeatType: 'reverse',
+          repeatType: 'loop',
+          ease: 'easeInOut',
+          delay: delay + 0.5
+        },
+        rotate: {
+          duration: duration * 0.8,
+          repeat: Infinity,
+          repeatType: 'loop',
           ease: 'easeInOut',
           delay: delay + 1
         },
@@ -240,20 +251,20 @@ export default function Hero() {
   
   // Floating ingredients in the background
   const floatingIngredients: FloatingIngredient[] = [
-    { icon: 'fa-apple-alt', size: 40, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-600', opacity: 0.7 },
-    { icon: 'fa-carrot', size: 50, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-600', opacity: 0.8 },
-    { icon: 'fa-lemon', size: 45, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.7 },
-    { icon: 'fa-pepper-hot', size: 38, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.7 },
-    { icon: 'fa-egg', size: 42, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-500', opacity: 0.7 },
-    { icon: 'fa-cheese', size: 48, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-500', opacity: 0.8 },
-    { icon: 'fa-fish', size: 52, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-500', opacity: 0.7 },
-    { icon: 'fa-drumstick-bite', size: 44, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.7 },
-    { icon: 'fa-bread-slice', size: 46, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-600', opacity: 0.8 },
-    { icon: 'fa-pizza-slice', size: 50, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.7 },
-    { icon: 'fa-leaf', size: 36, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-600', opacity: 0.7 },
-    { icon: 'fa-seedling', size: 34, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-500', opacity: 0.7 },
-    { icon: 'fa-bacon', size: 48, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-500', opacity: 0.8 },
-    { icon: 'fa-cookie', size: 40, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-700', opacity: 0.7 },
+    { icon: 'fa-apple-alt', size: 40, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-600', opacity: 0.45 },
+    { icon: 'fa-carrot', size: 46, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-600', opacity: 0.5 },
+    { icon: 'fa-lemon', size: 40, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.4 },
+    { icon: 'fa-pepper-hot', size: 38, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.45 },
+    { icon: 'fa-egg', size: 42, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-500', opacity: 0.4 },
+    { icon: 'fa-cheese', size: 44, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-500', opacity: 0.5 },
+    { icon: 'fa-fish', size: 46, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-500', opacity: 0.45 },
+    { icon: 'fa-drumstick-bite', size: 42, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.45 },
+    { icon: 'fa-bread-slice', size: 44, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-600', opacity: 0.5 },
+    { icon: 'fa-pizza-slice', size: 46, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.45 },
+    { icon: 'fa-leaf', size: 36, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-600', opacity: 0.45 },
+    { icon: 'fa-seedling', size: 34, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-500', opacity: 0.4 },
+    { icon: 'fa-bacon', size: 44, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-500', opacity: 0.5 },
+    { icon: 'fa-cookie', size: 38, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-700', opacity: 0.45 },
   ];
   
   return (
@@ -284,7 +295,7 @@ export default function Hero() {
           color={ingredient.color}
           opacity={ingredient.opacity}
           zIndex={5}
-          animationDuration={15 + Math.random() * 10}
+          animationDuration={8 + Math.random() * 4}
         />
       ))}
       

@@ -36,9 +36,9 @@ export default function Footer() {
                   </a>
                 </li>
                 <li className="text-slate-500 hover:text-primary transition-colors">
-                  <a href="#" className="flex items-center gap-1">
-                    <i className="fas fa-apple-alt"></i> Nutrition Info
-                  </a>
+                  <Link href="/terms" className="flex items-center gap-1">
+                    <i className="fas fa-gavel"></i> Terms & Conditions
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -94,12 +94,12 @@ export default function Footer() {
             <Link href="/contact" className="hover:text-primary transition-colors">
               Contact
             </Link>
-            <a href="#" className="hover:text-primary transition-colors">
+            <Link href="/privacy" className="hover:text-primary transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="hover:text-primary transition-colors">
+            </Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>

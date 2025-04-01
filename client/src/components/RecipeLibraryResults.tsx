@@ -44,19 +44,40 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
   // Initialize completed steps for each recipe
   useEffect(() => {
     const initialCompletedSteps: Record<number, Set<number>> = {};
-    result.recipes.forEach((_, index) => {
-      initialCompletedSteps[index] = new Set();
-    });
+    if (result.recipes && Array.isArray(result.recipes)) {
+      result.recipes.forEach((_, index) => {
+        initialCompletedSteps[index] = new Set();
+      });
+    } else {
+      // Default to at least one recipe if recipes array is undefined
+      initialCompletedSteps[0] = new Set();
+    }
     setCompletedSteps(initialCompletedSteps);
   }, [result.recipes]);
   
-  const selectedRecipe = selectedVariation 
-    ? { 
-        ...result.recipes[selectedRecipeIndex], 
-        title: `${result.recipes[selectedRecipeIndex].title} (${selectedVariation} Variation)`,
-        instructions: result.recipes[selectedRecipeIndex].variations?.find(v => v.type === selectedVariation)?.adjustments || result.recipes[selectedRecipeIndex].instructions 
-      } 
-    : result.recipes[selectedRecipeIndex];
+  // Handle the case when recipes is not defined or empty
+  const selectedRecipe = result.recipes && Array.isArray(result.recipes) && result.recipes.length > 0
+    ? (selectedVariation 
+      ? { 
+          ...result.recipes[selectedRecipeIndex], 
+          title: `${result.recipes[selectedRecipeIndex].title} (${selectedVariation} Variation)`,
+          instructions: result.recipes[selectedRecipeIndex].variations?.find(v => v.type === selectedVariation)?.adjustments || result.recipes[selectedRecipeIndex].instructions 
+        } 
+      : result.recipes[selectedRecipeIndex])
+    : { 
+        // Fallback empty recipe object if no recipes are available
+        title: result.foodName || "Recipe",
+        description: result.description || "",
+        instructions: [],
+        ingredients: [],
+        ingredientGroups: [],
+        prepTime: "",
+        cookTime: "",
+        totalTime: "",
+        servings: 0,
+        difficulty: "",
+        servingSize: "",
+      };
   
   const totalInstructions = selectedRecipe.instructions.length;
   
@@ -297,7 +318,9 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                     )}
                     
                     {/* Show variations if available */}
-                    {result.recipes[selectedRecipeIndex].variations && result.recipes[selectedRecipeIndex].variations.length > 0 && (
+                    {result.recipes && Array.isArray(result.recipes) && result.recipes.length > 0 && 
+                     result.recipes[selectedRecipeIndex]?.variations && 
+                     result.recipes[selectedRecipeIndex].variations.length > 0 && (
                       <div className="mt-6">
                         <h6 className="font-medium text-sm mb-3">Recipe Variations</h6>
                         <div className="space-y-2">

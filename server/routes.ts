@@ -18,16 +18,6 @@ import {
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
-import Stripe from "stripe";
-
-// Initialize the Google AI client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16" as any,
-});
-
 import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
 
@@ -35,570 +25,1018 @@ import { searchYouTubeVideos } from "./services/youtubeService";
 const GUEST_USER_ID = 1;
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Image analysis endpoint
+  // Flag to enable development mode with mock data when API quota is exceeded
+  const USE_MOCK_DATA_ON_QUOTA_EXCEEDED = false;
+  
+  // Initialize the Google Generative AI API with the user-provided key
+  const genAI = new GoogleGenerativeAI(
+    process.env.GEMINI_API_KEY || ""
+  );
+
+  // Define the model to use for image analysis
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-pro",
+    generationConfig: {
+      temperature: 0.4,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,
+    },
+    safetySettings: [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+    ],
+  });
+
   app.post("/api/analyze-image", async (req: Request, res: Response) => {
     try {
-      // Validate request
-      const { imageData } = analyzeImageRequestSchema.parse(req.body);
+      // Validate the request body
+      const validatedData = analyzeImageRequestSchema.parse(req.body);
+      const { imageData } = validatedData;
 
-      // Check if the user is authenticated (optional - for future use)
-      let userId = GUEST_USER_ID;
-      if (req.headers.authorization) {
-        const token = req.headers.authorization.split(" ")[1];
-        const session = await storage.getSessionByToken(token);
-        if (session) {
-          userId = session.userId;
-        }
-      }
+      // Remove the data URL prefix to get the base64 string
+      const base64Image = imageData.replace(/^data:image\/\w+;base64,/, "");
 
-      // Configure the generative model
-      const model = genAI.getGenerativeModel({
-        model: "gemini-pro-vision",
-        safetySettings: [
-          {
-            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-          {
-            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-          },
-        ],
-      });
-
-      // Format the prompt
-      const prompt = `Analyze this food image and provide a comprehensive recipe with the following structured information in JSON format:
-      - name: Name of the dish
-      - description: Detailed description of the dish
-      - cuisine: Cuisine type
-      - difficulty: Cooking difficulty (1-5)
-      - prepTime: Preparation time in minutes
-      - cookTime: Cooking time in minutes
-      - servings: Number of servings
-      - ingredientGroups: Array of objects with 'heading' and 'ingredients' array
-      - instructions: Detailed step-by-step cooking instructions
-      - nutritionInfo: Object with calories, protein, carbs, and fat
-      - tips: Array of cooking tips and tricks
-      - variations: Array of recipe variations
-      - sideDishes: Array of recommended side dishes
-      - youtubeVideos: Array of video IDs (leave empty, will be filled later)
-      - equipmentNeeded: Array of kitchen equipment needed
-      - techniques: Detailed cooking techniques used
-      - culturalContext: Historical and cultural background of the dish
-      - presentationTips: Tips for plating and serving
-      - cookingScience: Scientific principles behind the recipe
-      - sensoryProfile: Taste, texture, and aroma notes
-      - allergens: Common allergens in the recipe
-      - storageInstructions: How to store leftovers
-      - reheatingInstructions: How to reheat leftovers
-
-      Format the response as valid JSON with proper syntax.`;
-
-      // Analyze the image
-      const result = await model.generateContent([
-        prompt,
+      // Prepare the image part
+      const imageParts = [
         {
           inlineData: {
+            data: base64Image,
             mimeType: "image/jpeg",
-            data: imageData.split(",")[1],
           },
         },
-      ]);
+      ];
 
-      const response = result.response;
-      const text = response.text();
+      // Generate content using Gemini API
+      const prompt = `
+      You are a professional culinary consultant, food scientist, and master chef specializing in detailed recipe analysis and development.
       
-      // Extract the JSON object from the response
-      const jsonStart = text.indexOf("{");
-      const jsonEnd = text.lastIndexOf("}") + 1;
-      const jsonStr = text.substring(jsonStart, jsonEnd);
+      Analyze this food image in extreme detail and provide:
       
-      // Parse the JSON and validate it against our schema
-      const jsonData = JSON.parse(jsonStr);
-      const validatedData = analyzeImageResponseSchema.parse(jsonData);
+      1. The exact name of the dish with any regional variations or authentic naming
+      2. A comprehensive yet concise description of the dish including cultural context, origin, and traditional serving occasions
+      3. Detailed tags/categories (cuisine type, regional cuisine, diet type, meal type, cooking method, flavor profile, texture)
       
-      // If YouTube API key is available, fetch related videos
-      if (process.env.YOUTUBE_API_KEY) {
-        try {
-          const videos = await searchYouTubeVideos(validatedData.name);
-          validatedData.youtubeVideos = videos;
-        } catch (error) {
-          console.error("Error fetching YouTube videos:", error);
+      4. A single comprehensive, authentic recipe for how to make this dish. Include:
+         - Creative and descriptive title that captures the recipe's unique aspects
+         - Detailed description highlighting what makes this version special
+         - Precise preparation time, cooking time, and total time (also include active vs passive time breakdown)
+         - Exact servings with portion size information
+         - Specific difficulty level with brief explanation of what makes it that level
+         - Comprehensive dietary tags including allergies (gluten-free, dairy-free, nut-free, etc.)
+         - Complete list of required equipment and tools with descriptions and alternatives
+         - Complete ingredients list organized by preparation stage or component with precise measurements, prep notes, and quality indicators
+         - Step-by-step instructions with detailed professional chef techniques, visual cues for doneness, and time estimates for each step
+         - Technique details explaining complex cooking methods with visual cues and common errors
+         - Complete nutritional profile with macronutrient breakdown, allergens, and dietary compliance information
+         - Cultural context including origin, history, traditional serving customs, and festive relevance
+         - Plating and presentation guidance with garnishing tips and photography suggestions
+         - Science behind the recipe explaining key reactions and techniques
+         - Sensory guidance describing taste progression, aroma indicators, and texture descriptors
+         - Success indicators showing how to recognize when each step is done correctly
+         - Healthy alternatives for key ingredients with specific substitution ratios
+         - Detailed dietary notes and meal planning suggestions
+         - Recipe variations with precise adjustments and flavor profiles
+         - Expert chef tips and common mistakes to avoid
+         - Storage instructions and reheating methods
+         - Wine or beverage pairing suggestions
+         - Complementary side dishes with preparation details
+      
+      Format your response as a JSON object with the following structure:
+      {
+        "foodName": "Complete authentic name of the dish",
+        "description": "Comprehensive description with cultural context",
+        "tags": ["cuisine", "regional", "diet type", "meal type", "cooking method", "flavor profile", "texture"],
+        "recipes": [
+          {
+            "title": "Descriptive recipe title",
+            "description": "Detailed recipe description with what makes it unique",
+            "prepTime": "Precise prep time",
+            "cookTime": "Precise cook time",
+            "totalTime": "Total time",
+            "activeTime": "Time requiring active cooking",
+            "passiveTime": "Time not requiring active attention",
+            "servings": number,
+            "servingSize": "Description of portion size",
+            "difficulty": "Difficulty level with brief explanation",
+            "tags": ["dietary restriction", "allergy info"],
+            "equipment": [
+              {
+                "name": "Equipment name",
+                "description": "What it's used for in this recipe",
+                "alternatives": ["Alternative tools if available"],
+                "difficultyToUse": "How challenging this tool is to use properly"
+              }
+            ],
+            "ingredientGroups": [
+              {
+                "groupName": "Component or preparation stage name",
+                "ingredients": ["Detailed ingredients with measurements"],
+                "preparationNotes": "Special notes about preparing this group"
+              }
+            ],
+            "ingredients": ["Complete list of all ingredients with measurements"],
+            "instructions": ["Detailed steps with technique information"],
+            "techniqueDetails": [
+              {
+                "name": "Technique name",
+                "description": "Detailed explanation of the technique",
+                "visualCues": ["How to tell when done correctly"],
+                "commonErrors": ["Mistakes to avoid with this technique"]
+              }
+            ],
+            "chefTips": ["Professional cooking tips"],
+            "commonMistakes": ["Mistakes to avoid"],
+            "storageInstructions": "How to store and for how long",
+            "reheatingMethods": "Best ways to reheat",
+            "beveragePairings": ["Complementary drink suggestions"],
+            "successIndicators": ["How to know each critical step is done correctly"],
+            "nutritionInfo": {
+              "calories": number,
+              "protein": "amount in grams",
+              "carbs": "amount in grams",
+              "fats": "amount in grams",
+              "fiber": "amount in grams",
+              "sugar": "amount in grams",
+              "sodium": "amount in mg",
+              "vitamins": ["key vitamins and minerals present"],
+              "healthyAlternatives": ["specific alternative with substitution ratio"],
+              "dietaryNotes": ["detailed note about nutritional benefits"],
+              "macronutrientRatio": {
+                "protein": number as percentage,
+                "carbs": number as percentage,
+                "fats": number as percentage
+              },
+              "allergens": ["Common allergens present in the recipe"],
+              "dietaryCompliance": ["Diets this recipe complies with"]
+            },
+            "variations": [
+              {
+                "type": "variation type",
+                "description": "Detailed description of this variation",
+                "adjustments": ["precise ingredient adjustments with measurements"]
+              }
+            ],
+            "sideDishSuggestions": [
+              {
+                "name": "Side dish name",
+                "description": "Detailed description",
+                "preparationTime": "Precise preparation time",
+                "pairingReason": "Why this complements the main dish"
+              }
+            ],
+            "culturalContext": {
+              "origin": "Geographic origin of the dish",
+              "history": "Brief history of the dish's development",
+              "traditionalServing": "How it's traditionally served",
+              "festiveRelevance": ["Holidays or celebrations associated with this dish"]
+            },
+            "presentationGuidance": {
+              "platingSuggestions": ["Professional plating ideas"],
+              "garnishingTips": ["Effective garnishing techniques"],
+              "photoTips": ["How to take appealing photos of the dish"]
+            },
+            "cookingScience": {
+              "keyReactions": ["Important chemical/cooking reactions"],
+              "techniquePurpose": ["Scientific reasons for specific techniques"],
+              "safetyTips": ["Food safety considerations"]
+            },
+            "sensoryGuidance": {
+              "tasteProgression": ["How flavors develop during eating"],
+              "aromaIndicators": ["What smells indicate doneness or quality"],
+              "textureDescriptors": ["Detailed texture profiles and how to achieve them"]
+            },
+            "mealPlanningNotes": ["Suggestions for incorporating into meal plans"]
+          }
+        ]
+      }
+
+      Ensure the JSON is valid with no trailing commas. Make your response extremely detailed, professional, and useful for both amateur and professional cooks, but still ensure the JSON is properly formatted and parseable.
+      `;
+
+      try {
+        // Start a chat session and send message with the food image
+        const chatSession = model.startChat({
+          history: [],
+        });
+        
+        const result = await chatSession.sendMessage([prompt, ...imageParts]);
+        const response = result.response;
+        const text = response.text();
+
+        // Extract the JSON from the response - handle multiple possible formats
+        let jsonContent = '';
+        
+        // First try to extract JSON from code blocks (most common format)
+        const codeBlockMatch = text.match(/```(?:json)?\s*\n([\s\S]*?)\n\s*```/);
+        if (codeBlockMatch && codeBlockMatch[1]) {
+          jsonContent = codeBlockMatch[1].trim();
+        } 
+        // Then try to find JSON object directly 
+        else {
+          // Look for a complete JSON object with outer braces
+          const directJsonMatch = text.match(/(\{[\s\S]*\})/);
+          if (directJsonMatch && directJsonMatch[1]) {
+            jsonContent = directJsonMatch[1].trim();
+          } else {
+            // As a last resort, use the whole text and hope for the best
+            jsonContent = text.trim();
+          }
         }
+        
+        // Additional cleanup to ensure valid JSON
+        // Remove any trailing commas which are not valid in JSON
+        jsonContent = jsonContent
+          .replace(/,\s*}/g, '}') // Fix trailing commas in objects
+          .replace(/,\s*\]/g, ']'); // Fix trailing commas in arrays
+        
+        // Extra validation and debug info before parsing
+        if (!jsonContent || jsonContent.trim() === '') {
+          console.error("Empty JSON content from Gemini API");
+          console.log("Full API text response:", text);
+          return res.status(500).json({
+            error: "Empty response from AI",
+            details: "The AI service returned an empty response. Please try with a clearer food image."
+          });
+        }
+
+        // Log first part of the JSON response for debugging (limit to first 100 chars)
+        console.log("Attempting to parse Gemini response:", jsonContent.substring(0, 100) + '...');
+        
+        // Parse the JSON response
+        try {
+          // Attempt to parse JSON with additional safety checks
+          let parsedData;
+          try {
+            parsedData = JSON.parse(jsonContent);
+          } catch (jsonParseError) {
+            console.error("JSON parsing error:", jsonParseError);
+            console.log("Invalid JSON content:", jsonContent.substring(0, 500) + '...');
+            
+            // Try to clean up the JSON further before giving up
+            const cleanedJson = jsonContent
+              .replace(/(\w+):/g, '"$1":') // Convert unquoted property names to quoted
+              .replace(/'/g, '"') // Replace single quotes with double quotes
+              .replace(/,\s*([}\]])/g, '$1'); // Remove trailing commas in objects/arrays
+              
+            try {
+              parsedData = JSON.parse(cleanedJson);
+              console.log("Successfully parsed after cleanup");
+            } catch (secondAttemptError) {
+              // Still failed, return proper error
+              return res.status(500).json({
+                error: "Invalid response format", 
+                details: "The AI service returned data in an unexpected format. Please try again with a clearer food image."
+              });
+            }
+          }
+          
+          // Log success and check for required fields
+          console.log("Successfully parsed JSON response");
+          if (!parsedData.foodName) {
+            console.warn("Missing foodName in parsed data");
+          }
+          if (!Array.isArray(parsedData.recipes) || parsedData.recipes.length === 0) {
+            console.warn("Missing or empty recipes array in parsed data");
+          }
+          
+          // Process and normalize the response to ensure it matches our schema
+          // For example, handle any nested structures, ensure arrays exist, etc.
+          const normalizedData = {
+            ...parsedData,
+            recipes: parsedData.recipes?.map((recipe: any) => ({
+              ...recipe,
+              // Ensure required fields have defaults if missing
+              servings: recipe.servings || 4,
+              ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+              instructions: Array.isArray(recipe.instructions) ? recipe.instructions : [],
+              // Handle variations edge cases (if it exists but isn't in expected format)
+              variations: Array.isArray(recipe.variations) ? recipe.variations.map((v: any) => ({
+                type: v.type || 'spicy',
+                description: v.description || '',
+                adjustments: Array.isArray(v.adjustments) ? v.adjustments : []
+              })) : [],
+              // Handle nutrition info edge cases
+              nutritionInfo: recipe.nutritionInfo ? {
+                ...recipe.nutritionInfo,
+                // Handle calories whether it's a number or string containing a number
+                calories: typeof recipe.nutritionInfo.calories === 'number' ? 
+                  recipe.nutritionInfo.calories : 
+                  (typeof recipe.nutritionInfo.calories === 'string' ? 
+                    parseInt(recipe.nutritionInfo.calories, 10) || 0 : 0),
+                // Ensure required fields exist with proper formats
+                protein: recipe.nutritionInfo.protein?.toString() || "0g",
+                carbs: recipe.nutritionInfo.carbs?.toString() || "0g",
+                fats: recipe.nutritionInfo.fats?.toString() || "0g",
+                fiber: recipe.nutritionInfo.fiber?.toString() || "0g",
+                sugar: recipe.nutritionInfo.sugar?.toString() || "0g",
+                // Handle optional fields
+                sodium: recipe.nutritionInfo.sodium?.toString() || undefined,
+                vitamins: Array.isArray(recipe.nutritionInfo.vitamins) ? 
+                  recipe.nutritionInfo.vitamins : [],
+                // Handle complex structures that might come as arrays or objects
+                healthyAlternatives: Array.isArray(recipe.nutritionInfo.healthyAlternatives) ? 
+                  recipe.nutritionInfo.healthyAlternatives.map((alt: any) => 
+                    typeof alt === 'string' ? alt : 
+                    (alt.ingredient && alt.alternative ? 
+                      `${alt.ingredient} → ${alt.alternative} (${alt.effect || 'alternative'})` : 
+                      JSON.stringify(alt)
+                    )
+                  ) : [],
+                dietaryNotes: Array.isArray(recipe.nutritionInfo.dietaryNotes) ? 
+                  recipe.nutritionInfo.dietaryNotes.map((note: any) => typeof note === 'string' ? note : JSON.stringify(note)) : []
+              } : {
+                calories: 0,
+                protein: "0g",
+                carbs: "0g",
+                fats: "0g",
+                fiber: "0g",
+                sugar: "0g",
+                healthyAlternatives: [],
+                dietaryNotes: []
+              }
+            })) || []
+          };
+          
+          // Validate the response against our schema
+          try {
+            // Log the structure of the data before validation to debug
+            console.log("Normalized data structure (for debugging):", 
+              JSON.stringify({
+                foodName: typeof normalizedData.foodName,
+                description: typeof normalizedData.description,
+                tags: Array.isArray(normalizedData.tags) ? "array" : typeof normalizedData.tags,
+                recipes: Array.isArray(normalizedData.recipes) ? 
+                  normalizedData.recipes.map((r: any) => ({
+                    title: typeof r.title,
+                    description: typeof r.description,
+                    nutritionInfo: r.nutritionInfo ? {
+                      calories: typeof r.nutritionInfo.calories,
+                      protein: typeof r.nutritionInfo.protein,
+                      carbs: typeof r.nutritionInfo.carbs,
+                      fats: typeof r.nutritionInfo.fats,
+                    } : "missing"
+                  })) : "not-array"
+              }, null, 2)
+            );
+            
+            // Special handling for nested objects within the response
+            const finalData = {
+              // Convert top-level fields to strings
+              foodName: String(normalizedData.foodName || ""),
+              description: String(normalizedData.description || ""),
+              tags: Array.isArray(normalizedData.tags) ? 
+                normalizedData.tags.map((tag: any) => String(tag || "")) : [],
+              recipes: normalizedData.recipes?.map((recipe: any) => ({
+                ...recipe,
+                // Convert all property values to strings if they're not already
+                title: String(recipe.title || ""),
+                description: String(recipe.description || ""),
+                prepTime: String(recipe.prepTime || ""),
+                cookTime: String(recipe.cookTime || ""),
+                totalTime: String(recipe.totalTime || ""),
+                servingSize: String(recipe.servingSize || ""),
+                difficulty: String(recipe.difficulty || ""),
+                storageInstructions: String(recipe.storageInstructions || ""),
+                reheatingMethods: String(recipe.reheatingMethods || ""),
+                chefTips: Array.isArray(recipe.chefTips) ? 
+                  recipe.chefTips.map((tip: any) => String(tip || "")) : [],
+                commonMistakes: Array.isArray(recipe.commonMistakes) ? 
+                  recipe.commonMistakes.map((mistake: any) => String(mistake || "")) : [],
+                beveragePairings: Array.isArray(recipe.beveragePairings) ? 
+                  recipe.beveragePairings.map((pairing: any) => String(pairing || "")) : [],
+                ingredients: Array.isArray(recipe.ingredients) ? 
+                  recipe.ingredients.map((ing: any) => {
+                    // Handle objects that might be returned instead of strings
+                    if (ing === null || ing === undefined) return "";
+                    
+                    // If it's an object with item and quantity properties (common format from Gemini API)
+                    if (typeof ing === 'object') {
+                      if (ing.item && ing.quantity) {
+                        let formattedIngredient = `${ing.quantity} ${ing.item}`;
+                        
+                        // Add preparation note if available
+                        if (ing.prep && ing.prep !== "null") {
+                          formattedIngredient += `, ${ing.prep}`;
+                        }
+                        
+                        // Add quality information if available
+                        if (ing.quality && ing.quality !== "null") {
+                          formattedIngredient += ` (${ing.quality})`;
+                        }
+                        
+                        return formattedIngredient;
+                      }
+                      
+                      // If it has a name property
+                      if (ing.name) {
+                        let formatted = ing.name;
+                        if (ing.amount) formatted = `${ing.amount} ${formatted}`;
+                        if (ing.notes) formatted += ` - ${ing.notes}`;
+                        return formatted;
+                      }
+                      
+                      // If all else fails, turn it into a JSON string
+                      return JSON.stringify(ing);
+                    }
+                    
+                    return String(ing);
+                  }) : [],
+                instructions: Array.isArray(recipe.instructions) ? 
+                  recipe.instructions.map((inst: any) => {
+                    // Handle objects that might be returned instead of strings
+                    if (inst === null || inst === undefined) return "";
+                    
+                    if (typeof inst === 'object') {
+                      // For numbered instruction objects (common format)
+                      if (inst.number && inst.instruction) {
+                        return String(inst.instruction);
+                      }
+                      
+                      // For step objects with action and ingredients
+                      if (inst.action) {
+                        let formattedStep = inst.action;
+                        
+                        // Include ingredients if available
+                        if (inst.ingredients) {
+                          if (Array.isArray(inst.ingredients) && inst.ingredients.length > 0) {
+                            formattedStep += ` ${inst.ingredients.join(', ')}`;
+                          } else if (typeof inst.ingredients === 'string') {
+                            formattedStep += ` ${inst.ingredients}`;
+                          }
+                        }
+                        
+                        // Add any additional details
+                        if (inst.duration) {
+                          formattedStep += ` for ${inst.duration}`;
+                        }
+                        
+                        if (inst.note) {
+                          formattedStep += ` (${inst.note})`;
+                        }
+                        
+                        return formattedStep;
+                      }
+                      
+                      // For step objects with text or description
+                      if (inst.text) return String(inst.text);
+                      if (inst.description) return String(inst.description);
+                      if (inst.step) return String(inst.step);
+                      
+                      // If all else fails, turn it into a JSON string but formatted more nicely
+                      return JSON.stringify(inst);
+                    }
+                    
+                    return String(inst);
+                  }) : [],
+                tags: Array.isArray(recipe.tags) ? 
+                  recipe.tags.map((tag: any) => String(tag || "")) : [],
+                nutritionInfo: recipe.nutritionInfo ? {
+                  ...recipe.nutritionInfo,
+                  protein: String(recipe.nutritionInfo.protein || "0g"),
+                  carbs: String(recipe.nutritionInfo.carbs || "0g"),
+                  fats: String(recipe.nutritionInfo.fats || "0g"),
+                  fiber: String(recipe.nutritionInfo.fiber || "0g"),
+                  sugar: String(recipe.nutritionInfo.sugar || "0g"),
+                  sodium: recipe.nutritionInfo.sodium ? String(recipe.nutritionInfo.sodium) : undefined,
+                  vitamins: Array.isArray(recipe.nutritionInfo.vitamins) ? 
+                    recipe.nutritionInfo.vitamins.map((v: any) => String(v || "")) : [],
+                  healthyAlternatives: Array.isArray(recipe.nutritionInfo.healthyAlternatives) ? 
+                    recipe.nutritionInfo.healthyAlternatives.map((alt: any) => String(alt || "")) : [],
+                  dietaryNotes: Array.isArray(recipe.nutritionInfo.dietaryNotes) ? 
+                    recipe.nutritionInfo.dietaryNotes.map((note: any) => String(note || "")) : []
+                } : {
+                  calories: 0,
+                  protein: "0g",
+                  carbs: "0g",
+                  fats: "0g",
+                  fiber: "0g",
+                  sugar: "0g",
+                  healthyAlternatives: [],
+                  dietaryNotes: []
+                },
+                variations: Array.isArray(recipe.variations) ? 
+                  recipe.variations.map((v: any) => ({
+                    type: String(v.type || ""),
+                    description: String(v.description || ""),
+                    adjustments: Array.isArray(v.adjustments) ? 
+                      v.adjustments.map((adj: any) => String(adj || "")) : []
+                  })) : [],
+                sideDishSuggestions: Array.isArray(recipe.sideDishSuggestions) ? 
+                  recipe.sideDishSuggestions.map((s: any) => ({
+                    name: String(s.name || ""),
+                    description: String(s.description || ""),
+                    preparationTime: String(s.preparationTime || ""),
+                    pairingReason: String(s.pairingReason || "")
+                  })) : []
+              }))
+            };
+            
+            // Fetch related YouTube videos for the recipe
+            let youtubeVideos: YoutubeVideo[] = [];
+            try {
+              console.log("Fetching YouTube videos for:", finalData.foodName);
+              youtubeVideos = await searchYouTubeVideos(finalData.foodName, 5);
+              console.log(`Found ${youtubeVideos.length} YouTube videos`);
+            } catch (youtubeError) {
+              console.error("Error fetching YouTube videos:", youtubeError);
+              // Continue with empty videos rather than failing the request
+            }
+
+            // Add YouTube videos to the response
+            const responseWithVideos = {
+              ...finalData,
+              youtubeVideos
+            };
+
+            const validatedResponse = analyzeImageResponseSchema.parse(responseWithVideos);
+            return res.status(200).json(validatedResponse);
+          } catch (validationErr) {
+            console.error("Schema validation error:", validationErr);
+            
+            if (USE_MOCK_DATA_ON_QUOTA_EXCEEDED) {
+              console.log("Using mock data due to schema validation errors");
+              
+              const mockResponse = getMockAnalysisResponse();
+              // Use the mock data without any demo mode indicators
+              return res.status(200).json(mockResponse);
+            }
+            
+            return res.status(500).json({
+              error: "Invalid AI response",
+              details: "The AI service provided a response that doesn't match our expected format. Please try again with a clearer food image."
+            });
+          }
+        } catch (err) {
+          console.error("Error parsing Gemini API response:", err);
+          console.log("Raw response:", text);
+          
+          if (USE_MOCK_DATA_ON_QUOTA_EXCEEDED) {
+            console.log("Using mock data due to parsing error");
+            
+            const mockResponse = getMockAnalysisResponse();
+            // Use the mock data without any demo mode indicators
+            return res.status(200).json(mockResponse);
+          }
+          
+          return res.status(500).json({ 
+            error: "Could not parse the AI response properly",
+            details: "The response format from Gemini API was unexpected" 
+          });
+        }
+      } catch (apiError: any) {
+        console.error("API request error:", apiError);
+        
+        // Check if it's a quota or rate limit error (status code 429)
+        if (apiError.status === 429) {
+          // If in development mode, use mock data for demo purposes when quota is exceeded
+          if (USE_MOCK_DATA_ON_QUOTA_EXCEEDED) {
+            console.log("API quota exceeded, using mock data in development mode");
+            
+            // Use mock recipe data without any demo mode indicators
+            const mockResponse = getMockAnalysisResponse();
+            return res.status(200).json(mockResponse);
+          }
+          
+          // In production mode, return the actual error
+          return res.status(429).json({
+            error: "API quota exceeded",
+            details: "The Gemini API quota has been exceeded. Please try again later or upgrade your API plan.",
+            retryAfter: apiError?.errorDetails?.[2]?.retryDelay || "60s"
+          });
+        }
+
+        return res.status(500).json({
+          error: "AI service error",
+          details: "There was a problem connecting to the AI service. Please try again later."
+        });
+      }
+    } catch (err) {
+      console.error("Error in image analysis:", err);
+      
+      if (err instanceof ZodError) {
+        const validationError = fromZodError(err);
+        return res.status(400).json({ 
+          error: "Invalid request data", 
+          details: validationError.message 
+        });
       }
       
-      res.json(validatedData);
-    } catch (error) {
-      console.error("Error analyzing image:", error);
-      
-      if (error instanceof ZodError) {
-        const validationError = fromZodError(error);
-        return res.status(400).json({ error: validationError.message });
+      // Handle PayloadTooLargeError from Express
+      if ((err as any)?.type === 'entity.too.large' || 
+          (err as Error).message?.includes('request entity too large')) {
+        return res.status(413).json({
+          error: "Image too large",
+          details: "The uploaded image exceeds the maximum size limit. Please upload a smaller image (max 5MB)."
+        });
       }
       
-      // For demo purposes, return mock data if the API fails
-      if (error.message?.includes("quota")) {
-        const mockData = getMockAnalysisResponse();
-        return res.json(mockData);
-      }
-      
-      res.status(500).json({ error: "Failed to analyze image" });
+      return res.status(500).json({ 
+        error: "Error analyzing image", 
+        details: err instanceof Error ? err.message : "Unknown error" 
+      });
     }
   });
 
-  // Authentication endpoints
+  // Authentication routes
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
-      const userData = registerSchema.parse(req.body);
+      // Validate request data
+      const validatedData = registerSchema.parse(req.body);
       
       // Check if user already exists
-      const existingUser = await storage.getUserByUsername(userData.username);
+      const existingUser = await storage.getUserByEmail(validatedData.email);
       if (existingUser) {
-        return res.status(400).json({ error: "Username already exists" });
+        return res.status(400).json({
+          success: false,
+          message: "A user with this email already exists"
+        });
       }
       
-      // Hash the password
-      const { hash, salt } = hashPassword(userData.password);
+      const existingUsername = await storage.getUserByUsername(validatedData.username);
+      if (existingUsername) {
+        return res.status(400).json({
+          success: false,
+          message: "This username is already taken"
+        });
+      }
       
-      // Create the user
+      // Create new user
       const user = await storage.createUser({
-        username: userData.username,
-        email: userData.email,
-        password: `${hash}.${salt}`,
-        avatarUrl: userData.avatarUrl || null,
-        createdAt: new Date(),
+        username: validatedData.username,
+        email: validatedData.email,
+        password: validatedData.password,
+        displayName: validatedData.username
       });
       
-      // Create a session
+      // Create session token
       const token = generateToken();
-      const session = await storage.createSession({
-        token,
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+      
+      await storage.createSession({
         userId: user.id,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        token,
+        expiresAt
       });
       
+      // Return user data and token
       const authResponse: AuthResponse = {
-        user,
-        token: session.token,
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          profileImage: user.profileImage
+        },
+        token,
+        message: "Registration successful"
       };
       
-      res.status(201).json(authResponse);
+      return res.status(201).json(authResponse);
     } catch (error) {
-      console.error("Error registering user:", error);
-      
       if (error instanceof ZodError) {
-        const validationError = fromZodError(error);
-        return res.status(400).json({ error: validationError.message });
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: fromZodError(error).message
+        });
       }
       
-      res.status(500).json({ error: "Failed to register user" });
+      return res.status(500).json({
+        success: false,
+        message: "Registration failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
+  
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const { username, password } = loginSchema.parse(req.body);
+      // Validate request data
+      const validatedData = loginSchema.parse(req.body);
       
-      // Find the user
-      const user = await storage.getUserByUsername(username);
+      // Find user by email
+      const user = await storage.getUserByEmail(validatedData.email);
       if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials"
+        });
       }
       
-      // Verify the password
-      const [hash, salt] = user.password.split(".");
-      if (!verifyPassword(password, hash, salt)) {
-        return res.status(401).json({ error: "Invalid credentials" });
+      // Verify password
+      const [storedHash, salt] = user.password.split(':');
+      const isValid = verifyPassword(validatedData.password, storedHash, salt);
+      
+      if (!isValid) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials"
+        });
       }
       
-      // Create a session
+      // Create session token
       const token = generateToken();
-      const session = await storage.createSession({
-        token,
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+      
+      await storage.createSession({
         userId: user.id,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        token,
+        expiresAt
       });
       
+      // Return user data and token
       const authResponse: AuthResponse = {
-        user,
-        token: session.token,
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          profileImage: user.profileImage
+        },
+        token,
+        message: "Login successful"
       };
       
-      res.json(authResponse);
+      return res.status(200).json(authResponse);
     } catch (error) {
-      console.error("Error logging in:", error);
-      
       if (error instanceof ZodError) {
-        const validationError = fromZodError(error);
-        return res.status(400).json({ error: validationError.message });
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: fromZodError(error).message
+        });
       }
       
-      res.status(500).json({ error: "Failed to log in" });
+      return res.status(500).json({
+        success: false,
+        message: "Login failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
+  
   app.post("/api/auth/logout", async (req: Request, res: Response) => {
     try {
-      if (!req.headers.authorization) {
-        return res.status(401).json({ error: "Unauthorized" });
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.split(' ')[1];
+      
+      if (token) {
+        await storage.deleteSession(token);
       }
       
-      const token = req.headers.authorization.split(" ")[1];
-      await storage.deleteSession(token);
-      
-      res.json({ success: true });
+      return res.status(200).json({
+        success: true,
+        message: "Logout successful"
+      });
     } catch (error) {
-      console.error("Error logging out:", error);
-      res.status(500).json({ error: "Failed to log out" });
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
+  
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      if (!req.headers.authorization) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const token = req.headers.authorization.split(" ")[1];
-      const session = await storage.getSessionByToken(token);
-      
-      if (!session) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const user = await storage.getUser(session.userId);
-      
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      res.json(user);
+      // Return a guest user instead
+      return res.status(200).json({
+        success: true,
+        user: {
+          id: GUEST_USER_ID,
+          username: "guest",
+          email: "guest@example.com",
+          displayName: "Guest User",
+          profileImage: null
+        }
+      });
     } catch (error) {
-      console.error("Error getting user:", error);
-      res.status(500).json({ error: "Failed to get user" });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve user information",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
-  // Recipe management endpoints
+  
+  // Saved recipes routes
   app.get("/api/recipes", async (req: Request, res: Response) => {
     try {
-      let userId = GUEST_USER_ID;
+      const recipes = await storage.getSavedRecipes(GUEST_USER_ID);
       
-      if (req.headers.authorization) {
-        const token = req.headers.authorization.split(" ")[1];
-        const session = await storage.getSessionByToken(token);
-        
-        if (session) {
-          userId = session.userId;
-        }
-      }
-      
-      const recipes = await storage.getSavedRecipes(userId);
-      res.json(recipes);
+      return res.status(200).json({
+        success: true,
+        recipes
+      });
     } catch (error) {
-      console.error("Error getting recipes:", error);
-      res.status(500).json({ error: "Failed to get recipes" });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve saved recipes",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
+  
   app.post("/api/recipes", async (req: Request, res: Response) => {
     try {
-      let userId = GUEST_USER_ID;
       
-      if (req.headers.authorization) {
-        const token = req.headers.authorization.split(" ")[1];
-        const session = await storage.getSessionByToken(token);
-        
-        if (session) {
-          userId = session.userId;
-        }
-      }
-      
+      // Extract recipe data from request
       const recipeData: AnalyzeImageResponse = req.body.recipe;
       
-      // Create the recipe
-      const recipe = await storage.createSavedRecipe({
-        userId,
-        name: recipeData.name,
+      if (!recipeData || !recipeData.foodName || !Array.isArray(recipeData.recipes) || recipeData.recipes.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe data"
+        });
+      }
+      
+      // Create saved recipe entry
+      const savedRecipe = await storage.createSavedRecipe({
+        userId: GUEST_USER_ID,
+        recipeData: recipeData,
+        foodName: recipeData.foodName,
         description: recipeData.description,
         imageUrl: req.body.imageUrl || null,
-        recipeData,
-        isFavorite: false,
-        createdAt: new Date(),
+        tags: recipeData.tags || [],
+        favorite: false
       });
       
-      res.status(201).json(recipe);
+      return res.status(201).json({
+        success: true,
+        message: "Recipe saved successfully",
+        recipe: savedRecipe
+      });
     } catch (error) {
-      console.error("Error saving recipe:", error);
-      res.status(500).json({ error: "Failed to save recipe" });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to save recipe",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
+  
   app.get("/api/recipes/:id", async (req: Request, res: Response) => {
     try {
       const recipeId = parseInt(req.params.id);
+      
+      if (isNaN(recipeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe ID"
+        });
+      }
+      
       const recipe = await storage.getSavedRecipeById(recipeId);
       
       if (!recipe) {
-        return res.status(404).json({ error: "Recipe not found" });
+        return res.status(404).json({
+          success: false,
+          message: "Recipe not found"
+        });
       }
       
-      res.json(recipe);
+      // Check if recipe belongs to the guest user
+      if (recipe.userId !== GUEST_USER_ID) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission to access this recipe"
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        recipe
+      });
     } catch (error) {
-      console.error("Error getting recipe:", error);
-      res.status(500).json({ error: "Failed to get recipe" });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve recipe",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
+  
   app.delete("/api/recipes/:id", async (req: Request, res: Response) => {
     try {
       const recipeId = parseInt(req.params.id);
-      const success = await storage.deleteSavedRecipe(recipeId);
       
-      if (!success) {
-        return res.status(404).json({ error: "Recipe not found" });
+      if (isNaN(recipeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe ID"
+        });
       }
       
-      res.json({ success: true });
+      const recipe = await storage.getSavedRecipeById(recipeId);
+      
+      if (!recipe) {
+        return res.status(404).json({
+          success: false,
+          message: "Recipe not found"
+        });
+      }
+      
+      // Check if recipe belongs to the guest user
+      if (recipe.userId !== GUEST_USER_ID) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission to delete this recipe"
+        });
+      }
+      
+      const deleted = await storage.deleteSavedRecipe(recipeId);
+      
+      if (!deleted) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to delete recipe"
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: "Recipe deleted successfully"
+      });
     } catch (error) {
-      console.error("Error deleting recipe:", error);
-      res.status(500).json({ error: "Failed to delete recipe" });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete recipe",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
-
+  
   app.patch("/api/recipes/:id/favorite", async (req: Request, res: Response) => {
     try {
       const recipeId = parseInt(req.params.id);
-      const { isFavorite } = req.body;
+      const { favorite } = req.body;
       
-      const recipe = await storage.updateSavedRecipe(recipeId, { isFavorite });
-      
-      if (!recipe) {
-        return res.status(404).json({ error: "Recipe not found" });
+      if (isNaN(recipeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe ID"
+        });
       }
       
-      res.json(recipe);
+      if (typeof favorite !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: "Favorite status must be a boolean"
+        });
+      }
+      
+      const recipe = await storage.getSavedRecipeById(recipeId);
+      
+      if (!recipe) {
+        return res.status(404).json({
+          success: false,
+          message: "Recipe not found"
+        });
+      }
+      
+      // Check if recipe belongs to the guest user
+      if (recipe.userId !== GUEST_USER_ID) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission to update this recipe"
+        });
+      }
+      
+      const updatedRecipe = await storage.updateSavedRecipe(recipeId, { favorite });
+      
+      return res.status(200).json({
+        success: true,
+        message: favorite ? "Recipe marked as favorite" : "Recipe removed from favorites",
+        recipe: updatedRecipe
+      });
     } catch (error) {
-      console.error("Error updating recipe:", error);
-      res.status(500).json({ error: "Failed to update recipe" });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update favorite status",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
-  // Add Stripe API endpoints for subscription and one-time payments
-  app.post("/api/create-subscription", async (req: Request, res: Response) => {
-    try {
-      const { planId, interval = "month" } = req.body;
-      
-      if (!req.headers.authorization) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const token = req.headers.authorization.split(" ")[1];
-      const userSession = await storage.getSessionByToken(token);
-      
-      if (!userSession) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const user = await storage.getUser(userSession.userId);
-      
-      if (!user) {
-        return res.status(401).json({ error: "User not found" });
-      }
-      
-      // Price IDs would normally come from the database
-      // For simplicity in this implementation, we're using fixed price values
-      let priceAmount = 0;
-      let analysisCount = 0;
-      let name = "";
-      
-      switch (planId) {
-        case "basic":
-          priceAmount = interval === "month" ? 800 : 7680; // $8/mo or $76.80/yr (20% discount)
-          analysisCount = 50;
-          name = "Basic Plan";
-          break;
-        case "premium":
-          priceAmount = interval === "month" ? 1200 : 11520; // $12/mo or $115.20/yr
-          analysisCount = 100;
-          name = "Premium Plan";
-          break;
-        case "unlimited":
-          priceAmount = interval === "month" ? 2500 : 24000; // $25/mo or $240/yr
-          analysisCount = -1; // Unlimited
-          name = "Unlimited Plan";
-          break;
-        default:
-          return res.status(400).json({ error: "Invalid plan ID" });
-      }
-      
-      // Create a Stripe checkout session
-      const checkoutSession = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: `${name} (${interval}ly)`,
-                description: `${analysisCount === -1 ? "Unlimited" : analysisCount} recipe analyses per ${interval}`
-              },
-              unit_amount: priceAmount, // in cents
-              recurring: {
-                interval: interval === "month" ? "month" : "year"
-              }
-            },
-            quantity: 1,
-          },
-        ],
-        mode: "subscription",
-        success_url: `${req.headers.origin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin}/subscription`,
-      });
-      
-      res.json({ 
-        clientSecret: checkoutSession.id
-      });
-    } catch (error) {
-      console.error("Error creating subscription:", error);
-      res.status(500).json({ error: "Failed to create subscription" });
-    }
-  });
-  
-  app.post("/api/pay-per-use", async (req: Request, res: Response) => {
-    try {
-      const { amount } = req.body;
-      
-      if (!req.headers.authorization) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const token = req.headers.authorization.split(" ")[1];
-      const userSession = await storage.getSessionByToken(token);
-      
-      if (!userSession) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const user = await storage.getUser(userSession.userId);
-      
-      if (!user) {
-        return res.status(401).json({ error: "User not found" });
-      }
-      
-      // Create a Stripe checkout session for a one-time payment
-      const checkoutSession = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: "Single Recipe Analysis",
-                description: "One-time payment for a single recipe analysis"
-              },
-              unit_amount: Math.round(amount * 100), // Convert to cents
-            },
-            quantity: 1,
-          },
-        ],
-        mode: "payment",
-        success_url: `${req.headers.origin}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin}/subscription`,
-      });
-      
-      res.json({ 
-        clientSecret: checkoutSession.id
-      });
-    } catch (error) {
-      console.error("Error processing payment:", error);
-      res.status(500).json({ error: "Failed to process payment" });
-    }
-  });
-  
-  // Check subscription status
-  app.get("/api/subscription-status", async (req: Request, res: Response) => {
-    try {
-      if (!req.headers.authorization) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const token = req.headers.authorization.split(" ")[1];
-      const userSession = await storage.getSessionByToken(token);
-      
-      if (!userSession) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-      
-      const user = await storage.getUser(userSession.userId);
-      
-      if (!user) {
-        return res.status(401).json({ error: "User not found" });
-      }
-      
-      // In a real implementation, this would check the user's subscription status in the database
-      // For now, we'll return a mock response
-      res.json({
-        subscribed: true,
-        plan: "premium",
-        analysisCount: 100,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-      });
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
-      res.status(500).json({ error: "Failed to check subscription status" });
-    }
-  });
-  
-  // Webhook to handle Stripe events
-  app.post("/api/webhook", async (req: Request, res: Response) => {
-    const sig = req.headers["stripe-signature"] as string;
-    
-    let event;
-    
-    try {
-      // Verify the event came from Stripe
-      // In production, you should configure the webhook secret in your Stripe dashboard
-      // and use it to verify the signature
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET || "whsec_test"
-      );
-    } catch (error: any) {
-      console.error("Webhook signature verification failed:", error);
-      return res.status(400).send(`Webhook Error: ${error.message}`);
-    }
-    
-    // Handle the event
-    switch (event.type) {
-      case "checkout.session.completed":
-        const checkoutSession = event.data.object;
-        // Update subscription status in database
-        break;
-      case "invoice.paid":
-        const invoice = event.data.object;
-        // Update subscription status in database
-        break;
-      case "invoice.payment_failed":
-        const failedInvoice = event.data.object;
-        // Notify customer of failed payment
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}`);
-    }
-    
-    res.json({ received: true });
-  });
-  
   const httpServer = createServer(app);
   return httpServer;
 }

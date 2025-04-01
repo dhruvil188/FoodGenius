@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -15,19 +15,19 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 
 export default function ProfilePage() {
-  const { currentUser, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const [savedRecipes, setSavedRecipes] = useState<SavedRecipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     // Only fetch saved recipes if the user is logged in
-    if (currentUser) {
+    if (user) {
       fetchSavedRecipes();
     } else {
       setIsLoading(false);
     }
-  }, [currentUser]);
+  }, [user]);
 
   const fetchSavedRecipes = async () => {
     try {
@@ -89,7 +89,7 @@ export default function ProfilePage() {
   };
 
   // If user is not logged in, redirect to auth page
-  if (!currentUser && !isLoading) {
+  if (!user && !isLoading) {
     return <Redirect to="/auth" />;
   }
 
@@ -122,14 +122,14 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20 border-2 border-primary/20">
-                  <AvatarImage src={currentUser?.photoURL || ""} alt={currentUser?.displayName || "User"} />
+                  <AvatarImage src={user?.username ? `https://ui-avatars.com/api/?name=${user.username}` : ""} alt={user?.username || "User"} />
                   <AvatarFallback className="text-xl font-bold">
-                    {getInitials(currentUser?.displayName || "")}
+                    {getInitials(user?.username || "")}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <CardTitle className="text-2xl">{currentUser?.displayName || "User"}</CardTitle>
-                  <CardDescription>{currentUser?.email}</CardDescription>
+                  <CardTitle className="text-2xl">{user?.username || "User"}</CardTitle>
+                  <CardDescription>{user?.email}</CardDescription>
                   <div className="flex gap-2 mt-2">
                     <Badge variant="outline" className="bg-primary/10">Member</Badge>
                     {savedRecipes.length > 10 && <Badge variant="outline" className="bg-amber-500/10 text-amber-600">Food Enthusiast</Badge>}
@@ -137,7 +137,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              <Button variant="outline" onClick={() => logout()} className="md:self-start">
+              <Button variant="outline" onClick={() => logoutMutation.mutate()} className="md:self-start">
                 Sign Out
               </Button>
             </div>
@@ -354,12 +354,12 @@ export default function ProfilePage() {
                     <p className="text-slate-500 mb-4">Manage your account information.</p>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1">Name</label>
-                        <p className="border rounded-md px-3 py-2">{currentUser?.displayName || "Not provided"}</p>
+                        <label className="block text-sm font-medium mb-1">Username</label>
+                        <p className="border rounded-md px-3 py-2">{user?.username || "Not provided"}</p>
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-1">Email</label>
-                        <p className="border rounded-md px-3 py-2">{currentUser?.email}</p>
+                        <p className="border rounded-md px-3 py-2">{user?.email || "Not provided"}</p>
                       </div>
                     </div>
                   </div>
@@ -368,7 +368,7 @@ export default function ProfilePage() {
                     <h3 className="text-lg font-medium mb-2">Account Management</h3>
                     <Separator className="mb-4" />
                     <p className="text-slate-500 mb-6">Manage your account settings and preferences.</p>
-                    <Button variant="destructive" onClick={() => logout()}>
+                    <Button variant="destructive" onClick={() => logoutMutation.mutate()}>
                       Sign Out
                     </Button>
                   </div>

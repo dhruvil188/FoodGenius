@@ -221,18 +221,45 @@ export default function MealPrep() {
   const handleSubmit = async () => {
     setIsGenerating(true);
     
-    // Here you would normally make an API call to generate a meal plan
-    // For now, we'll simulate a response after a short delay
-    setTimeout(() => {
-      setMealPlan(demoMealPlan);
+    try {
+      // Make an API call to generate a meal plan based on preferences
+      const response = await fetch('/api/meal-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(preferences),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate meal plan');
+      }
+      
+      const data = await response.json();
+      
+      // Process the response data
+      setMealPlan(data);
       setActiveTab('calendar');
-      setIsGenerating(false);
+      
+      // Set the first day as selected by default
+      if (data.days && data.days.length > 0) {
+        setSelectedDay(new Date(data.days[0].date));
+      }
       
       toast({
         title: "Meal Plan Generated",
         description: "Your personalized meal plan is ready to explore!",
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Error generating meal plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate meal plan. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleUpdatePreference = (field: keyof MealPlanPreferences, value: any) => {

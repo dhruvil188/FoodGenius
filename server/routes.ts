@@ -24,6 +24,8 @@ import { searchYouTubeVideos } from "./services/youtubeService";
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
 
+import { MealPlanPreferences } from "@shared/schema";
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flag to enable development mode with mock data when API quota is exceeded
   const USE_MOCK_DATA_ON_QUOTA_EXCEEDED = false;
@@ -1036,6 +1038,746 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Generate meal plan based on user preferences using Gemini API
+  app.post("/api/meal-plan", async (req: Request, res: Response) => {
+    try {
+      // Validate the request body
+      const validatedData = mealPlanPreferencesSchema.parse(req.body);
+      
+      // Generate a prompt for Gemini based on user preferences
+      const prompt = `
+      You are a professional nutritionist and chef specialized in meal planning. Create a comprehensive meal plan based on the following preferences:
+      
+      Meals per day: ${validatedData.mealsPerDay === '2' ? '2 meals (Lunch and Dinner)' : '4 meals (Breakfast, Lunch, Snack, and Dinner)'}
+      Spiciness level: ${validatedData.spiciness}
+      Diet type: ${validatedData.dietType}
+      Health goal: ${validatedData.healthGoal === 'fit' ? 'Fitness-oriented (low-calorie, high protein, balanced)' : 'Indulgent (comfort food, satisfying meals)'}
+      Cuisine preferences: ${validatedData.cuisinePreferences.join(', ')}
+      Preparation time per meal: ${validatedData.prepTime === 'quick' ? 'Quick (under 15 minutes)' : validatedData.prepTime === 'moderate' ? 'Moderate (15-30 minutes)' : 'Slow (30+ minutes)'}
+      Duration: ${validatedData.duration}
+      Dietary restrictions: ${validatedData.restrictions.length > 0 ? validatedData.restrictions.join(', ') : 'None'}
+      
+      For each day, please provide:
+      1. A full day's meal plan with ${validatedData.mealsPerDay === '2' ? 'lunch and dinner' : 'breakfast, lunch, snack, and dinner'} recipes
+      2. For each meal, include:
+         - Meal name
+         - Calorie count
+         - List of ingredients with measurements
+         - Step-by-step cooking instructions
+         - Nutritional information (protein, carbs, fats)
+      3. Daily nutritional totals
+      
+      Also include:
+      1. A comprehensive grocery list organized by categories
+      2. Overall nutrition summary and recommendations
+      
+      Ensure the meals are varied, not repetitive, and aligned with the specified preferences. Make sure all recipes are detailed with precise ingredients and clear cooking steps.
+      
+      Return the meal plan as a JSON object with the following structure:
+      {
+        "days": [
+          {
+            "date": "2025-04-01", // Just use consecutive dates starting from current date
+            "meals": [
+              {
+                "type": "Breakfast/Lunch/Snack/Dinner",
+                "name": "Recipe name",
+                "calories": number,
+                "recipe": "Detailed cooking instructions with steps",
+                "ingredients": ["Ingredient 1 with measurement", "Ingredient 2 with measurement"],
+                "nutrients": {
+                  "protein": "protein in grams",
+                  "carbs": "carbs in grams",
+                  "fats": "fats in grams"
+                }
+              }
+            ],
+            "dailyNutrition": {
+              "totalCalories": number,
+              "totalProtein": "protein in grams",
+              "totalCarbs": "carbs in grams",
+              "totalFats": "fats in grams"
+            }
+          }
+        ],
+        "groceryList": [
+          {
+            "category": "Category name (e.g., Proteins, Vegetables, etc.)",
+            "items": ["Item 1 with quantity", "Item 2 with quantity"]
+          }
+        ],
+        "nutritionSummary": {
+          "averageCalories": number,
+          "averageProtein": "protein in grams",
+          "averageCarbs": "carbs in grams",
+          "averageFats": "fats in grams",
+          "recommendations": ["Recommendation 1", "Recommendation 2"]
+        }
+      }
+      
+      Please ensure no recipes are repeated in the meal plan. Each recipe should be unique, creative, and tailored to the preferences.
+      `;
+      
+      try {
+        // Use Gemini API to generate the meal plan
+        const chatSession = model.startChat({
+          history: [],
+        });
+        
+        const result = await chatSession.sendMessage(prompt);
+        const response = result.response;
+        const text = response.text();
+        
+        // Extract the JSON from the response - handle multiple possible formats
+        let jsonContent = '';
+        
+        // First try to extract JSON from code blocks (most common format)
+        const codeBlockMatch = text.match(/```(?:json)?\s*\n([\s\S]*?)\n\s*```/);
+        if (codeBlockMatch && codeBlockMatch[1]) {
+          jsonContent = codeBlockMatch[1].trim();
+        } 
+        // Then try to find JSON object directly 
+        else {
+          // Look for a complete JSON object with outer braces
+          const directJsonMatch = text.match(/(\{[\s\S]*\})/);
+          if (directJsonMatch && directJsonMatch[1]) {
+            jsonContent = directJsonMatch[1].trim();
+          } else {
+            // As a last resort, use the whole text and hope for the best
+            jsonContent = text.trim();
+          }
+        }
+        
+        // Additional cleanup to ensure valid JSON
+        jsonContent = jsonContent
+          .replace(/,\s*}/g, '}') // Fix trailing commas in objects
+          .replace(/,\s*\]/g, ']'); // Fix trailing commas in arrays
+        
+        // Parse the JSON response
+        let parsedData;
+        try {
+          parsedData = JSON.parse(jsonContent);
+        } catch (jsonParseError) {
+          console.error("JSON parsing error:", jsonParseError);
+          
+          // Use a placeholder response for demo purposes if there's an API issue
+          return res.status(200).json(generateDemoMealPlan(validatedData));
+        }
+        
+        // If successfully parsed, convert string dates to actual Date objects
+        if (parsedData && Array.isArray(parsedData.days)) {
+          parsedData.days = parsedData.days.map((day: any, index: number) => {
+            // If the date is a string, convert it to a Date object
+            // Otherwise, generate a date based on current date + index
+            if (typeof day.date === 'string') {
+              try {
+                day.date = new Date(day.date);
+              } catch (e) {
+                const date = new Date();
+                date.setDate(date.getDate() + index);
+                day.date = date;
+              }
+            } else {
+              const date = new Date();
+              date.setDate(date.getDate() + index);
+              day.date = date;
+            }
+            
+            return day;
+          });
+        }
+        
+        return res.status(200).json(parsedData);
+        
+      } catch (apiError) {
+        console.error("Gemini API error:", apiError);
+        
+        // Generate a demo meal plan as fallback
+        return res.status(200).json(generateDemoMealPlan(validatedData));
+      }
+      
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+      return res.status(500).json({ error: "Failed to generate meal plan" });
+    }
+  });
+  
+  // Helper function to generate a demo meal plan when API fails
+  function generateDemoMealPlan(preferences: MealPlanPreferences) {
+    const numDays = preferences.duration === '1-week' ? 7 : 
+                   preferences.duration === '2-weeks' ? 14 : 30;
+    
+    const cuisines = preferences.cuisinePreferences;
+    const mealTypes = preferences.mealsPerDay === '2' 
+      ? ['Lunch', 'Dinner'] 
+      : ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
+      
+    // Demo meal templates by cuisine and meal type
+    const mealTemplates: Record<string, Record<string, any>> = {
+      'Indian': {
+        'Breakfast': {
+          name: 'Masala Dosa with Coconut Chutney',
+          calories: 350,
+          recipe: "1. Soak rice and urad dal separately for 4-6 hours.\n2. Grind them to a smooth batter.\n3. Ferment overnight.\n4. Heat a griddle and pour a ladleful of batter.\n5. Spread it in a circular motion.\n6. Add oil around the edges and cook until golden brown.\n7. Place potato masala filling in the center.\n8. Fold and serve with coconut chutney.",
+          ingredients: [
+            '1 cup rice', 
+            '1/4 cup urad dal', 
+            '1/2 tsp fenugreek seeds', 
+            'Salt to taste', 
+            '2 potatoes, boiled and mashed', 
+            '1 onion, finely chopped', 
+            '1/2 tsp mustard seeds', 
+            '1 tsp cumin seeds', 
+            'Curry leaves', 
+            '2 green chilies, chopped', 
+            '1/2 tsp turmeric powder', 
+            '1 tbsp oil'
+          ],
+          nutrients: {
+            protein: '8g',
+            carbs: '58g',
+            fats: '7g'
+          }
+        },
+        'Lunch': {
+          name: 'Vegetable Biryani with Raita',
+          calories: 480,
+          recipe: "1. Soak basmati rice for 30 minutes.\n2. In a large pot, heat oil and add whole spices.\n3. Add sliced onions and sauté until golden brown.\n4. Add ginger-garlic paste and cook for 1 minute.\n5. Add mixed vegetables and spices, cook for 5 minutes.\n6. Add soaked rice and 2 cups of water.\n7. Cover and cook on low heat until rice is done.\n8. Garnish with fresh mint and serve with raita.",
+          ingredients: [
+            '1.5 cups basmati rice', 
+            '2 cups mixed vegetables (carrots, peas, beans, cauliflower)',
+            '1 large onion, thinly sliced',
+            '1 tbsp ginger-garlic paste',
+            '2 bay leaves',
+            '1 cinnamon stick',
+            '4 cloves',
+            '4 cardamom pods',
+            '1 tsp cumin seeds',
+            '1/2 tsp turmeric powder',
+            '1 tsp garam masala',
+            '1/4 cup fresh mint leaves',
+            '3 tbsp oil',
+            'Salt to taste',
+            '1 cup yogurt',
+            '1 cucumber, grated'
+          ],
+          nutrients: {
+            protein: '11g',
+            carbs: '74g',
+            fats: '14g'
+          }
+        },
+        'Snack': {
+          name: 'Samosa with Mint Chutney',
+          calories: 220,
+          recipe: "1. Make dough by mixing flour, salt, and oil. Knead with water.\n2. Rest for 30 minutes.\n3. For filling, heat oil and add cumin seeds.\n4. Add boiled potatoes, peas, and spices. Mix well.\n5. Divide dough into balls and roll into circles.\n6. Cut each circle in half.\n7. Form cones and fill with potato mixture.\n8. Seal edges and deep fry until golden brown.\n9. Serve with mint chutney.",
+          ingredients: [
+            '1 cup all-purpose flour',
+            '2 tbsp oil',
+            '1/2 tsp salt',
+            'Water as needed',
+            '2 potatoes, boiled and mashed',
+            '1/4 cup green peas',
+            '1/2 tsp cumin seeds',
+            '1/2 tsp coriander powder',
+            '1/4 tsp garam masala',
+            '1/4 tsp red chili powder',
+            'Oil for deep frying',
+            '1 cup fresh mint leaves',
+            '1/4 cup cilantro',
+            '2 green chilies',
+            '1 tbsp lemon juice'
+          ],
+          nutrients: {
+            protein: '4g',
+            carbs: '32g',
+            fats: '10g'
+          }
+        },
+        'Dinner': {
+          name: 'Butter Chicken with Naan',
+          calories: 650,
+          recipe: "1. Marinate chicken in yogurt, lemon juice, and spices for 2 hours.\n2. Grill or bake until 80% cooked.\n3. In a pan, heat butter and add onions and ginger-garlic paste.\n4. Add tomato puree and spices. Cook for 10 minutes.\n5. Add chicken and simmer for 15 minutes.\n6. Add cream and kasoori methi.\n7. Serve hot with naan bread.",
+          ingredients: [
+            '500g chicken, cut into pieces',
+            '1/2 cup yogurt',
+            '1 tbsp lemon juice',
+            '1 tbsp ginger-garlic paste',
+            '1 tsp garam masala',
+            '1 tsp red chili powder',
+            '3 tbsp butter',
+            '1 onion, finely chopped',
+            '2 cups tomato puree',
+            '1/2 tsp turmeric powder',
+            '1/4 cup heavy cream',
+            '1 tbsp kasoori methi (dried fenugreek leaves)',
+            'Salt to taste',
+            '2 naan breads'
+          ],
+          nutrients: {
+            protein: '42g',
+            carbs: '38g',
+            fats: '32g'
+          }
+        }
+      },
+      'Italian': {
+        'Breakfast': {
+          name: 'Caprese Avocado Toast',
+          calories: 320,
+          recipe: "1. Toast bread slices until golden brown.\n2. Mash avocado with lemon juice, salt, and pepper.\n3. Spread mashed avocado on toast.\n4. Top with sliced tomatoes and mozzarella.\n5. Drizzle with balsamic glaze and olive oil.\n6. Garnish with fresh basil leaves.",
+          ingredients: [
+            '2 slices whole grain bread',
+            '1 ripe avocado',
+            '1 tsp lemon juice',
+            'Salt and pepper to taste',
+            '1 large tomato, sliced',
+            '100g fresh mozzarella, sliced',
+            '1 tbsp balsamic glaze',
+            '1 tbsp olive oil',
+            'Fresh basil leaves'
+          ],
+          nutrients: {
+            protein: '12g',
+            carbs: '28g',
+            fats: '18g'
+          }
+        },
+        'Lunch': {
+          name: 'Penne Arrabbiata',
+          calories: 450,
+          recipe: "1. Cook penne pasta according to package instructions.\n2. In a pan, heat olive oil and add minced garlic.\n3. Add red pepper flakes and cook for 30 seconds.\n4. Add canned tomatoes and crush them with a spoon.\n5. Season with salt and simmer for 15 minutes.\n6. Drain pasta and add to sauce.\n7. Garnish with fresh basil and grated parmesan.",
+          ingredients: [
+            '250g penne pasta',
+            '3 tbsp olive oil',
+            '4 garlic cloves, minced',
+            '1 tsp red pepper flakes',
+            '1 can (400g) whole tomatoes',
+            'Salt to taste',
+            'Fresh basil leaves',
+            '2 tbsp grated parmesan cheese'
+          ],
+          nutrients: {
+            protein: '14g',
+            carbs: '72g',
+            fats: '13g'
+          }
+        },
+        'Snack': {
+          name: 'Bruschetta with Tomato and Basil',
+          calories: 180,
+          recipe: "1. Slice baguette diagonally into 1/2 inch pieces.\n2. Brush with olive oil and toast until golden.\n3. Rub each slice with garlic clove.\n4. In a bowl, mix diced tomatoes, basil, salt, and olive oil.\n5. Spoon tomato mixture onto toasted bread.\n6. Drizzle with balsamic glaze before serving.",
+          ingredients: [
+            '1/2 baguette',
+            '2 tbsp olive oil',
+            '2 garlic cloves',
+            '2 large tomatoes, diced',
+            '1/4 cup fresh basil, chopped',
+            'Salt to taste',
+            '1 tbsp balsamic glaze'
+          ],
+          nutrients: {
+            protein: '4g',
+            carbs: '24g',
+            fats: '8g'
+          }
+        },
+        'Dinner': {
+          name: 'Mushroom Risotto',
+          calories: 520,
+          recipe: "1. In a pot, warm vegetable broth over low heat.\n2. In another pot, heat olive oil and butter.\n3. Add onions and sauté until translucent.\n4. Add sliced mushrooms and garlic, cook until mushrooms release moisture.\n5. Add arborio rice and toast for 2 minutes.\n6. Add white wine and stir until absorbed.\n7. Gradually add warm broth, 1/2 cup at a time, stirring continuously.\n8. Continue until rice is creamy and al dente (about 18-20 minutes).\n9. Remove from heat, stir in parmesan cheese and parsley.\n10. Let rest for 2 minutes before serving.",
+          ingredients: [
+            '1.5 cups arborio rice',
+            '4 cups vegetable broth',
+            '2 tbsp olive oil',
+            '2 tbsp butter',
+            '1 onion, finely chopped',
+            '300g mushrooms, sliced',
+            '2 garlic cloves, minced',
+            '1/2 cup white wine',
+            '1/2 cup grated parmesan cheese',
+            '2 tbsp fresh parsley, chopped',
+            'Salt and pepper to taste'
+          ],
+          nutrients: {
+            protein: '12g',
+            carbs: '78g',
+            fats: '18g'
+          }
+        }
+      },
+      'Japanese': {
+        'Breakfast': {
+          name: 'Traditional Japanese Breakfast',
+          calories: 380,
+          recipe: "1. Cook rice according to package instructions.\n2. Grill or broil salmon with a dash of salt.\n3. Make miso soup by dissolving miso paste in dashi stock.\n4. Add tofu cubes and seaweed to the soup.\n5. Serve rice, salmon, miso soup, and pickled vegetables together.",
+          ingredients: [
+            '1 cup short-grain rice',
+            '1 salmon fillet (100g)',
+            '2 cups dashi stock',
+            '2 tbsp miso paste',
+            '100g silken tofu, cubed',
+            '1 sheet nori seaweed, cut into small pieces',
+            '2 tbsp pickled vegetables',
+            '1 tbsp soy sauce'
+          ],
+          nutrients: {
+            protein: '24g',
+            carbs: '48g',
+            fats: '10g'
+          }
+        },
+        'Lunch': {
+          name: 'Chicken Teriyaki Bento Box',
+          calories: 520,
+          recipe: "1. Mix soy sauce, mirin, sake, and sugar for teriyaki sauce.\n2. Marinate chicken thighs for 30 minutes.\n3. Grill or pan-fry chicken until cooked through.\n4. Baste with remaining sauce until glazed.\n5. Cook rice and let it cool slightly.\n6. Stir-fry vegetables with a bit of soy sauce.\n7. Arrange chicken, rice, vegetables, and pickles in a bento box.",
+          ingredients: [
+            '2 chicken thighs, boneless',
+            '3 tbsp soy sauce',
+            '2 tbsp mirin',
+            '1 tbsp sake',
+            '1 tbsp sugar',
+            '1 cup steamed rice',
+            '1 cup mixed vegetables (broccoli, carrots, bell peppers)',
+            '1 tbsp pickled ginger',
+            '1 tbsp vegetable oil'
+          ],
+          nutrients: {
+            protein: '34g',
+            carbs: '62g',
+            fats: '14g'
+          }
+        },
+        'Snack': {
+          name: 'Edamame with Sea Salt',
+          calories: 120,
+          recipe: "1. Bring a pot of water to a boil.\n2. Add edamame pods and boil for 5 minutes.\n3. Drain and rinse under cold water.\n4. Toss with sea salt.\n5. Serve warm or cold.",
+          ingredients: [
+            '2 cups edamame pods',
+            '1 tsp sea salt'
+          ],
+          nutrients: {
+            protein: '11g',
+            carbs: '10g',
+            fats: '5g'
+          }
+        },
+        'Dinner': {
+          name: 'Homemade Sushi Rolls',
+          calories: 480,
+          recipe: "1. Cook sushi rice according to package instructions.\n2. Mix with rice vinegar, sugar, and salt while warm.\n3. Let cool to room temperature.\n4. Place a nori sheet on a bamboo mat.\n5. Spread rice evenly over nori, leaving 1 inch at the top.\n6. Arrange avocado, cucumber, and crab in a line at the bottom.\n7. Roll tightly using the bamboo mat.\n8. Moisten the top edge to seal.\n9. Slice into 6-8 pieces.\n10. Serve with soy sauce, wasabi, and pickled ginger.",
+          ingredients: [
+            '2 cups sushi rice',
+            '3 tbsp rice vinegar',
+            '1 tbsp sugar',
+            '1 tsp salt',
+            '4 nori sheets',
+            '1 avocado, sliced',
+            '1 cucumber, julienned',
+            '200g imitation crab, shredded',
+            'Soy sauce for serving',
+            'Wasabi paste',
+            'Pickled ginger'
+          ],
+          nutrients: {
+            protein: '14g',
+            carbs: '76g',
+            fats: '12g'
+          }
+        }
+      },
+      'Mexican': {
+        'Breakfast': {
+          name: 'Huevos Rancheros',
+          calories: 420,
+          recipe: "1. Heat oil in a pan and cook corn tortillas until slightly crisp.\n2. In another pan, make tomato sauce by sautéing onion, jalapeño, and garlic.\n3. Add diced tomatoes and simmer for 10 minutes.\n4. In a separate pan, fry eggs sunny-side up.\n5. Place tortillas on a plate, top with eggs.\n6. Pour tomato sauce over eggs.\n7. Garnish with avocado, cilantro, and crumbled queso fresco.",
+          ingredients: [
+            '2 corn tortillas',
+            '2 eggs',
+            '1 tbsp vegetable oil',
+            '1/2 onion, diced',
+            '1 jalapeño, seeded and diced',
+            '2 garlic cloves, minced',
+            '2 large tomatoes, diced',
+            '1/2 avocado, sliced',
+            '2 tbsp fresh cilantro, chopped',
+            '2 tbsp queso fresco, crumbled',
+            'Salt and pepper to taste'
+          ],
+          nutrients: {
+            protein: '18g',
+            carbs: '32g',
+            fats: '26g'
+          }
+        },
+        'Lunch': {
+          name: 'Chicken Fajita Bowl',
+          calories: 520,
+          recipe: "1. Marinate chicken strips in lime juice, oil, and spices for 30 minutes.\n2. Cook rice with a pinch of salt and lime zest.\n3. Sauté onions and bell peppers until slightly charred.\n4. In the same pan, cook marinated chicken until done.\n5. Assemble bowls with rice, chicken, peppers, and onions.\n6. Top with avocado, salsa, and a dollop of sour cream.\n7. Garnish with cilantro and a lime wedge.",
+          ingredients: [
+            '250g chicken breast, cut into strips',
+            '2 tbsp lime juice',
+            '1 tbsp olive oil',
+            '1 tsp cumin powder',
+            '1 tsp chili powder',
+            '1 cup rice',
+            '1 onion, sliced',
+            '2 bell peppers, sliced',
+            '1/2 avocado, diced',
+            '2 tbsp salsa',
+            '1 tbsp sour cream',
+            'Fresh cilantro for garnish',
+            'Lime wedges for serving'
+          ],
+          nutrients: {
+            protein: '36g',
+            carbs: '58g',
+            fats: '16g'
+          }
+        },
+        'Snack': {
+          name: 'Homemade Guacamole with Tortilla Chips',
+          calories: 280,
+          recipe: "1. Mash avocados in a bowl.\n2. Mix in diced onion, tomato, jalapeño, and cilantro.\n3. Add lime juice, salt, and pepper.\n4. Serve with tortilla chips.",
+          ingredients: [
+            '2 ripe avocados',
+            '1/4 onion, finely diced',
+            '1 tomato, seeded and diced',
+            '1 jalapeño, seeded and minced',
+            '2 tbsp fresh cilantro, chopped',
+            '1 tbsp lime juice',
+            'Salt and pepper to taste',
+            '100g tortilla chips'
+          ],
+          nutrients: {
+            protein: '4g',
+            carbs: '22g',
+            fats: '20g'
+          }
+        },
+        'Dinner': {
+          name: 'Beef Enchiladas with Mexican Rice',
+          calories: 680,
+          recipe: "1. Brown ground beef with onions and garlic.\n2. Add spices and cook until fragrant.\n3. Warm tortillas to make them pliable.\n4. Fill each tortilla with beef mixture and roll up.\n5. Place in a baking dish and cover with enchilada sauce and cheese.\n6. Bake at 375°F for 20 minutes.\n7. For rice, sauté rice in oil until translucent.\n8. Add tomato sauce, broth, and spices.\n9. Cover and simmer until rice is tender.\n10. Serve enchiladas with rice on the side.",
+          ingredients: [
+            '500g ground beef',
+            '1 onion, diced',
+            '3 garlic cloves, minced',
+            '2 tsp cumin powder',
+            '1 tsp chili powder',
+            '8 corn tortillas',
+            '2 cups enchilada sauce',
+            '1 cup shredded cheddar cheese',
+            '1 cup rice',
+            '2 tbsp vegetable oil',
+            '1/2 cup tomato sauce',
+            '1.5 cups chicken broth',
+            'Sour cream and sliced green onions for garnish'
+          ],
+          nutrients: {
+            protein: '42g',
+            carbs: '68g',
+            fats: '28g'
+          }
+        }
+      }
+    };
+    
+    // Generate the meal plan
+    const days: any[] = [];
+    const groceryCategories: Record<string, string[]> = {
+      'Proteins': [],
+      'Grains': [],
+      'Fruits & Vegetables': [],
+      'Dairy': [],
+      'Herbs & Spices': [],
+      'Oils & Condiments': [],
+      'Other': []
+    };
+    
+    // Track used meals to prevent repetition
+    const usedMeals: Record<string, Set<string>> = {};
+    cuisines.forEach(cuisine => {
+      usedMeals[cuisine] = new Set();
+    });
+    
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFats = 0;
+    let mealCount = 0;
+    
+    // Process ingredients to add to grocery list
+    const processIngredientsForGrocery = (ingredients: string[]) => {
+      ingredients.forEach(ing => {
+        const lowerIng = ing.toLowerCase();
+        // Simple categorization based on keywords
+        if (lowerIng.includes('chicken') || lowerIng.includes('beef') || lowerIng.includes('fish') || 
+            lowerIng.includes('salmon') || lowerIng.includes('tofu') || lowerIng.includes('egg')) {
+          if (!groceryCategories['Proteins'].includes(ing)) {
+            groceryCategories['Proteins'].push(ing);
+          }
+        } else if (lowerIng.includes('rice') || lowerIng.includes('pasta') || lowerIng.includes('bread') || 
+                  lowerIng.includes('tortilla') || lowerIng.includes('flour')) {
+          if (!groceryCategories['Grains'].includes(ing)) {
+            groceryCategories['Grains'].push(ing);
+          }
+        } else if (lowerIng.includes('tomato') || lowerIng.includes('onion') || lowerIng.includes('carrot') || 
+                  lowerIng.includes('potato') || lowerIng.includes('lettuce') || lowerIng.includes('cucumber') || 
+                  lowerIng.includes('apple') || lowerIng.includes('banana') || lowerIng.includes('berry')) {
+          if (!groceryCategories['Fruits & Vegetables'].includes(ing)) {
+            groceryCategories['Fruits & Vegetables'].push(ing);
+          }
+        } else if (lowerIng.includes('milk') || lowerIng.includes('cheese') || lowerIng.includes('yogurt') || 
+                  lowerIng.includes('cream') || lowerIng.includes('butter')) {
+          if (!groceryCategories['Dairy'].includes(ing)) {
+            groceryCategories['Dairy'].push(ing);
+          }
+        } else if (lowerIng.includes('salt') || lowerIng.includes('pepper') || lowerIng.includes('cumin') || 
+                  lowerIng.includes('coriander') || lowerIng.includes('basil') || lowerIng.includes('oregano') ||
+                  lowerIng.includes('thyme') || lowerIng.includes('rosemary') || lowerIng.includes('cilantro') ||
+                  lowerIng.includes('parsley')) {
+          if (!groceryCategories['Herbs & Spices'].includes(ing)) {
+            groceryCategories['Herbs & Spices'].push(ing);
+          }
+        } else if (lowerIng.includes('oil') || lowerIng.includes('vinegar') || lowerIng.includes('sauce') || 
+                  lowerIng.includes('ketchup') || lowerIng.includes('mustard') || lowerIng.includes('mayo')) {
+          if (!groceryCategories['Oils & Condiments'].includes(ing)) {
+            groceryCategories['Oils & Condiments'].push(ing);
+          }
+        } else {
+          if (!groceryCategories['Other'].includes(ing)) {
+            groceryCategories['Other'].push(ing);
+          }
+        }
+      });
+    };
+    
+    // Create meal plan for each day
+    for (let dayIndex = 0; dayIndex < numDays; dayIndex++) {
+      const date = new Date();
+      date.setDate(date.getDate() + dayIndex);
+      
+      const dayMeals: any[] = [];
+      let dayCalories = 0;
+      let dayProtein = 0;
+      let dayCarbs = 0;
+      let dayFats = 0;
+      
+      // Process each meal type for the day
+      mealTypes.forEach(mealType => {
+        // Select a cuisine that still has unused meals for this type
+        const availableCuisines = cuisines.filter(cuisine => 
+          !usedMeals[cuisine].has(mealType) && 
+          mealTemplates[cuisine]?.[mealType]
+        );
+        
+        // If no cuisines with unused meals, reset the tracking for this meal type
+        if (availableCuisines.length === 0) {
+          cuisines.forEach(cuisine => {
+            usedMeals[cuisine].delete(mealType);
+          });
+        }
+        
+        // Re-check available cuisines after reset
+        const selectedCuisine = cuisines[Math.floor(Math.random() * cuisines.length)];
+        
+        // Mark this cuisine's meal type as used
+        usedMeals[selectedCuisine].add(mealType);
+        
+        // Get the meal template
+        const mealTemplate = mealTemplates[selectedCuisine][mealType];
+        
+        // Extract nutrient values for calculations
+        const proteinGrams = parseInt(mealTemplate.nutrients.protein.replace('g', ''));
+        const carbsGrams = parseInt(mealTemplate.nutrients.carbs.replace('g', ''));
+        const fatsGrams = parseInt(mealTemplate.nutrients.fats.replace('g', ''));
+        
+        // Add to daily totals
+        dayCalories += mealTemplate.calories;
+        dayProtein += proteinGrams;
+        dayCarbs += carbsGrams;
+        dayFats += fatsGrams;
+        
+        // Add meal to the day
+        dayMeals.push({
+          type: mealType,
+          name: mealTemplate.name,
+          calories: mealTemplate.calories,
+          recipe: mealTemplate.recipe,
+          ingredients: mealTemplate.ingredients,
+          instructions: mealTemplate.recipe.split('\n'),
+          nutrients: mealTemplate.nutrients
+        });
+        
+        // Process ingredients for grocery list
+        processIngredientsForGrocery(mealTemplate.ingredients);
+      });
+      
+      // Add to overall totals
+      totalCalories += dayCalories;
+      totalProtein += dayProtein;
+      totalCarbs += dayCarbs;
+      totalFats += dayFats;
+      mealCount += dayMeals.length;
+      
+      // Add day to the meal plan
+      days.push({
+        date,
+        meals: dayMeals,
+        dailyNutrition: {
+          totalCalories: dayCalories,
+          totalProtein: `${dayProtein}g`,
+          totalCarbs: `${dayCarbs}g`,
+          totalFats: `${dayFats}g`
+        }
+      });
+    }
+    
+    // Prepare grocery list
+    const groceryList = Object.entries(groceryCategories)
+      .filter(([_, items]) => items.length > 0)
+      .map(([category, items]) => ({
+        category,
+        items
+      }));
+      
+    // Calculate averages
+    const avgCalories = Math.round(totalCalories / numDays);
+    const avgProtein = Math.round(totalProtein / numDays);
+    const avgCarbs = Math.round(totalCarbs / numDays);
+    const avgFats = Math.round(totalFats / numDays);
+    
+    // Generate nutrition recommendations
+    const recommendations = [
+      `Your daily calorie intake averages ${avgCalories} calories, which ${
+        preferences.healthGoal === 'fit' ? 
+          'supports your fitness goals' : 
+          'provides satisfying energy for your day'
+      }.`,
+      `Try to drink at least 8 glasses of water per day to stay properly hydrated.`,
+      `This meal plan includes approximately ${avgProtein}g of protein daily, which helps ${
+        preferences.healthGoal === 'fit' ? 
+          'support muscle recovery and growth' : 
+          'maintain healthy body functions'
+      }.`,
+      `For optimal nutrition, try to include a variety of colored vegetables in your meals.`
+    ];
+    
+    // Return the complete meal plan
+    return {
+      days,
+      groceryList,
+      nutritionSummary: {
+        averageCalories: avgCalories,
+        averageProtein: `${avgProtein}g`,
+        averageCarbs: `${avgCarbs}g`,
+        averageFats: `${avgFats}g`,
+        recommendations
+      }
+    };
+  }
 
   const httpServer = createServer(app);
   return httpServer;

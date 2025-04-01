@@ -294,3 +294,68 @@ export const authResponseSchema = z.object({
 });
 
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+// Meal Plan Types
+export const mealPlanPreferencesSchema = z.object({
+  mealsPerDay: z.enum(['2', '4']),
+  spiciness: z.enum(['spicy', 'mild']),
+  dietType: z.enum(['vegetarian', 'non-vegetarian', 'vegan']),
+  healthGoal: z.enum(['fit', 'indulgent']),
+  cuisinePreferences: z.array(z.string()),
+  prepTime: z.enum(['quick', 'moderate', 'slow']),
+  duration: z.enum(['1-week', '2-weeks', '1-month']),
+  restrictions: z.array(z.string())
+});
+
+export type MealPlanPreferences = z.infer<typeof mealPlanPreferencesSchema>;
+
+export const mealSchema = z.object({
+  type: z.string(),
+  name: z.string(),
+  image: z.string().optional(),
+  calories: z.number(),
+  recipe: z.string(),
+  ingredients: z.array(z.string()),
+  instructions: z.array(z.string()),
+  nutrients: z.object({
+    protein: z.string(),
+    carbs: z.string(),
+    fats: z.string()
+  })
+});
+
+export type Meal = z.infer<typeof mealSchema>;
+
+export const mealPlanDaySchema = z.object({
+  date: z.date(),
+  meals: z.array(mealSchema),
+  dailyNutrition: z.object({
+    totalCalories: z.number(),
+    totalProtein: z.string(),
+    totalCarbs: z.string(),
+    totalFats: z.string()
+  })
+});
+
+export type MealPlanDay = z.infer<typeof mealPlanDaySchema>;
+
+export const groceryCategorySchema = z.object({
+  category: z.string(),
+  items: z.array(z.string())
+});
+
+export type GroceryCategory = z.infer<typeof groceryCategorySchema>;
+
+export const mealPlanSchema = z.object({
+  days: z.array(mealPlanDaySchema),
+  groceryList: z.array(groceryCategorySchema),
+  nutritionSummary: z.object({
+    averageCalories: z.number(),
+    averageProtein: z.string(),
+    averageCarbs: z.string(),
+    averageFats: z.string(),
+    recommendations: z.array(z.string())
+  })
+});
+
+export type MealPlan = z.infer<typeof mealPlanSchema>;

@@ -934,6 +934,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = (req as any).user as User;
       console.log("Fetching recipes for user ID:", user.id);
       
+      // Debug - log state before fetching (without accessing private properties)
+      // We'll see the detailed state in the enhanced storage methods
+      
       const recipes = await storage.getSavedRecipes(user.id);
       console.log("Found recipes count:", recipes.length);
       console.log("Recipe IDs:", recipes.map(r => r.id));

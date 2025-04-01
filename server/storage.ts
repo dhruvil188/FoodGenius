@@ -46,9 +46,10 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  // Make savedRecipes accessible for debugging purposes in this file only
+  savedRecipes: Map<number, SavedRecipe>;
   private users: Map<number, User>;
   private userSessions: Map<string, Session>;
-  private savedRecipes: Map<number, SavedRecipe>;
   private userId: number;
   private sessionId: number;
   private recipeId: number;
@@ -157,9 +158,17 @@ export class MemStorage implements IStorage {
     console.log("Getting saved recipes for user ID:", userId);
     console.log("All saved recipes:", Array.from(this.savedRecipes.entries()));
     
-    const userRecipes = Array.from(this.savedRecipes.values()).filter(
-      (recipe) => recipe.userId === userId
-    );
+    // Enhanced debugging
+    const allRecipesList = Array.from(this.savedRecipes.values());
+    console.log("All recipes list:", allRecipesList);
+    console.log("Recipe user IDs:", allRecipesList.map(r => r.userId));
+    
+    // Further comparison debugging
+    allRecipesList.forEach(recipe => {
+      console.log(`Recipe ID ${recipe.id}: userId=${recipe.userId}, comparing to ${userId}, equal: ${recipe.userId === userId}`);
+    });
+    
+    const userRecipes = allRecipesList.filter(recipe => recipe.userId === userId);
     
     console.log("Filtered recipes for user:", userRecipes);
     return userRecipes;

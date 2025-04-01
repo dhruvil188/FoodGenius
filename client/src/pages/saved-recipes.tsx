@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { SavedRecipe, AnalyzeImageResponse } from '@shared/schema';
@@ -19,23 +19,35 @@ export default function SavedRecipes() {
   const { toast } = useToast();
   const [selectedRecipe, setSelectedRecipe] = useState<SavedRecipe | null>(null);
   
+  // Define the type for the API response
+  type RecipesResponse = {
+    success: boolean;
+    recipes: SavedRecipe[];
+  };
+
   // Fetch saved recipes
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<RecipesResponse>({
     queryKey: ['/api/recipes'],
-    enabled: !!user,
-    onSuccess: (data: any) => {
+    enabled: !!user
+  });
+
+  // Log data for debugging
+  useEffect(() => {
+    if (data) {
       console.log("Saved recipes API response:", data);
       console.log("Data type:", typeof data);
-      if (data && data.recipes) {
+      if (data?.recipes) {
         console.log("Recipes count:", data.recipes.length);
+        console.log("Recipe IDs:", data.recipes.map(recipe => recipe.id));
       } else {
         console.log("No recipes found in response");
       }
-    },
-    onError: (err: any) => {
-      console.error("Error fetching saved recipes:", err);
     }
-  });
+    
+    if (isError) {
+      console.error("Error fetching saved recipes:", error);
+    }
+  }, [data, isError, error]);
   
   // Toggle favorite status mutation
   const toggleFavoriteMutation = useMutation({
@@ -162,7 +174,7 @@ export default function SavedRecipes() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data?.recipes.map((recipe) => (
+          {data?.recipes && data.recipes.length > 0 && data.recipes.map((recipe) => (
             <Card key={recipe.id} className="overflow-hidden h-full flex flex-col">
               <div className="relative h-48">
                 {recipe.imageUrl ? (
@@ -202,7 +214,7 @@ export default function SavedRecipes() {
               <CardContent className="flex-grow">
                 <ScrollArea className="h-20">
                   <div className="flex flex-wrap gap-1">
-                    {recipe.tags && recipe.tags.map((tag, i) => (
+                    {recipe.tags && recipe.tags.map((tag: string, i: number) => (
                       <Badge key={i} variant="outline" className="text-xs">
                         {tag}
                       </Badge>

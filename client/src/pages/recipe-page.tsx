@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { expandedRecipes } from "@/data/expandedRecipeLibrary";
+import { foodComRecipes } from "@/data/foodComRecipes";
+import { foodComRecipes2 } from "@/data/foodComRecipes2";
+import { foodComRecipes3 } from "@/data/foodComRecipes3";
 import RecipeLibraryResults from "@/components/RecipeLibraryResults";
 import { AnalyzeImageResponse } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -44,7 +47,22 @@ export default function RecipePage() {
 
   // Get an appropriate image for a recipe based on name or tags
   const getRecipeImage = (recipe: AnalyzeImageResponse): string => {
-    // First try to use YouTube thumbnail if available (TheMealDB recipes have these)
+    // First check if the recipe has an imageUrl property (Food.com recipes have these)
+    // Use a type assertion to access the non-standard property
+    const recipeAny = recipe as any;
+    if (recipeAny.imageUrl && typeof recipeAny.imageUrl === 'string' && recipeAny.imageUrl.trim() !== '') {
+      return recipeAny.imageUrl;
+    }
+    
+    // First recipe in the array might have an imageUrl
+    if (recipe.recipes && 
+        recipe.recipes.length > 0 && 
+        recipe.recipes[0].imageUrl && 
+        recipe.recipes[0].imageUrl.trim() !== '') {
+      return recipe.recipes[0].imageUrl;
+    }
+    
+    // Then try to use YouTube thumbnail if available (TheMealDB recipes have these)
     if (recipe.youtubeVideos && 
         recipe.youtubeVideos.length > 0 && 
         recipe.youtubeVideos[0].thumbnailUrl && 
@@ -88,7 +106,25 @@ export default function RecipePage() {
   useEffect(() => {
     if (params?.slug) {
       setLoading(true);
-      const foundRecipe = findRecipeBySlug(expandedRecipes, params.slug);
+      
+      // Search in all recipe collections
+      const allRecipeCollections = [
+        expandedRecipes,
+        foodComRecipes,
+        foodComRecipes2,
+        foodComRecipes3
+      ];
+      
+      let foundRecipe = null;
+      
+      // Look through all collections for the recipe by slug
+      for (const collection of allRecipeCollections) {
+        const found = findRecipeBySlug(collection, params.slug);
+        if (found) {
+          foundRecipe = found;
+          break;
+        }
+      }
       
       if (foundRecipe) {
         setRecipe(foundRecipe);

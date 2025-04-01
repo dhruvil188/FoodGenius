@@ -44,11 +44,20 @@ export default function SubscriptionPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     },
     onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      // Check if the error is due to missing Stripe configuration
+      if (error.message && error.message.includes('STRIPE_SECRET_KEY is not configured')) {
+        toast({
+          title: 'Subscription Service Unavailable',
+          description: 'The subscription service is currently unavailable. Please try again later.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     },
   });
 
@@ -67,11 +76,20 @@ export default function SubscriptionPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
     },
     onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      // Check if the error is due to missing Stripe configuration
+      if (error.message && error.message.includes('STRIPE_SECRET_KEY is not configured')) {
+        toast({
+          title: 'Subscription Service Unavailable',
+          description: 'The subscription service is currently unavailable. Please try again later.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
     },
   });
 

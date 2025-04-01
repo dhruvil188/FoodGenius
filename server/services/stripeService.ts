@@ -1,13 +1,17 @@
 import Stripe from 'stripe';
 import { SubscriptionPlan } from '@shared/schema';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
-}
+// Allow the app to start without Stripe credentials
+// We'll check for credentials before performing any Stripe operations
+let stripe: Stripe | null = null;
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16' as any,
-});
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2023-10-16' as any,
+  });
+} else {
+  console.warn('STRIPE_SECRET_KEY is not set. Stripe functionality will be disabled.');
+}
 
 // Define subscription plans with our pricing structure
 export const subscriptionPlans: SubscriptionPlan[] = [
@@ -70,6 +74,9 @@ export const subscriptionPlans: SubscriptionPlan[] = [
  * @returns Stripe Customer
  */
 export async function createCustomer(email: string, name?: string): Promise<Stripe.Customer> {
+  if (!stripe) {
+    throw new Error('Stripe is not initialized. STRIPE_SECRET_KEY is missing.');
+  }
   return await stripe.customers.create({
     email,
     name
@@ -82,6 +89,9 @@ export async function createCustomer(email: string, name?: string): Promise<Stri
  * @returns Stripe Customer
  */
 export async function getCustomer(customerId: string): Promise<Stripe.Customer> {
+  if (!stripe) {
+    throw new Error('Stripe is not initialized. STRIPE_SECRET_KEY is missing.');
+  }
   return await stripe.customers.retrieve(customerId) as Stripe.Customer;
 }
 
@@ -92,6 +102,9 @@ export async function getCustomer(customerId: string): Promise<Stripe.Customer> 
  * @returns Checkout session with client secret
  */
 export async function createSubscriptionSession(customerId: string, planId: string) {
+  if (!stripe) {
+    throw new Error('Stripe is not initialized. STRIPE_SECRET_KEY is missing.');
+  }
   // Find the subscription plan
   const plan = subscriptionPlans.find(p => p.id === planId);
   if (!plan) {
@@ -126,6 +139,9 @@ export async function createSubscriptionSession(customerId: string, planId: stri
  * @returns Subscription details
  */
 export async function getSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
+  if (!stripe) {
+    throw new Error('Stripe is not initialized. STRIPE_SECRET_KEY is missing.');
+  }
   return await stripe.subscriptions.retrieve(subscriptionId);
 }
 
@@ -135,6 +151,9 @@ export async function getSubscription(subscriptionId: string): Promise<Stripe.Su
  * @returns Canceled subscription
  */
 export async function cancelSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
+  if (!stripe) {
+    throw new Error('Stripe is not initialized. STRIPE_SECRET_KEY is missing.');
+  }
   return await stripe.subscriptions.cancel(subscriptionId);
 }
 
@@ -142,6 +161,9 @@ export async function cancelSubscription(subscriptionId: string): Promise<Stripe
  * Create or retrieve a price for a plan
  */
 async function createOrRetrievePrice(plan: SubscriptionPlan): Promise<Stripe.Price> {
+  if (!stripe) {
+    throw new Error('Stripe is not initialized. STRIPE_SECRET_KEY is missing.');
+  }
   // In production, you'd have a more robust solution for this
   // Here we're creating a price on-the-fly for simplicity
   
@@ -175,6 +197,9 @@ async function createOrRetrievePrice(plan: SubscriptionPlan): Promise<Stripe.Pri
  * @param event Stripe webhook event
  */
 export async function handleWebhookEvent(event: Stripe.Event) {
+  if (!stripe) {
+    throw new Error('Stripe is not initialized. STRIPE_SECRET_KEY is missing.');
+  }
   switch (event.type) {
     case 'customer.subscription.created':
     case 'customer.subscription.updated':

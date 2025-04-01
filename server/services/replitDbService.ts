@@ -4,15 +4,26 @@ import { AnalyzeImageResponse } from '@shared/schema';
 // Initialize the Replit Database client
 const db = new Database();
 
-// Helper function to safely handle database response types
+// Helper function to safely handle database response types with better error handling
 function safeParse(data: any): any {
   if (typeof data === 'string') {
     try {
-      return JSON.parse(data);
+      console.log('Parsing string data from DB');
+      const parsed = JSON.parse(data);
+      console.log('Successfully parsed data, type:', Array.isArray(parsed) ? 'array' : typeof parsed);
+      return parsed;
     } catch (e) {
+      console.error('Failed to parse string data from DB:', e);
+      // For debugging purposes, log a snippet of the data
+      if (data.length > 100) {
+        console.log('Data snippet (first 100 chars):', data.substring(0, 100) + '...');
+      } else {
+        console.log('Data:', data);
+      }
       return data;
     }
   }
+  console.log('Data is not a string, type:', typeof data);
   return data;
 }
 
@@ -43,7 +54,21 @@ export async function saveUserRecipe(userId: string, recipe: AnalyzeImageRespons
     
     // Get existing recipes or initialize empty array
     const existingRecipesJson = await db.get(userRecipesKey);
-    const existingRecipes = existingRecipesJson ? safeParse(existingRecipesJson) : [];
+    
+    // Ensure we have a valid array
+    let existingRecipes = [];
+    if (existingRecipesJson) {
+      try {
+        const parsed = safeParse(existingRecipesJson);
+        if (Array.isArray(parsed)) {
+          existingRecipes = parsed;
+        } else {
+          console.warn('Expected array from DB but got:', typeof parsed);
+        }
+      } catch (err) {
+        console.error('Failed to parse existing recipes:', err);
+      }
+    }
     
     // Add the new recipe
     const updatedRecipes = [...existingRecipes, recipeData];
@@ -74,17 +99,32 @@ export async function saveUserRecipe(userId: string, recipe: AnalyzeImageRespons
  */
 export async function getUserRecipes(userId: string) {
   try {
+    console.log(`Fetching recipes for user: ${userId}`);
     const userRecipesKey = `${USER_RECIPES_PREFIX}${userId}`;
     
     // Get recipes from DB
     const recipesJson = await db.get(userRecipesKey);
     
     if (!recipesJson) {
+      console.log('No recipes found for user');
       return [];
     }
     
-    // Parse and return recipes
-    return safeParse(recipesJson);
+    // Parse recipes with extra validation
+    let recipes = [];
+    try {
+      const parsed = safeParse(recipesJson);
+      if (Array.isArray(parsed)) {
+        recipes = parsed;
+        console.log(`Found ${recipes.length} recipes for user`);
+      } else {
+        console.warn('Expected array from DB but got:', typeof parsed);
+      }
+    } catch (err) {
+      console.error('Failed to parse user recipes:', err);
+    }
+    
+    return recipes;
   } catch (error) {
     console.error('Error fetching recipes from Replit DB:', error);
     return [];
@@ -108,8 +148,27 @@ export async function deleteUserRecipe(userId: string, recipeId: string) {
       };
     }
     
-    // Parse recipes
-    const recipes = safeParse(recipesJson);
+    // Parse recipes with extra validation
+    let recipes = [];
+    try {
+      const parsed = safeParse(recipesJson);
+      if (Array.isArray(parsed)) {
+        recipes = parsed;
+        console.log(`Found ${recipes.length} recipes to filter`);
+      } else {
+        console.warn('Expected array from DB but got:', typeof parsed);
+        return {
+          success: false,
+          message: 'Invalid recipe data format'
+        };
+      }
+    } catch (err) {
+      console.error('Failed to parse recipes for deletion:', err);
+      return {
+        success: false,
+        message: 'Failed to parse recipes'
+      };
+    }
     
     // Find and remove the recipe
     const filteredRecipes = recipes.filter((recipe: any) => recipe.id !== recipeId);

@@ -146,9 +146,16 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
           >
             <div className="w-full md:w-1/3">
               <img 
-                src={imageUrl} 
+                src={(result as any).imageUrl || imageUrl} 
                 alt={result.foodName} 
                 className="w-full h-48 md:h-64 object-cover rounded-lg"
+                onError={(e) => {
+                  console.log("Image failed to load, trying fallback", e);
+                  if ((result as any).imageUrl) {
+                    // If we were using the direct imageUrl and it failed, try using the passed-in imageUrl prop
+                    e.currentTarget.src = imageUrl;
+                  }
+                }}
               />
             </div>
             <div className="w-full md:w-2/3">

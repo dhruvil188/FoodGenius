@@ -1209,7 +1209,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                         <h5 className="text-lg font-medium">Estimated Cost Per Serving</h5>
                         <p className="text-sm text-slate-500">Based on average UK supermarket prices</p>
                       </div>
-                      <div className="text-2xl font-bold text-green-600">£{(Math.random() * 3 + 2).toFixed(2)}</div>
+                      <div className="text-2xl font-bold text-green-600">£{(Math.random() * 5 + 4).toFixed(2)}</div>
                     </div>
                     
                     <div className="mb-6">
@@ -1218,7 +1218,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                         {selectedRecipe.ingredients.slice(0, 8).map((ingredient, index) => (
                           <div key={index} className="flex justify-between items-center py-2 border-b border-slate-100">
                             <span className="text-slate-700">{ingredient}</span>
-                            <span className="font-medium">£{(Math.random() * 2 + 0.5).toFixed(2)}</span>
+                            <span className="font-medium">£{(Math.random() * 3 + 1.5).toFixed(2)}</span>
                           </div>
                         ))}
                         {selectedRecipe.ingredients.length > 8 && (
@@ -1258,7 +1258,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                               }
                             </h6>
                             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                              Save £{(Math.random() * 1.5 + 1).toFixed(2)}
+                              Save £{(Math.random() * 2.5 + 2).toFixed(2)}
                             </span>
                           </div>
                           <p className="text-sm text-slate-600">
@@ -1330,7 +1330,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                               }
                             </h6>
                             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                              Save £{(Math.random() * 1 + 0.5).toFixed(2)}
+                              Save £{(Math.random() * 2 + 1.5).toFixed(2)}
                             </span>
                           </div>
                           <p className="text-sm text-slate-600">

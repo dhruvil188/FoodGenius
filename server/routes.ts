@@ -24,7 +24,7 @@ import { searchYouTubeVideos } from "./services/youtubeService";
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
 
-import { MealPlanPreferences } from "@shared/schema";
+import { MealPlanPreferences, mealPlanPreferencesSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flag to enable development mode with mock data when API quota is exceeded

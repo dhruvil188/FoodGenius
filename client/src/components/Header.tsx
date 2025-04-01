@@ -4,16 +4,32 @@ import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
+import { useAuth } from '@/hooks/use-auth';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { LogOut, User } from 'lucide-react';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
+  const { user, logoutMutation } = useAuth();
   
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
+  
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
   
   return (
     <motion.header 
@@ -44,14 +60,16 @@ export default function Header() {
             Recipe Library
           </Button>
           
-          <Button 
-            variant="outline"
-            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
-            onClick={() => navigate('/history')}
-          >
-            <i className="fas fa-history mr-2"></i>
-            View History
-          </Button>
+          {user && (
+            <Button 
+              variant="outline"
+              className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
+              onClick={() => navigate('/history')}
+            >
+              <i className="fas fa-history mr-2"></i>
+              View History
+            </Button>
+          )}
           
           <Button 
             className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
@@ -69,6 +87,46 @@ export default function Header() {
             <span className="hidden md:inline">Analyze Dish</span>
             <span className="inline md:hidden">Analyze</span>
           </Button>
+          
+          {/* Authentication UI */}
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-9 w-9 cursor-pointer hover:opacity-90 transition-opacity border-2 border-primary/20">
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {user.username?.substring(0, 2).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => navigate('/profile')}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-500 focus:text-red-500"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>{logoutMutation.isPending ? "Logging out..." : "Logout"}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="outline"
+              className="rounded-full border-primary/30 text-primary hover:bg-primary/5 hover:text-primary hover:border-primary"
+              onClick={() => navigate('/auth')}
+            >
+              Login / Register
+            </Button>
+          )}
         </div>
       </div>
     </motion.header>

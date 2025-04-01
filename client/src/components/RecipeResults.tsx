@@ -657,7 +657,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold food-gradient-text">
-                          {selectedRecipe.nutritionInfo.carbs || 'N/A'}
+                          {selectedRecipe.nutritionInfo.carbohydrates || 'N/A'}
                         </div>
                         <p className="text-xs text-slate-500 mt-1">per serving</p>
                       </CardContent>
@@ -674,7 +674,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                           <div>
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-sm font-medium">Fat</span>
-                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.fats || 'N/A'}</span>
+                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.fat || 'N/A'}</span>
                             </div>
                             <Progress value={60} className="h-2" />
                           </div>

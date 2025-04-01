@@ -23,6 +23,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/hooks/use-auth';
 import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
 
 interface RecipeResultsProps {
@@ -158,6 +159,49 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     // In a real app, this would replace the current result with the saved one
     // For now, we'll just switch to the first tab
     setSelectedTab("instructions");
+  };
+  
+  // Check if user is authenticated to show save options
+  const { user } = useAuth();
+  
+  // Function to save recipe to user's favorites
+  const saveRecipeToFavorites = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in or register to save recipes to your favorites.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipe: result
+        }),
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Recipe Saved!",
+          description: `${result.foodName} has been added to your favorites.`,
+        });
+        triggerConfetti();
+      } else {
+        throw new Error("Failed to save recipe");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save recipe. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -1178,7 +1222,15 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             </TabsContent>
           </Tabs>
           
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 gap-4">
+            {user && (
+              <Button 
+                onClick={saveRecipeToFavorites} 
+                className="rounded-full bg-green-600 hover:bg-green-700"
+              >
+                <i className="fas fa-bookmark mr-2"></i> Save Recipe
+              </Button>
+            )}
             <Button onClick={onTryAnother} className="rounded-full">
               <i className="fas fa-camera mr-2"></i> Try Another Dish
             </Button>

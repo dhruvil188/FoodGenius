@@ -1494,12 +1494,11 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                                 <span className="text-xs font-medium text-white">Moderate</span>
                                 <span className="text-xs font-medium text-white">Premium</span>
                               </div>
-                              <div className="mt-2 flex items-center justify-between">
+                              <div className="mt-2 flex items-center">
                                 <div className="flex items-center">
                                   <span className={`inline-block w-3 h-3 rounded-full mr-2 ${fillColor}`}></span>
                                   <span className="font-medium">{costCategory}</span>
                                 </div>
-                                <span className="text-sm text-slate-600">{costLabel}</span>
                               </div>
                             </>
                           );

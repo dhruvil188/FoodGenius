@@ -214,12 +214,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
               >
                 <i className="fas fa-globe-americas mr-2"></i> Guide
               </TabsTrigger>
-              <TabsTrigger 
-                value="history" 
-                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
-              >
-                <i className="fas fa-history mr-2"></i> History
-              </TabsTrigger>
+
             </TabsList>
             
             {/* Tab 1: Step-by-Step Instructions */}
@@ -999,65 +994,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
               )}
             </TabsContent>
 
-            {/* Tab 5: History & Background */}
-            <TabsContent value="history" className="space-y-6">
-              {selectedRecipe.culturalContext && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Dish History & Origin</h4>
-                  {selectedRecipe.culturalContext.history ? (
-                    <Card className="mb-6">
-                      <CardContent className="p-6">
-                        <p className="text-slate-700 mb-4">{selectedRecipe.culturalContext.history}</p>
-                        
-                        {selectedRecipe.culturalContext.origin && (
-                          <div className="p-4 bg-slate-50 rounded-lg mt-4">
-                            <h5 className="font-medium mb-2">Origin</h5>
-                            <p className="text-slate-700">{selectedRecipe.culturalContext.origin}</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Card className="mb-6">
-                      <CardContent className="p-6 text-center text-slate-500">
-                        <p>No historical information available for this recipe.</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              )}
-              
-              {/* Historical Facts */}
-              {selectedRecipe.historicalFacts && selectedRecipe.historicalFacts.length > 0 && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Interesting Historical Facts</h4>
-                  <div className="space-y-4">
-                    {selectedRecipe.historicalFacts.map((fact, index) => (
-                      <div key={index} className="p-4 bg-amber-50 rounded-lg border border-amber-100">
-                        <div className="flex items-start gap-3">
-                          <span className="text-amber-600 mt-1">
-                            <i className="fas fa-info-circle"></i>
-                          </span>
-                          <p className="text-slate-700">{fact}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Evolution */}
-              {selectedRecipe.evolution && (
-                <div className="mb-8">
-                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Evolution Over Time</h4>
-                  <Card>
-                    <CardContent className="p-6">
-                      <p className="text-slate-700">{selectedRecipe.evolution}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-            </TabsContent>
+
           </Tabs>
         </CardContent>
       </Card>

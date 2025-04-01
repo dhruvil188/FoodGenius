@@ -1231,7 +1231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Helper function to generate a demo meal plan when API fails
+  // Helper function to generate a diverse demo meal plan when API fails
   function generateDemoMealPlan(preferences: MealPlanPreferences) {
     const numDays = preferences.duration === '1-week' ? 7 : 
                    preferences.duration === '2-weeks' ? 14 : 30;
@@ -1240,6 +1240,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const mealTypes = preferences.mealsPerDay === '2' 
       ? ['Lunch', 'Dinner'] 
       : ['Breakfast', 'Lunch', 'Snack', 'Dinner'];
+      
+    // Array of unique protein sources to ensure variety across days
+    const proteins = [
+      'Chicken', 'Beef', 'Fish', 'Tofu', 'Lentils', 'Pork', 'Lamb', 
+      'Shrimp', 'Turkey', 'Eggs', 'Beans', 'Chickpeas', 'Tempeh',
+      'Duck', 'Rabbit', 'Venison', 'Bison', 'Quail', 'Crab', 'Lobster'
+    ];
       
     // Demo meal templates by cuisine and meal type
     const mealTemplates: Record<string, Record<string, any>> = {
@@ -1621,6 +1628,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'Dairy': [],
       'Herbs & Spices': [],
       'Oils & Condiments': [],
+      'Canned & Packaged': [],
+      'Baking & Sweeteners': [],
+      'Nuts & Dried Fruits': [],
       'Other': []
     };
     
@@ -1638,43 +1648,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Process ingredients to add to grocery list
     const processIngredientsForGrocery = (ingredients: string[]) => {
+      // Updated categorization with more comprehensive groups and broader keyword matching
       ingredients.forEach(ing => {
         const lowerIng = ing.toLowerCase();
-        // Simple categorization based on keywords
+        
+        // PROTEINS - expanded to include more protein sources
         if (lowerIng.includes('chicken') || lowerIng.includes('beef') || lowerIng.includes('fish') || 
-            lowerIng.includes('salmon') || lowerIng.includes('tofu') || lowerIng.includes('egg')) {
+            lowerIng.includes('salmon') || lowerIng.includes('tofu') || lowerIng.includes('egg') ||
+            lowerIng.includes('pork') || lowerIng.includes('turkey') || lowerIng.includes('lamb') ||
+            lowerIng.includes('shrimp') || lowerIng.includes('tuna') || lowerIng.includes('duck') ||
+            lowerIng.includes('sausage') || lowerIng.includes('bacon') || lowerIng.includes('ham') ||
+            lowerIng.includes('ground') || lowerIng.includes('steak') || lowerIng.includes('meat') ||
+            lowerIng.includes('patty') || lowerIng.includes('lentil') || lowerIng.includes('bean') ||
+            lowerIng.includes('tempeh') || lowerIng.includes('seitan') || lowerIng.includes('crab') ||
+            lowerIng.includes('lobster') || lowerIng.includes('scallop') || lowerIng.includes('mussel')) {
           if (!groceryCategories['Proteins'].includes(ing)) {
             groceryCategories['Proteins'].push(ing);
           }
-        } else if (lowerIng.includes('rice') || lowerIng.includes('pasta') || lowerIng.includes('bread') || 
-                  lowerIng.includes('tortilla') || lowerIng.includes('flour')) {
+        } 
+        
+        // GRAINS - expanded to include more grain types and baking ingredients
+        else if (lowerIng.includes('rice') || lowerIng.includes('pasta') || lowerIng.includes('bread') || 
+                lowerIng.includes('tortilla') || lowerIng.includes('flour') || lowerIng.includes('cereal') ||
+                lowerIng.includes('oat') || lowerIng.includes('quinoa') || lowerIng.includes('barley') ||
+                lowerIng.includes('couscous') || lowerIng.includes('noodle') || lowerIng.includes('penne') ||
+                lowerIng.includes('macaroni') || lowerIng.includes('spaghetti') || lowerIng.includes('fettuccine') ||
+                lowerIng.includes('bagel') || lowerIng.includes('roll') || lowerIng.includes('wrap') ||
+                lowerIng.includes('cracker') || lowerIng.includes('tortilla') || lowerIng.includes('pita') ||
+                lowerIng.includes('bun') || lowerIng.includes('waffle') || lowerIng.includes('pancake') ||
+                lowerIng.includes('cornmeal') || lowerIng.includes('millet') || lowerIng.includes('bulgur')) {
           if (!groceryCategories['Grains'].includes(ing)) {
             groceryCategories['Grains'].push(ing);
           }
-        } else if (lowerIng.includes('tomato') || lowerIng.includes('onion') || lowerIng.includes('carrot') || 
-                  lowerIng.includes('potato') || lowerIng.includes('lettuce') || lowerIng.includes('cucumber') || 
-                  lowerIng.includes('apple') || lowerIng.includes('banana') || lowerIng.includes('berry')) {
+        } 
+        
+        // FRUITS & VEGETABLES - expanded to include more varieties
+        else if (lowerIng.includes('tomato') || lowerIng.includes('onion') || lowerIng.includes('carrot') || 
+                lowerIng.includes('potato') || lowerIng.includes('lettuce') || lowerIng.includes('cucumber') || 
+                lowerIng.includes('apple') || lowerIng.includes('banana') || lowerIng.includes('berry') ||
+                lowerIng.includes('orange') || lowerIng.includes('grape') || lowerIng.includes('mango') ||
+                lowerIng.includes('pineapple') || lowerIng.includes('avocado') || lowerIng.includes('lemon') ||
+                lowerIng.includes('lime') || lowerIng.includes('broccoli') || lowerIng.includes('spinach') ||
+                lowerIng.includes('kale') || lowerIng.includes('pepper') || lowerIng.includes('zucchini') ||
+                lowerIng.includes('squash') || lowerIng.includes('eggplant') || lowerIng.includes('cabbage') ||
+                lowerIng.includes('cauliflower') || lowerIng.includes('mushroom') || lowerIng.includes('garlic') ||
+                lowerIng.includes('celery') || lowerIng.includes('asparagus') || lowerIng.includes('corn') ||
+                lowerIng.includes('pea') || lowerIng.includes('bean') || lowerIng.includes('fruit') || 
+                lowerIng.includes('vegetable') || lowerIng.includes('bell pepper') || lowerIng.includes('chili') ||
+                lowerIng.includes('jalapeno') || lowerIng.includes('shallot') || lowerIng.includes('scallion') ||
+                lowerIng.includes('green onion') || lowerIng.includes('ginger') || lowerIng.includes('brussels sprout') ||
+                lowerIng.includes('sweet potato') || lowerIng.includes('green bean') || lowerIng.includes('beet') ||
+                lowerIng.includes('radish') || lowerIng.includes('turnip') || lowerIng.includes('leek')) {
           if (!groceryCategories['Fruits & Vegetables'].includes(ing)) {
             groceryCategories['Fruits & Vegetables'].push(ing);
           }
-        } else if (lowerIng.includes('milk') || lowerIng.includes('cheese') || lowerIng.includes('yogurt') || 
-                  lowerIng.includes('cream') || lowerIng.includes('butter')) {
+        } 
+        
+        // DAIRY - expanded to include non-dairy alternatives
+        else if (lowerIng.includes('milk') || lowerIng.includes('cheese') || lowerIng.includes('yogurt') || 
+                lowerIng.includes('cream') || lowerIng.includes('butter') || lowerIng.includes('cheddar') ||
+                lowerIng.includes('mozzarella') || lowerIng.includes('parmesan') || lowerIng.includes('feta') ||
+                lowerIng.includes('gouda') || lowerIng.includes('ricotta') || lowerIng.includes('cottage cheese') ||
+                lowerIng.includes('almond milk') || lowerIng.includes('soy milk') || lowerIng.includes('oat milk') ||
+                lowerIng.includes('coconut milk') || lowerIng.includes('sour cream') || lowerIng.includes('ice cream') ||
+                lowerIng.includes('whipped cream') || lowerIng.includes('half and half') || lowerIng.includes('buttermilk') ||
+                lowerIng.includes('creamer') || (lowerIng.includes('greek') && lowerIng.includes('yogurt'))) {
           if (!groceryCategories['Dairy'].includes(ing)) {
             groceryCategories['Dairy'].push(ing);
           }
-        } else if (lowerIng.includes('salt') || lowerIng.includes('pepper') || lowerIng.includes('cumin') || 
-                  lowerIng.includes('coriander') || lowerIng.includes('basil') || lowerIng.includes('oregano') ||
-                  lowerIng.includes('thyme') || lowerIng.includes('rosemary') || lowerIng.includes('cilantro') ||
-                  lowerIng.includes('parsley')) {
+        } 
+        
+        // HERBS & SPICES - expanded with more varieties
+        else if (lowerIng.includes('salt') || lowerIng.includes('pepper') || lowerIng.includes('cumin') || 
+                lowerIng.includes('coriander') || lowerIng.includes('basil') || lowerIng.includes('oregano') ||
+                lowerIng.includes('thyme') || lowerIng.includes('rosemary') || lowerIng.includes('cilantro') ||
+                lowerIng.includes('parsley') || lowerIng.includes('dill') || lowerIng.includes('mint') ||
+                lowerIng.includes('cinnamon') || lowerIng.includes('nutmeg') || lowerIng.includes('cardamom') ||
+                lowerIng.includes('clove') || lowerIng.includes('garam masala') || lowerIng.includes('turmeric') ||
+                lowerIng.includes('paprika') || lowerIng.includes('cayenne') || lowerIng.includes('chili powder') ||
+                lowerIng.includes('curry powder') || lowerIng.includes('powder') || lowerIng.includes('spice') ||
+                lowerIng.includes('herb') || lowerIng.includes('seasoning') || lowerIng.includes('vanilla') ||
+                lowerIng.includes('extract') || lowerIng.includes('bay leaf') || lowerIng.includes('star anise') ||
+                lowerIng.includes('fennel') || lowerIng.includes('sage') || lowerIng.includes('marjoram') ||
+                lowerIng.includes('tarragon') || lowerIng.includes('allspice') || lowerIng.includes('saffron')) {
           if (!groceryCategories['Herbs & Spices'].includes(ing)) {
             groceryCategories['Herbs & Spices'].push(ing);
           }
-        } else if (lowerIng.includes('oil') || lowerIng.includes('vinegar') || lowerIng.includes('sauce') || 
-                  lowerIng.includes('ketchup') || lowerIng.includes('mustard') || lowerIng.includes('mayo')) {
+        } 
+        
+        // OILS & CONDIMENTS - expanded with more varieties
+        else if (lowerIng.includes('oil') || lowerIng.includes('vinegar') || lowerIng.includes('sauce') || 
+                lowerIng.includes('ketchup') || lowerIng.includes('mustard') || lowerIng.includes('mayo') ||
+                lowerIng.includes('mayonnaise') || lowerIng.includes('dressing') || lowerIng.includes('honey') ||
+                lowerIng.includes('maple syrup') || lowerIng.includes('syrup') || lowerIng.includes('olive oil') ||
+                lowerIng.includes('vegetable oil') || lowerIng.includes('canola oil') || lowerIng.includes('sesame oil') ||
+                lowerIng.includes('coconut oil') || lowerIng.includes('peanut oil') || lowerIng.includes('balsamic') ||
+                lowerIng.includes('apple cider vinegar') || lowerIng.includes('rice vinegar') || lowerIng.includes('soy sauce') ||
+                lowerIng.includes('teriyaki') || lowerIng.includes('sriracha') || lowerIng.includes('hot sauce') ||
+                lowerIng.includes('bbq sauce') || lowerIng.includes('barbecue') || lowerIng.includes('pesto') ||
+                lowerIng.includes('salsa') || lowerIng.includes('aioli') || lowerIng.includes('tahini') ||
+                lowerIng.includes('hoisin') || lowerIng.includes('marinade') || lowerIng.includes('relish') ||
+                lowerIng.includes('jam') || lowerIng.includes('jelly') || lowerIng.includes('molasses')) {
           if (!groceryCategories['Oils & Condiments'].includes(ing)) {
             groceryCategories['Oils & Condiments'].push(ing);
           }
-        } else {
+        }
+        
+        // CANNED & PACKAGED GOODS - new category
+        else if (lowerIng.includes('can') || lowerIng.includes('jar') || lowerIng.includes('boxed') ||
+                lowerIng.includes('broth') || lowerIng.includes('stock') || lowerIng.includes('tomato paste') ||
+                lowerIng.includes('tomato sauce') || lowerIng.includes('diced tomato') || lowerIng.includes('crushed tomato') ||
+                lowerIng.includes('canned bean') || lowerIng.includes('canned soup') || lowerIng.includes('condensed') ||
+                lowerIng.includes('mix')) {
+          if (!groceryCategories['Canned & Packaged'].includes(ing)) {
+            groceryCategories['Canned & Packaged'].push(ing);
+          }
+        }
+        
+        // BAKING & SWEETENERS - new category
+        else if (lowerIng.includes('baking') || lowerIng.includes('sugar') || lowerIng.includes('sweetener') ||
+                lowerIng.includes('chocolate') || lowerIng.includes('chip') || lowerIng.includes('cocoa') ||
+                lowerIng.includes('yeast') || lowerIng.includes('baking powder') || lowerIng.includes('baking soda') ||
+                lowerIng.includes('stevia') || lowerIng.includes('brown sugar') || lowerIng.includes('confectioner') ||
+                lowerIng.includes('powdered sugar')) {
+          if (!groceryCategories['Baking & Sweeteners'].includes(ing)) {
+            groceryCategories['Baking & Sweeteners'].push(ing);
+          }
+        }
+        
+        // NUTS, SEEDS & DRIED FRUITS - new category
+        else if (lowerIng.includes('nut') || lowerIng.includes('almond') || lowerIng.includes('cashew') ||
+                lowerIng.includes('peanut') || lowerIng.includes('walnut') || lowerIng.includes('pecan') ||
+                lowerIng.includes('seed') || lowerIng.includes('pine nut') || lowerIng.includes('flaxseed') ||
+                lowerIng.includes('chia') || lowerIng.includes('sunflower seed') || lowerIng.includes('sesame seed') ||
+                lowerIng.includes('dried') || lowerIng.includes('raisin') || lowerIng.includes('date') ||
+                lowerIng.includes('fig') || lowerIng.includes('apricot') || lowerIng.includes('cranberry')) {
+          if (!groceryCategories['Nuts & Dried Fruits'].includes(ing)) {
+            groceryCategories['Nuts & Dried Fruits'].push(ing);
+          }
+        }
+        
+        // OTHERS - fallback category
+        else {
           if (!groceryCategories['Other'].includes(ing)) {
             groceryCategories['Other'].push(ing);
           }
@@ -1694,9 +1809,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let dayFats = 0;
       
       // Process each meal type for the day
-      mealTypes.forEach(mealType => {
-        // Select a cuisine that still has unused meals for this type
-        const availableCuisines = cuisines.filter(cuisine => 
+      mealTypes.forEach((mealType, mealTypeIndex) => {
+        // Create a pool of available cuisines
+        let availableCuisines = cuisines.filter(cuisine => 
           !usedMeals[cuisine].has(mealType) && 
           mealTemplates[cuisine]?.[mealType]
         );
@@ -1706,16 +1821,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cuisines.forEach(cuisine => {
             usedMeals[cuisine].delete(mealType);
           });
+          
+          // Re-check available cuisines after reset
+          availableCuisines = cuisines.filter(cuisine => 
+            mealTemplates[cuisine]?.[mealType]
+          );
         }
         
-        // Re-check available cuisines after reset
-        const selectedCuisine = cuisines[Math.floor(Math.random() * cuisines.length)];
+        // Ensure we have at least one available cuisine
+        if (availableCuisines.length === 0 && cuisines.length > 0) {
+          availableCuisines = [cuisines[0]]; // Fallback to first cuisine
+        }
+        
+        // Select a cuisine using the day index to ensure variety across days
+        // This uses a deterministic pattern based on day and meal type
+        const cuisineIndex = (dayIndex + mealTypeIndex) % Math.max(1, availableCuisines.length);
+        const selectedCuisine = availableCuisines[cuisineIndex] || cuisines[0];
         
         // Mark this cuisine's meal type as used
-        usedMeals[selectedCuisine].add(mealType);
+        if (selectedCuisine) {
+          usedMeals[selectedCuisine].add(mealType);
+        }
         
-        // Get the meal template
-        const mealTemplate = mealTemplates[selectedCuisine][mealType];
+        // Get the basic meal template
+        let mealTemplate = {...mealTemplates[selectedCuisine][mealType]};
+        
+        // Generate different meal names using deterministic variations
+        const mealPrefixes = [
+          'Classic', 'Homestyle', 'Gourmet', 'Rustic', 'Fresh', 'Chef\'s',
+          'Traditional', 'Signature', 'Seasonal', 'Artisan', 'House'
+        ];
+        
+        // Use deterministic variation based on day index
+        const prefixIndex = (dayIndex * 3 + mealTypeIndex) % mealPrefixes.length;
+        const prefix = mealPrefixes[prefixIndex];
+        
+        // Create an array of proteins to rotate through for variety
+        const proteins = [
+          'Chicken', 'Beef', 'Fish', 'Tofu', 'Pork', 'Lamb', 'Shrimp', 
+          'Turkey', 'Duck', 'Salmon', 'Tuna', 'Lentils', 'Beans'
+        ];
+        
+        // Make a deep copy of the meal template
+        const modifiedMeal = {
+          ...mealTemplate,
+          name: `${prefix} ${mealTemplate.name}`,
+          ingredients: [...mealTemplate.ingredients]
+        };
+        
+        // For animal protein dishes, change the protein based on day index
+        const lowerName = modifiedMeal.name.toLowerCase();
+        if (lowerName.includes('chicken') || lowerName.includes('beef') || 
+            lowerName.includes('pork') || lowerName.includes('fish')) {
+          
+          // Select protein based on day index
+          const proteinIndex = dayIndex % proteins.length;
+          const newProtein = proteins[proteinIndex];
+          
+          // Replace the protein in the name
+          modifiedMeal.name = modifiedMeal.name.replace(
+            /(chicken|beef|pork|fish)/i, 
+            (_match: string) => newProtein
+          );
+          
+          // Update ingredients list with the new protein
+          modifiedMeal.ingredients = modifiedMeal.ingredients.map((ingredient: string) => {
+            const lowerIng = ingredient.toLowerCase();
+            if (lowerIng.includes('chicken') || lowerIng.includes('beef') || 
+                lowerIng.includes('pork') || lowerIng.includes('fish')) {
+              return ingredient.replace(
+                /(chicken|beef|pork|fish)/i, 
+                (_match: string) => newProtein.toLowerCase()
+              );
+            }
+            return ingredient;
+          });
+        }
+        
+        // Use the modified meal instead of the original template
+        mealTemplate = modifiedMeal;
         
         // Extract nutrient values for calculations
         const proteinGrams = parseInt(mealTemplate.nutrients.protein.replace('g', ''));

@@ -4,12 +4,15 @@ import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
+import { UserAccountNav } from '@/components/auth/UserAccountNav';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
+  const { user } = useAuth();
   
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -44,14 +47,16 @@ export default function Header() {
             Recipe Library
           </Button>
           
-          <Button 
-            variant="outline"
-            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
-            onClick={() => navigate('/history')}
-          >
-            <i className="fas fa-history mr-2"></i>
-            View History
-          </Button>
+          {user && (
+            <Button 
+              variant="outline"
+              className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
+              onClick={() => navigate('/saved-recipes')}
+            >
+              <i className="fas fa-bookmark mr-2"></i>
+              Saved Recipes
+            </Button>
+          )}
           
           <Button 
             className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
@@ -69,6 +74,10 @@ export default function Header() {
             <span className="hidden md:inline">Analyze Dish</span>
             <span className="inline md:hidden">Analyze</span>
           </Button>
+          
+          <div className="ml-2">
+            <UserAccountNav />
+          </div>
         </div>
       </div>
     </motion.header>

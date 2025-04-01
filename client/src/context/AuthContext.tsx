@@ -1,0 +1,159 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User } from 'firebase/auth';
+import { 
+  loginUser, 
+  registerUser, 
+  logoutUser, 
+  onAuthChange, 
+  getUserProfile 
+} from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+
+// Define the context type
+type AuthContextType = {
+  user: User | null;
+  userProfile: any | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+};
+
+// Create the context with an empty default value
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  userProfile: null,
+  loading: true,
+  login: async () => {},
+  register: async () => {},
+  logout: async () => {},
+});
+
+// Provider component that wraps the app and makes auth object available to any child component that calls useAuth()
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Listen for Firebase auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthChange(async (firebaseUser) => {
+      setUser(firebaseUser);
+      
+      // If user is logged in, fetch their profile
+      if (firebaseUser) {
+        try {
+          const profile = await getUserProfile(firebaseUser.uid);
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      } else {
+        setUserProfile(null);
+      }
+      
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  // Log in with email and password
+  const login = async (email: string, password: string) => {
+    try {
+      await loginUser(email, password);
+      toast({
+        title: "Success!",
+        description: "You are now logged in.",
+      });
+    } catch (error: any) {
+      let errorMessage = "Failed to log in";
+      
+      // Parse Firebase error messages
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        errorMessage = "Invalid email or password";
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = "Too many failed login attempts. Please try again later";
+      }
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      
+      throw error;
+    }
+  };
+
+  // Register a new user
+  const register = async (email: string, password: string) => {
+    try {
+      await registerUser(email, password);
+      toast({
+        title: "Account created!",
+        description: "Your account has been created successfully.",
+      });
+    } catch (error: any) {
+      let errorMessage = "Failed to create account";
+      
+      // Parse Firebase error messages
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "Email already in use";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Invalid email address";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password is too weak";
+      }
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      
+      throw error;
+    }
+  };
+
+  // Log out
+  const logout = async () => {
+    try {
+      await logoutUser();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // The value passed to the provider includes the current user state and auth methods
+  const value = {
+    user,
+    userProfile,
+    loading,
+    login,
+    register,
+    logout,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Custom hook to use the auth context
+export const useAuth = () => {
+  return useContext(AuthContext);
+};

@@ -932,13 +932,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user as User;
+      console.log("Fetching recipes for user ID:", user.id);
+      
       const recipes = await storage.getSavedRecipes(user.id);
+      console.log("Found recipes count:", recipes.length);
+      console.log("Recipe IDs:", recipes.map(r => r.id));
       
       return res.status(200).json({
         success: true,
         recipes
       });
     } catch (error) {
+      console.error("Error retrieving saved recipes:", error);
       return res.status(500).json({
         success: false,
         message: "Failed to retrieve saved recipes",
@@ -950,11 +955,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user as User;
+      console.log("Creating recipe for user ID:", user.id);
       
       // Extract recipe data from request
       const recipeData: AnalyzeImageResponse = req.body.recipe;
+      console.log("Received recipe data:", {
+        foodName: recipeData?.foodName,
+        hasRecipes: Array.isArray(recipeData?.recipes),
+        recipesLength: recipeData?.recipes?.length
+      });
       
       if (!recipeData || !recipeData.foodName || !Array.isArray(recipeData.recipes) || recipeData.recipes.length === 0) {
+        console.log("Invalid recipe data received");
         return res.status(400).json({
           success: false,
           message: "Invalid recipe data"
@@ -971,6 +983,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tags: recipeData.tags || [],
         favorite: false
       });
+      
+      console.log("Recipe saved successfully with ID:", savedRecipe.id);
       
       return res.status(201).json({
         success: true,

@@ -177,13 +177,22 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     
     try {
       // Use the API module with proper credentials handling
+      // Add debugging to track the saving process
+      console.log("Saving recipe to favorites:", {
+        foodName: result.foodName,
+        imageUrl: imageUrl,
+        hasRecipeArray: Array.isArray(result.recipes),
+        recipesCount: result.recipes.length
+      });
+      
       const response = await fetch('/api/recipes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recipe: result
+          recipe: result,
+          imageUrl: imageUrl
         }),
         // Include credentials to send the session cookie
         credentials: 'include'

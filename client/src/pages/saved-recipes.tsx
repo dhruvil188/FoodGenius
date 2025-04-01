@@ -20,9 +20,21 @@ export default function SavedRecipes() {
   const [selectedRecipe, setSelectedRecipe] = useState<SavedRecipe | null>(null);
   
   // Fetch saved recipes
-  const { data, isLoading, isError, error } = useQuery<{ success: boolean, recipes: SavedRecipe[] }>({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['/api/recipes'],
     enabled: !!user,
+    onSuccess: (data: any) => {
+      console.log("Saved recipes API response:", data);
+      console.log("Data type:", typeof data);
+      if (data && data.recipes) {
+        console.log("Recipes count:", data.recipes.length);
+      } else {
+        console.log("No recipes found in response");
+      }
+    },
+    onError: (err: any) => {
+      console.error("Error fetching saved recipes:", err);
+    }
   });
   
   // Toggle favorite status mutation

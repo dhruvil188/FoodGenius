@@ -154,9 +154,15 @@ export class MemStorage implements IStorage {
 
   // Saved recipe methods
   async getSavedRecipes(userId: number): Promise<SavedRecipe[]> {
-    return Array.from(this.savedRecipes.values()).filter(
+    console.log("Getting saved recipes for user ID:", userId);
+    console.log("All saved recipes:", Array.from(this.savedRecipes.entries()));
+    
+    const userRecipes = Array.from(this.savedRecipes.values()).filter(
       (recipe) => recipe.userId === userId
     );
+    
+    console.log("Filtered recipes for user:", userRecipes);
+    return userRecipes;
   }
 
   async getSavedRecipeById(id: number): Promise<SavedRecipe | undefined> {
@@ -165,6 +171,8 @@ export class MemStorage implements IStorage {
 
   async createSavedRecipe(recipeData: InsertSavedRecipe): Promise<SavedRecipe> {
     const id = this.recipeId++;
+    console.log("Creating saved recipe with ID:", id, "for user:", recipeData.userId);
+    
     const recipe: SavedRecipe = {
       id,
       userId: recipeData.userId,
@@ -177,7 +185,14 @@ export class MemStorage implements IStorage {
       createdAt: new Date()
     };
     
+    // Store the recipe in the map
     this.savedRecipes.set(id, recipe);
+    
+    // Verify storage
+    console.log("Saved recipe verified in storage:", this.savedRecipes.has(id));
+    console.log("Current savedRecipes map size:", this.savedRecipes.size);
+    console.log("All saved recipe IDs:", Array.from(this.savedRecipes.keys()));
+    
     return recipe;
   }
 

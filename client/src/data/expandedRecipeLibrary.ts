@@ -11,12 +11,14 @@ import {
   middleEasternYoutubeVideos,
   genericYoutubeVideos
 } from "./recipeLibrary";
+import { theMealDBRecipes } from "./additionalRecipes";
 
 /**
  * Expanded library of pre-populated recipes from diverse cuisines around the world
  * These recipes don't require Gemini API calls and provide a rich browsing experience
  */
 export const expandedRecipes: AnalyzeImageResponse[] = [
+  ...theMealDBRecipes,
   {
     foodName: "Guacamole",
     description: "A traditional Mexican avocado-based dip dating back to the Aztecs in the 14th century. This vibrant green, creamy dip combines ripe avocados with lime, cilantro, onions, and chili peppers for a perfect balance of flavors that has become popular worldwide.",

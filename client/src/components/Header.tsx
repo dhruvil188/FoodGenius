@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, BookmarkIcon, HistoryIcon } from 'lucide-react';
+import { LogOut, User, BookmarkIcon, Settings } from 'lucide-react';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -68,15 +68,15 @@ export default function Header() {
                 onClick={() => navigate('/saved-recipes')}
               >
                 <BookmarkIcon className="h-4 w-4 mr-2" />
-                Saved
+                Saved Recipes
               </Button>
               <Button 
                 variant="outline"
                 className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
-                onClick={() => navigate('/history')}
+                onClick={() => navigate('/profile')}
               >
-                <HistoryIcon className="h-4 w-4 mr-2" />
-                View History
+                <Settings className="h-4 w-4 mr-2" />
+                Profile
               </Button>
             </>
           )}

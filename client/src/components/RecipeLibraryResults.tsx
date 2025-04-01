@@ -32,6 +32,25 @@ interface RecipeLibraryResultsProps {
 }
 
 export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }: RecipeLibraryResultsProps) {
+  // Return null or a loading state if result is null
+  if (!result) {
+    return (
+      <div className="flex items-center justify-center min-h-64 bg-white rounded-lg shadow-md">
+        <div className="text-center p-6">
+          <p className="text-lg text-slate-600">Recipe not found or still loading...</p>
+          <Button 
+            variant="outline" 
+            onClick={onTryAnother}
+            className="mt-4 flex items-center gap-2"
+          >
+            <i className="fas fa-arrow-left"></i>
+            Back to Library
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // Always use the first (original) recipe
   const [selectedRecipeIndex, setSelectedRecipeIndex] = useState(0);
   const [selectedTab, setSelectedTab] = useState("instructions");

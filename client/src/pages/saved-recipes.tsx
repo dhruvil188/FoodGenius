@@ -89,19 +89,27 @@ export default function SavedRecipes() {
 
   const handleViewRecipe = (recipeData: any) => {
     try {
-      // Store the selected recipe in localStorage to display it
+      // Extract recipe object properly from the recipeData
+      // If it's stored with the recipe property, use that, otherwise use the recipe data directly
+      const actualRecipe = recipeData.recipe || recipeData;
+      
       // Make sure we're storing a valid recipe object with all necessary data
       const recipeToStore = {
-        foodName: recipeData.foodName || "Recipe",
-        description: recipeData.description || "No description available",
-        tags: recipeData.tags || [],
-        recipes: recipeData.recipes || [{
-          title: recipeData.recipes?.[0]?.title || "Recipe",
-          description: recipeData.description || "No description available",
-          ingredients: recipeData.recipes?.[0]?.ingredients || [],
-          instructions: recipeData.recipes?.[0]?.instructions || []
+        foodName: actualRecipe.foodName || "Recipe",
+        description: actualRecipe.description || "No description available",
+        tags: actualRecipe.tags || [],
+        recipes: actualRecipe.recipes || [{
+          title: actualRecipe.recipes?.[0]?.title || "Recipe",
+          description: actualRecipe.description || "No description available",
+          ingredients: actualRecipe.recipes?.[0]?.ingredients || [],
+          instructions: actualRecipe.recipes?.[0]?.instructions || []
         }]
       };
+      
+      // Extract a display title for the UI
+      const displayTitle = recipeToStore.foodName || 
+                          recipeToStore.recipes?.[0]?.title || 
+                          "Recipe";
       
       console.log('Viewing recipe:', recipeToStore);
       localStorage.setItem('selectedRecipe', JSON.stringify(recipeToStore));
@@ -113,7 +121,7 @@ export default function SavedRecipes() {
       // Success toast
       toast({
         title: "Loading Recipe",
-        description: `Opening ${recipeToStore.foodName || recipeToStore.recipes[0].title}`,
+        description: `Opening ${displayTitle}`,
       });
     } catch (error) {
       console.error('Error preparing recipe for viewing:', error);

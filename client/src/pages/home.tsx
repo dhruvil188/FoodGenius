@@ -105,32 +105,63 @@ export default function Home() {
         let savedRecipe;
         
         try {
+          // Get recipe from localStorage
           savedRecipe = localStorage.getItem('selectedRecipe');
+          console.log('Retrieved from localStorage:', savedRecipe ? 'Recipe found' : 'No recipe found');
         } catch (storageError) {
           console.error('Error reading from localStorage:', storageError);
           // Continue execution, we'll handle the null case below
         }
         
-        const savedRecipeImage = localStorage.getItem('selectedRecipeImage') || '';
+        // Get image URL from localStorage
+        let savedRecipeImage;
+        try {
+          savedRecipeImage = localStorage.getItem('selectedRecipeImage') || '';
+        } catch (storageError) {
+          console.error('Error reading image from localStorage:', storageError);
+          savedRecipeImage = '';
+        }
         
+        // Process the recipe
         if (savedRecipe) {
-          const parsedRecipe = JSON.parse(savedRecipe);
-          console.log('Loading saved recipe:', parsedRecipe);
-          
-          // Validate the recipe object has the minimum required fields
-          if (!parsedRecipe || (!parsedRecipe.recipes && !parsedRecipe.foodName)) {
-            throw new Error('Invalid recipe format');
+          try {
+            const parsedRecipe = JSON.parse(savedRecipe);
+            console.log('Loading saved recipe:', parsedRecipe);
+            
+            // Validate the recipe object has the minimum required fields
+            if (!parsedRecipe) {
+              throw new Error('Recipe is null or undefined');
+            }
+            
+            // Make sure the recipe has a valid structure
+            const validRecipe = {
+              foodName: parsedRecipe.foodName || "Recipe",
+              description: parsedRecipe.description || "No description available",
+              tags: parsedRecipe.tags || [],
+              recipes: Array.isArray(parsedRecipe.recipes) && parsedRecipe.recipes.length > 0 
+                ? parsedRecipe.recipes 
+                : [{
+                    title: "Recipe",
+                    description: parsedRecipe.description || "No description available",
+                    ingredients: [],
+                    instructions: []
+                  }]
+            };
+            
+            // Set the state with the validated recipe
+            setAnalysisResult(validRecipe);
+            setSelectedImage(savedRecipeImage);
+            setStage('results');
+            
+            // Show success toast
+            toast({
+              title: `Viewing: ${validRecipe.foodName || validRecipe.recipes[0].title || 'Recipe'}`,
+              description: "Loaded your saved recipe",
+            });
+          } catch (parseError) {
+            console.error('Error parsing recipe JSON:', parseError);
+            throw new Error(`Invalid recipe data format: ${parseError.message}`);
           }
-          
-          setAnalysisResult(parsedRecipe);
-          setSelectedImage(savedRecipeImage);
-          setStage('results');
-          
-          // Show success toast
-          toast({
-            title: `Viewing: ${parsedRecipe.foodName || parsedRecipe.recipes?.[0]?.title || 'Recipe'}`,
-            description: "Loaded your saved recipe",
-          });
         } else {
           throw new Error('No recipe found in localStorage');
         }

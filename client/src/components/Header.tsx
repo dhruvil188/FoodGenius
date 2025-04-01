@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, BookmarkIcon, Settings } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -61,24 +61,14 @@ export default function Header() {
           </Button>
           
           {user && (
-            <>
-              <Button 
-                variant="outline"
-                className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
-                onClick={() => navigate('/saved-recipes')}
-              >
-                <BookmarkIcon className="h-4 w-4 mr-2" />
-                Saved Recipes
-              </Button>
-              <Button 
-                variant="outline"
-                className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
-                onClick={() => navigate('/profile')}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Profile
-              </Button>
-            </>
+            <Button 
+              variant="outline"
+              className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
+              onClick={() => navigate('/history')}
+            >
+              <i className="fas fa-history mr-2"></i>
+              View History
+            </Button>
           )}
           
           <Button 
@@ -118,14 +108,6 @@ export default function Header() {
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={() => navigate('/saved-recipes')}
-                >
-                  <BookmarkIcon className="mr-2 h-4 w-4" />
-                  <span>Saved Recipes</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem 
                   className="cursor-pointer text-red-500 focus:text-red-500"
                   onClick={handleLogout}

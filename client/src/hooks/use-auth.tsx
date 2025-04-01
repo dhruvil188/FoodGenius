@@ -38,11 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return authResponseSchema.parse(await res.json());
     },
     onSuccess: (data) => {
-      // Store token in local storage for backup (hybrid auth approach)
-      if (data.token) {
-        localStorage.setItem("recipe_snap_token", data.token);
-      }
-      
       queryClient.setQueryData(["/api/auth/me"], data.user);
       toast({
         title: "Welcome back!",
@@ -64,11 +59,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return authResponseSchema.parse(await res.json());
     },
     onSuccess: (data) => {
-      // Store token in local storage for backup (hybrid auth approach)
-      if (data.token) {
-        localStorage.setItem("recipe_snap_token", data.token);
-      }
-      
       queryClient.setQueryData(["/api/auth/me"], data.user);
       toast({
         title: "Account created!",
@@ -90,9 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true };
     },
     onSuccess: () => {
-      // Clear token from localStorage
-      localStorage.removeItem("recipe_snap_token");
-      
       queryClient.setQueryData(["/api/auth/me"], null);
       toast({
         title: "Logged out",

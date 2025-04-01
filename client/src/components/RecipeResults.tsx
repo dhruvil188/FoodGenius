@@ -24,6 +24,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
+import { useAuth } from '@/context/AuthContext';
+import { saveRecipe as firebaseSaveRecipe } from '@/lib/firebase';
 
 interface RecipeResultsProps {
   result: AnalyzeImageResponse;
@@ -38,8 +40,10 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
   const [completedSteps, setCompletedSteps] = useState<Record<number, Set<number>>>({});
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const [savedRecipes, setSavedRecipes] = useState<AnalyzeImageResponse[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   
   // Initialize completed steps for each recipe
   useEffect(() => {
@@ -71,6 +75,40 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       const updatedHistory = [...savedRecipes, recipeData].slice(-10); // Keep last 10 recipes
       setSavedRecipes(updatedHistory);
       localStorage.setItem('dishDetectiveSavedRecipes', JSON.stringify(updatedHistory));
+    }
+  };
+  
+  // Save recipe to Firebase if user is logged in
+  const saveToFirebase = async () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to save this recipe to your account.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setIsSaving(true);
+      await firebaseSaveRecipe(user.uid, result, imageUrl);
+      
+      toast({
+        title: "Recipe Saved!",
+        description: `Successfully saved ${result.foodName} to your account.`,
+        duration: 3000,
+      });
+      
+      triggerConfetti();
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+      toast({
+        title: "Save Failed",
+        description: "There was a problem saving your recipe. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
   
@@ -1178,7 +1216,26 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             </TabsContent>
           </Tabs>
           
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center gap-4 mt-8">
+            <Button 
+              onClick={saveToFirebase} 
+              className="rounded-full bg-primary hover:bg-primary/90"
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-bookmark mr-2"></i> Save Recipe
+                </>
+              )}
+            </Button>
             <Button onClick={onTryAnother} className="rounded-full">
               <i className="fas fa-camera mr-2"></i> Try Another Dish
             </Button>

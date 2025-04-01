@@ -282,23 +282,41 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
           
           {/* Tabbed Interface */}
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-6">
-            <TabsList className="grid grid-cols-6 mb-6 p-1 rounded-full bg-slate-100 dark:bg-slate-800">
-              <TabsTrigger value="instructions" className="flex items-center rounded-full data-[state=active]:shadow-md">
+            <TabsList className="flex overflow-x-auto mb-6 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 no-scrollbar">
+              <TabsTrigger 
+                value="instructions" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
                 <i className="fas fa-list-ol mr-2"></i> Instructions
               </TabsTrigger>
-              <TabsTrigger value="nutrition" className="flex items-center rounded-full data-[state=active]:shadow-md">
+              <TabsTrigger 
+                value="nutrition" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
                 <i className="fas fa-apple-alt mr-2"></i> Nutrition
               </TabsTrigger>
-              <TabsTrigger value="techniques" className="flex items-center rounded-full data-[state=active]:shadow-md">
+              <TabsTrigger 
+                value="techniques" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
                 <i className="fas fa-utensils mr-2"></i> Techniques
               </TabsTrigger>
-              <TabsTrigger value="cultural" className="flex items-center rounded-full data-[state=active]:shadow-md">
-                <i className="fas fa-globe-americas mr-2"></i> Culture
+              <TabsTrigger 
+                value="cultural" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
+                <i className="fas fa-globe-americas mr-2"></i> Guide
               </TabsTrigger>
-              <TabsTrigger value="videos" className="flex items-center rounded-full data-[state=active]:shadow-md">
+              <TabsTrigger 
+                value="videos" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
                 <i className="fas fa-video mr-2"></i> Videos
               </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center rounded-full data-[state=active]:shadow-md">
+              <TabsTrigger 
+                value="history" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
                 <i className="fas fa-history mr-2"></i> History
               </TabsTrigger>
             </TabsList>

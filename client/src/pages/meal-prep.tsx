@@ -96,7 +96,8 @@ export default function MealPrep() {
       setMealPlan(generatedMealPlan);
       // Set first day as selected - handle undefined dates
       if (generatedMealPlan.days.length > 0) {
-        setSelectedDay(generatedMealPlan.days[0].date);
+        const firstDay = new Date(generatedMealPlan.days[0].date);
+        setSelectedDay(firstDay);
       }
       setActiveTab('calendar');
       
@@ -536,6 +537,16 @@ export default function MealPrep() {
                     onSelect={(day) => day && setSelectedDay(day)}
                     className="rounded-md border"
                     initialFocus
+                    // Only show dates that are part of the meal plan
+                    disabled={(date) => {
+                      if (!mealPlan) return true;
+                      // Convert all dates to strings for comparison
+                      const mealPlanDateStrings = mealPlan.days.map(day => 
+                        day.date.toDateString()
+                      );
+                      // Only enable dates that are in the meal plan
+                      return !mealPlanDateStrings.includes(date.toDateString());
+                    }}
                   />
                   
                   <div className="mt-4">
@@ -578,16 +589,23 @@ export default function MealPrep() {
                       `Meals for ${selectedDay.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`
                     ) : 'Select a day to view meals'}
                   </CardTitle>
-                  {selectedDay && (
+                  {selectedDay && mealPlan && (
                     <CardDescription>
-                      Daily total: {mealPlan.days[0].dailyNutrition.totalCalories} calories | {mealPlan.days[0].dailyNutrition.totalProtein} protein | {mealPlan.days[0].dailyNutrition.totalCarbs} carbs | {mealPlan.days[0].dailyNutrition.totalFats} fats
+                      {mealPlan.days.find(day => day.date.toDateString() === selectedDay.toDateString()) ? (
+                        <>
+                          Daily total: {mealPlan.days.find(day => day.date.toDateString() === selectedDay.toDateString())?.dailyNutrition.totalCalories} calories | {mealPlan.days.find(day => day.date.toDateString() === selectedDay.toDateString())?.dailyNutrition.totalProtein} protein | {mealPlan.days.find(day => day.date.toDateString() === selectedDay.toDateString())?.dailyNutrition.totalCarbs} carbs | {mealPlan.days.find(day => day.date.toDateString() === selectedDay.toDateString())?.dailyNutrition.totalFats} fats
+                        </>
+                      ) : (
+                        "No meal data available for this day"
+                      )}
                     </CardDescription>
                   )}
                 </CardHeader>
                 <CardContent>
-                  {selectedDay ? (
+                  {selectedDay && mealPlan ? (
                     <div className="space-y-6">
-                      {mealPlan.days[0].meals.map((meal, index) => (
+                      {/* Find the day matching the selected date */}
+                      {mealPlan.days.find(day => day.date.toDateString() === selectedDay.toDateString())?.meals.map((meal, index) => (
                         <div key={index} className="p-4 border rounded-lg">
                           <div className="flex flex-col md:flex-row gap-4">
                             <div className="w-full md:w-24 h-20 bg-slate-200 rounded-md flex-shrink-0 overflow-hidden">

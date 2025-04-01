@@ -16,6 +16,7 @@ export default function SavedRecipes() {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [usingLocalStorage, setUsingLocalStorage] = useState(false);
   const { toast } = useToast();
   const [location, navigate] = useLocation();
 
@@ -26,6 +27,19 @@ export default function SavedRecipes() {
     }
   }, [user, navigate]);
 
+  // Function to load recipes from local storage
+  const loadFromLocalStorage = () => {
+    try {
+      const localRecipes = JSON.parse(localStorage.getItem('recipeSnapSavedRecipes') || '[]');
+      setRecipes(localRecipes);
+      setUsingLocalStorage(true);
+      return localRecipes.length > 0;
+    } catch (err) {
+      console.error("Error loading from local storage:", err);
+      return false;
+    }
+  };
+
   // Load user recipes
   useEffect(() => {
     const loadUserRecipes = async () => {
@@ -35,13 +49,26 @@ export default function SavedRecipes() {
         setIsLoading(true);
         const userRecipes = await getUserRecipes(user.uid);
         setRecipes(userRecipes);
+        setUsingLocalStorage(false);
       } catch (error) {
         console.error('Error fetching recipes:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load your saved recipes. Please try again later.',
-          variant: 'destructive',
-        });
+        
+        // Try loading from local storage as fallback
+        const localRecipesLoaded = loadFromLocalStorage();
+        
+        if (!localRecipesLoaded) {
+          toast({
+            title: 'Error',
+            description: 'Failed to load your saved recipes and no local backups found.',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Using Local Recipes',
+            description: 'Firebase unavailable. Loaded recipes from your browser storage.',
+            variant: 'default',
+          });
+        }
       } finally {
         setIsLoading(false);
       }

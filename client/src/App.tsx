@@ -9,7 +9,6 @@ import RecipePage from "@/pages/recipe-page";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
-import ProfilePage from "@/pages/profile";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -20,7 +19,6 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/library" component={Library} />
       <Route path="/recipe/:slug" component={RecipePage} />
-      <Route path="/profile" component={ProfilePage} />
       <Route path="/contact" component={Contact} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />

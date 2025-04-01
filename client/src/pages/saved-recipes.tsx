@@ -209,6 +209,19 @@ export default function SavedRecipes() {
                     <p className="text-gray-500">No image available</p>
                   </div>
                 )}
+                
+                {/* Recipe source badge - distinguish between library and uploaded */}
+                <div className="absolute top-2 left-2">
+                  <Badge className={
+                    recipe.imageUrl?.includes('unsplash.com') 
+                      ? "bg-blue-100 text-blue-800 hover:bg-blue-200" 
+                      : "bg-green-100 text-green-800 hover:bg-green-200"
+                  }>
+                    <i className={`fas fa-${recipe.imageUrl?.includes('unsplash.com') ? 'book' : 'camera'} mr-1`}></i>
+                    {recipe.imageUrl?.includes('unsplash.com') ? 'Library' : 'Uploaded'}
+                  </Badge>
+                </div>
+                
                 <Button
                   size="icon"
                   variant="ghost"

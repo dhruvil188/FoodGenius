@@ -202,23 +202,13 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
         const responseData = await response.json();
         console.log("Recipe saved successfully:", responseData);
         
-        toast({
-          title: "Recipe Saved Successfully!",
-          description: (
-            <div className="flex flex-col gap-2">
-              <p>{`${result.foodName} has been added to your favorites.`}</p>
-              <a 
-                href="/saved" 
-                className="text-green-700 hover:text-green-900 font-semibold underline"
-              >
-                View in Saved Recipes
-              </a>
-            </div>
-          ),
-          duration: 5000,
-        });
-        
+        // Navigate to the saved recipes page automatically
         triggerConfetti();
+        
+        // Short timeout to allow confetti to start before navigation
+        setTimeout(() => {
+          window.location.href = '/saved';
+        }, 1000);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to save recipe");

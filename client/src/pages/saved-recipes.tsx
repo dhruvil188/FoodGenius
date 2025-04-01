@@ -26,9 +26,12 @@ export default function SavedRecipes() {
   };
 
   // Fetch saved recipes
-  const { data, isLoading, isError, error } = useQuery<RecipesResponse>({
+  const { data, isLoading, isError, error, refetch } = useQuery<RecipesResponse>({
     queryKey: ['/api/recipes'],
-    enabled: !!user
+    enabled: !!user,
+    // Refresh data every 5 seconds if the page is focused
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false
   });
 
   // Log data for debugging
@@ -155,11 +158,29 @@ export default function SavedRecipes() {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-teal-600 bg-clip-text text-transparent">
-          Your Saved Recipes
-        </h1>
-        <Button onClick={() => navigate('/')}>Discover More Recipes</Button>
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4 items-start sm:items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-teal-600 bg-clip-text text-transparent mb-2">
+            Your Saved Recipes
+          </h1>
+          <p className="text-slate-500 text-sm">
+            {data?.recipes && data.recipes.length > 0 
+              ? `Showing ${data.recipes.length} ${data.recipes.length === 1 ? 'recipe' : 'recipes'}`
+              : 'No recipes found'}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => refetch()} className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-refresh-cw">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+              <path d="M3 21v-5h5"/>
+            </svg>
+            Refresh
+          </Button>
+          <Button onClick={() => navigate('/')}>Discover More Recipes</Button>
+        </div>
       </div>
 
       {isLoading ? (

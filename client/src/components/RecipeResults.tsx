@@ -199,10 +199,25 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       });
       
       if (response.ok) {
+        const responseData = await response.json();
+        console.log("Recipe saved successfully:", responseData);
+        
         toast({
-          title: "Recipe Saved!",
-          description: `${result.foodName} has been added to your favorites.`,
+          title: "Recipe Saved Successfully!",
+          description: (
+            <div className="flex flex-col gap-2">
+              <p>{`${result.foodName} has been added to your favorites.`}</p>
+              <a 
+                href="/saved" 
+                className="text-green-700 hover:text-green-900 font-semibold underline"
+              >
+                View in Saved Recipes
+              </a>
+            </div>
+          ),
+          duration: 5000,
         });
+        
         triggerConfetti();
       } else {
         const errorData = await response.json();

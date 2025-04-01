@@ -46,10 +46,9 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  // Make savedRecipes accessible for debugging purposes in this file only
-  savedRecipes: Map<number, SavedRecipe>;
   private users: Map<number, User>;
   private userSessions: Map<string, Session>;
+  private savedRecipes: Map<number, SavedRecipe>;
   private userId: number;
   private sessionId: number;
   private recipeId: number;
@@ -68,8 +67,7 @@ export class MemStorage implements IStorage {
       id: this.userId++,
       username: 'demo',
       email: 'demo@example.com',
-      password: hash,
-      salt: salt,
+      password: `${hash}:${salt}`,
       displayName: 'Demo User',
       profileImage: null,
       createdAt: new Date(),
@@ -103,8 +101,7 @@ export class MemStorage implements IStorage {
       id,
       username: insertUser.username,
       email: insertUser.email,
-      password: hash,
-      salt: salt,
+      password: `${hash}:${salt}`,
       displayName: insertUser.displayName || null,
       profileImage: null,
       createdAt: new Date(),
@@ -157,23 +154,9 @@ export class MemStorage implements IStorage {
 
   // Saved recipe methods
   async getSavedRecipes(userId: number): Promise<SavedRecipe[]> {
-    console.log("Getting saved recipes for user ID:", userId);
-    console.log("All saved recipes:", Array.from(this.savedRecipes.entries()));
-    
-    // Enhanced debugging
-    const allRecipesList = Array.from(this.savedRecipes.values());
-    console.log("All recipes list:", allRecipesList);
-    console.log("Recipe user IDs:", allRecipesList.map(r => r.userId));
-    
-    // Further comparison debugging
-    allRecipesList.forEach(recipe => {
-      console.log(`Recipe ID ${recipe.id}: userId=${recipe.userId}, comparing to ${userId}, equal: ${recipe.userId === userId}`);
-    });
-    
-    const userRecipes = allRecipesList.filter(recipe => recipe.userId === userId);
-    
-    console.log("Filtered recipes for user:", userRecipes);
-    return userRecipes;
+    return Array.from(this.savedRecipes.values()).filter(
+      (recipe) => recipe.userId === userId
+    );
   }
 
   async getSavedRecipeById(id: number): Promise<SavedRecipe | undefined> {
@@ -182,8 +165,6 @@ export class MemStorage implements IStorage {
 
   async createSavedRecipe(recipeData: InsertSavedRecipe): Promise<SavedRecipe> {
     const id = this.recipeId++;
-    console.log("Creating saved recipe with ID:", id, "for user:", recipeData.userId);
-    
     const recipe: SavedRecipe = {
       id,
       userId: recipeData.userId,
@@ -196,14 +177,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date()
     };
     
-    // Store the recipe in the map
     this.savedRecipes.set(id, recipe);
-    
-    // Verify storage
-    console.log("Saved recipe verified in storage:", this.savedRecipes.has(id));
-    console.log("Current savedRecipes map size:", this.savedRecipes.size);
-    console.log("All saved recipe IDs:", Array.from(this.savedRecipes.keys()));
-    
     return recipe;
   }
 

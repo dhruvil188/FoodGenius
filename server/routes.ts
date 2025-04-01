@@ -21,33 +21,9 @@ import { fromZodError } from "zod-validation-error";
 import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
 
-// Auth middleware to support both session cookies and Bearer tokens for authentication
+// Auth middleware to validate JWT token
 const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Check if we have an active session from cookie
-    if (req.headers.cookie) {
-      const cookies = req.headers.cookie.split(';').reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split('=');
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, string>);
-      
-      // Look for session token in cookies
-      if (cookies.sessionToken) {
-        const session = await storage.getSessionByToken(cookies.sessionToken);
-        if (session) {
-          const user = await storage.getUser(session.userId);
-          if (user) {
-            // Store user details in request object
-            (req as any).user = user;
-            (req as any).session = session;
-            return next();
-          }
-        }
-      }
-    }
-    
-    // If no valid session cookie, try Bearer token from Authorization header
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -81,7 +57,6 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
     (req as any).session = session;
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
     return res.status(401).json({ 
       success: false, 
       message: 'Authentication failed. Please log in again.' 
@@ -759,14 +734,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt
       });
       
-      // Set the token as an HTTP-only cookie for security
-      res.cookie('sessionToken', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
-        path: '/'
-      });
-      
       // Return user data and token
       const authResponse: AuthResponse = {
         success: true,
@@ -814,7 +781,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify password
-      const isValid = verifyPassword(validatedData.password, user.password, user.salt || '');
+      const [storedHash, salt] = user.password.split(':');
+      const isValid = verifyPassword(validatedData.password, storedHash, salt);
       
       if (!isValid) {
         return res.status(401).json({
@@ -832,14 +800,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: user.id,
         token,
         expiresAt
-      });
-      
-      // Set the token as an HTTP-only cookie for security
-      res.cookie('sessionToken', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
-        path: '/'
       });
       
       // Return user data and token
@@ -876,20 +836,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/auth/logout", authMiddleware, async (req: Request, res: Response) => {
     try {
-      // Get session from middleware
-      const session = (req as any).session;
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.split(' ')[1];
       
-      if (session && session.token) {
-        // Delete the session from storage
-        await storage.deleteSession(session.token);
+      if (token) {
+        await storage.deleteSession(token);
       }
-      
-      // Clear the session cookie
-      res.clearCookie('sessionToken', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        path: '/'
-      });
       
       return res.status(200).json({
         success: true,
@@ -915,8 +867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: user.username,
           email: user.email,
           displayName: user.displayName,
-          profileImage: user.profileImage,
-          createdAt: user.createdAt
+          profileImage: user.profileImage
         }
       });
     } catch (error) {
@@ -932,21 +883,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user as User;
-      console.log("Fetching recipes for user ID:", user.id);
-      
-      // Debug - log state before fetching (without accessing private properties)
-      // We'll see the detailed state in the enhanced storage methods
-      
       const recipes = await storage.getSavedRecipes(user.id);
-      console.log("Found recipes count:", recipes.length);
-      console.log("Recipe IDs:", recipes.map(r => r.id));
       
       return res.status(200).json({
         success: true,
         recipes
       });
     } catch (error) {
-      console.error("Error retrieving saved recipes:", error);
       return res.status(500).json({
         success: false,
         message: "Failed to retrieve saved recipes",
@@ -958,18 +901,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user as User;
-      console.log("Creating recipe for user ID:", user.id);
       
       // Extract recipe data from request
       const recipeData: AnalyzeImageResponse = req.body.recipe;
-      console.log("Received recipe data:", {
-        foodName: recipeData?.foodName,
-        hasRecipes: Array.isArray(recipeData?.recipes),
-        recipesLength: recipeData?.recipes?.length
-      });
       
       if (!recipeData || !recipeData.foodName || !Array.isArray(recipeData.recipes) || recipeData.recipes.length === 0) {
-        console.log("Invalid recipe data received");
         return res.status(400).json({
           success: false,
           message: "Invalid recipe data"
@@ -986,8 +922,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tags: recipeData.tags || [],
         favorite: false
       });
-      
-      console.log("Recipe saved successfully with ID:", savedRecipe.id);
       
       return res.status(201).json({
         success: true,
@@ -1144,65 +1078,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         success: false,
         message: "Failed to update favorite status",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-  
-  // User password update endpoint
-  app.patch("/api/auth/password", authMiddleware, async (req: Request, res: Response) => {
-    try {
-      const { currentPassword, newPassword } = req.body;
-      const user = (req as any).user as User;
-      
-      if (!currentPassword || !newPassword) {
-        return res.status(400).json({
-          success: false,
-          message: "Current password and new password are required"
-        });
-      }
-      
-      // Verify current password
-      const isPasswordValid = verifyPassword(currentPassword, user.password, user.salt || '');
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          success: false,
-          message: "Current password is incorrect"
-        });
-      }
-      
-      // Password validation rules
-      if (newPassword.length < 6) {
-        return res.status(400).json({
-          success: false,
-          message: "New password must be at least 6 characters long"
-        });
-      }
-      
-      // Hash new password and update user
-      const { hash, salt } = hashPassword(newPassword);
-      
-      const updatedUser = await storage.updateUser(user.id, { 
-        password: hash,
-        salt
-      });
-      
-      if (!updatedUser) {
-        return res.status(500).json({
-          success: false,
-          message: "Failed to update password"
-        });
-      }
-      
-      return res.status(200).json({
-        success: true,
-        message: "Password updated successfully"
-      });
-    } catch (error) {
-      console.error("Error updating password:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Failed to update password",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

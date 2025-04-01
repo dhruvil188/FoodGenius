@@ -23,7 +23,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/hooks/use-auth';
 import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
 
 interface RecipeResultsProps {
@@ -159,68 +158,6 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     // In a real app, this would replace the current result with the saved one
     // For now, we'll just switch to the first tab
     setSelectedTab("instructions");
-  };
-  
-  // Check if user is authenticated to show save options
-  const { user } = useAuth();
-  
-  // Function to save recipe to user's favorites
-  const saveRecipeToFavorites = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in or register to save recipes to your favorites.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      // Use the API module with proper credentials handling
-      // Add debugging to track the saving process
-      console.log("Saving recipe to favorites:", {
-        foodName: result.foodName,
-        imageUrl: imageUrl,
-        hasRecipeArray: Array.isArray(result.recipes),
-        recipesCount: result.recipes.length
-      });
-      
-      const response = await fetch('/api/recipes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          recipe: result,
-          imageUrl: imageUrl
-        }),
-        // Include credentials to send the session cookie
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log("Recipe saved successfully:", responseData);
-        
-        // Navigate to the saved recipes page automatically
-        triggerConfetti();
-        
-        // Short timeout to allow confetti to start before navigation
-        setTimeout(() => {
-          window.location.href = '/saved-recipes';
-        }, 1000);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save recipe");
-      }
-    } catch (error) {
-      console.error("Error saving recipe:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save recipe. Please try again.",
-        variant: "destructive",
-      });
-    }
   };
   
   return (
@@ -1241,15 +1178,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             </TabsContent>
           </Tabs>
           
-          <div className="flex justify-center mt-8 gap-4">
-            {user && (
-              <Button 
-                onClick={saveRecipeToFavorites} 
-                className="rounded-full bg-green-600 hover:bg-green-700"
-              >
-                <i className="fas fa-bookmark mr-2"></i> Save Recipe
-              </Button>
-            )}
+          <div className="flex justify-center mt-8">
             <Button onClick={onTryAnother} className="rounded-full">
               <i className="fas fa-camera mr-2"></i> Try Another Dish
             </Button>

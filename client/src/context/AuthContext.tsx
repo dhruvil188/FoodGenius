@@ -5,7 +5,8 @@ import {
   registerUser, 
   logoutUser, 
   onAuthChange, 
-  getUserProfile 
+  getUserProfile,
+  signInWithGoogle
 } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,6 +18,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
 };
 
 // Create the context with an empty default value
@@ -27,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: async () => {},
+  loginWithGoogle: async () => {},
 });
 
 // Provider component that wraps the app and makes auth object available to any child component that calls useAuth()
@@ -135,6 +138,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
+  
+  // Login with Google
+  const loginWithGoogle = async () => {
+    try {
+      await signInWithGoogle();
+      toast({
+        title: "Success!",
+        description: "You are now logged in with Google.",
+      });
+    } catch (error: any) {
+      let errorMessage = "Failed to log in with Google";
+      
+      // Parse Firebase error messages
+      if (error.code === 'auth/popup-blocked') {
+        errorMessage = "Popup was blocked by your browser. Please allow popups for this site.";
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = "Login process was cancelled.";
+      }
+      
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      
+      throw error;
+    }
+  };
 
   // The value passed to the provider includes the current user state and auth methods
   const value = {
@@ -144,6 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
+    loginWithGoogle,
   };
 
   return (

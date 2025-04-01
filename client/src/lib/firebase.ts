@@ -5,7 +5,11 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User 
+  User,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -34,6 +38,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// Create Google auth provider
+const googleProvider = new GoogleAuthProvider();
 
 // Authentication functions
 export const registerUser = async (email: string, password: string) => {
@@ -71,6 +78,40 @@ export const logoutUser = async () => {
     await signOut(auth);
   } catch (error) {
     console.error('Error logging out:', error);
+    throw error;
+  }
+};
+
+// Google Sign-in function
+export const signInWithGoogle = async () => {
+  try {
+    // Add scopes for requested permissions
+    googleProvider.addScope('profile');
+    googleProvider.addScope('email');
+    
+    // Use popup for mobile friendliness (can be changed to redirect for specific cases)
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    
+    // Check if this is a new user to create profile
+    const userProfileRef = doc(db, 'userProfiles', user.uid);
+    const userProfileSnap = await getDoc(userProfileRef);
+    
+    if (!userProfileSnap.exists()) {
+      // Create a new user profile document
+      await setDoc(userProfileRef, {
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        createdAt: Timestamp.now(),
+        recipeCount: 0,
+        preferences: {}
+      });
+    }
+    
+    return user;
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
     throw error;
   }
 };

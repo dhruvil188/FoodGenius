@@ -1,20 +1,60 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User Account Schema
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  displayName: text("display_name"),
+  profileImage: text("profile_image"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
+  email: true,
   password: true,
+  displayName: true,
+});
+
+// Auth schemas for form validation
+export const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export const registerSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords must match",
+  path: ["confirmPassword"],
+});
+
+// User session schema 
+export const sessions = pgTable("sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+  createdAt: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+export type InsertSession = z.infer<typeof insertSessionSchema>;
 
 // Schema for food analysis
 export const foodAnalysis = pgTable("food_analysis", {
@@ -217,3 +257,40 @@ export const analyzeImageResponseSchema = z.object({
 });
 
 export type AnalyzeImageResponse = z.infer<typeof analyzeImageResponseSchema>;
+
+// Saved recipes schema
+export const savedRecipes = pgTable("saved_recipes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  recipeData: jsonb("recipe_data").notNull(), // Store the full recipe JSON
+  foodName: text("food_name").notNull(),
+  description: text("description"),
+  imageUrl: text("image_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  favorite: boolean("favorite").default(false),
+  tags: text("tags").array(),
+});
+
+export const insertSavedRecipeSchema = createInsertSchema(savedRecipes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSavedRecipe = z.infer<typeof insertSavedRecipeSchema>;
+export type SavedRecipe = typeof savedRecipes.$inferSelect;
+
+// Auth related types and schemas
+export const authResponseSchema = z.object({
+  user: z.object({
+    id: z.number(),
+    username: z.string(),
+    email: z.string(),
+    displayName: z.string().nullable(),
+    profileImage: z.string().nullable(),
+  }),
+  token: z.string(),
+  success: z.boolean(),
+  message: z.string().optional(),
+});
+
+export type AuthResponse = z.infer<typeof authResponseSchema>;

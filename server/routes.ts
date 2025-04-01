@@ -1,17 +1,68 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, generateToken, verifyPassword, hashPassword } from "./storage";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import {
   analyzeImageRequestSchema,
   analyzeImageResponseSchema,
+  loginSchema,
+  registerSchema,
+  authResponseSchema,
+  insertSavedRecipeSchema,
   type AnalyzeImageResponse,
   type YoutubeVideo,
+  type AuthResponse,
+  type User,
+  type InsertSavedRecipe,
+  type SavedRecipe,
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
+
+// Auth middleware to validate JWT token
+const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Authentication required. Please log in.' 
+      });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const session = await storage.getSessionByToken(token);
+    
+    if (!session) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid or expired session. Please log in again.' 
+      });
+    }
+    
+    const user = await storage.getUser(session.userId);
+    
+    if (!user) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'User not found. Please log in again.' 
+      });
+    }
+    
+    // Store user details in request object for route handlers to use
+    (req as any).user = user;
+    (req as any).session = session;
+    next();
+  } catch (error) {
+    return res.status(401).json({ 
+      success: false, 
+      message: 'Authentication failed. Please log in again.' 
+    });
+  }
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flag to enable development mode with mock data when API quota is exceeded
@@ -637,6 +688,397 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ 
         error: "Error analyzing image", 
         details: err instanceof Error ? err.message : "Unknown error" 
+      });
+    }
+  });
+
+  // Authentication routes
+  app.post("/api/auth/register", async (req: Request, res: Response) => {
+    try {
+      // Validate request data
+      const validatedData = registerSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "A user with this email already exists"
+        });
+      }
+      
+      const existingUsername = await storage.getUserByUsername(validatedData.username);
+      if (existingUsername) {
+        return res.status(400).json({
+          success: false,
+          message: "This username is already taken"
+        });
+      }
+      
+      // Create new user
+      const user = await storage.createUser({
+        username: validatedData.username,
+        email: validatedData.email,
+        password: validatedData.password,
+        displayName: validatedData.username
+      });
+      
+      // Create session token
+      const token = generateToken();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+      
+      await storage.createSession({
+        userId: user.id,
+        token,
+        expiresAt
+      });
+      
+      // Return user data and token
+      const authResponse: AuthResponse = {
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          profileImage: user.profileImage
+        },
+        token,
+        message: "Registration successful"
+      };
+      
+      return res.status(201).json(authResponse);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: fromZodError(error).message
+        });
+      }
+      
+      return res.status(500).json({
+        success: false,
+        message: "Registration failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.post("/api/auth/login", async (req: Request, res: Response) => {
+    try {
+      // Validate request data
+      const validatedData = loginSchema.parse(req.body);
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(validatedData.email);
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials"
+        });
+      }
+      
+      // Verify password
+      const [storedHash, salt] = user.password.split(':');
+      const isValid = verifyPassword(validatedData.password, storedHash, salt);
+      
+      if (!isValid) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials"
+        });
+      }
+      
+      // Create session token
+      const token = generateToken();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+      
+      await storage.createSession({
+        userId: user.id,
+        token,
+        expiresAt
+      });
+      
+      // Return user data and token
+      const authResponse: AuthResponse = {
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          profileImage: user.profileImage
+        },
+        token,
+        message: "Login successful"
+      };
+      
+      return res.status(200).json(authResponse);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: fromZodError(error).message
+        });
+      }
+      
+      return res.status(500).json({
+        success: false,
+        message: "Login failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.post("/api/auth/logout", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.split(' ')[1];
+      
+      if (token) {
+        await storage.deleteSession(token);
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: "Logout successful"
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.get("/api/auth/me", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user as User;
+      
+      return res.status(200).json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName,
+          profileImage: user.profileImage
+        }
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve user information",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  // Saved recipes routes
+  app.get("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user as User;
+      const recipes = await storage.getSavedRecipes(user.id);
+      
+      return res.status(200).json({
+        success: true,
+        recipes
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve saved recipes",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.post("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const user = (req as any).user as User;
+      
+      // Extract recipe data from request
+      const recipeData: AnalyzeImageResponse = req.body.recipe;
+      
+      if (!recipeData || !recipeData.foodName || !Array.isArray(recipeData.recipes) || recipeData.recipes.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe data"
+        });
+      }
+      
+      // Create saved recipe entry
+      const savedRecipe = await storage.createSavedRecipe({
+        userId: user.id,
+        recipeData: recipeData,
+        foodName: recipeData.foodName,
+        description: recipeData.description,
+        imageUrl: req.body.imageUrl || null,
+        tags: recipeData.tags || [],
+        favorite: false
+      });
+      
+      return res.status(201).json({
+        success: true,
+        message: "Recipe saved successfully",
+        recipe: savedRecipe
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to save recipe",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.get("/api/recipes/:id", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const recipeId = parseInt(req.params.id);
+      const user = (req as any).user as User;
+      
+      if (isNaN(recipeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe ID"
+        });
+      }
+      
+      const recipe = await storage.getSavedRecipeById(recipeId);
+      
+      if (!recipe) {
+        return res.status(404).json({
+          success: false,
+          message: "Recipe not found"
+        });
+      }
+      
+      // Check if recipe belongs to the authenticated user
+      if (recipe.userId !== user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission to access this recipe"
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        recipe
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to retrieve recipe",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.delete("/api/recipes/:id", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const recipeId = parseInt(req.params.id);
+      const user = (req as any).user as User;
+      
+      if (isNaN(recipeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe ID"
+        });
+      }
+      
+      const recipe = await storage.getSavedRecipeById(recipeId);
+      
+      if (!recipe) {
+        return res.status(404).json({
+          success: false,
+          message: "Recipe not found"
+        });
+      }
+      
+      // Check if recipe belongs to the authenticated user
+      if (recipe.userId !== user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission to delete this recipe"
+        });
+      }
+      
+      const deleted = await storage.deleteSavedRecipe(recipeId);
+      
+      if (!deleted) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to delete recipe"
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: "Recipe deleted successfully"
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete recipe",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.patch("/api/recipes/:id/favorite", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const recipeId = parseInt(req.params.id);
+      const user = (req as any).user as User;
+      const { favorite } = req.body;
+      
+      if (isNaN(recipeId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipe ID"
+        });
+      }
+      
+      if (typeof favorite !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: "Favorite status must be a boolean"
+        });
+      }
+      
+      const recipe = await storage.getSavedRecipeById(recipeId);
+      
+      if (!recipe) {
+        return res.status(404).json({
+          success: false,
+          message: "Recipe not found"
+        });
+      }
+      
+      // Check if recipe belongs to the authenticated user
+      if (recipe.userId !== user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You do not have permission to update this recipe"
+        });
+      }
+      
+      const updatedRecipe = await storage.updateSavedRecipe(recipeId, { favorite });
+      
+      return res.status(200).json({
+        success: true,
+        message: favorite ? "Recipe marked as favorite" : "Recipe removed from favorites",
+        recipe: updatedRecipe
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update favorite status",
+        error: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });

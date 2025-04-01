@@ -68,7 +68,7 @@ export default function Header() {
                 onClick={() => navigate('/saved-recipes')}
               >
                 <BookmarkIcon className="h-4 w-4 mr-2" />
-                Saved Recipes
+                Saved
               </Button>
               <Button 
                 variant="outline"

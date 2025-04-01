@@ -23,6 +23,7 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/auth" component={AuthPage} />
+      <ProtectedRoute path="/profile" component={Home} />
       <Route component={NotFound} />
     </Switch>
   );

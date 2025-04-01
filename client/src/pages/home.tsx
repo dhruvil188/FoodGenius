@@ -93,11 +93,42 @@ export default function Home() {
   const uploadSectionRef = useRef<HTMLDivElement>(null);
   
   // Scroll to the upload section if a deep link is used
+  // Or check for saved recipe to view
   useEffect(() => {
     if (location.includes('#upload-section')) {
       uploadSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [location]);
+    
+    // Check if we should display a saved recipe (from localStorage)
+    if (location.includes('#view-recipe')) {
+      try {
+        const savedRecipe = localStorage.getItem('selectedRecipe');
+        const savedRecipeImage = localStorage.getItem('selectedRecipeImage');
+        
+        if (savedRecipe) {
+          const parsedRecipe = JSON.parse(savedRecipe);
+          console.log('Loading saved recipe:', parsedRecipe);
+          
+          setAnalysisResult(parsedRecipe);
+          setSelectedImage(savedRecipeImage || '');
+          setStage('results');
+          
+          // Show success toast
+          toast({
+            title: `Viewing: ${parsedRecipe.foodName || parsedRecipe.recipes?.[0].title || 'Recipe'}`,
+            description: "Loaded your saved recipe",
+          });
+        }
+      } catch (error) {
+        console.error('Error loading saved recipe:', error);
+        toast({
+          title: 'Error',
+          description: 'Could not load the saved recipe',
+          variant: 'destructive',
+        });
+      }
+    }
+  }, [location, toast]);
 
   // Handle analyzing an image
   const handleAnalyzeImage = (imageData: string) => {

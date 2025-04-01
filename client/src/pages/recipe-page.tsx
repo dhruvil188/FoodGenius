@@ -44,7 +44,15 @@ export default function RecipePage() {
 
   // Get an appropriate image for a recipe based on name or tags
   const getRecipeImage = (recipe: AnalyzeImageResponse): string => {
-    // First try exact match by name
+    // First try to use YouTube thumbnail if available (TheMealDB recipes have these)
+    if (recipe.youtubeVideos && 
+        recipe.youtubeVideos.length > 0 && 
+        recipe.youtubeVideos[0].thumbnailUrl && 
+        recipe.youtubeVideos[0].thumbnailUrl.trim() !== '') {
+      return recipe.youtubeVideos[0].thumbnailUrl;
+    }
+    
+    // Then try exact match by name
     if (placeholderImages[recipe.foodName]) {
       return placeholderImages[recipe.foodName];
     }

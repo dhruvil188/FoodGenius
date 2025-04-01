@@ -47,9 +47,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   });
   
-  // Use Gemini 1.0 Pro for meal planning (more cost-effective than 1.5 Pro)
+  // Use Gemini 2.0 Flash Lite for meal planning (most cost-effective option)
   const mealPlanningModel = genAI.getGenerativeModel({
-    model: "gemini-1.0-pro",
+    model: "gemini-flash",
     generationConfig: {
       temperature: 0.7,
       topP: 0.95,
@@ -1128,7 +1128,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      Please ensure no recipes are repeated in the meal plan. Each recipe should be unique, creative, and tailored to the preferences.
+      IMPORTANT: Make sure each day has completely different meals than other days. Each recipe should be unique, creative, and specifically tailored to the preferences. Do not repeat recipes or use variations of the same dish across different days. For example, if you include Pasta Bolognese on Monday, don't include any pasta with meat sauce on any other day.
+      
+      Ensure high diversity across the meal plan by:
+      1. Varying protein sources (e.g., chicken, beef, fish, tofu, legumes)
+      2. Using different cooking methods each day (e.g., baking, sautéing, grilling, steaming)
+      3. Incorporating different cultural cuisines spread throughout the week
+      4. Balancing textures, colors, and flavor profiles across the plan
+      
+      This meal plan should reflect the expertise of a professional chef and nutritionist who plans highly diverse and interesting meals.
       `;
       
       try {

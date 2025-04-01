@@ -242,7 +242,7 @@ export default function MealPrep() {
       setActiveTab('calendar');
       
       // Set the first day as selected by default
-      if (data.days && data.days.length > 0) {
+      if (data.days && data.days.length > 0 && data.days[0].date) {
         setSelectedDay(new Date(data.days[0].date));
       }
       

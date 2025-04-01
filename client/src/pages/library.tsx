@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { expandedRecipes } from "@/data/expandedRecipeLibrary";
+import { foodComRecipes } from "@/data/foodComRecipes";
+import { foodComRecipes2 } from "@/data/foodComRecipes2";
+import { foodComRecipes3 } from "@/data/foodComRecipes3";
 import RecipeResults from "@/components/RecipeResults";
 import { AnalyzeImageResponse } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -37,7 +40,12 @@ export default function Library() {
 
   // Get an appropriate image for a recipe based on name or tags
   const getRecipeImage = (recipe: AnalyzeImageResponse): string => {
-    // First try to use YouTube thumbnail if available (TheMealDB recipes have these)
+    // First check if the recipe has an imageUrl property (Food.com recipes have these)
+    if (recipe.imageUrl && recipe.imageUrl.trim() !== '') {
+      return recipe.imageUrl;
+    }
+    
+    // Then try to use YouTube thumbnail if available (TheMealDB recipes have these)
     if (recipe.youtubeVideos && 
         recipe.youtubeVideos.length > 0 && 
         recipe.youtubeVideos[0].thumbnailUrl && 
@@ -83,10 +91,18 @@ export default function Library() {
     setLocation(`/recipe/${slugify(recipe.foodName)}`);
   };
 
+  // Combine all recipe sources
+  const allRecipes = [
+    ...expandedRecipes,
+    ...foodComRecipes,
+    ...foodComRecipes2,
+    ...foodComRecipes3
+  ];
+  
   // Categorize recipes by cuisine type
   const recipesByCategory: Record<string, AnalyzeImageResponse[]> = {};
   
-  expandedRecipes.forEach(recipe => {
+  allRecipes.forEach(recipe => {
     const mainTag = recipe.tags[0] || "Other";
     if (!recipesByCategory[mainTag]) {
       recipesByCategory[mainTag] = [];
@@ -115,7 +131,7 @@ export default function Library() {
 
         <TabsContent value="all" className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {expandedRecipes.map((recipe, index) => (
+            {allRecipes.map((recipe, index) => (
               <RecipeCard 
                 key={index} 
                 recipe={recipe} 

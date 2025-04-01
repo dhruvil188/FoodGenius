@@ -10,6 +10,12 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   displayName: text("display_name"),
   profileImage: text("profile_image"),
+  // Subscription fields for stripe
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status").default("none"), // none, active, canceled, past_due
+  subscriptionTier: text("subscription_tier").default("free"),  // free, basic, premium, unlimited
+  analysisCredits: integer("analysis_credits").default(1),  // Free trial gives 1 credit
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -287,6 +293,9 @@ export const authResponseSchema = z.object({
     email: z.string(),
     displayName: z.string().nullable(),
     profileImage: z.string().nullable(),
+    subscriptionStatus: z.string().optional(),
+    subscriptionTier: z.string().optional(),
+    analysisCredits: z.number().optional(), 
   }),
   token: z.string(),
   success: z.boolean(),
@@ -294,3 +303,33 @@ export const authResponseSchema = z.object({
 });
 
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+// Subscription related schemas
+export const subscriptionPlanSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  price: z.number(),
+  currency: z.string(),
+  interval: z.enum(["month", "year"]),
+  credits: z.number(),
+  features: z.array(z.string()),
+  mostPopular: z.boolean().optional(),
+});
+
+export type SubscriptionPlan = z.infer<typeof subscriptionPlanSchema>;
+
+export const subscriptionCreateSchema = z.object({
+  planId: z.string(),
+  customerId: z.string().optional(),
+});
+
+export type SubscriptionCreate = z.infer<typeof subscriptionCreateSchema>;
+
+export const subscriptionResponseSchema = z.object({
+  subscriptionId: z.string(),
+  clientSecret: z.string(),
+  status: z.string(),
+});
+
+export type SubscriptionResponse = z.infer<typeof subscriptionResponseSchema>;

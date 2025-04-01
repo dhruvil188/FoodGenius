@@ -9,6 +9,8 @@ import RecipePage from "@/pages/recipe-page";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import Subscription from "@/pages/subscription";
+import SubscriptionSuccess from "@/pages/subscription-success";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -22,6 +24,8 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/subscription" component={Subscription} />
+      <Route path="/subscription/success" component={SubscriptionSuccess} />
       <Route component={NotFound} />
     </Switch>
   );

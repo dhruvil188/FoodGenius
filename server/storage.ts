@@ -43,6 +43,18 @@ export interface IStorage {
   createSavedRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   deleteSavedRecipe(id: number): Promise<boolean>;
   updateSavedRecipe(id: number, recipe: Partial<SavedRecipe>): Promise<SavedRecipe | undefined>;
+  
+  // Subscription methods
+  updateUserSubscription(userId: number, subscriptionData: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    subscriptionStatus?: string;
+    subscriptionTier?: string;
+    analysisCredits?: number;
+  }): Promise<User | undefined>;
+  
+  decrementUserCredits(userId: number): Promise<User | undefined>;
+  addUserCredits(userId: number, credits: number): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -70,6 +82,11 @@ export class MemStorage implements IStorage {
       password: `${hash}:${salt}`,
       displayName: 'Demo User',
       profileImage: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      subscriptionStatus: 'none',
+      subscriptionTier: 'free',
+      analysisCredits: 1,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -104,6 +121,11 @@ export class MemStorage implements IStorage {
       password: `${hash}:${salt}`,
       displayName: insertUser.displayName || null,
       profileImage: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      subscriptionStatus: 'none',
+      subscriptionTier: 'free',
+      analysisCredits: 1, // One free credit for new users
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -192,6 +214,65 @@ export class MemStorage implements IStorage {
     const updatedRecipe = { ...recipe, ...updates };
     this.savedRecipes.set(id, updatedRecipe);
     return updatedRecipe;
+  }
+  
+  // Subscription methods
+  async updateUserSubscription(userId: number, subscriptionData: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    subscriptionStatus?: string;
+    subscriptionTier?: string;
+    analysisCredits?: number;
+  }): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    const updatedUser = { 
+      ...user,
+      stripeCustomerId: subscriptionData.stripeCustomerId ?? user.stripeCustomerId,
+      stripeSubscriptionId: subscriptionData.stripeSubscriptionId ?? user.stripeSubscriptionId,
+      subscriptionStatus: subscriptionData.subscriptionStatus ?? user.subscriptionStatus,
+      subscriptionTier: subscriptionData.subscriptionTier ?? user.subscriptionTier,
+      analysisCredits: subscriptionData.analysisCredits ?? user.analysisCredits,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async decrementUserCredits(userId: number): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    if (!user.analysisCredits || user.analysisCredits <= 0) {
+      return user; // No credits to decrement
+    }
+    
+    const updatedUser = { 
+      ...user,
+      analysisCredits: user.analysisCredits - 1,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async addUserCredits(userId: number, credits: number): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) return undefined;
+    
+    const currentCredits = user.analysisCredits || 0;
+    
+    const updatedUser = { 
+      ...user,
+      analysisCredits: currentCredits + credits,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 }
 

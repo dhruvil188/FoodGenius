@@ -468,6 +468,232 @@ export const theMealDBRecipes: AnalyzeImageResponse[] = [
   },
   {
     foodName: "Irish Stew",
+        tags: ["French", "Dessert", "Baked", "Caramel"],
+        ingredients: [
+          "6-8 large firm apples (Granny Smith, Honeycrisp, or Braeburn)",
+          "1 cup granulated sugar",
+          "6 tablespoons unsalted butter",
+          "1 pinch of salt",
+          "1 teaspoon vanilla extract (optional)",
+          "1 teaspoon ground cinnamon (optional)",
+          "1 sheet puff pastry, thawed if frozen (or homemade short crust pastry)",
+          "Crème fraîche or vanilla ice cream, for serving"
+        ],
+        instructions: [
+          "Peel, quarter, and core the apples. If the apples are very large, cut each quarter in half.",
+          "Preheat oven to 375°F (190°C).",
+          "In a 9 or 10-inch cast-iron skillet or oven-safe heavy-bottomed pan, spread the sugar evenly.",
+          "Place the skillet over medium heat and allow the sugar to melt without stirring (you can gently swirl the pan occasionally).",
+          "Once the sugar has melted completely and turned a golden amber color, remove from heat and immediately add the butter, salt, and vanilla if using. Be careful as the mixture will bubble up.",
+          "Stir carefully until the butter is incorporated, then return to low heat if the caramel has hardened.",
+          "Arrange the apple pieces in the skillet, rounded side down, fitting them tightly together in a circular pattern. Fill any gaps with smaller apple pieces.",
+          "Sprinkle with cinnamon if using.",
+          "Return the skillet to medium heat and cook for about 10-15 minutes until the apples have softened slightly and absorbed some of the caramel.",
+          "Remove from heat and let cool for 5 minutes.",
+          "Roll out the puff pastry to about 1/8 inch thickness and cut it into a circle slightly larger than the skillet.",
+          "Place the pastry over the apples, tucking the edges down inside the skillet.",
+          "Cut a few small vents in the pastry to allow steam to escape.",
+          "Bake in the preheated oven for 25-30 minutes, until the pastry is golden brown and puffed.",
+          "Remove from oven and let cool for 5-10 minutes.",
+          "Run a knife around the edge of the skillet to loosen the tart.",
+          "Place a serving plate larger than the skillet over the top and carefully but quickly invert the tart onto the plate.",
+          "Serve warm with crème fraîche or vanilla ice cream."
+        ],
+        chefTips: [
+          "The key to a perfect Tarte Tatin is achieving the right caramel color - aim for deep amber, not too dark or it will taste burnt",
+          "Use firm apples that hold their shape when cooked - avoid McIntosh or Red Delicious which get too mushy",
+          "Let the tart rest a few minutes after baking, but don't wait too long to invert it or the caramel might harden and stick to the pan",
+          "If any apple pieces stick to the pan when inverting, simply remove them and place them back on the tart"
+        ],
+        commonMistakes: [
+          "Cooking the caramel too long, causing it to burn and become bitter",
+          "Not packing the apples tightly enough, which can cause the tart to collapse when inverted",
+          "Cutting the apples too thin, which makes them cook too quickly and lose their shape",
+          "Waiting too long to invert the tart, allowing the caramel to harden and stick to the pan"
+        ],
+        nutritionInfo: {
+          calories: 320,
+          protein: "2g",
+          carbs: "48g",
+          fats: "15g",
+          fiber: "3g",
+          sugar: "36g",
+          sodium: "120mg",
+          vitamins: [
+            "Vitamin C: 8% DV",
+            "Vitamin A: 4% DV",
+            "Iron: 6% DV"
+          ],
+          healthyAlternatives: [
+            "Reduce the sugar to 3/4 cup for a less sweet version",
+            "Use a whole wheat pastry crust instead of puff pastry for more fiber",
+            "Add a tablespoon of lemon juice to the caramel for a brighter flavor with less sweetness"
+          ],
+          dietaryNotes: [
+            "High in sugar due to the caramel and natural fruit sugars",
+            "Contains gluten from the pastry",
+            "Good source of fiber from the apples"
+          ]
+        },
+        variations: [
+          {
+            type: "Pear Tarte Tatin",
+            description: "A variation using pears instead of apples",
+            adjustments: [
+              "Replace apples with 6-7 firm but ripe Bosc or Anjou pears",
+              "Add 1 tablespoon of lemon juice to the caramel",
+              "Consider adding a few crushed cardamom pods to the caramel for complementary flavor"
+            ]
+          },
+          {
+            type: "Salted Caramel Apple Tarte Tatin",
+            description: "A modern twist with the popular salted caramel flavor",
+            adjustments: [
+              "Increase salt to 1/2 teaspoon for a more pronounced salted caramel flavor",
+              "Add 2 tablespoons of heavy cream to the caramel for richness",
+              "Sprinkle flaky sea salt on top after inverting the tart"
+            ]
+          }
+        ],
+        sideDishSuggestions: [
+          {
+            name: "Vanilla Bean Ice Cream",
+            description: "High-quality vanilla ice cream with visible bean specks",
+            preparationTime: "0 minutes (store-bought)",
+            pairingReason: "The cold, creamy texture perfectly contrasts with the warm, caramelized apples"
+          },
+          {
+            name: "Crème Fraîche",
+            description: "Tangy cultured cream",
+            preparationTime: "5 minutes",
+            pairingReason: "The slight tanginess balances the sweetness of the caramel"
+          },
+          {
+            name: "Calvados Crème Anglaise",
+            description: "Vanilla custard sauce with a splash of apple brandy",
+            preparationTime: "15 minutes",
+            pairingReason: "Enhances the apple flavor while adding a luxurious sauce"
+          }
+        ],
+        storageInstructions: "Tarte Tatin is best consumed the day it's made. If necessary, store at room temperature for up to 24 hours. Do not refrigerate as this will make the pastry soggy.",
+        reheatingMethods: "To reheat, warm in a 300°F (150°C) oven for 10 minutes.",
+        beveragePairings: [
+          "Calvados (apple brandy) - the classic French pairing",
+          "Late harvest Riesling or Sauternes - sweet wines that complement the caramel notes",
+          "Strong coffee or espresso to balance the sweetness"
+        ],
+        techniqueDetails: [
+          {
+            name: "Caramel Making",
+            description: "Creating the perfect caramel is the foundation of Tarte Tatin. It should be a deep amber color that balances sweetness with slight bitterness without burning.",
+            visualCues: [
+              "The caramel should be a rich amber color, similar to maple syrup",
+              "It should be completely smooth with no sugar crystals",
+              "When tilted, the caramel should flow slowly but not be thick or sticky"
+            ],
+            commonErrors: [
+              "Removing the caramel from heat too soon, resulting in a pale, overly sweet flavor",
+              "Cooking the caramel too long, creating bitter, burnt flavors",
+              "Stirring the sugar as it melts, which can cause crystallization"
+            ]
+          },
+          {
+            name: "Apple Arrangement",
+            description: "The apples must be arranged carefully to create a beautiful pattern when the tart is inverted. They also need to be packed tightly to prevent collapse.",
+            visualCues: [
+              "Apples should be tightly packed with minimal gaps",
+              "The rounded sides should face down (toward the caramel)",
+              "The pattern should be concentric, working from the outside in"
+            ],
+            commonErrors: [
+              "Leaving large gaps between apples, which can cause the tart to collapse when inverted",
+              "Cutting the apples too thin, which causes them to disintegrate during cooking",
+              "Not arranging decoratively, missing the opportunity for a beautiful presentation"
+            ]
+          },
+          {
+            name: "Pastry Handling",
+            description: "The pastry should be handled minimally and kept cold to ensure it remains flaky after baking.",
+            visualCues: [
+              "The pastry should be rolled to even thickness (about 1/8 inch)",
+              "It should be draped over the apples and tucked down the sides of the pan",
+              "After baking, it should be golden brown and crisp"
+            ],
+            commonErrors: [
+              "Overworking the pastry, making it tough rather than flaky",
+              "Not tucking the edges down into the pan, which can cause the tart to fall apart when inverted",
+              "Rolling the pastry too thick, resulting in an undercooked layer"
+            ]
+          }
+        ],
+        cookingScience: {
+          keyReactions: [
+            "Caramelization occurs when sugar is heated to about 340°F (170°C), creating complex flavor compounds",
+            "The Maillard reaction between the sugars and proteins in the apples creates additional flavor depth",
+            "Steam from the apples helps cook the underside of the pastry while the top browns in the oven"
+          ],
+          techniquePurpose: [
+            "Cooking the apples in caramel before baking softens them and infuses them with flavor",
+            "Using a heavy-bottomed pan (especially cast iron) provides even heat distribution for uniform caramel",
+            "Inverting while still warm ensures the caramel doesn't harden and stick to the pan"
+          ],
+          safetyTips: [
+            "Be extremely careful when making caramel as it can cause severe burns",
+            "Use oven mitts when inverting the hot tart to prevent burns",
+            "Allow the tart to cool slightly before serving to prevent mouth burns from hot caramel"
+          ]
+        },
+        sensoryGuidance: {
+          aromaIndicators: [
+            "A rich, sweet, buttery aroma should dominate",
+            "There should be distinct notes of caramelized sugar and baked apples",
+            "A pleasant hint of vanilla or spice if those were added to the recipe"
+          ],
+          textureDescriptors: [
+            "The apples should be tender but still hold their shape - not mushy",
+            "The caramel should coat the apples with a glossy finish that's soft but not runny",
+            "The pastry should be crisp and flaky, providing textural contrast to the soft apples"
+          ],
+          tasteProgression: [
+            "First comes the buttery, flaky pastry",
+            "Then the deep, complex sweetness of the caramel",
+            "Finally, the subtle tartness of the apples balancing the sweet elements"
+          ]
+        },
+        culturalContext: {
+          origin: "Created in the 1880s at the Hotel Tatin in Lamotte-Beuvron, France, by the Tatin sisters, Stéphanie and Caroline. Legend has it that Stéphanie accidentally created the dessert when she was making a traditional apple pie but left the apples cooking in butter and sugar too long.",
+          history: "Rather than throw away the caramelized apples, she put the pastry on top and baked it anyway. The hotel guests loved the dessert, and it became a signature dish. The recipe was later popularized by the famous Maxim's restaurant in Paris in the early 20th century.",
+          traditionalServing: "In France, Tarte Tatin is traditionally served slightly warm with a dollop of crème fraîche or a small scoop of vanilla ice cream. It's a common dessert for family meals and is often served during autumn when apples are in season.",
+          festiveRelevance: [
+            "Popular during apple harvest festivals throughout France",
+            "Often served during family gatherings and Sunday lunches",
+            "A staple dessert for Christmas and New Year celebrations in many French households",
+            "Featured during Epiphany celebrations in January as an alternative to galette des rois"
+          ]
+        },
+        presentationGuidance: {
+          platingSuggestions: [
+            "Serve each slice on a white plate to highlight the amber colors",
+            "Place a small quenelle of crème fraîche or scoop of vanilla ice cream alongside, not on top",
+            "Drizzle any extra caramel from the pan around the plate, not over the tart",
+            "For special occasions, add a thin slice of apple that has been dried or fried as a crisp garnish"
+          ],
+          garnishingTips: [
+            "A small sprig of fresh mint provides color contrast without interfering with flavors",
+            "A light dusting of powdered sugar can add visual appeal for serving",
+            "Avoid elaborate garnishes that would detract from the tart's rustic elegance"
+          ],
+          photoTips: [
+            "Capture a cross-section view to show the layers of flaky pastry, tender apples, and glossy caramel",
+            "Photograph while still warm to capture the slight steam and glossiness of the caramel",
+            "Include traditional French elements in the background (like a vintage fork or linen napkin) to emphasize heritage"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    foodName: "Irish Stew",
     description: "Irish Stew is a traditional hearty dish from Ireland, historically made with mutton or lamb, potatoes, onions, and parsley. Dating back centuries, it was born of necessity among peasant families utilizing locally available ingredients. The slow-cooking method tenderizes tougher cuts of meat, while root vegetables absorb the rich flavors. This simple, rustic stew has become an iconic comfort food symbolizing Irish culinary heritage.",
     tags: ["Irish", "Stew", "Comfort Food", "Lamb", "One-pot"],
     youtubeVideos: genericYoutubeVideos,

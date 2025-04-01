@@ -93,6 +93,9 @@ export default function MealPrep() {
       // Generate a meal plan based on user preferences using our comprehensive library
       const generatedMealPlan = generateMealPlan(preferences);
       
+      console.log("Generated meal plan:", generatedMealPlan);
+      console.log("First day meals:", generatedMealPlan.days[0]?.meals);
+      
       setMealPlan(generatedMealPlan);
       // Set first day as selected - handle undefined dates
       if (generatedMealPlan.days.length > 0) {
@@ -604,75 +607,89 @@ export default function MealPrep() {
                 <CardContent>
                   {selectedDay && mealPlan ? (
                     <div className="space-y-6">
-                      {/* Find the day matching the selected date */}
-                      {mealPlan.days.find(day => day.date.toDateString() === selectedDay.toDateString())?.meals.map((meal, index) => (
-                        <div key={index} className="p-4 border rounded-lg">
-                          <div className="flex flex-col md:flex-row gap-4">
-                            <div className="w-full md:w-24 h-20 bg-slate-200 rounded-md flex-shrink-0 overflow-hidden">
-                              <div className="w-full h-full bg-slate-300 flex items-center justify-center text-slate-600">
-                                <i className="fas fa-image text-2xl"></i>
-                              </div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                                    {meal.type}
-                                  </span>
-                                  <h3 className="font-semibold mt-1">{meal.name}</h3>
+                      {/* Find the day that matches the selected date */}
+                      {(() => {
+                        // Get the selected day data
+                        const selectedDayData = mealPlan.days.find(day => {
+                          const dayDate = new Date(day.date);
+                          return dayDate.toDateString() === selectedDay.toDateString();
+                        });
+
+                        // If no day data or no meals, show message
+                        if (!selectedDayData || !selectedDayData.meals || selectedDayData.meals.length === 0) {
+                          return <div>No meals found for selected day</div>;
+                        }
+
+                        // Return meal components
+                        return selectedDayData.meals.map((meal, index) => (
+                          <div key={index} className="p-4 border rounded-lg mb-4">
+                            <div className="flex flex-col md:flex-row gap-4">
+                              <div className="w-full md:w-24 h-20 bg-slate-200 rounded-md flex-shrink-0 overflow-hidden">
+                                <div className="w-full h-full bg-slate-300 flex items-center justify-center text-slate-600">
+                                  <i className="fas fa-image text-2xl"></i>
                                 </div>
-                                <span className="text-sm font-medium text-slate-700">{meal.calories} cal</span>
                               </div>
-                              
-                              <Tabs defaultValue="recipe" className="mt-3">
-                                <TabsList className="grid w-full grid-cols-2">
-                                  <TabsTrigger value="recipe">Recipe</TabsTrigger>
-                                  <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="recipe" className="pt-4">
-                                  <div className="mb-2">
-                                    <h4 className="text-sm font-medium text-slate-700 mb-1">Ingredients:</h4>
-                                    <ul className="text-sm text-slate-600 space-y-1">
-                                      {meal.ingredients.map((ingredient, i) => (
-                                        <li key={i} className="flex items-center gap-2">
-                                          <i className="fas fa-check text-xs text-primary"></i>
-                                          {ingredient}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
+                              <div className="flex-1">
+                                <div className="flex justify-between items-start">
                                   <div>
-                                    <h4 className="text-sm font-medium text-slate-700 mb-1">Instructions:</h4>
-                                    <p className="text-sm text-slate-600 whitespace-pre-line">{meal.recipe}</p>
+                                    <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                      {meal.type}
+                                    </span>
+                                    <h3 className="font-semibold mt-1">{meal.name}</h3>
                                   </div>
-                                </TabsContent>
-                                <TabsContent value="nutrition" className="pt-4">
-                                  <div className="grid grid-cols-3 gap-2">
-                                    <div className="p-2 bg-primary/5 rounded-md text-center">
-                                      <div className="text-xs text-slate-500">Protein</div>
-                                      <div className="font-semibold text-slate-700">{meal.nutrients.protein}</div>
+                                  <span className="text-sm font-medium text-slate-700">{meal.calories} cal</span>
+                                </div>
+                                
+                                <Tabs defaultValue="recipe" className="mt-3">
+                                  <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="recipe">Recipe</TabsTrigger>
+                                    <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
+                                  </TabsList>
+                                  <TabsContent value="recipe" className="pt-4">
+                                    <div className="mb-2">
+                                      <h4 className="text-sm font-medium text-slate-700 mb-1">Ingredients:</h4>
+                                      <ul className="text-sm text-slate-600 space-y-1">
+                                        {meal.ingredients.map((ingredient, i) => (
+                                          <li key={i} className="flex items-center gap-2">
+                                            <i className="fas fa-check text-xs text-primary"></i>
+                                            {ingredient}
+                                          </li>
+                                        ))}
+                                      </ul>
                                     </div>
-                                    <div className="p-2 bg-primary/5 rounded-md text-center">
-                                      <div className="text-xs text-slate-500">Carbs</div>
-                                      <div className="font-semibold text-slate-700">{meal.nutrients.carbs}</div>
+                                    <div>
+                                      <h4 className="text-sm font-medium text-slate-700 mb-1">Instructions:</h4>
+                                      <p className="text-sm text-slate-600 whitespace-pre-line">{meal.recipe}</p>
                                     </div>
-                                    <div className="p-2 bg-primary/5 rounded-md text-center">
-                                      <div className="text-xs text-slate-500">Fats</div>
-                                      <div className="font-semibold text-slate-700">{meal.nutrients.fats}</div>
+                                  </TabsContent>
+                                  <TabsContent value="nutrition" className="pt-4">
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <div className="p-2 bg-primary/5 rounded-md text-center">
+                                        <div className="text-xs text-slate-500">Protein</div>
+                                        <div className="font-semibold text-slate-700">{meal.nutrients.protein}</div>
+                                      </div>
+                                      <div className="p-2 bg-primary/5 rounded-md text-center">
+                                        <div className="text-xs text-slate-500">Carbs</div>
+                                        <div className="font-semibold text-slate-700">{meal.nutrients.carbs}</div>
+                                      </div>
+                                      <div className="p-2 bg-primary/5 rounded-md text-center">
+                                        <div className="text-xs text-slate-500">Fats</div>
+                                        <div className="font-semibold text-slate-700">{meal.nutrients.fats}</div>
+                                      </div>
                                     </div>
-                                  </div>
-                                </TabsContent>
-                              </Tabs>
-                              
-                              <div className="mt-3 flex justify-end">
-                                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-primary">
-                                  <i className="fas fa-random mr-1"></i> Swap Meal
-                                </Button>
+                                  </TabsContent>
+                                </Tabs>
+                                
+                                <div className="mt-3 flex justify-end">
+                                  <Button variant="ghost" size="sm" className="text-slate-500 hover:text-primary">
+                                    <i className="fas fa-random mr-1"></i> Swap Meal
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ));
+                      })()}
                     </div>
                   ) : (
                     <div className="text-center py-12">

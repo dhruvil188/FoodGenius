@@ -9,6 +9,7 @@ import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import AuthPage from "@/pages/auth-page";
+import SavedRecipes from "@/pages/saved-recipes";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/auth" component={AuthPage} />
+      <ProtectedRoute path="/saved-recipes" component={SavedRecipes} />
       <ProtectedRoute path="/profile" component={Home} />
       <Route component={NotFound} />
     </Switch>

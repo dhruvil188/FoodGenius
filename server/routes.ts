@@ -1076,6 +1076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Subscription routes
   app.get("/api/subscription/plans", async (req: Request, res: Response) => {
     try {
+      // Always return the plans, even if Stripe is not configured
       return res.status(200).json(stripeService.subscriptionPlans);
     } catch (error) {
       return res.status(500).json({
@@ -1088,6 +1089,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/subscription/create", async (req: Request, res: Response) => {
     try {
+      // Check if Stripe is configured
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Subscription service is currently unavailable. STRIPE_SECRET_KEY is not configured."
+        });
+      }
+      
       // Validate request data
       const validatedData = subscriptionCreateSchema.parse(req.body);
 
@@ -1140,6 +1149,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/subscription/cancel", async (req: Request, res: Response) => {
     try {
+      // Check if Stripe is configured
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Subscription service is currently unavailable. STRIPE_SECRET_KEY is not configured."
+        });
+      }
+      
       // For authenticated user flow, use the actual user ID (not implemented yet)
       // For now, use the guest user ID
       const userId = GUEST_USER_ID;
@@ -1185,6 +1202,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Subscription webhook for handling Stripe events
   app.post("/api/subscription/webhook", async (req: Request, res: Response) => {
     try {
+      // Check if Stripe is configured
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(503).json({
+          success: false,
+          message: "Subscription service is currently unavailable. STRIPE_SECRET_KEY is not configured."
+        });
+      }
+      
       // Get the webhook event data
       const event = req.body;
       

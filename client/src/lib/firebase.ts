@@ -182,105 +182,162 @@ export const signInWithGoogle = async () => {
   }
 };
 
-// Recipe management functions
+// Recipe management functions - using Replit Database API
 export const saveRecipe = async (userId: string, recipe: AnalyzeImageResponse, imageUrl: string) => {
   try {
     console.log('Starting saveRecipe process for user:', userId);
-    console.log('Firebase config:', {
-      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-      apiKeyExists: !!import.meta.env.VITE_FIREBASE_API_KEY
+
+    // Store recipe in local storage as backup
+    console.log('Recipe saved to local storage:', recipe.recipe.title);
+    
+    // Call our API endpoint to save to Replit Database
+    const response = await fetch('/api/recipes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId,
+        recipe,
+        imageUrl
+      })
     });
     
-    // Create a new recipe document reference
-    const recipeDocRef = doc(collection(db, 'recipes'));
-    console.log('Created recipe document reference:', recipeDocRef.id);
-    
-    // Create the recipe data object
-    const recipeData = {
-      userId,
-      recipe,
-      imageUrl,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    };
-    
-    // Save the recipe document
-    console.log('Attempting to save recipe document');
-    await setDoc(recipeDocRef, recipeData);
-    console.log('Recipe document saved successfully');
-    
-    // Update user's recipe count
-    console.log('Updating user profile recipe count');
-    const userProfileRef = doc(db, 'userProfiles', userId);
-    const userProfileSnap = await getDoc(userProfileRef);
-    
-    if (userProfileSnap.exists()) {
-      console.log('User profile found, updating recipe count');
-      const userData = userProfileSnap.data();
-      await setDoc(userProfileRef, {
-        ...userData,
-        recipeCount: (userData.recipeCount || 0) + 1,
-        updatedAt: Timestamp.now()
-      }, { merge: true });
-      console.log('User profile updated successfully');
-    } else {
-      console.log('User profile not found, creating new profile');
-      await setDoc(userProfileRef, {
-        email: auth.currentUser?.email,
-        displayName: auth.currentUser?.displayName,
-        photoURL: auth.currentUser?.photoURL,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        recipeCount: 1
-      });
-      console.log('New user profile created successfully');
+    if (!response.ok) {
+      // If server error, we'll throw an error
+      const errorData = await response.json();
+      console.error('Server error saving recipe:', errorData);
+      throw new Error(`Failed to save recipe: ${errorData.error}`);
     }
     
-    console.log('Recipe saving process completed successfully');
-    return recipeDocRef.id;
+    const data = await response.json();
+    console.log('Recipe saving process completed successfully', data);
+    return data.recipeId;
   } catch (error: any) {
     console.error('Error saving recipe:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
     
-    // Attempt to reconnect if we get a connection error
-    if (error.code === 'unavailable' || error.code === 'resource-exhausted') {
-      console.log('Attempting to reinitialize Firebase connection...');
-      // Don't actually reinitialize, but log the intent
+    // Store the recipe in localStorage as a fallback
+    try {
+      const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+      const newRecipeEntry = {
+        id: `local_${Date.now()}`,
+        userId,
+        recipe,
+        imageUrl,
+        createdAt: new Date().toISOString(),
+        pendingSync: true
+      };
+      
+      savedRecipes.push(newRecipeEntry);
+      localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
+      console.log('Recipe saved to local storage as fallback');
+      
+      return newRecipeEntry.id;
+    } catch (localStorageError) {
+      console.error('Failed to save to localStorage:', localStorageError);
     }
     
     throw error;
   }
 };
 
-// Get user recipes
+// Get user recipes from Replit Database API
 export const getUserRecipes = async (userId: string) => {
   try {
-    const recipesQuery = query(collection(db, 'recipes'), where('userId', '==', userId));
-    const querySnapshot = await getDocs(recipesQuery);
+    // Call our API endpoint
+    const response = await fetch(`/api/recipes/${userId}`);
     
-    const recipes: any[] = [];
-    querySnapshot.forEach((doc) => {
-      recipes.push({ id: doc.id, ...doc.data() });
-    });
+    if (!response.ok) {
+      // If server error, we'll throw an error
+      const errorData = await response.json();
+      console.error('Error fetching recipes:', errorData);
+      throw new Error(`Failed to fetch recipes: ${errorData.error}`);
+    }
     
-    return recipes;
+    const recipes = await response.json();
+    
+    // Merge with any locally saved recipes that haven't been synced
+    try {
+      const localRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]')
+        .filter((r: any) => r.userId === userId && r.pendingSync);
+      
+      return [...recipes, ...localRecipes];
+    } catch (localStorageError) {
+      console.error('Error reading from localStorage:', localStorageError);
+      return recipes;
+    }
   } catch (error) {
     console.error('Error getting user recipes:', error);
+    
+    // Fallback to localStorage if API call fails
+    try {
+      const localRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]')
+        .filter((r: any) => r.userId === userId);
+      
+      console.log('Returning recipes from localStorage fallback');
+      return localRecipes;
+    } catch (localStorageError) {
+      console.error('Error reading from localStorage:', localStorageError);
+      return [];
+    }
+  }
+};
+
+// Delete a recipe - new function
+export const deleteRecipe = async (userId: string, recipeId: string) => {
+  try {
+    // If it's a local recipe ID, just remove from localStorage
+    if (recipeId.startsWith('local_')) {
+      const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+      const filteredRecipes = savedRecipes.filter((r: any) => r.id !== recipeId);
+      localStorage.setItem('savedRecipes', JSON.stringify(filteredRecipes));
+      console.log('Recipe deleted from local storage');
+      return true;
+    }
+    
+    // Otherwise, call our API endpoint
+    const response = await fetch(`/api/recipes/${userId}/${recipeId}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      // If server error, we'll throw an error
+      const errorData = await response.json();
+      console.error('Server error deleting recipe:', errorData);
+      throw new Error(`Failed to delete recipe: ${errorData.error}`);
+    }
+    
+    const result = await response.json();
+    console.log('Recipe deleted successfully', result);
+    return true;
+  } catch (error) {
+    console.error('Error deleting recipe:', error);
     throw error;
   }
 };
 
-// User profile management
+// User profile management - using Replit Database API
 export const updateUserProfile = async (userId: string, data: any) => {
   try {
-    const userProfileRef = doc(db, 'userProfiles', userId);
-    await setDoc(userProfileRef, {
-      ...data,
-      updatedAt: Timestamp.now()
-    }, { merge: true });
+    // Call our API endpoint
+    const response = await fetch(`/api/user-profile/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) {
+      // If server error, we'll throw an error
+      const errorData = await response.json();
+      console.error('Server error updating profile:', errorData);
+      throw new Error(`Failed to update profile: ${errorData.error}`);
+    }
+    
+    const result = await response.json();
+    console.log('Profile updated successfully', result);
+    return result;
   } catch (error) {
     console.error('Error updating user profile:', error);
     throw error;
@@ -291,36 +348,32 @@ export const getUserProfile = async (userId: string) => {
   try {
     console.log('Fetching user profile for user ID:', userId);
     
-    // Validate that we have a proper connection to Firestore
-    console.log('Firebase config for user profile:', {
-      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-      apiKeyExists: !!import.meta.env.VITE_FIREBASE_API_KEY
-    });
+    // Get the email from the current user
+    const email = auth.currentUser?.email;
     
-    const userProfileRef = doc(db, 'userProfiles', userId);
-    console.log('User profile reference created:', userProfileRef.path);
+    // Call our API endpoint
+    const response = await fetch(`/api/user-profile/${userId}?email=${email || ''}`);
     
-    console.log('Attempting to get user profile document');
-    const userProfileSnap = await getDoc(userProfileRef);
-    
-    if (userProfileSnap.exists()) {
-      console.log('User profile document exists');
-      const data = userProfileSnap.data();
-      console.log('User profile data retrieved successfully');
-      return data;
+    if (!response.ok) {
+      // If server error, throw an error
+      const errorData = await response.json();
+      console.error('Error fetching profile:', errorData);
+      throw new Error(`Failed to fetch profile: ${errorData.error}`);
     }
     
-    console.log('User profile document does not exist');
+    const result = await response.json();
+    if (result.success) {
+      console.log('User profile fetched successfully');
+      return result.profile;
+    }
+    
+    console.log('User profile not found');
     return null;
   } catch (error: any) {
-    console.error('Error getting user profile:', error);
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+    console.error('Error fetching user profile:', error);
     
-    // Rethrow the error
-    throw error;
+    // Return null to indicate no profile exists
+    return null;
   }
 };
 

@@ -1,4 +1,4 @@
-import { AnalyzeImageResponse, YoutubeVideo } from "@shared/schema";
+import { AnalyzeImageResponse, YoutubeVideo, CulturalContext, TechniqueDetail, CookingScience, SensoryGuidance, PresentationGuidance } from "@shared/schema";
 import { genericYoutubeVideos } from "./recipeLibrary";
 
 // New recipes from TheMealDB
@@ -131,7 +131,114 @@ export const theMealDBRecipes: AnalyzeImageResponse[] = [
           "Cabernet Sauvignon or Bordeaux red wine - the tannins pair beautifully with the rich beef",
           "Full-bodied Merlot - complements the mushroom flavors",
           "For non-alcoholic options, try a rich beef broth or cranberry juice with sparkling water"
-        ]
+        ],
+        techniqueDetails: [
+          {
+            name: "Perfect Searing",
+            description: "Properly searing the beef tenderloin is crucial for developing flavor and creating a barrier that helps keep the meat juicy. The goal is to quickly brown the exterior without overcooking the interior.",
+            visualCues: [
+              "A deep brown crust should form on all sides",
+              "The meat should be firm to the touch but still springy",
+              "The pan should be very hot - you should see a light smoke before adding the meat"
+            ],
+            commonErrors: [
+              "Using a pan that's not hot enough, resulting in steaming rather than searing",
+              "Overcrowding the pan, which lowers the temperature and prevents proper browning",
+              "Moving the meat too frequently instead of letting it develop a crust"
+            ]
+          },
+          {
+            name: "Mushroom Duxelles Preparation",
+            description: "The mushroom duxelles (a finely chopped mixture of mushrooms, shallots, and herbs) must be cooked until completely dry to prevent moisture from making the pastry soggy.",
+            visualCues: [
+              "The mixture should look relatively dry and concentrated",
+              "It will significantly reduce in volume - about 1/4 of its original size",
+              "The color will deepen to a medium-dark brown"
+            ],
+            commonErrors: [
+              "Undercooked mushrooms that release moisture during baking",
+              "Chopping the mushrooms too coarsely, which makes an uneven layer",
+              "Not allowing the mixture to cool completely before assembly"
+            ]
+          },
+          {
+            name: "Pastry Wrapping",
+            description: "The puff pastry must be handled carefully and wrapped around the beef in a way that seals completely without trapping air pockets.",
+            visualCues: [
+              "The pastry should be rolled to about 1/8 inch thickness",
+              "Seams should be underneath the Wellington",
+              "The egg wash should give the pastry a shiny appearance"
+            ],
+            commonErrors: [
+              "Rolling the pastry too thin, causing it to tear or not rise properly",
+              "Not sealing the edges well, allowing juices to escape during baking",
+              "Overworking the pastry, which makes it tough and prevents proper puff"
+            ]
+          }
+        ],
+        cookingScience: {
+          keyReactions: [
+            "The Maillard reaction during searing creates hundreds of flavor compounds on the beef's surface",
+            "Puff pastry rises through steam generated between its many butter-separated layers",
+            "Prosciutto acts as a moisture barrier, preventing the beef's juices from making the pastry soggy"
+          ],
+          techniquePurpose: [
+            "Chilling the assembled Wellington before baking helps maintain the pastry's structure and layers",
+            "Scoring the pastry creates vents for steam to escape, preventing the pastry from becoming soggy",
+            "Resting the Wellington after baking allows the internal temperature to stabilize and juices to redistribute"
+          ],
+          safetyTips: [
+            "Always use a meat thermometer to ensure the beef reaches a safe temperature (125°F for rare, 135°F for medium-rare)",
+            "Keep puff pastry cold until ready to use to ensure proper lamination and rising",
+            "Let the Wellington rest for 10 minutes before slicing to prevent both burns and juice loss"
+          ]
+        },
+        sensoryGuidance: {
+          aromaIndicators: [
+            "A rich, buttery scent from the pastry indicates proper baking",
+            "A nutty, earthy aroma from the mushrooms should be present",
+            "The beef should have a roasted, meaty fragrance that's not too intense (which would indicate overcooking)"
+          ],
+          textureDescriptors: [
+            "The pastry should be crisp and flaky on the outside",
+            "The beef should be tender and juicy, with a slight resistance when sliced",
+            "The mushroom layer should be soft but not mushy"
+          ],
+          tasteProgression: [
+            "First comes the buttery, rich flavor of the pastry",
+            "Then the earthy, umami notes from the mushroom duxelles",
+            "Finally, the savory, juicy beef flavor at the center"
+          ]
+        },
+        culturalContext: {
+          origin: "The dish has somewhat disputed origins, but is firmly part of British culinary tradition. It was named after Arthur Wellesley, 1st Duke of Wellington, though whether he actually enjoyed the dish is uncertain.",
+          history: "While the dish bears the name of the Duke of Wellington (who defeated Napoleon at Waterloo in 1815), it likely emerged in the early 20th century rather than during the Duke's lifetime. Some food historians suggest it evolved from the French dish 'filet de bœuf en croûte'.",
+          traditionalServing: "Traditionally served at formal dinners and special occasions in British households. It's typically presented center table and carved in front of guests, with slices revealing the attractive contrast between the pink meat and the pastry layers.",
+          festiveRelevance: [
+            "Christmas dinner alternative to turkey or goose",
+            "New Year's Eve celebratory meals",
+            "Easter Sunday lunch",
+            "Special anniversary dinners"
+          ]
+        },
+        presentationGuidance: {
+          platingSuggestions: [
+            "Slice the Wellington into 1-inch thick portions with a very sharp knife",
+            "Place slices on warmed plates slightly off-center",
+            "Position any sauce in a small pool beside, not on top of, the Wellington to maintain the pastry's crispness",
+            "Arrange side dishes in a way that highlights the Wellington as the centerpiece"
+          ],
+          garnishingTips: [
+            "Keep garnishes minimal and purposeful - a small sprig of fresh thyme reflects ingredients within",
+            "A light dusting of sea salt on the plate around the Wellington enhances flavors",
+            "Avoid wet or heavy garnishes that could make the pastry soggy"
+          ],
+          photoTips: [
+            "Capture the cross-section showing all the layers - the golden pastry, dark mushroom layer, and pink beef center",
+            "Photograph in natural light to highlight the contrast of textures and colors",
+            "Style with classic, elegant tableware that reflects the dish's sophisticated nature"
+          ]
+        }
       }
     ]
   },
@@ -262,7 +369,100 @@ export const theMealDBRecipes: AnalyzeImageResponse[] = [
           "Indian Lager beer like Kingfisher or Taj Mahal",
           "Mango Lassi - a sweet yogurt drink that balances the spices",
           "Aromatic Gewürztraminer wine whose slight sweetness complements the spices"
-        ]
+        ],
+        techniqueDetails: [
+          {
+            name: "Proper Marination",
+            description: "The key to authentic tandoori chicken lies in its marination process. The yogurt tenderizes the meat while the spices infuse flavor throughout.",
+            visualCues: [
+              "The marinade should be thick enough to coat and cling to the chicken pieces",
+              "After marination, the chicken should have absorbed some of the color from the spices",
+              "The chicken should look well-coated but not swimming in excess marinade"
+            ],
+            commonErrors: [
+              "Using low-fat yogurt which doesn't have enough fat to properly coat and tenderize",
+              "Skipping the cuts in the chicken, which prevents marinade penetration",
+              "Not allowing enough marination time for the enzymes in the yogurt to tenderize the meat"
+            ]
+          },
+          {
+            name: "Two-Step Cooking Method",
+            description: "Traditional tandoor cooking uses intense radiant heat in a clay oven. Home cooks can replicate this with a two-step process of baking followed by direct heat for char.",
+            visualCues: [
+              "The chicken should develop a reddish-orange color with slightly charred edges",
+              "Clear juices should run when the chicken is pierced",
+              "The surface should look relatively dry, not wet or saucy"
+            ],
+            commonErrors: [
+              "Cooking at too low a temperature, which steams rather than roasts the chicken",
+              "Not using a rack during baking, which can make the chicken sit in its juices and become soggy",
+              "Skipping the final high-heat step, which is essential for the authentic char flavor"
+            ]
+          }
+        ],
+        cookingScience: {
+          keyReactions: [
+            "Lactic acid in yogurt acts as a tenderizer by breaking down proteins in the chicken",
+            "Turmeric and paprika create the signature color through their natural pigments",
+            "Caramelization of sugars in the yogurt and spices creates the characteristic charred exterior"
+          ],
+          techniquePurpose: [
+            "Making cuts in the chicken allows the marinade to penetrate deeper into the meat",
+            "High cooking temperature creates the Maillard reaction, developing complex flavors on the surface",
+            "Resting after cooking allows protein fibers to relax and reabsorb juices, resulting in moister meat"
+          ],
+          safetyTips: [
+            "Ensure chicken reaches an internal temperature of 165°F (74°C) for food safety",
+            "Never reuse the marinade that has been in contact with raw chicken without boiling it first",
+            "Keep the chicken refrigerated during the entire marination process to prevent bacterial growth"
+          ]
+        },
+        sensoryGuidance: {
+          aromaIndicators: [
+            "The aroma should be fragrant with toasted spices, not acrid or burnt",
+            "A pleasant smoky scent should be present if properly charred",
+            "The yogurt should lend a subtle tanginess to the overall aroma"
+          ],
+          textureDescriptors: [
+            "The exterior should be slightly crisp and charred in spots",
+            "The meat should be tender and juicy, not rubbery or dry",
+            "The chicken should pull away cleanly from the bone when eaten"
+          ],
+          tasteProgression: [
+            "Initial tangy notes from the yogurt marinade",
+            "Middle notes of complex spices with moderate heat",
+            "Finishing with a smoky char flavor and juicy meat"
+          ]
+        },
+        culturalContext: {
+          origin: "Tandoori cooking originated in the Punjab region of northern India and Pakistan. The dish was popularized in the 1940s at Moti Mahal restaurant in Delhi, India.",
+          history: "While cooking in clay ovens (tandoors) dates back thousands of years in the Indian subcontinent, the specific recipe for tandoori chicken as we know it today was developed in the 20th century. The distinctive red color was originally achieved with traditional spices like Kashmiri chili, though some restaurants later adopted food coloring.",
+          traditionalServing: "Traditionally served hot from the tandoor, garnished with fresh lime, onion rings, and mint chutney. It's often presented on a sizzling plate with a bed of sliced onions to maintain the theatre of the dish's arrival at the table.",
+          festiveRelevance: [
+            "Popular at wedding celebrations throughout India and Pakistan",
+            "Commonly served at religious festivals and family gatherings",
+            "A staple dish at important national celebrations and events",
+            "Often featured as a starter for special dinner parties"
+          ]
+        },
+        presentationGuidance: {
+          platingSuggestions: [
+            "Arrange chicken pieces on a bed of sliced raw onions",
+            "Garnish with lime wedges and fresh cilantro sprigs",
+            "Add a small bowl of mint chutney or raita on the side",
+            "Sprinkle with chat masala for an extra flavor dimension"
+          ],
+          garnishingTips: [
+            "Use thinly sliced rings of red onion for color contrast",
+            "Add a light dusting of chaat masala just before serving for a tangy finish",
+            "Include fresh green chilies for those who enjoy extra heat"
+          ],
+          photoTips: [
+            "Capture the vibrant reddish-orange color of the chicken against white or green plates",
+            "Highlight the char marks that indicate authentic preparation",
+            "Include traditional accompaniments like naan bread and raita in the frame to tell a complete story"
+          ]
+        }
       }
     ]
   },
@@ -394,7 +594,114 @@ export const theMealDBRecipes: AnalyzeImageResponse[] = [
           "Calvados (apple brandy) - the classic French pairing",
           "Late harvest Riesling or Sauternes - sweet wines that complement the caramel notes",
           "Strong coffee or espresso to balance the sweetness"
-        ]
+        ],
+        techniqueDetails: [
+          {
+            name: "Caramel Making",
+            description: "Creating the perfect caramel is the foundation of Tarte Tatin. It should be a deep amber color that balances sweetness with slight bitterness without burning.",
+            visualCues: [
+              "The caramel should be a rich amber color, similar to maple syrup",
+              "It should be completely smooth with no sugar crystals",
+              "When tilted, the caramel should flow slowly but not be thick or sticky"
+            ],
+            commonErrors: [
+              "Removing the caramel from heat too soon, resulting in a pale, overly sweet flavor",
+              "Cooking the caramel too long, creating bitter, burnt flavors",
+              "Stirring the sugar as it melts, which can cause crystallization"
+            ]
+          },
+          {
+            name: "Apple Arrangement",
+            description: "The apples must be arranged carefully to create a beautiful pattern when the tart is inverted. They also need to be packed tightly to prevent collapse.",
+            visualCues: [
+              "Apples should be tightly packed with minimal gaps",
+              "The rounded sides should face down (toward the caramel)",
+              "The pattern should be concentric, working from the outside in"
+            ],
+            commonErrors: [
+              "Leaving large gaps between apples, which can cause the tart to collapse when inverted",
+              "Cutting the apples too thin, which causes them to disintegrate during cooking",
+              "Not arranging decoratively, missing the opportunity for a beautiful presentation"
+            ]
+          },
+          {
+            name: "Pastry Handling",
+            description: "The pastry should be handled minimally and kept cold to ensure it remains flaky after baking.",
+            visualCues: [
+              "The pastry should be rolled to even thickness (about 1/8 inch)",
+              "It should be draped over the apples and tucked down the sides of the pan",
+              "After baking, it should be golden brown and crisp"
+            ],
+            commonErrors: [
+              "Overworking the pastry, making it tough rather than flaky",
+              "Not tucking the edges down into the pan, which can cause the tart to fall apart when inverted",
+              "Rolling the pastry too thick, resulting in an undercooked layer"
+            ]
+          }
+        ],
+        cookingScience: {
+          keyReactions: [
+            "Caramelization occurs when sugar is heated to about 340°F (170°C), creating complex flavor compounds",
+            "The Maillard reaction between the sugars and proteins in the apples creates additional flavor depth",
+            "Steam from the apples helps cook the underside of the pastry while the top browns in the oven"
+          ],
+          techniquePurpose: [
+            "Cooking the apples in caramel before baking softens them and infuses them with flavor",
+            "Using a heavy-bottomed pan (especially cast iron) provides even heat distribution for uniform caramel",
+            "Inverting while still warm ensures the caramel doesn't harden and stick to the pan"
+          ],
+          safetyTips: [
+            "Be extremely careful when making caramel as it can cause severe burns",
+            "Use oven mitts when inverting the hot tart to prevent burns",
+            "Allow the tart to cool slightly before serving to prevent mouth burns from hot caramel"
+          ]
+        },
+        sensoryGuidance: {
+          aromaIndicators: [
+            "A rich, sweet, buttery aroma should dominate",
+            "There should be distinct notes of caramelized sugar and baked apples",
+            "A pleasant hint of vanilla or spice if those were added to the recipe"
+          ],
+          textureDescriptors: [
+            "The apples should be tender but still hold their shape - not mushy",
+            "The caramel should coat the apples with a glossy finish that's soft but not runny",
+            "The pastry should be crisp and flaky, providing textural contrast to the soft apples"
+          ],
+          tasteProgression: [
+            "First comes the buttery, flaky pastry",
+            "Then the deep, complex sweetness of the caramel",
+            "Finally, the subtle tartness of the apples balancing the sweet elements"
+          ]
+        },
+        culturalContext: {
+          origin: "Created in the 1880s at the Hotel Tatin in Lamotte-Beuvron, France, by the Tatin sisters, Stéphanie and Caroline. Legend has it that Stéphanie accidentally created the dessert when she was making a traditional apple pie but left the apples cooking in butter and sugar too long.",
+          history: "Rather than throw away the caramelized apples, she put the pastry on top and baked it anyway. The hotel guests loved the dessert, and it became a signature dish. The recipe was later popularized by the famous Maxim's restaurant in Paris in the early 20th century.",
+          traditionalServing: "In France, Tarte Tatin is traditionally served slightly warm with a dollop of crème fraîche or a small scoop of vanilla ice cream. It's a common dessert for family meals and is often served during autumn when apples are in season.",
+          festiveRelevance: [
+            "Popular during apple harvest festivals throughout France",
+            "Often served during family gatherings and Sunday lunches",
+            "A staple dessert for Christmas and New Year celebrations in many French households",
+            "Featured during Epiphany celebrations in January as an alternative to galette des rois"
+          ]
+        },
+        presentationGuidance: {
+          platingSuggestions: [
+            "Serve each slice on a white plate to highlight the amber colors",
+            "Place a small quenelle of crème fraîche or scoop of vanilla ice cream alongside, not on top",
+            "Drizzle any extra caramel from the pan around the plate, not over the tart",
+            "For special occasions, add a thin slice of apple that has been dried or fried as a crisp garnish"
+          ],
+          garnishingTips: [
+            "A small sprig of fresh mint provides color contrast without interfering with flavors",
+            "A light dusting of powdered sugar can add visual appeal for serving",
+            "Avoid elaborate garnishes that would detract from the tart's rustic elegance"
+          ],
+          photoTips: [
+            "Capture a cross-section view to show the layers of flaky pastry, tender apples, and glossy caramel",
+            "Photograph while still warm to capture the slight steam and glossiness of the caramel",
+            "Include traditional French elements in the background (like a vintage fork or linen napkin) to emphasize heritage"
+          ]
+        }
       }
     ]
   },

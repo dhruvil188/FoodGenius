@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { expandedRecipes } from "@/data/expandedRecipeLibrary";
-import RecipeResults from "@/components/RecipeResults";
+import RecipeLibraryResults from "@/components/RecipeLibraryResults";
 import { AnalyzeImageResponse } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { findRecipeBySlug, slugify } from "@/lib/utils";
@@ -117,7 +117,7 @@ export default function RecipePage() {
       >
         ← Back to Recipe Library
       </Button>
-      <RecipeResults 
+      <RecipeLibraryResults 
         result={recipe} 
         imageUrl={imageUrl} 
         onTryAnother={handleBackToLibrary}

@@ -47,14 +47,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   });
   
-  // Use Gemini 2.0 Flash Lite for meal planning (most cost-effective option)
+  // Use Gemini 1.5 Flash 8b for meal planning (better cost efficiency)
   const mealPlanningModel = genAI.getGenerativeModel({
-    model: "gemini-flash",
+    model: "gemini-1.5-flash-8b",
     generationConfig: {
-      temperature: 0.7,
+      temperature: 1,
       topP: 0.95,
       topK: 40,
       maxOutputTokens: 8192,
+      responseMimeType: "text/plain",
     },
     safetySettings: [
       {
@@ -1128,15 +1129,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      IMPORTANT: Make sure each day has completely different meals than other days. Each recipe should be unique, creative, and specifically tailored to the preferences. Do not repeat recipes or use variations of the same dish across different days. For example, if you include Pasta Bolognese on Monday, don't include any pasta with meat sauce on any other day.
+      EXTREMELY IMPORTANT: You MUST create a different set of meals for each day in the plan. DO NOT REPEAT OR REUSE any recipe across multiple days. Each day of the meal plan must feature completely different recipes.
       
-      Ensure high diversity across the meal plan by:
-      1. Varying protein sources (e.g., chicken, beef, fish, tofu, legumes)
-      2. Using different cooking methods each day (e.g., baking, sautéing, grilling, steaming)
-      3. Incorporating different cultural cuisines spread throughout the week
-      4. Balancing textures, colors, and flavor profiles across the plan
+      Rules you MUST follow for meal diversity:
+      1. No recipe, meal, or dish may appear more than once in the entire meal plan
+      2. Each day must use different primary protein sources (chicken, beef, fish, tofu, legumes, etc.)
+      3. Each day must utilize different cooking methods (baking, grilling, steaming, sautéing, etc.)
+      4. Each day must represent different cultural cuisines (based on user preferences)
+      5. Each day should have completely different flavor profiles (e.g., not having two spicy dishes on consecutive days)
       
-      This meal plan should reflect the expertise of a professional chef and nutritionist who plans highly diverse and interesting meals.
+      For a 7-day plan, you should be planning 7 COMPLETELY DIFFERENT breakfasts, 7 COMPLETELY DIFFERENT lunches, etc.
+      
+      Example of what NOT to do:
+      - Day 1: Chicken Stir Fry for dinner
+      - Day 3: Chicken Stir Fry with different vegetables for dinner
+      
+      For validation: Before finalizing your response, review the entire meal plan and confirm that no meal appears twice. If you find any duplicates, replace them with completely new recipes.
       `;
       
       try {

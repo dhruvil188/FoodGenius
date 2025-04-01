@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "wouter";
 import { expandedRecipes } from "@/data/expandedRecipeLibrary";
 import RecipeResults from "@/components/RecipeResults";
 import { AnalyzeImageResponse } from "@shared/schema";
@@ -6,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, slugify } from "@/lib/utils";
 
 export default function Library() {
-  const [selectedRecipe, setSelectedRecipe] = useState<AnalyzeImageResponse | null>(null);
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
+  const [, setLocation] = useLocation();
 
   // Placeholder image URLs for each recipe
   const placeholderImages: Record<string, string> = {
@@ -58,14 +58,9 @@ export default function Library() {
     return fallbackImages.default;
   };
 
-  const handleRecipeSelect = (recipe: AnalyzeImageResponse) => {
-    setSelectedRecipe(recipe);
-    setSelectedImageUrl(getRecipeImage(recipe));
-  };
-
-  const handleBackToLibrary = () => {
-    setSelectedRecipe(null);
-    setSelectedImageUrl("");
+  const navigateToRecipe = (recipe: AnalyzeImageResponse) => {
+    // Navigate to the recipe page using the slug
+    setLocation(`/recipe/${slugify(recipe.foodName)}`);
   };
 
   // Categorize recipes by cuisine type
@@ -78,26 +73,6 @@ export default function Library() {
     }
     recipesByCategory[mainTag].push(recipe);
   });
-
-  // If a recipe is selected, show the RecipeResults component
-  if (selectedRecipe) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Button 
-          onClick={handleBackToLibrary}
-          className="mb-6"
-          variant="outline"
-        >
-          ← Back to Recipe Library
-        </Button>
-        <RecipeResults 
-          result={selectedRecipe} 
-          imageUrl={selectedImageUrl} 
-          onTryAnother={handleBackToLibrary}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -125,7 +100,7 @@ export default function Library() {
                 key={index} 
                 recipe={recipe} 
                 imageUrl={getRecipeImage(recipe)} 
-                onSelect={handleRecipeSelect}
+                onSelect={navigateToRecipe}
                 index={index}
               />
             ))}
@@ -140,7 +115,7 @@ export default function Library() {
                   key={index} 
                   recipe={recipe} 
                   imageUrl={getRecipeImage(recipe)} 
-                  onSelect={handleRecipeSelect}
+                  onSelect={navigateToRecipe}
                   index={index}
                 />
               ))}

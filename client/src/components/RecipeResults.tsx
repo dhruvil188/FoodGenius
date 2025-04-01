@@ -319,6 +319,18 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
               >
                 <i className="fas fa-history mr-2"></i> History
               </TabsTrigger>
+              <TabsTrigger 
+                value="health" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
+                <i className="fas fa-heartbeat mr-2"></i> Health
+              </TabsTrigger>
+              <TabsTrigger 
+                value="cost" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
+                <i className="fas fa-tag mr-2"></i> Cost
+              </TabsTrigger>
             </TabsList>
             
             {/* Tab 1: Step-by-Step Instructions */}
@@ -1175,6 +1187,479 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                   <p className="text-slate-500">No recipe history available yet. Analyze more dishes to build your history!</p>
                 </div>
               )}
+            </TabsContent>
+            
+            {/* Health Benefits Tab */}
+            <TabsContent value="health">
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold mb-4 food-gradient-text">Health Benefits</h4>
+                <Card className="bg-white rounded-lg shadow-sm">
+                  <CardContent className="p-6">
+                    {/* Key Nutrients Section */}
+                    <div className="mb-6">
+                      <h5 className="text-lg font-medium mb-3">Key Health Benefits</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Generate 6 health benefit cards based on recipe ingredients */}
+                        <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                          <div className="flex items-center mb-2">
+                            <div className="mr-3 bg-green-100 p-2 rounded-full">
+                              <i className="fas fa-heart text-green-600 text-lg"></i>
+                            </div>
+                            <h6 className="font-semibold">Heart Health</h6>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("salmon") || 
+                             result.foodName.toLowerCase().includes("fish") || 
+                             result.foodName.toLowerCase().includes("avocado") || 
+                             result.foodName.toLowerCase().includes("olive") ?
+                              "Rich in omega-3 fatty acids and healthy unsaturated fats that may help reduce inflammation and lower risk of heart disease." :
+                              "Contains nutrients that support cardiovascular function and may help maintain healthy cholesterol levels."}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                          <div className="flex items-center mb-2">
+                            <div className="mr-3 bg-blue-100 p-2 rounded-full">
+                              <i className="fas fa-brain text-blue-600 text-lg"></i>
+                            </div>
+                            <h6 className="font-semibold">Brain Function</h6>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("fish") || 
+                             result.foodName.toLowerCase().includes("berry") || 
+                             result.foodName.toLowerCase().includes("nut") || 
+                             result.foodName.toLowerCase().includes("green") ?
+                              "Contains antioxidants and essential fatty acids that support cognitive health and may improve memory and brain function." :
+                              "Provides nutrients that support overall brain health and proper nervous system function."}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                          <div className="flex items-center mb-2">
+                            <div className="mr-3 bg-indigo-100 p-2 rounded-full">
+                              <i className="fas fa-dumbbell text-indigo-600 text-lg"></i>
+                            </div>
+                            <h6 className="font-semibold">Muscle Recovery</h6>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("chicken") || 
+                             result.foodName.toLowerCase().includes("beef") || 
+                             result.foodName.toLowerCase().includes("protein") || 
+                             result.foodName.toLowerCase().includes("fish") ?
+                              "High-quality protein helps repair and build muscle tissue, supporting recovery after exercise and maintaining muscle mass." :
+                              "Contains nutrients that aid in muscle function and recovery after physical activity."}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
+                          <div className="flex items-center mb-2">
+                            <div className="mr-3 bg-amber-100 p-2 rounded-full">
+                              <i className="fas fa-shield-alt text-amber-600 text-lg"></i>
+                            </div>
+                            <h6 className="font-semibold">Immune Support</h6>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("garlic") || 
+                             result.foodName.toLowerCase().includes("citrus") || 
+                             result.foodName.toLowerCase().includes("ginger") || 
+                             result.foodName.toLowerCase().includes("vegetable") ?
+                              "Contains compounds with antimicrobial and immune-boosting properties that help the body defend against infections." :
+                              "Provides nutrients that support immune system function and help protect against seasonal illness."}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-pink-50 p-4 rounded-lg border border-pink-100">
+                          <div className="flex items-center mb-2">
+                            <div className="mr-3 bg-pink-100 p-2 rounded-full">
+                              <i className="fas fa-seedling text-pink-600 text-lg"></i>
+                            </div>
+                            <h6 className="font-semibold">Digestive Health</h6>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("fiber") || 
+                             result.foodName.toLowerCase().includes("vegetable") || 
+                             result.foodName.toLowerCase().includes("whole grain") || 
+                             result.foodName.toLowerCase().includes("yogurt") ?
+                              "High in dietary fiber and beneficial compounds that promote healthy digestion and support gut microbiome balance." :
+                              "Contains elements that aid digestion and support a healthy digestive system."}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-teal-50 p-4 rounded-lg border border-teal-100">
+                          <div className="flex items-center mb-2">
+                            <div className="mr-3 bg-teal-100 p-2 rounded-full">
+                              <i className="fas fa-eye text-teal-600 text-lg"></i>
+                            </div>
+                            <h6 className="font-semibold">Antioxidant Protection</h6>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("berry") || 
+                             result.foodName.toLowerCase().includes("vegetable") || 
+                             result.foodName.toLowerCase().includes("spice") || 
+                             result.foodName.toLowerCase().includes("herb") ?
+                              "Rich in antioxidants that help neutralize harmful free radicals and may reduce cellular damage and inflammation." :
+                              "Contains compounds that provide antioxidant protection and support overall cellular health."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Dietary Info Section */}
+                    <div className="mb-6">
+                      <h5 className="text-lg font-medium mb-3">Dietary Considerations</h5>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {/* Dynamic generation based on ingredients */}
+                        <div className="bg-slate-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl mb-1 text-green-600">
+                            <i className={`fas ${result.foodName.toLowerCase().includes("vegetable") || 
+                                               result.foodName.toLowerCase().includes("salad") || 
+                                               result.foodName.toLowerCase().includes("vegan") ? 
+                                               'fa-check-circle' : 'fa-info-circle'}`}></i>
+                          </div>
+                          <h6 className="font-medium text-sm">Vegetarian</h6>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {result.foodName.toLowerCase().includes("meat") || 
+                              result.foodName.toLowerCase().includes("chicken") || 
+                              result.foodName.toLowerCase().includes("beef") || 
+                              result.foodName.toLowerCase().includes("pork") || 
+                              result.foodName.toLowerCase().includes("fish") || 
+                              result.foodName.toLowerCase().includes("salmon") ? 
+                              "Contains animal products" : "Plant-based ingredients"}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl mb-1 text-amber-600">
+                            <i className={`fas ${result.foodName.toLowerCase().includes("wheat") || 
+                                              result.foodName.toLowerCase().includes("bread") || 
+                                              result.foodName.toLowerCase().includes("pasta") || 
+                                              result.foodName.toLowerCase().includes("flour") ? 
+                                              'fa-times-circle' : 'fa-check-circle'}`}></i>
+                          </div>
+                          <h6 className="font-medium text-sm">Gluten-Free</h6>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {result.foodName.toLowerCase().includes("wheat") || 
+                              result.foodName.toLowerCase().includes("bread") || 
+                              result.foodName.toLowerCase().includes("pasta") || 
+                              result.foodName.toLowerCase().includes("flour") ? 
+                              "Contains gluten ingredients" : "No obvious gluten sources"}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl mb-1 text-blue-600">
+                            <i className={`fas ${result.foodName.toLowerCase().includes("milk") || 
+                                             result.foodName.toLowerCase().includes("cheese") || 
+                                             result.foodName.toLowerCase().includes("cream") || 
+                                             result.foodName.toLowerCase().includes("butter") || 
+                                             result.foodName.toLowerCase().includes("yogurt") ? 
+                                             'fa-times-circle' : 'fa-check-circle'}`}></i>
+                          </div>
+                          <h6 className="font-medium text-sm">Dairy-Free</h6>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {result.foodName.toLowerCase().includes("milk") || 
+                              result.foodName.toLowerCase().includes("cheese") || 
+                              result.foodName.toLowerCase().includes("cream") || 
+                              result.foodName.toLowerCase().includes("butter") || 
+                              result.foodName.toLowerCase().includes("yogurt") ? 
+                              "Contains dairy products" : "No obvious dairy ingredients"}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-3 rounded-lg text-center">
+                          <div className="text-2xl mb-1 text-rose-600">
+                            <i className={`fas ${result.foodName.toLowerCase().includes("nut") || 
+                                              result.foodName.toLowerCase().includes("peanut") || 
+                                              result.foodName.toLowerCase().includes("almond") || 
+                                              result.foodName.toLowerCase().includes("cashew") ? 
+                                              'fa-exclamation-triangle' : 'fa-check-circle'}`}></i>
+                          </div>
+                          <h6 className="font-medium text-sm">Nut Allergens</h6>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {result.foodName.toLowerCase().includes("nut") || 
+                              result.foodName.toLowerCase().includes("peanut") || 
+                              result.foodName.toLowerCase().includes("almond") || 
+                              result.foodName.toLowerCase().includes("cashew") ? 
+                              "Contains nuts or traces" : "No obvious nut ingredients"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Recommended For Section */}
+                    <div>
+                      <h5 className="text-lg font-medium mb-3">Ideal For</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-slate-50 p-3 rounded-lg border-l-4 border-green-500">
+                          <h6 className="font-medium mb-1">Fitness Enthusiasts</h6>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("protein") || 
+                             result.foodName.toLowerCase().includes("chicken") || 
+                             result.foodName.toLowerCase().includes("fish") || 
+                             result.foodName.toLowerCase().includes("lean") ?
+                             "High protein content supports muscle recovery and growth after training sessions." :
+                             "Balanced macronutrients help fuel fitness activities and support recovery."}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-3 rounded-lg border-l-4 border-blue-500">
+                          <h6 className="font-medium mb-1">Weight Management</h6>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("salad") || 
+                             result.foodName.toLowerCase().includes("vegetable") || 
+                             result.foodName.toLowerCase().includes("lean") || 
+                             result.foodName.toLowerCase().includes("grilled") ?
+                             "Lower in calories while being nutrient-dense and satisfying to support healthy weight goals." : 
+                             "Can be incorporated into a balanced diet with portion control for weight management."}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-slate-50 p-3 rounded-lg border-l-4 border-purple-500">
+                          <h6 className="font-medium mb-1">Active Families</h6>
+                          <p className="text-sm text-slate-600">
+                            {result.foodName.toLowerCase().includes("comfort") || 
+                             result.foodName.toLowerCase().includes("pasta") || 
+                             result.foodName.toLowerCase().includes("rice") || 
+                             result.foodName.toLowerCase().includes("bowl") ?
+                             "Provides essential nutrients and energy for active family members of all ages." :
+                             "Contains balanced nutrients that support energy levels and overall health for busy families."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            {/* Cost Estimation Tab */}
+            <TabsContent value="cost">
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold mb-4 food-gradient-text">Cost Estimation</h4>
+                <Card className="bg-white rounded-lg shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="mb-6">
+                      <h5 className="text-lg font-medium mb-2">Budget Classification</h5>
+                      
+                      <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                        {/* Dynamic cost indicator */}
+                        {(() => {
+                          // Classify recipes based on ingredients and complexity
+                          const hasExpensiveIngredients = selectedRecipe.ingredients.some(i => 
+                            i.toLowerCase().includes("steak") || 
+                            i.toLowerCase().includes("salmon") || 
+                            i.toLowerCase().includes("shrimp") || 
+                            i.toLowerCase().includes("prawn") ||
+                            i.toLowerCase().includes("saffron") ||
+                            i.toLowerCase().includes("truffle") ||
+                            i.toLowerCase().includes("crab") ||
+                            i.toLowerCase().includes("lobster")
+                          );
+                          
+                          const hasMediumIngredients = selectedRecipe.ingredients.some(i => 
+                            i.toLowerCase().includes("chicken") || 
+                            i.toLowerCase().includes("cheese") || 
+                            i.toLowerCase().includes("nuts") ||
+                            i.toLowerCase().includes("wine") ||
+                            i.toLowerCase().includes("beef")
+                          );
+                          
+                          let costCategory;
+                          let fillWidth;
+                          let fillColor;
+                          let costLabel;
+
+                          if (hasExpensiveIngredients) {
+                            costCategory = "Premium";
+                            fillWidth = "w-full";
+                            fillColor = "bg-red-500";
+                            costLabel = "High-cost recipe with premium ingredients";
+                          } else if (hasMediumIngredients) {
+                            costCategory = "Moderate";
+                            fillWidth = "w-2/3";
+                            fillColor = "bg-amber-500";
+                            costLabel = "Medium-cost recipe with standard ingredients";
+                          } else {
+                            costCategory = "Budget-friendly";
+                            fillWidth = "w-1/3";
+                            fillColor = "bg-green-500";
+                            costLabel = "Low-cost recipe with economical ingredients";
+                          }
+                          
+                          return (
+                            <>
+                              <div className={`absolute top-0 left-0 h-full ${fillWidth} ${fillColor}`}></div>
+                              <div className="absolute top-0 left-0 w-full h-full flex justify-between items-center px-3">
+                                <span className="text-xs font-medium text-white">Budget</span>
+                                <span className="text-xs font-medium text-white">Moderate</span>
+                                <span className="text-xs font-medium text-white">Premium</span>
+                              </div>
+                              <div className="mt-2 flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${fillColor}`}></span>
+                                  <span className="font-medium">{costCategory}</span>
+                                </div>
+                                <span className="text-sm text-slate-600">{costLabel}</span>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <h5 className="text-md font-medium mb-3 border-b pb-2">Cost-Saving Tips</h5>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-green-50 rounded-lg">
+                          <h6 className="font-medium text-green-800 mb-2">Shopping Strategy</h6>
+                          <ul className="list-disc pl-5 space-y-2 text-slate-700">
+                            <li>Buy seasonal ingredients for better value</li>
+                            <li>Check discount supermarkets for basic ingredients</li>
+                            <li>Look for "reduced to clear" items for perishables</li>
+                            <li>Consider frozen alternatives for out-of-season produce</li>
+                          </ul>
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <h6 className="font-medium text-blue-800 mb-2">Main Cost Contributors</h6>
+                          <div className="space-y-1">
+                            {selectedRecipe.ingredients.slice(0, 5).map((ingredient, index) => (
+                              <div key={index} className="flex items-center py-1">
+                                {index < 3 ? 
+                                  <span className="text-red-500 mr-2"><i className="fas fa-exclamation-circle"></i></span> :
+                                  <span className="text-amber-500 mr-2"><i className="fas fa-exclamation-triangle"></i></span>
+                                }
+                                <span className="text-slate-700">{ingredient}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-slate-500 mt-2">
+                            <i className="fas fa-info-circle mr-1"></i> 
+                            Red items typically contribute most to overall cost. Consider substitutes below for savings.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h5 className="text-md font-medium mb-3 border-b pb-2">Cheaper Alternatives</h5>
+                      <div className="space-y-4">
+                        {/* Generate 3 random cheaper alternatives */}
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <div className="flex justify-between items-start mb-2">
+                            <h6 className="font-medium">
+                              <span className="mr-2">
+                                <i className="fas fa-exchange-alt text-blue-600"></i>
+                              </span>
+                              Replace {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("beef"))
+                                ? "beef"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("chicken")) 
+                                  ? "chicken breast"
+                                  : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("cheese"))
+                                    ? "specialty cheese"
+                                    : "fresh herbs"
+                              } with {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("beef"))
+                                ? "turkey mince"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("chicken")) 
+                                  ? "chicken thighs"
+                                  : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("cheese"))
+                                    ? "regular cheddar"
+                                    : "dried herbs"
+                              }
+                            </h6>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Save £{(Math.random() * 2.5 + 2).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {
+                              selectedRecipe.ingredients.some(i => i.toLowerCase().includes("beef"))
+                              ? "Turkey mince is leaner and cheaper while still providing protein."
+                              : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("chicken")) 
+                                ? "Chicken thighs are more flavorful and often significantly cheaper."
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("cheese"))
+                                  ? "Regular cheddar works well in most recipes at a fraction of the cost."
+                                  : "Dried herbs last longer and are more economical for everyday cooking."
+                            }
+                          </p>
+                        </div>
+                        
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <div className="flex justify-between items-start mb-2">
+                            <h6 className="font-medium">
+                              <span className="mr-2">
+                                <i className="fas fa-exchange-alt text-blue-600"></i>
+                              </span>
+                              Use {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("shrimp") || i.toLowerCase().includes("prawn"))
+                                ? "frozen prawns"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("berr")) 
+                                  ? "frozen berries"
+                                  : "seasonal vegetables"
+                              } instead of {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("shrimp") || i.toLowerCase().includes("prawn"))
+                                ? "fresh prawns"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("berr")) 
+                                  ? "fresh berries"
+                                  : "out-of-season produce"
+                              }
+                            </h6>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Save £{(Math.random() * 2 + 2).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {
+                              selectedRecipe.ingredients.some(i => i.toLowerCase().includes("shrimp") || i.toLowerCase().includes("prawn"))
+                              ? "Frozen prawns are just as nutritious and much more affordable."
+                              : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("berr")) 
+                                ? "Frozen berries are picked at peak ripeness and often cheaper."
+                                : "Seasonal vegetables are both cheaper and more flavorful."
+                            }
+                          </p>
+                        </div>
+                        
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <div className="flex justify-between items-start mb-2">
+                            <h6 className="font-medium">
+                              <span className="mr-2">
+                                <i className="fas fa-exchange-alt text-blue-600"></i>
+                              </span>
+                              Buy {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                                ? "rice/pasta in bulk"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                  ? "whole spices"
+                                  : "store brand ingredients"
+                              } instead of {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                                ? "small packages"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                  ? "pre-ground spices"
+                                  : "premium brands"
+                              }
+                            </h6>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Save £{(Math.random() * 2 + 1.5).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {
+                              selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                              ? "Buying staples in bulk can save up to 50% on per-serving cost."
+                              : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                ? "Whole spices last longer and provide better flavor when freshly ground."
+                                : "Store brands often contain identical ingredients at lower prices."
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
           

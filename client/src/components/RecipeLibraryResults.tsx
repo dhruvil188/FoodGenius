@@ -1023,7 +1023,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                             <div>
                               <h6 className="font-medium text-sm mb-1">Heart Health</h6>
                               <p className="text-sm text-slate-700">
-                                {selectedRecipe.foodName.includes("Fish") || selectedRecipe.foodName.includes("Salmon") 
+                                {selectedRecipe.title.includes("Fish") || selectedRecipe.title.includes("Salmon") 
                                   ? "Rich in omega-3 fatty acids that reduce inflammation and lower blood pressure." 
                                   : "Contains nutrients that support cardiovascular function and healthy circulation."}
                               </p>
@@ -1160,7 +1160,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                             </span>
                             <span className="text-slate-700">
                               <strong>Heart Health:</strong> {
-                                selectedRecipe.tags.some(tag => tag.toLowerCase().includes("fish") || tag.toLowerCase().includes("vegan"))
+                                selectedRecipe.tags && selectedRecipe.tags.some(tag => tag.toLowerCase().includes("fish") || tag.toLowerCase().includes("vegan"))
                                 ? "Low in saturated fat and rich in heart-healthy nutrients."
                                 : "Balanced ingredients support cardiovascular health when consumed in moderation."
                               }
@@ -1184,7 +1184,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                             </span>
                             <span className="text-slate-700">
                               <strong>Weight Management:</strong> {
-                                selectedRecipe.tags.some(tag => tag.toLowerCase().includes("healthy") || tag.toLowerCase().includes("light"))
+                                selectedRecipe.tags && selectedRecipe.tags.some(tag => tag.toLowerCase().includes("healthy") || tag.toLowerCase().includes("light"))
                                 ? "Nutrient-dense with balanced macros to support healthy weight."
                                 : "Can be incorporated into a balanced diet with portion control."
                               }

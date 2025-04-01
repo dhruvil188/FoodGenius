@@ -201,13 +201,18 @@ function RecipeCard({ recipe, imageUrl, onSelect, index }: RecipeCardProps) {
     >
       <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300">
         <div className="relative h-48 bg-gray-100">
-          {imageUrl && (
-            <img 
-              src={imageUrl} 
-              alt={recipe.foodName} 
-              className="w-full h-full object-cover" 
-            />
-          )}
+          <img 
+            src={(recipe as any).imageUrl || imageUrl} 
+            alt={recipe.foodName} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.log("Image failed to load, trying fallback", e);
+              if ((recipe as any).imageUrl) {
+                // If we were using the direct imageUrl and it failed, try using the passed-in imageUrl prop
+                e.currentTarget.src = imageUrl;
+              }
+            }}
+          />
         </div>
         <CardContent className="p-5">
           <h3 className="font-bold text-xl mb-2">{recipe.foodName}</h3>

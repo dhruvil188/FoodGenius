@@ -651,6 +651,22 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
             
             {/* Tab 3: Techniques */}
             <TabsContent value="techniques" className="space-y-6">
+              {/* No Techniques Available Message */}
+              {(!selectedRecipe.equipment || selectedRecipe.equipment.length === 0) && 
+               (!selectedRecipe.techniqueDetails || selectedRecipe.techniqueDetails.length === 0) && 
+               (!selectedRecipe.cookingScience) && (
+                <div className="p-8 text-center">
+                  <div className="mb-4 text-slate-400">
+                    <i className="fas fa-utensils text-6xl"></i>
+                  </div>
+                  <h4 className="text-xl font-semibold mb-2 food-gradient-text">Techniques Not Available</h4>
+                  <p className="text-slate-600 max-w-lg mx-auto">
+                    Detailed cooking techniques and equipment information are not available for this recipe.
+                    You can still follow the step-by-step instructions to prepare this delicious dish!
+                  </p>
+                </div>
+              )}
+              
               {/* Kitchen Tools and Equipment */}
               {selectedRecipe.equipment && selectedRecipe.equipment.length > 0 && (
                 <div className="mb-8">

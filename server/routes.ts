@@ -21,9 +21,33 @@ import { fromZodError } from "zod-validation-error";
 import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
 
-// Auth middleware to validate JWT token
+// Auth middleware to support both session cookies and Bearer tokens for authentication
 const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    // Check if we have an active session from cookie
+    if (req.headers.cookie) {
+      const cookies = req.headers.cookie.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, string>);
+      
+      // Look for session token in cookies
+      if (cookies.sessionToken) {
+        const session = await storage.getSessionByToken(cookies.sessionToken);
+        if (session) {
+          const user = await storage.getUser(session.userId);
+          if (user) {
+            // Store user details in request object
+            (req as any).user = user;
+            (req as any).session = session;
+            return next();
+          }
+        }
+      }
+    }
+    
+    // If no valid session cookie, try Bearer token from Authorization header
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -57,6 +81,7 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
     (req as any).session = session;
     next();
   } catch (error) {
+    console.error('Auth middleware error:', error);
     return res.status(401).json({ 
       success: false, 
       message: 'Authentication failed. Please log in again.' 
@@ -734,6 +759,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt
       });
       
+      // Set the token as an HTTP-only cookie for security
+      res.cookie('sessionToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+        path: '/'
+      });
+      
       // Return user data and token
       const authResponse: AuthResponse = {
         success: true,
@@ -802,6 +835,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt
       });
       
+      // Set the token as an HTTP-only cookie for security
+      res.cookie('sessionToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
+        path: '/'
+      });
+      
       // Return user data and token
       const authResponse: AuthResponse = {
         success: true,
@@ -836,12 +877,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/auth/logout", authMiddleware, async (req: Request, res: Response) => {
     try {
-      const authHeader = req.headers.authorization;
-      const token = authHeader?.split(' ')[1];
+      // Get session from middleware
+      const session = (req as any).session;
       
-      if (token) {
-        await storage.deleteSession(token);
+      if (session && session.token) {
+        // Delete the session from storage
+        await storage.deleteSession(session.token);
       }
+      
+      // Clear the session cookie
+      res.clearCookie('sessionToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/'
+      });
       
       return res.status(200).json({
         success: true,

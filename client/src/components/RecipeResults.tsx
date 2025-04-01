@@ -176,6 +176,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     }
     
     try {
+      // Use the API module with proper credentials handling
       const response = await fetch('/api/recipes', {
         method: 'POST',
         headers: {
@@ -184,6 +185,8 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
         body: JSON.stringify({
           recipe: result
         }),
+        // Include credentials to send the session cookie
+        credentials: 'include'
       });
       
       if (response.ok) {
@@ -193,12 +196,14 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
         });
         triggerConfetti();
       } else {
-        throw new Error("Failed to save recipe");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save recipe");
       }
     } catch (error) {
+      console.error("Error saving recipe:", error);
       toast({
         title: "Error",
-        description: "Failed to save recipe. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save recipe. Please try again.",
         variant: "destructive",
       });
     }

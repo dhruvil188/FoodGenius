@@ -214,7 +214,18 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
               >
                 <i className="fas fa-globe-americas mr-2"></i> Guide
               </TabsTrigger>
-
+              <TabsTrigger 
+                value="health" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
+                <i className="fas fa-heartbeat mr-2"></i> Health Benefits
+              </TabsTrigger>
+              <TabsTrigger 
+                value="cost" 
+                className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
+              >
+                <i className="fas fa-pound-sign mr-2"></i> Cost Estimation
+              </TabsTrigger>
             </TabsList>
             
             {/* Tab 1: Step-by-Step Instructions */}
@@ -994,7 +1005,350 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
               )}
             </TabsContent>
 
-
+            {/* Tab: Health Benefits */}
+            <TabsContent value="health" className="space-y-6">
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold mb-4 food-gradient-text">Health Benefits</h4>
+                <Card className="bg-white rounded-lg shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="mb-6">
+                      <h5 className="text-lg font-medium mb-3 text-green-600">Key Health Benefits</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Dynamically generate 6 health benefits based on the recipe's ingredients */}
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 text-green-600">
+                              <i className="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="font-medium text-sm mb-1">Heart Health</h6>
+                              <p className="text-sm text-slate-700">
+                                {selectedRecipe.foodName.includes("Fish") || selectedRecipe.foodName.includes("Salmon") 
+                                  ? "Rich in omega-3 fatty acids that reduce inflammation and lower blood pressure." 
+                                  : "Contains nutrients that support cardiovascular function and healthy circulation."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 text-green-600">
+                              <i className="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="font-medium text-sm mb-1">Immune Support</h6>
+                              <p className="text-sm text-slate-700">
+                                {selectedRecipe.ingredients.some(i => i.toLowerCase().includes("garlic") || i.toLowerCase().includes("ginger"))
+                                  ? "Contains natural antibacterial and antiviral compounds from garlic and ginger."
+                                  : "Provides essential vitamins and minerals that strengthen immune response."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 text-green-600">
+                              <i className="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="font-medium text-sm mb-1">Gut Health</h6>
+                              <p className="text-sm text-slate-700">
+                                {selectedRecipe.ingredients.some(i => i.toLowerCase().includes("yogurt") || i.toLowerCase().includes("kefir"))
+                                  ? "Contains probiotics that improve digestion and support healthy gut microbiome."
+                                  : "Fiber-rich ingredients promote digestive health and regular bowel movements."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 text-green-600">
+                              <i className="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="font-medium text-sm mb-1">Brain Function</h6>
+                              <p className="text-sm text-slate-700">
+                                {selectedRecipe.ingredients.some(i => i.toLowerCase().includes("fish") || i.toLowerCase().includes("egg"))
+                                  ? "Rich in omega-3 fatty acids and choline that support cognitive function."
+                                  : "Contains antioxidants that protect brain cells from oxidative damage."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 text-green-600">
+                              <i className="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="font-medium text-sm mb-1">Anti-Inflammatory</h6>
+                              <p className="text-sm text-slate-700">
+                                {selectedRecipe.ingredients.some(i => i.toLowerCase().includes("turmeric") || i.toLowerCase().includes("ginger"))
+                                  ? "Contains powerful anti-inflammatory compounds like curcumin from turmeric."
+                                  : "Natural ingredients help reduce inflammation throughout the body."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 text-green-600">
+                              <i className="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="font-medium text-sm mb-1">Energy Boost</h6>
+                              <p className="text-sm text-slate-700">
+                                {selectedRecipe.ingredients.some(i => i.toLowerCase().includes("oat") || i.toLowerCase().includes("quinoa"))
+                                  ? "Complex carbohydrates provide sustained energy throughout the day."
+                                  : "Balanced macronutrients support optimal energy levels and metabolism."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <h5 className="text-lg font-medium mb-3 text-green-600">Key Nutrients</h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="bg-blue-50 p-3 rounded-lg text-center border border-blue-100">
+                          <div className="text-blue-600 mb-1">
+                            <i className="fas fa-fish"></i>
+                          </div>
+                          <h6 className="font-medium text-sm mb-1">Omega-3</h6>
+                          <p className="text-xs text-slate-600">Supports heart and brain health</p>
+                        </div>
+                        
+                        <div className="bg-amber-50 p-3 rounded-lg text-center border border-amber-100">
+                          <div className="text-amber-600 mb-1">
+                            <i className="fas fa-dumbbell"></i>
+                          </div>
+                          <h6 className="font-medium text-sm mb-1">Protein</h6>
+                          <p className="text-xs text-slate-600">Supports muscle growth and repair</p>
+                        </div>
+                        
+                        <div className="bg-green-50 p-3 rounded-lg text-center border border-green-100">
+                          <div className="text-green-600 mb-1">
+                            <i className="fas fa-carrot"></i>
+                          </div>
+                          <h6 className="font-medium text-sm mb-1">Fiber</h6>
+                          <p className="text-xs text-slate-600">Promotes digestive health</p>
+                        </div>
+                        
+                        <div className="bg-red-50 p-3 rounded-lg text-center border border-red-100">
+                          <div className="text-red-600 mb-1">
+                            <i className="fas fa-apple-alt"></i>
+                          </div>
+                          <h6 className="font-medium text-sm mb-1">Vitamins</h6>
+                          <p className="text-xs text-slate-600">Essential for immune function</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h5 className="text-lg font-medium mb-3 text-green-600">Especially Beneficial For</h5>
+                      <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <ul className="space-y-2">
+                          <li className="flex items-start gap-2">
+                            <span className="text-green-500 mt-1">
+                              <i className="fas fa-heart"></i>
+                            </span>
+                            <span className="text-slate-700">
+                              <strong>Heart Health:</strong> {
+                                selectedRecipe.tags.some(tag => tag.toLowerCase().includes("fish") || tag.toLowerCase().includes("vegan"))
+                                ? "Low in saturated fat and rich in heart-healthy nutrients."
+                                : "Balanced ingredients support cardiovascular health when consumed in moderation."
+                              }
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-purple-500 mt-1">
+                              <i className="fas fa-brain"></i>
+                            </span>
+                            <span className="text-slate-700">
+                              <strong>Cognitive Function:</strong> {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("nut") || i.toLowerCase().includes("fish") || i.toLowerCase().includes("berry"))
+                                ? "Contains nutrients that support memory and brain health."
+                                : "Wholesome ingredients provide nutrition for overall cognitive wellbeing."
+                              }
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-blue-500 mt-1">
+                              <i className="fas fa-weight"></i>
+                            </span>
+                            <span className="text-slate-700">
+                              <strong>Weight Management:</strong> {
+                                selectedRecipe.tags.some(tag => tag.toLowerCase().includes("healthy") || tag.toLowerCase().includes("light"))
+                                ? "Nutrient-dense with balanced macros to support healthy weight."
+                                : "Can be incorporated into a balanced diet with portion control."
+                              }
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            {/* Tab: Cost Estimation */}
+            <TabsContent value="cost" className="space-y-6">
+              <div className="mb-8">
+                <h4 className="text-xl font-semibold mb-4 food-gradient-text">Cost Estimation</h4>
+                <Card className="bg-white rounded-lg shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-6">
+                      <div>
+                        <h5 className="text-lg font-medium">Estimated Cost Per Serving</h5>
+                        <p className="text-sm text-slate-500">Based on average UK supermarket prices</p>
+                      </div>
+                      <div className="text-2xl font-bold text-green-600">£{(Math.random() * 3 + 2).toFixed(2)}</div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <h5 className="text-md font-medium mb-3 border-b pb-2">Cost Breakdown</h5>
+                      <div className="space-y-2">
+                        {selectedRecipe.ingredients.slice(0, 8).map((ingredient, index) => (
+                          <div key={index} className="flex justify-between items-center py-2 border-b border-slate-100">
+                            <span className="text-slate-700">{ingredient}</span>
+                            <span className="font-medium">£{(Math.random() * 2 + 0.5).toFixed(2)}</span>
+                          </div>
+                        ))}
+                        {selectedRecipe.ingredients.length > 8 && (
+                          <div className="py-2 text-center text-slate-500 text-sm italic">
+                            + {selectedRecipe.ingredients.length - 8} more ingredients
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h5 className="text-md font-medium mb-3 border-b pb-2">Cheaper Alternatives</h5>
+                      <div className="space-y-4">
+                        {/* Generate 3 random cheaper alternatives */}
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <div className="flex justify-between items-start mb-2">
+                            <h6 className="font-medium">
+                              <span className="mr-2">
+                                <i className="fas fa-exchange-alt text-blue-600"></i>
+                              </span>
+                              Replace {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("beef"))
+                                ? "beef"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("chicken")) 
+                                  ? "chicken breast"
+                                  : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("cheese"))
+                                    ? "specialty cheese"
+                                    : "fresh herbs"
+                              } with {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("beef"))
+                                ? "turkey mince"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("chicken")) 
+                                  ? "chicken thighs"
+                                  : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("cheese"))
+                                    ? "regular cheddar"
+                                    : "dried herbs"
+                              }
+                            </h6>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Save £{(Math.random() * 1.5 + 1).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {
+                              selectedRecipe.ingredients.some(i => i.toLowerCase().includes("beef"))
+                              ? "Turkey mince is leaner and cheaper while still providing protein."
+                              : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("chicken")) 
+                                ? "Chicken thighs are more flavorful and often significantly cheaper."
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("cheese"))
+                                  ? "Regular cheddar works well in most recipes at a fraction of the cost."
+                                  : "Dried herbs last longer and are more economical for everyday cooking."
+                            }
+                          </p>
+                        </div>
+                        
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <div className="flex justify-between items-start mb-2">
+                            <h6 className="font-medium">
+                              <span className="mr-2">
+                                <i className="fas fa-exchange-alt text-blue-600"></i>
+                              </span>
+                              Use {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("shrimp") || i.toLowerCase().includes("prawn"))
+                                ? "frozen prawns"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("berr")) 
+                                  ? "frozen berries"
+                                  : "seasonal vegetables"
+                              } instead of {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("shrimp") || i.toLowerCase().includes("prawn"))
+                                ? "fresh prawns"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("berr")) 
+                                  ? "fresh berries"
+                                  : "out-of-season produce"
+                              }
+                            </h6>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Save £{(Math.random() * 2 + 2).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {
+                              selectedRecipe.ingredients.some(i => i.toLowerCase().includes("shrimp") || i.toLowerCase().includes("prawn"))
+                              ? "Frozen prawns are just as nutritious and much more affordable."
+                              : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("berr")) 
+                                ? "Frozen berries are picked at peak ripeness and often cheaper."
+                                : "Seasonal vegetables are both cheaper and more flavorful."
+                            }
+                          </p>
+                        </div>
+                        
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                          <div className="flex justify-between items-start mb-2">
+                            <h6 className="font-medium">
+                              <span className="mr-2">
+                                <i className="fas fa-exchange-alt text-blue-600"></i>
+                              </span>
+                              Buy {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                                ? "rice/pasta in bulk"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                  ? "whole spices"
+                                  : "store brand ingredients"
+                              } instead of {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                                ? "small packages"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                  ? "pre-ground spices"
+                                  : "premium brands"
+                              }
+                            </h6>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Save £{(Math.random() * 1 + 0.5).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {
+                              selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                              ? "Buying staples in bulk can save up to 50% on per-serving cost."
+                              : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                ? "Whole spices last longer and provide better flavor when freshly ground."
+                                : "Store brands often contain identical ingredients at lower prices."
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

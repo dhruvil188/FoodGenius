@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { expandedRecipes } from "@/data/expandedRecipeLibrary";
-import { foodComRecipes } from "@/data/foodComRecipes";
-import { foodComRecipes2 } from "@/data/foodComRecipes2";
-import { foodComRecipes3 } from "@/data/foodComRecipes3";
 import RecipeLibraryResults from "@/components/RecipeLibraryResults";
 import { AnalyzeImageResponse } from "@shared/schema";
 import { Button } from "@/components/ui/button";
@@ -47,32 +44,12 @@ export default function RecipePage() {
 
   // Get an appropriate image for a recipe based on name or tags
   const getRecipeImage = (recipe: AnalyzeImageResponse): string => {
-    console.log("Recipe object:", recipe);
-    
-    // First check if the recipe has an imageUrl property (Food.com recipes have these)
-    // Use a type assertion to access the non-standard property
-    const recipeAny = recipe as any;
-    if (recipeAny.imageUrl && typeof recipeAny.imageUrl === 'string' && recipeAny.imageUrl.trim() !== '') {
-      console.log("Using direct imageUrl:", recipeAny.imageUrl);
-      return recipeAny.imageUrl;
-    }
-    
-    // First recipe in the array might have an imageUrl
-    if (recipe.recipes && 
-        recipe.recipes.length > 0 && 
-        (recipe.recipes[0] as any).imageUrl && 
-        typeof (recipe.recipes[0] as any).imageUrl === 'string' && 
-        (recipe.recipes[0] as any).imageUrl.trim() !== '') {
-      console.log("Using recipe[0] imageUrl:", (recipe.recipes[0] as any).imageUrl);
-      return (recipe.recipes[0] as any).imageUrl;
-    }
-    
-    // Then try to use YouTube thumbnail if available (TheMealDB recipes have these)
+    // First try to use YouTube thumbnail if available (TheMealDB recipes have these)
     if (recipe.youtubeVideos && 
         recipe.youtubeVideos.length > 0 && 
         recipe.youtubeVideos[0].thumbnailUrl && 
-        recipe.youtubeVideos[0].thumbnailUrl.trim() !== '') {
-      console.log("Using YouTube thumbnail:", recipe.youtubeVideos[0].thumbnailUrl);
+        recipe.youtubeVideos[0].thumbnailUrl.trim() !== '' &&
+        recipe.youtubeVideos[0].thumbnailUrl.includes('themealdb.com')) {
       return recipe.youtubeVideos[0].thumbnailUrl;
     }
     
@@ -80,8 +57,8 @@ export default function RecipePage() {
     if (recipe.youtubeVideos) {
       for (const video of recipe.youtubeVideos) {
         if (video.thumbnailUrl && 
-            video.thumbnailUrl.trim() !== '') {
-          console.log("Using YouTube video thumbnail:", video.thumbnailUrl);
+            video.thumbnailUrl.trim() !== '' && 
+            video.thumbnailUrl.includes('themealdb.com')) {
           return video.thumbnailUrl;
         }
       }
@@ -89,53 +66,29 @@ export default function RecipePage() {
     
     // Then try exact match by name
     if (placeholderImages[recipe.foodName]) {
-      console.log("Using named placeholder:", placeholderImages[recipe.foodName]);
       return placeholderImages[recipe.foodName];
     }
     
     // Then look for category matches in tags
     const lowerTags = recipe.tags.map(tag => tag.toLowerCase());
     if (lowerTags.some(tag => tag.includes('soup'))) {
-      console.log("Using soup fallback");
       return fallbackImages.soup;
     } else if (lowerTags.some(tag => tag.includes('dessert') || tag.includes('sweet'))) {
-      console.log("Using dessert fallback");
       return fallbackImages.dessert;
     } else if (lowerTags.some(tag => tag.includes('vegetarian') || tag.includes('vegan'))) {
-      console.log("Using vegetarian fallback");
       return fallbackImages.vegetarian;
     } else if (lowerTags.some(tag => tag.includes('meat') || tag.includes('chicken') || tag.includes('beef'))) {
-      console.log("Using meat fallback");
       return fallbackImages.meat;
     }
     
     // Default fallback
-    console.log("Using default fallback");
     return fallbackImages.default;
   };
 
   useEffect(() => {
     if (params?.slug) {
       setLoading(true);
-      
-      // Search in all recipe collections
-      const allRecipeCollections = [
-        expandedRecipes,
-        foodComRecipes,
-        foodComRecipes2,
-        foodComRecipes3
-      ];
-      
-      let foundRecipe = null;
-      
-      // Look through all collections for the recipe by slug
-      for (const collection of allRecipeCollections) {
-        const found = findRecipeBySlug(collection, params.slug);
-        if (found) {
-          foundRecipe = found;
-          break;
-        }
-      }
+      const foundRecipe = findRecipeBySlug(expandedRecipes, params.slug);
       
       if (foundRecipe) {
         setRecipe(foundRecipe);

@@ -41,8 +41,18 @@ export default function Library() {
   // Get an appropriate image for a recipe based on name or tags
   const getRecipeImage = (recipe: AnalyzeImageResponse): string => {
     // First check if the recipe has an imageUrl property (Food.com recipes have these)
-    if (recipe.imageUrl && recipe.imageUrl.trim() !== '') {
-      return recipe.imageUrl;
+    // Use a type assertion to access the non-standard property
+    const recipeAny = recipe as any;
+    if (recipeAny.imageUrl && typeof recipeAny.imageUrl === 'string' && recipeAny.imageUrl.trim() !== '') {
+      return recipeAny.imageUrl;
+    }
+    
+    // First recipe in the array might have an imageUrl
+    if (recipe.recipes && 
+        recipe.recipes.length > 0 && 
+        recipe.recipes[0].imageUrl && 
+        recipe.recipes[0].imageUrl.trim() !== '') {
+      return recipe.recipes[0].imageUrl;
     }
     
     // Then try to use YouTube thumbnail if available (TheMealDB recipes have these)

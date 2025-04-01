@@ -814,8 +814,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify password
-      const [storedHash, salt] = user.password.split(':');
-      const isValid = verifyPassword(validatedData.password, storedHash, salt);
+      const isValid = verifyPassword(validatedData.password, user.password, user.salt || '');
       
       if (!isValid) {
         return res.status(401).json({
@@ -916,7 +915,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: user.username,
           email: user.email,
           displayName: user.displayName,
-          profileImage: user.profileImage
+          profileImage: user.profileImage,
+          createdAt: user.createdAt
         }
       });
     } catch (error) {
@@ -1144,6 +1144,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         success: false,
         message: "Failed to update favorite status",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  // User password update endpoint
+  app.patch("/api/auth/password", authMiddleware, async (req: Request, res: Response) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const user = (req as any).user as User;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Current password and new password are required"
+        });
+      }
+      
+      // Verify current password
+      const isPasswordValid = verifyPassword(currentPassword, user.password, user.salt || '');
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: "Current password is incorrect"
+        });
+      }
+      
+      // Password validation rules
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "New password must be at least 6 characters long"
+        });
+      }
+      
+      // Hash new password and update user
+      const { hash, salt } = hashPassword(newPassword);
+      
+      const updatedUser = await storage.updateUser(user.id, { 
+        password: hash,
+        salt
+      });
+      
+      if (!updatedUser) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update password"
+        });
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: "Password updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating password:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update password",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

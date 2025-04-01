@@ -21,48 +21,8 @@ import { fromZodError } from "zod-validation-error";
 import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
 
-// Auth middleware to validate JWT token
-const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Authentication required. Please log in.' 
-      });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    const session = await storage.getSessionByToken(token);
-    
-    if (!session) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid or expired session. Please log in again.' 
-      });
-    }
-    
-    const user = await storage.getUser(session.userId);
-    
-    if (!user) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'User not found. Please log in again.' 
-      });
-    }
-    
-    // Store user details in request object for route handlers to use
-    (req as any).user = user;
-    (req as any).session = session;
-    next();
-  } catch (error) {
-    return res.status(401).json({ 
-      success: false, 
-      message: 'Authentication failed. Please log in again.' 
-    });
-  }
-};
+// Simple mock user ID for guest access
+const GUEST_USER_ID = 1;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Flag to enable development mode with mock data when API quota is exceeded
@@ -834,7 +794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/auth/logout", authMiddleware, async (req: Request, res: Response) => {
+  app.post("/api/auth/logout", async (req: Request, res: Response) => {
     try {
       const authHeader = req.headers.authorization;
       const token = authHeader?.split(' ')[1];
@@ -856,18 +816,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/auth/me", authMiddleware, async (req: Request, res: Response) => {
+  app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      const user = (req as any).user as User;
-      
+      // Return a guest user instead
       return res.status(200).json({
         success: true,
         user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          displayName: user.displayName,
-          profileImage: user.profileImage
+          id: GUEST_USER_ID,
+          username: "guest",
+          email: "guest@example.com",
+          displayName: "Guest User",
+          profileImage: null
         }
       });
     } catch (error) {
@@ -880,10 +839,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Saved recipes routes
-  app.get("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
+  app.get("/api/recipes", async (req: Request, res: Response) => {
     try {
-      const user = (req as any).user as User;
-      const recipes = await storage.getSavedRecipes(user.id);
+      const recipes = await storage.getSavedRecipes(GUEST_USER_ID);
       
       return res.status(200).json({
         success: true,
@@ -898,9 +856,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/recipes", authMiddleware, async (req: Request, res: Response) => {
+  app.post("/api/recipes", async (req: Request, res: Response) => {
     try {
-      const user = (req as any).user as User;
       
       // Extract recipe data from request
       const recipeData: AnalyzeImageResponse = req.body.recipe;
@@ -914,7 +871,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create saved recipe entry
       const savedRecipe = await storage.createSavedRecipe({
-        userId: user.id,
+        userId: GUEST_USER_ID,
         recipeData: recipeData,
         foodName: recipeData.foodName,
         description: recipeData.description,
@@ -937,10 +894,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/recipes/:id", authMiddleware, async (req: Request, res: Response) => {
+  app.get("/api/recipes/:id", async (req: Request, res: Response) => {
     try {
       const recipeId = parseInt(req.params.id);
-      const user = (req as any).user as User;
       
       if (isNaN(recipeId)) {
         return res.status(400).json({
@@ -958,8 +914,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if recipe belongs to the authenticated user
-      if (recipe.userId !== user.id) {
+      // Check if recipe belongs to the guest user
+      if (recipe.userId !== GUEST_USER_ID) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to access this recipe"
@@ -979,10 +935,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete("/api/recipes/:id", authMiddleware, async (req: Request, res: Response) => {
+  app.delete("/api/recipes/:id", async (req: Request, res: Response) => {
     try {
       const recipeId = parseInt(req.params.id);
-      const user = (req as any).user as User;
       
       if (isNaN(recipeId)) {
         return res.status(400).json({
@@ -1000,8 +955,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if recipe belongs to the authenticated user
-      if (recipe.userId !== user.id) {
+      // Check if recipe belongs to the guest user
+      if (recipe.userId !== GUEST_USER_ID) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to delete this recipe"
@@ -1030,10 +985,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.patch("/api/recipes/:id/favorite", authMiddleware, async (req: Request, res: Response) => {
+  app.patch("/api/recipes/:id/favorite", async (req: Request, res: Response) => {
     try {
       const recipeId = parseInt(req.params.id);
-      const user = (req as any).user as User;
       const { favorite } = req.body;
       
       if (isNaN(recipeId)) {
@@ -1059,8 +1013,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if recipe belongs to the authenticated user
-      if (recipe.userId !== user.id) {
+      // Check if recipe belongs to the guest user
+      if (recipe.userId !== GUEST_USER_ID) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to update this recipe"

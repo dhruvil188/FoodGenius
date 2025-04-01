@@ -207,7 +207,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
         
         // Short timeout to allow confetti to start before navigation
         setTimeout(() => {
-          window.location.href = '/saved';
+          window.location.href = '/saved-recipes';
         }, 1000);
       } else {
         const errorData = await response.json();

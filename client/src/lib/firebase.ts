@@ -9,7 +9,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
-  getRedirectResult
+  getRedirectResult,
+  type Auth
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -20,7 +21,8 @@ import {
   query, 
   where, 
   getDocs,
-  Timestamp 
+  Timestamp,
+  type Firestore
 } from 'firebase/firestore';
 import { AnalyzeImageResponse } from '@shared/schema';
 
@@ -50,9 +52,9 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.appId
 }
 
 // Initialize Firebase with proper error handling
-let app;
-let auth;
-let db;
+let app: any;
+let auth: ReturnType<typeof getAuth>;
+let db: ReturnType<typeof getFirestore>;
 
 try {
   // Initialize Firebase
@@ -63,28 +65,44 @@ try {
 } catch (error) {
   console.error('Error initializing Firebase:', error);
   
-  // Create empty implementations to prevent app from crashing
-  auth = {
-    currentUser: null,
-    onAuthStateChanged: () => () => {},
-    signInWithEmailAndPassword: () => Promise.reject(new Error('Firebase not initialized')),
-    createUserWithEmailAndPassword: () => Promise.reject(new Error('Firebase not initialized')),
-    signOut: () => Promise.reject(new Error('Firebase not initialized')),
-    signInWithPopup: () => Promise.reject(new Error('Firebase not initialized')),
+  // Since we can't properly mock Firebase types, we'll create a fake Auth and Firestore
+  // that will throw appropriate errors when methods are called
+  
+  // Create a dummy implementation so the app doesn't crash on import
+  // This is just to satisfy TypeScript - any actual usage will properly throw an error
+  const createDummyFirebase = () => {
+    const handler = {
+      get: function(target: any, prop: string) {
+        if (typeof target[prop] === 'function') {
+          return () => {
+            throw new Error('Firebase not initialized');
+          };
+        }
+        
+        if (typeof target[prop] === 'undefined') {
+          if (typeof prop === 'symbol' || prop === 'then') {
+            return undefined;
+          }
+          return createDummyFirebase();
+        }
+        
+        return target[prop];
+      }
+    };
+    
+    return new Proxy({}, handler);
   };
   
-  db = {
-    collection: () => ({
-      doc: () => ({
-        set: () => Promise.reject(new Error('Firebase not initialized')),
-        get: () => Promise.reject(new Error('Firebase not initialized')),
-      }),
-    }),
-    doc: () => ({
-      set: () => Promise.reject(new Error('Firebase not initialized')),
-      get: () => Promise.reject(new Error('Firebase not initialized')),
-    }),
-  };
+  // Create fake Auth and Firestore objects that throw errors
+  const dummyImplementation = createDummyFirebase();
+  
+  // Use type assertion to satisfy TypeScript
+  auth = {
+    currentUser: null,
+    ...dummyImplementation
+  } as unknown as ReturnType<typeof getAuth>;
+  
+  db = dummyImplementation as unknown as ReturnType<typeof getFirestore>;
 }
 
 // Create Google auth provider

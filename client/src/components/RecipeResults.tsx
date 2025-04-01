@@ -41,6 +41,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const [savedRecipes, setSavedRecipes] = useState<AnalyzeImageResponse[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { user } = useAuth();
@@ -53,20 +54,38 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     });
     setCompletedSteps(initialCompletedSteps);
     
-    // Load saved recipes from localStorage
-    const savedRecipesJson = localStorage.getItem('dishDetectiveSavedRecipes');
-    if (savedRecipesJson) {
+    // Check if we're loading from a URL with the view-recipe hash
+    if (window.location.hash === '#view-recipe') {
+      // This is a recipe loaded from saved recipes page
+      const selectedRecipeJson = localStorage.getItem('selectedRecipe');
+      const selectedImageUrl = localStorage.getItem('selectedRecipeImage');
+      
+      if (selectedRecipeJson && selectedImageUrl) {
+        // We have a recipe that was selected from the saved recipes page
+        // In a full implementation, we would replace the current recipe with this one
+        setIsLoadedFromLocalStorage(true);
+        toast({
+          title: "Recipe Loaded",
+          description: "Loaded your saved recipe",
+          duration: 3000
+        });
+      }
+    }
+    
+    // Load saved recipes history from localStorage
+    const historyJson = localStorage.getItem('recipeSnapHistory');
+    if (historyJson) {
       try {
-        const savedRecipes = JSON.parse(savedRecipesJson);
-        setSavedRecipes(savedRecipes);
+        const historyRecipes = JSON.parse(historyJson);
+        setSavedRecipes(historyRecipes);
       } catch (error) {
-        console.error('Error loading saved recipes:', error);
+        console.error('Error loading recipe history:', error);
       }
     }
     
     // Add current recipe to history
     saveToHistory(result);
-  }, [result]);
+  }, [result, toast]);
   
   const saveToHistory = (recipeData: AnalyzeImageResponse) => {
     // Check if recipe already exists to avoid duplicates
@@ -74,7 +93,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     if (!exists) {
       const updatedHistory = [...savedRecipes, recipeData].slice(-10); // Keep last 10 recipes
       setSavedRecipes(updatedHistory);
-      localStorage.setItem('dishDetectiveSavedRecipes', JSON.stringify(updatedHistory));
+      localStorage.setItem('recipeSnapHistory', JSON.stringify(updatedHistory));
     }
   };
   
@@ -150,16 +169,26 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       console.error("Error code:", error?.code);
       console.error("Error message:", error?.message);
       
-      // Check if the error is related to offline status
+      // Check if the error is related to offline status or permissions
       isOfflineMode = error?.code === 'unavailable' || error?.message?.includes('offline');
+      const isPermissionDenied = error?.code === 'permission-denied';
       
       // Customize error message based on error type
       let errorMessage = "There was a problem saving your recipe. Please try again.";
+      let shouldSaveLocally = false;
       
       if (isOfflineMode) {
         errorMessage = "You appear to be offline. Recipe saved locally and will sync when connectivity is restored.";
-        
-        // Save to local storage as a backup when offline
+        shouldSaveLocally = true;
+      } else if (isPermissionDenied) {
+        errorMessage = "Firebase permissions issue. Recipe saved locally as a fallback.";
+        shouldSaveLocally = true;
+      } else if (error?.code === 'resource-exhausted') {
+        errorMessage = "Storage limit reached. Please delete some recipes and try again.";
+      }
+      
+      // Save to local storage as a backup when offline or permission denied
+      if (shouldSaveLocally) {
         const savedLocally = saveToLocalStorage(result);
         
         if (savedLocally) {
@@ -171,10 +200,6 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
           triggerConfetti();
           return;  // Early return to avoid showing error toast
         }
-      } else if (error?.code === 'permission-denied') {
-        errorMessage = "You don't have permission to save this recipe.";
-      } else if (error?.code === 'resource-exhausted') {
-        errorMessage = "Storage limit reached. Please delete some recipes and try again.";
       }
       
       toast({

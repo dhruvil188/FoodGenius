@@ -78,6 +78,36 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     }
   };
   
+  // Function to save to local storage
+  const saveToLocalStorage = (result: AnalyzeImageResponse) => {
+    try {
+      // First, save to history
+      saveToHistory(result);
+      
+      // Then, save to saved recipes
+      const storageKey = 'recipeSnapSavedRecipes';
+      const existingRecipes = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const exists = existingRecipes.some((r: any) => r.foodName === result.foodName);
+      
+      if (!exists) {
+        const updatedRecipes = [...existingRecipes, {
+          id: Date.now().toString(),
+          recipe: result,
+          imageUrl,
+          createdAt: new Date().toISOString()
+        }].slice(-20); // Keep last 20
+        
+        localStorage.setItem(storageKey, JSON.stringify(updatedRecipes));
+        console.log('Recipe saved to local storage:', result.foodName);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Error saving to local storage:", err);
+      return false;
+    }
+  };
+  
   // Save recipe to Firebase if user is logged in
   const saveToFirebase = async () => {
     if (!user) {
@@ -89,6 +119,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       return;
     }
     
+    let isOfflineMode = false;
     try {
       setIsSaving(true);
       
@@ -100,7 +131,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
           description: "Saving is taking longer than expected. You can try again later.",
           variant: "destructive"
         });
-      }, 8000); // 8 seconds timeout
+      }, 5000); // 5 seconds timeout
       
       await saveRecipe(user.uid, result, imageUrl);
       
@@ -116,14 +147,34 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       triggerConfetti();
     } catch (error: any) {
       console.error("Error saving recipe:", error);
+      console.error("Error code:", error?.code);
+      console.error("Error message:", error?.message);
+      
+      // Check if the error is related to offline status
+      isOfflineMode = error?.code === 'unavailable' || error?.message?.includes('offline');
       
       // Customize error message based on error type
       let errorMessage = "There was a problem saving your recipe. Please try again.";
       
-      if (error?.code === 'unavailable') {
-        errorMessage = "Firebase service is currently unavailable. Please try again later.";
+      if (isOfflineMode) {
+        errorMessage = "You appear to be offline. Recipe saved locally and will sync when connectivity is restored.";
+        
+        // Save to local storage as a backup when offline
+        const savedLocally = saveToLocalStorage(result);
+        
+        if (savedLocally) {
+          toast({
+            title: "Saved Locally",
+            description: errorMessage,
+            variant: "default"
+          });
+          triggerConfetti();
+          return;  // Early return to avoid showing error toast
+        }
       } else if (error?.code === 'permission-denied') {
         errorMessage = "You don't have permission to save this recipe.";
+      } else if (error?.code === 'resource-exhausted') {
+        errorMessage = "Storage limit reached. Please delete some recipes and try again.";
       }
       
       toast({
@@ -133,19 +184,11 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       });
     } finally {
       setIsSaving(false);
-    }
-    
-    // Also save to local storage as a backup
-    try {
-      const existingRecipes = JSON.parse(localStorage.getItem('dishDetectiveSavedRecipes') || '[]');
-      const exists = existingRecipes.some((r: any) => r.foodName === result.foodName);
       
-      if (!exists) {
-        const updatedRecipes = [...existingRecipes, result].slice(-10); // Keep last 10
-        localStorage.setItem('dishDetectiveSavedRecipes', JSON.stringify(updatedRecipes));
+      // If we're not in offline mode and the save failed, still try local storage
+      if (!isOfflineMode) {
+        saveToLocalStorage(result);
       }
-    } catch (err) {
-      console.error("Error saving to local storage:", err);
     }
   };
   

@@ -88,12 +88,41 @@ export default function SavedRecipes() {
   }, [user, toast]);
 
   const handleViewRecipe = (recipeData: any) => {
-    // Store the selected recipe in localStorage to display it
-    localStorage.setItem('selectedRecipe', JSON.stringify(recipeData.recipe));
-    localStorage.setItem('selectedRecipeImage', recipeData.imageUrl || '');
-    // Navigate to home page to display the recipe in RecipeResults
-    navigate('/#view-recipe');
-    // The RecipeResults component will need to be updated to check for this localStorage item
+    try {
+      // Store the selected recipe in localStorage to display it
+      // Make sure we're storing a valid recipe object with all necessary data
+      const recipeToStore = {
+        foodName: recipeData.recipe?.foodName || recipeData.foodName || "Recipe",
+        description: recipeData.recipe?.description || recipeData.description || "No description available",
+        tags: recipeData.recipe?.tags || recipeData.tags || [],
+        recipes: recipeData.recipe?.recipes || recipeData.recipes || [{
+          title: recipeData.recipe?.title || recipeData.recipes?.[0]?.title || "Recipe",
+          description: recipeData.recipe?.description || recipeData.description || "No description available",
+          ingredients: recipeData.recipe?.ingredients || recipeData.recipes?.[0]?.ingredients || [],
+          instructions: recipeData.recipe?.instructions || recipeData.recipes?.[0]?.instructions || []
+        }]
+      };
+      
+      console.log('Viewing recipe:', recipeToStore);
+      localStorage.setItem('selectedRecipe', JSON.stringify(recipeToStore));
+      localStorage.setItem('selectedRecipeImage', recipeData.imageUrl || '');
+      
+      // Navigate to home page to display the recipe in RecipeResults
+      navigate('/#view-recipe');
+      
+      // Success toast
+      toast({
+        title: "Loading Recipe",
+        description: `Opening ${recipeToStore.foodName || recipeToStore.recipes[0].title}`,
+      });
+    } catch (error) {
+      console.error('Error preparing recipe for viewing:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem loading this recipe. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteRecipe = async (recipeId: string) => {
@@ -208,7 +237,7 @@ export default function SavedRecipes() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete "{recipe.recipe.title || recipe.foodName}"? 
+                            Are you sure you want to delete "{recipe?.recipe?.title || recipe?.recipes?.[0]?.title || recipe?.foodName || "this recipe"}"? 
                             This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
@@ -226,12 +255,16 @@ export default function SavedRecipes() {
                     </AlertDialog>
                   </div>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-xl">{recipe.recipe.title || recipe.foodName}</CardTitle>
-                    <CardDescription className="line-clamp-2">{recipe.description}</CardDescription>
+                    <CardTitle className="text-xl">
+                      {recipe?.recipe?.title || recipe?.recipes?.[0]?.title || recipe?.foodName || "Recipe"}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {recipe?.description || recipe?.recipes?.[0]?.description || "No description available"}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="pb-2 flex-grow">
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {recipe.recipe.tags?.slice(0, 3).map((tag, i) => (
+                      {(recipe?.recipe?.tags || recipe?.tags || recipe?.recipes?.[0]?.tags || []).slice(0, 3).map((tag, i) => (
                         <Badge key={i} variant="outline" className="bg-primary/5">
                           {tag}
                         </Badge>
@@ -240,11 +273,11 @@ export default function SavedRecipes() {
                     <div className="text-sm text-muted-foreground">
                       <div className="flex items-center gap-2 mb-1">
                         <i className="fas fa-clock text-primary/70"></i>
-                        <span>Prep: {recipe.recipe.prepTime || 'N/A'}</span>
+                        <span>Prep: {recipe?.recipe?.prepTime || recipe?.recipes?.[0]?.prepTime || 'N/A'}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <i className="fas fa-utensils text-primary/70"></i>
-                        <span>Cook: {recipe.recipe.cookTime || 'N/A'}</span>
+                        <span>Cook: {recipe?.recipe?.cookTime || recipe?.recipes?.[0]?.cookTime || 'N/A'}</span>
                       </div>
                     </div>
                   </CardContent>

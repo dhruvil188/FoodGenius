@@ -63,7 +63,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
   // Initialize completed steps for each recipe
   useEffect(() => {
     const initialCompletedSteps: Record<number, Set<number>> = {};
-    if (result.recipes && Array.isArray(result.recipes)) {
+    if (result?.recipes && Array.isArray(result.recipes)) {
       result.recipes.forEach((_, index) => {
         initialCompletedSteps[index] = new Set();
       });
@@ -72,10 +72,10 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
       initialCompletedSteps[0] = new Set();
     }
     setCompletedSteps(initialCompletedSteps);
-  }, [result.recipes]);
+  }, [result?.recipes]);
   
   // Handle the case when recipes is not defined or empty
-  const selectedRecipe = result.recipes && Array.isArray(result.recipes) && result.recipes.length > 0
+  const selectedRecipe = result?.recipes && Array.isArray(result.recipes) && result.recipes.length > 0
     ? (selectedVariation 
       ? { 
           ...result.recipes[selectedRecipeIndex], 
@@ -85,8 +85,8 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
       : result.recipes[selectedRecipeIndex])
     : { 
         // Fallback empty recipe object if no recipes are available
-        title: result.foodName || "Recipe",
-        description: result.description || "",
+        title: result?.foodName || "Recipe",
+        description: result?.description || "",
         instructions: [],
         ingredients: [],
         ingredientGroups: [],
@@ -98,7 +98,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
         servingSize: "",
       };
   
-  const totalInstructions = selectedRecipe.instructions.length;
+  const totalInstructions = selectedRecipe?.instructions?.length || 0;
   
   const currentProgress = totalInstructions > 0
     ? (completedSteps[selectedRecipeIndex]?.size / totalInstructions) * 100
@@ -151,17 +151,19 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
     // For the demo, we'll just show a toast
     toast({
       title: "Recipe Saved",
-      description: `Saved ${recipeData.foodName} to your collection`,
+      description: `Saved ${recipeData?.foodName || "Recipe"} to your collection`,
     });
     
     // Add to local state for demo purposes
-    setSavedRecipes(prev => [...prev, recipeData]);
+    if (recipeData) {
+      setSavedRecipes(prev => [...prev, recipeData]);
+    }
   };
   
   const handleLoadSavedRecipe = (savedRecipe: AnalyzeImageResponse) => {
     toast({
       title: "Recipe Loaded",
-      description: `Loaded recipe for ${savedRecipe.foodName}`,
+      description: `Loaded recipe for ${savedRecipe?.foodName || "Recipe"}`,
     });
     
     // In a real app, this would replace the current result with the saved one
@@ -187,7 +189,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
             <div className="w-full md:w-1/3">
               <img 
                 src={imageUrl} 
-                alt={result.foodName} 
+                alt={result?.foodName || "Recipe"} 
                 className="w-full h-48 md:h-64 object-cover rounded-lg"
               />
             </div>
@@ -196,15 +198,15 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                 Recipe Library
               </Badge>
               
-              <h3 className="text-2xl font-bold font-heading mb-2 food-gradient-text">{result.foodName}</h3>
-              <p className="text-slate-600 mb-4">{result.description}</p>
+              <h3 className="text-2xl font-bold font-heading mb-2 food-gradient-text">{result?.foodName || "Recipe"}</h3>
+              <p className="text-slate-600 mb-4">{result?.description || ""}</p>
               
               <div className="flex flex-wrap gap-2 mb-4">
-                {result.tags.map((tag, index) => (
+                {result?.tags?.map((tag, index) => (
                   <Badge key={index} variant="outline" className="bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-full">
                     {tag}
                   </Badge>
-                ))}
+                )) || []}
               </div>
               
               <div className="flex flex-wrap gap-3">
@@ -279,7 +281,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                     <h5 className="text-lg font-semibold mb-4 food-gradient-text">Ingredients</h5>
                     
                     {/* Standard list of ingredients */}
-                    {!selectedRecipe.ingredientGroups && (
+                    {!selectedRecipe.ingredientGroups && selectedRecipe.ingredients && Array.isArray(selectedRecipe.ingredients) && (
                       <ul className="space-y-2">
                         {selectedRecipe.ingredients.map((ingredient, i) => (
                           <li key={i} className="flex items-start gap-3">
@@ -301,7 +303,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                     )}
                     
                     {/* Grouped ingredients */}
-                    {selectedRecipe.ingredientGroups && (
+                    {selectedRecipe?.ingredientGroups && Array.isArray(selectedRecipe.ingredientGroups) && selectedRecipe.ingredientGroups.length > 0 && (
                       <div className="space-y-6">
                         {selectedRecipe.ingredientGroups.map((group, groupIndex) => (
                           <div key={groupIndex}>
@@ -311,22 +313,25 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                               </h6>
                             )}
                             <ul className="space-y-2">
-                              {group.ingredients.map((ingredient, i) => (
-                                <li key={i} className="flex items-start gap-3">
-                                  <div className="flex h-6 items-center">
-                                    <Checkbox 
-                                      id={`ingredient-${groupIndex}-${i}`}
-                                      onCheckedChange={() => toggleIngredientCompletion(groupIndex, i)}
-                                    />
-                                  </div>
-                                  <label
-                                    htmlFor={`ingredient-${groupIndex}-${i}`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                  >
-                                    {ingredient}
-                                  </label>
-                                </li>
-                              ))}
+                              {group.ingredients && Array.isArray(group.ingredients) ? 
+                                group.ingredients.map((ingredient, i) => (
+                                  <li key={i} className="flex items-start gap-3">
+                                    <div className="flex h-6 items-center">
+                                      <Checkbox 
+                                        id={`ingredient-${groupIndex}-${i}`}
+                                        onCheckedChange={() => toggleIngredientCompletion(groupIndex, i)}
+                                      />
+                                    </div>
+                                    <label
+                                      htmlFor={`ingredient-${groupIndex}-${i}`}
+                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                      {ingredient}
+                                    </label>
+                                  </li>
+                                ))
+                              : <li className="text-slate-600">No ingredients available.</li>
+                              }
                             </ul>
                             {group.preparationNotes && (
                               <p className="mt-2 text-xs text-slate-500 italic">{group.preparationNotes}</p>
@@ -337,8 +342,9 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                     )}
                     
                     {/* Show variations if available */}
-                    {result.recipes && Array.isArray(result.recipes) && result.recipes.length > 0 && 
+                    {result?.recipes && Array.isArray(result.recipes) && result.recipes.length > 0 && 
                      result.recipes[selectedRecipeIndex]?.variations && 
+                     Array.isArray(result.recipes[selectedRecipeIndex].variations) &&
                      result.recipes[selectedRecipeIndex].variations.length > 0 && (
                       <div className="mt-6">
                         <h6 className="font-medium text-sm mb-3">Recipe Variations</h6>
@@ -370,31 +376,35 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                   <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4">
                     <h5 className="text-lg font-semibold mb-4 food-gradient-text">Step by Step Instructions</h5>
                     <ol className="space-y-6">
-                      {selectedRecipe.instructions.map((instruction, index) => (
-                        <li 
-                          key={index} 
-                          id={`step-${index}`}
-                          className={`relative pl-8 ${completedSteps[selectedRecipeIndex]?.has(index) ? 'text-slate-400' : 'text-slate-800'}`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-6 items-center absolute left-0 top-0">
-                              <Checkbox 
-                                id={`step-${index}-checkbox`}
-                                checked={completedSteps[selectedRecipeIndex]?.has(index)}
-                                onCheckedChange={() => toggleStepCompletion(index)}
-                              />
+                      {selectedRecipe?.instructions && Array.isArray(selectedRecipe.instructions) ?
+                        selectedRecipe.instructions.map((instruction, index) => (
+                          <li 
+                            key={index} 
+                            id={`step-${index}`}
+                            className={`relative pl-8 ${completedSteps[selectedRecipeIndex]?.has(index) ? 'text-slate-400' : 'text-slate-800'}`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-6 items-center absolute left-0 top-0">
+                                <Checkbox 
+                                  id={`step-${index}-checkbox`}
+                                  checked={completedSteps[selectedRecipeIndex]?.has(index)}
+                                  onCheckedChange={() => toggleStepCompletion(index)}
+                                />
+                              </div>
+                              <div>
+                                <h6 className={`font-semibold text-base mb-1 ${completedSteps[selectedRecipeIndex]?.has(index) ? 'line-through opacity-70' : ''}`}>
+                                  Step {index + 1}
+                                </h6>
+                                <p className={completedSteps[selectedRecipeIndex]?.has(index) ? 'line-through opacity-70' : ''}>
+                                  {instruction}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h6 className={`font-semibold text-base mb-1 ${completedSteps[selectedRecipeIndex]?.has(index) ? 'line-through opacity-70' : ''}`}>
-                                Step {index + 1}
-                              </h6>
-                              <p className={completedSteps[selectedRecipeIndex]?.has(index) ? 'line-through opacity-70' : ''}>
-                                {instruction}
-                              </p>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
+                          </li>
+                        ))
+                      : (
+                        <li className="text-slate-600">No instructions available for this recipe.</li>
+                      )}
                     </ol>
                   </div>
                 </div>
@@ -436,7 +446,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Chef's Tips */}
-                  {selectedRecipe.chefTips && selectedRecipe.chefTips.length > 0 && (
+                  {selectedRecipe?.chefTips && Array.isArray(selectedRecipe.chefTips) && selectedRecipe.chefTips.length > 0 && (
                     <div className="mb-6">
                       <div className="flex items-center gap-2 mb-3">
                         <i className="fas fa-lightbulb text-amber-500"></i>
@@ -458,7 +468,7 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                   )}
                   
                   {/* Common Mistakes to Avoid */}
-                  {selectedRecipe.commonMistakes && selectedRecipe.commonMistakes.length > 0 && (
+                  {selectedRecipe?.commonMistakes && Array.isArray(selectedRecipe.commonMistakes) && selectedRecipe.commonMistakes.length > 0 && (
                     <div className="mb-6">
                       <div className="flex items-center gap-2 mb-3">
                         <i className="fas fa-exclamation-triangle text-orange-500"></i>

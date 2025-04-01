@@ -14,6 +14,8 @@ import {
 import { theMealDBRecipes } from "./additionalRecipes";
 import { themealdbAdditionalRecipes } from "./themealdbRecipes";
 import { pinchOfYumRecipes } from "./pinchOfYumRecipes";
+import { pinchOfYumRecipes1 } from "./pinchOfYumRecipes1";
+import { pinchOfYumRecipes2 } from "./pinchOfYumRecipes2";
 
 /**
  * Expanded library of pre-populated recipes from diverse cuisines around the world
@@ -23,6 +25,8 @@ export const expandedRecipes: AnalyzeImageResponse[] = [
   ...theMealDBRecipes,
   ...themealdbAdditionalRecipes,
   ...pinchOfYumRecipes,
+  ...pinchOfYumRecipes1,
+  ...pinchOfYumRecipes2,
   {
     foodName: "Guacamole",
     description: "A traditional Mexican avocado-based dip dating back to the Aztecs in the 14th century. This vibrant green, creamy dip combines ripe avocados with lime, cilantro, onions, and chili peppers for a perfect balance of flavors that has become popular worldwide.",

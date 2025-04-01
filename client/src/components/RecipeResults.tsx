@@ -24,8 +24,6 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
-import { useAuth } from '@/context/AuthContext';
-import { saveRecipe } from '@/lib/firebase';
 
 interface RecipeResultsProps {
   result: AnalyzeImageResponse;
@@ -40,11 +38,8 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
   const [completedSteps, setCompletedSteps] = useState<Record<number, Set<number>>>({});
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const [savedRecipes, setSavedRecipes] = useState<AnalyzeImageResponse[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoadedFromLocalStorage, setIsLoadedFromLocalStorage] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { user } = useAuth();
   
   // Initialize completed steps for each recipe
   useEffect(() => {
@@ -54,38 +49,20 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     });
     setCompletedSteps(initialCompletedSteps);
     
-    // Check if we're loading from a URL with the view-recipe hash
-    if (window.location.hash === '#view-recipe') {
-      // This is a recipe loaded from saved recipes page
-      const selectedRecipeJson = localStorage.getItem('selectedRecipe');
-      const selectedImageUrl = localStorage.getItem('selectedRecipeImage');
-      
-      if (selectedRecipeJson && selectedImageUrl) {
-        // We have a recipe that was selected from the saved recipes page
-        // In a full implementation, we would replace the current recipe with this one
-        setIsLoadedFromLocalStorage(true);
-        toast({
-          title: "Recipe Loaded",
-          description: "Loaded your saved recipe",
-          duration: 3000
-        });
-      }
-    }
-    
-    // Load saved recipes history from localStorage
-    const historyJson = localStorage.getItem('recipeSnapHistory');
-    if (historyJson) {
+    // Load saved recipes from localStorage
+    const savedRecipesJson = localStorage.getItem('dishDetectiveSavedRecipes');
+    if (savedRecipesJson) {
       try {
-        const historyRecipes = JSON.parse(historyJson);
-        setSavedRecipes(historyRecipes);
+        const savedRecipes = JSON.parse(savedRecipesJson);
+        setSavedRecipes(savedRecipes);
       } catch (error) {
-        console.error('Error loading recipe history:', error);
+        console.error('Error loading saved recipes:', error);
       }
     }
     
     // Add current recipe to history
     saveToHistory(result);
-  }, [result, toast]);
+  }, [result]);
   
   const saveToHistory = (recipeData: AnalyzeImageResponse) => {
     // Check if recipe already exists to avoid duplicates
@@ -93,127 +70,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     if (!exists) {
       const updatedHistory = [...savedRecipes, recipeData].slice(-10); // Keep last 10 recipes
       setSavedRecipes(updatedHistory);
-      localStorage.setItem('recipeSnapHistory', JSON.stringify(updatedHistory));
-    }
-  };
-  
-  // Function to save to local storage
-  const saveToLocalStorage = (result: AnalyzeImageResponse) => {
-    try {
-      // First, save to history
-      saveToHistory(result);
-      
-      // Then, save to saved recipes
-      const storageKey = 'recipeSnapSavedRecipes';
-      const existingRecipes = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      const exists = existingRecipes.some((r: any) => r.foodName === result.foodName);
-      
-      if (!exists) {
-        const updatedRecipes = [...existingRecipes, {
-          id: Date.now().toString(),
-          recipe: result,
-          imageUrl,
-          createdAt: new Date().toISOString()
-        }].slice(-20); // Keep last 20
-        
-        localStorage.setItem(storageKey, JSON.stringify(updatedRecipes));
-        console.log('Recipe saved to local storage:', result.foodName);
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error("Error saving to local storage:", err);
-      return false;
-    }
-  };
-  
-  // Save recipe to Firebase if user is logged in
-  const saveToFirebase = async () => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to save this recipe to your account.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    let isOfflineMode = false;
-    try {
-      setIsSaving(true);
-      
-      // Set a timeout to prevent infinite loading state
-      const saveTimeout = setTimeout(() => {
-        setIsSaving(false);
-        toast({
-          title: "Taking too long",
-          description: "Saving is taking longer than expected. You can try again later.",
-          variant: "destructive"
-        });
-      }, 5000); // 5 seconds timeout
-      
-      await saveRecipe(user.uid, result, imageUrl);
-      
-      // Clear the timeout since save succeeded
-      clearTimeout(saveTimeout);
-      
-      toast({
-        title: "Recipe Saved!",
-        description: `Successfully saved ${result.foodName} to your account.`,
-        duration: 3000,
-      });
-      
-      triggerConfetti();
-    } catch (error: any) {
-      console.error("Error saving recipe:", error);
-      console.error("Error code:", error?.code);
-      console.error("Error message:", error?.message);
-      
-      // Check if the error is related to offline status or permissions
-      isOfflineMode = error?.code === 'unavailable' || error?.message?.includes('offline');
-      const isPermissionDenied = error?.code === 'permission-denied';
-      
-      // Customize error message based on error type
-      let errorMessage = "There was a problem saving your recipe. Please try again.";
-      let shouldSaveLocally = false;
-      
-      if (isOfflineMode) {
-        errorMessage = "You appear to be offline. Recipe saved locally and will sync when connectivity is restored.";
-        shouldSaveLocally = true;
-      } else if (isPermissionDenied) {
-        errorMessage = "Firebase permissions issue. Recipe saved locally as a fallback.";
-        shouldSaveLocally = true;
-      } else if (error?.code === 'resource-exhausted') {
-        errorMessage = "Storage limit reached. Please delete some recipes and try again.";
-      }
-      
-      // Save to local storage as a backup when offline or permission denied
-      if (shouldSaveLocally) {
-        const savedLocally = saveToLocalStorage(result);
-        
-        if (savedLocally) {
-          toast({
-            title: "Saved Locally",
-            description: errorMessage,
-            variant: "default"
-          });
-          triggerConfetti();
-          return;  // Early return to avoid showing error toast
-        }
-      }
-      
-      toast({
-        title: "Save Failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
-      
-      // If we're not in offline mode and the save failed, still try local storage
-      if (!isOfflineMode) {
-        saveToLocalStorage(result);
-      }
+      localStorage.setItem('dishDetectiveSavedRecipes', JSON.stringify(updatedHistory));
     }
   };
   
@@ -800,7 +657,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                       </CardHeader>
                       <CardContent>
                         <div className="text-3xl font-bold food-gradient-text">
-                          {selectedRecipe.nutritionInfo.carbs || 'N/A'}
+                          {selectedRecipe.nutritionInfo.carbohydrates || 'N/A'}
                         </div>
                         <p className="text-xs text-slate-500 mt-1">per serving</p>
                       </CardContent>
@@ -817,7 +674,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                           <div>
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-sm font-medium">Fat</span>
-                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.fats || 'N/A'}</span>
+                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.fat || 'N/A'}</span>
                             </div>
                             <Progress value={60} className="h-2" />
                           </div>
@@ -825,7 +682,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                           <div>
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-sm font-medium">Saturated Fat</span>
-                              <span className="text-sm text-slate-500">N/A</span>
+                              <span className="text-sm text-slate-500">{selectedRecipe.nutritionInfo.saturatedFat || 'N/A'}</span>
                             </div>
                             <Progress value={40} className="h-2" />
                           </div>
@@ -1321,26 +1178,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             </TabsContent>
           </Tabs>
           
-          <div className="flex justify-center gap-4 mt-8">
-            <Button 
-              onClick={saveToFirebase} 
-              className="rounded-full bg-primary hover:bg-primary/90"
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-bookmark mr-2"></i> Save Recipe
-                </>
-              )}
-            </Button>
+          <div className="flex justify-center mt-8">
             <Button onClick={onTryAnother} className="rounded-full">
               <i className="fas fa-camera mr-2"></i> Try Another Dish
             </Button>

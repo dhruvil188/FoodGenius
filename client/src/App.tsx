@@ -9,7 +9,7 @@ import RecipePage from "@/pages/recipe-page";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
-import SubscriptionPage from "@/pages/subscription";
+import SubscriptionPage from "@/pages/subscription-updated";
 import SubscriptionSuccess from "@/pages/subscription-success";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";

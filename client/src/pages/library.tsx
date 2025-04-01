@@ -41,8 +41,20 @@ export default function Library() {
     if (recipe.youtubeVideos && 
         recipe.youtubeVideos.length > 0 && 
         recipe.youtubeVideos[0].thumbnailUrl && 
-        recipe.youtubeVideos[0].thumbnailUrl.trim() !== '') {
+        recipe.youtubeVideos[0].thumbnailUrl.trim() !== '' &&
+        recipe.youtubeVideos[0].thumbnailUrl.includes('themealdb.com')) {
       return recipe.youtubeVideos[0].thumbnailUrl;
+    }
+    
+    // Direct check for TheMealDB recipes via their URL pattern in other videos
+    if (recipe.youtubeVideos) {
+      for (const video of recipe.youtubeVideos) {
+        if (video.thumbnailUrl && 
+            video.thumbnailUrl.trim() !== '' && 
+            video.thumbnailUrl.includes('themealdb.com')) {
+          return video.thumbnailUrl;
+        }
+      }
     }
     
     // Then try exact match by name

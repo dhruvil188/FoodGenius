@@ -1204,28 +1204,106 @@ export default function RecipeLibraryResults({ result, imageUrl, onTryAnother }:
                 <h4 className="text-xl font-semibold mb-4 food-gradient-text">Cost Estimation</h4>
                 <Card className="bg-white rounded-lg shadow-sm">
                   <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-6">
-                      <div>
-                        <h5 className="text-lg font-medium">Estimated Cost Per Serving</h5>
-                        <p className="text-sm text-slate-500">Based on average UK supermarket prices</p>
+                    <div className="mb-6">
+                      <h5 className="text-lg font-medium mb-2">Budget Classification</h5>
+                      
+                      <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                        {/* Dynamic cost indicator */}
+                        {(() => {
+                          // Classify recipes based on ingredients and complexity
+                          const hasExpensiveIngredients = selectedRecipe.ingredients.some(i => 
+                            i.toLowerCase().includes("steak") || 
+                            i.toLowerCase().includes("salmon") || 
+                            i.toLowerCase().includes("shrimp") || 
+                            i.toLowerCase().includes("prawn") ||
+                            i.toLowerCase().includes("saffron") ||
+                            i.toLowerCase().includes("truffle") ||
+                            i.toLowerCase().includes("crab") ||
+                            i.toLowerCase().includes("lobster")
+                          );
+                          
+                          const hasMediumIngredients = selectedRecipe.ingredients.some(i => 
+                            i.toLowerCase().includes("chicken") || 
+                            i.toLowerCase().includes("cheese") || 
+                            i.toLowerCase().includes("nuts") ||
+                            i.toLowerCase().includes("wine") ||
+                            i.toLowerCase().includes("beef")
+                          );
+                          
+                          let costCategory;
+                          let fillWidth;
+                          let fillColor;
+                          let costLabel;
+
+                          if (hasExpensiveIngredients) {
+                            costCategory = "Premium";
+                            fillWidth = "w-full";
+                            fillColor = "bg-red-500";
+                            costLabel = "High-cost recipe with premium ingredients";
+                          } else if (hasMediumIngredients) {
+                            costCategory = "Moderate";
+                            fillWidth = "w-2/3";
+                            fillColor = "bg-amber-500";
+                            costLabel = "Medium-cost recipe with standard ingredients";
+                          } else {
+                            costCategory = "Budget-friendly";
+                            fillWidth = "w-1/3";
+                            fillColor = "bg-green-500";
+                            costLabel = "Low-cost recipe with economical ingredients";
+                          }
+                          
+                          return (
+                            <>
+                              <div className={`absolute top-0 left-0 h-full ${fillWidth} ${fillColor}`}></div>
+                              <div className="absolute top-0 left-0 w-full h-full flex justify-between items-center px-3">
+                                <span className="text-xs font-medium text-white">Budget</span>
+                                <span className="text-xs font-medium text-white">Moderate</span>
+                                <span className="text-xs font-medium text-white">Premium</span>
+                              </div>
+                              <div className="mt-2 flex items-center justify-between">
+                                <div className="flex items-center">
+                                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${fillColor}`}></span>
+                                  <span className="font-medium">{costCategory}</span>
+                                </div>
+                                <span className="text-sm text-slate-600">{costLabel}</span>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
-                      <div className="text-2xl font-bold text-green-600">£{(Math.random() * 5 + 4).toFixed(2)}</div>
                     </div>
                     
                     <div className="mb-6">
-                      <h5 className="text-md font-medium mb-3 border-b pb-2">Cost Breakdown</h5>
-                      <div className="space-y-2">
-                        {selectedRecipe.ingredients.slice(0, 8).map((ingredient, index) => (
-                          <div key={index} className="flex justify-between items-center py-2 border-b border-slate-100">
-                            <span className="text-slate-700">{ingredient}</span>
-                            <span className="font-medium">£{(Math.random() * 3 + 1.5).toFixed(2)}</span>
+                      <h5 className="text-md font-medium mb-3 border-b pb-2">Cost-Saving Tips</h5>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-green-50 rounded-lg">
+                          <h6 className="font-medium text-green-800 mb-2">Shopping Strategy</h6>
+                          <ul className="list-disc pl-5 space-y-2 text-slate-700">
+                            <li>Buy seasonal ingredients for better value</li>
+                            <li>Check discount supermarkets for basic ingredients</li>
+                            <li>Look for "reduced to clear" items for perishables</li>
+                            <li>Consider frozen alternatives for out-of-season produce</li>
+                          </ul>
+                        </div>
+                        
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <h6 className="font-medium text-blue-800 mb-2">Main Cost Contributors</h6>
+                          <div className="space-y-1">
+                            {selectedRecipe.ingredients.slice(0, 5).map((ingredient, index) => (
+                              <div key={index} className="flex items-center py-1">
+                                {index < 3 ? 
+                                  <span className="text-red-500 mr-2"><i className="fas fa-exclamation-circle"></i></span> :
+                                  <span className="text-amber-500 mr-2"><i className="fas fa-exclamation-triangle"></i></span>
+                                }
+                                <span className="text-slate-700">{ingredient}</span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                        {selectedRecipe.ingredients.length > 8 && (
-                          <div className="py-2 text-center text-slate-500 text-sm italic">
-                            + {selectedRecipe.ingredients.length - 8} more ingredients
-                          </div>
-                        )}
+                          <p className="text-xs text-slate-500 mt-2">
+                            <i className="fas fa-info-circle mr-1"></i> 
+                            Red items typically contribute most to overall cost. Consider substitutes below for savings.
+                          </p>
+                        </div>
                       </div>
                     </div>
                     

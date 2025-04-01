@@ -11,6 +11,7 @@ import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 function Router() {
   return (
@@ -29,14 +30,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300">
-        <Header />
-        <main className="flex-grow pt-16">
-          <Router />
-        </main>
-        <Footer />
-      </div>
-      <Toaster />
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300">
+          <Header />
+          <main className="flex-grow pt-16">
+            <Router />
+          </main>
+          <Footer />
+        </div>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

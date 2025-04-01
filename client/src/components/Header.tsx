@@ -4,12 +4,16 @@ import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import LoginButton from './LoginButton';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
+  const { currentUser } = useAuth();
   
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -60,6 +64,28 @@ export default function Header() {
             <span className="hidden md:inline">Analyze Dish</span>
             <span className="inline md:hidden">Analyze</span>
           </Button>
+          
+          {currentUser ? (
+            <div className="flex items-center ml-2">
+              <Avatar className="h-8 w-8 border-2 border-primary/20">
+                <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
+                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">
+                  {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <LoginButton 
+                variant="ghost" 
+                size="sm" 
+                className="ml-1"
+              />
+            </div>
+          ) : (
+            <LoginButton 
+              variant="outline" 
+              size="sm" 
+              className="rounded-full ml-1 hidden md:flex"
+            />
+          )}
         </div>
       </div>
     </motion.header>

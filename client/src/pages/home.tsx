@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import Hero from "@/components/Hero"; // Import the Hero component
+import ProtectedFeature from "@/components/ProtectedFeature"; // Import the ProtectedFeature component
 import {
   Dialog,
   DialogContent,
@@ -909,7 +910,12 @@ export default function Home() {
                     transition={{ duration: 0.3 }}
                   >
                     <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
-                      <ImageUploader onAnalyzeImage={handleAnalyzeImage} />
+                      <ProtectedFeature
+                        featureName="AI Image Analysis"
+                        description="Upload a food image to get a detailed recipe. Sign in to unlock this feature."
+                      >
+                        <ImageUploader onAnalyzeImage={handleAnalyzeImage} />
+                      </ProtectedFeature>
                     </div>
                   </motion.div>
                 )}

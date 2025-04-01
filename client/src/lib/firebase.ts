@@ -188,7 +188,7 @@ export const saveRecipe = async (userId: string, recipe: AnalyzeImageResponse, i
     console.log('Starting saveRecipe process for user:', userId);
 
     // Store recipe in local storage as backup
-    console.log('Recipe saved to local storage:', recipe.recipe.title);
+    console.log('Recipe saved to local storage:', recipe.foodName || recipe.recipes?.[0]?.title || "Recipe");
     
     // Call our API endpoint to save to Replit Database
     const response = await fetch('/api/recipes', {

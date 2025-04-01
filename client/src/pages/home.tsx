@@ -102,30 +102,50 @@ export default function Home() {
     // Check if we should display a saved recipe (from localStorage)
     if (location.includes('#view-recipe')) {
       try {
-        const savedRecipe = localStorage.getItem('selectedRecipe');
-        const savedRecipeImage = localStorage.getItem('selectedRecipeImage');
+        let savedRecipe;
+        
+        try {
+          savedRecipe = localStorage.getItem('selectedRecipe');
+        } catch (storageError) {
+          console.error('Error reading from localStorage:', storageError);
+          // Continue execution, we'll handle the null case below
+        }
+        
+        const savedRecipeImage = localStorage.getItem('selectedRecipeImage') || '';
         
         if (savedRecipe) {
           const parsedRecipe = JSON.parse(savedRecipe);
           console.log('Loading saved recipe:', parsedRecipe);
           
+          // Validate the recipe object has the minimum required fields
+          if (!parsedRecipe || (!parsedRecipe.recipes && !parsedRecipe.foodName)) {
+            throw new Error('Invalid recipe format');
+          }
+          
           setAnalysisResult(parsedRecipe);
-          setSelectedImage(savedRecipeImage || '');
+          setSelectedImage(savedRecipeImage);
           setStage('results');
           
           // Show success toast
           toast({
-            title: `Viewing: ${parsedRecipe.foodName || parsedRecipe.recipes?.[0].title || 'Recipe'}`,
+            title: `Viewing: ${parsedRecipe.foodName || parsedRecipe.recipes?.[0]?.title || 'Recipe'}`,
             description: "Loaded your saved recipe",
           });
+        } else {
+          throw new Error('No recipe found in localStorage');
         }
       } catch (error) {
         console.error('Error loading saved recipe:', error);
         toast({
-          title: 'Error',
-          description: 'Could not load the saved recipe',
+          title: 'Error Loading Recipe',
+          description: 'Could not load the saved recipe. Please try again.',
           variant: 'destructive',
         });
+        
+        // Redirect to saved recipes page
+        setTimeout(() => {
+          setLocation('/saved-recipes');
+        }, 1500);
       }
     }
   }, [location, toast]);

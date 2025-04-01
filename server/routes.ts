@@ -9,22 +9,17 @@ import {
   registerSchema,
   authResponseSchema,
   insertSavedRecipeSchema,
-  subscriptionCreateSchema,
   type AnalyzeImageResponse,
   type YoutubeVideo,
   type AuthResponse,
   type User,
   type InsertSavedRecipe,
   type SavedRecipe,
-  type SubscriptionPlan,
-  type SubscriptionCreate,
-  type SubscriptionResponse,
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
-import * as stripeService from "./services/stripeService";
 
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
@@ -72,26 +67,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request body
       const validatedData = analyzeImageRequestSchema.parse(req.body);
       const { imageData } = validatedData;
-      
-      // Check user subscription status and credits
-      const userId = GUEST_USER_ID; // In a real implementation, this would be the authenticated user's ID
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found"
-        });
-      }
-      
-      // Check if user has sufficient credits
-      if (user.subscriptionTier !== 'unlimited' && (!user.analysisCredits || user.analysisCredits <= 0)) {
-        return res.status(403).json({
-          success: false,
-          message: "Insufficient credits. Please subscribe to a plan to continue analyzing images.",
-          requiresSubscription: true
-        });
-      }
 
       // Remove the data URL prefix to get the base64 string
       const base64Image = imageData.replace(/^data:image\/\w+;base64,/, "");
@@ -589,12 +564,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             const validatedResponse = analyzeImageResponseSchema.parse(responseWithVideos);
-            
-            // Deduct one credit from user's balance if they're not on unlimited plan
-            if (user.subscriptionTier !== 'unlimited') {
-              await storage.decrementUserCredits(userId);
-            }
-            
             return res.status(200).json(validatedResponse);
           } catch (validationErr) {
             console.error("Schema validation error:", validationErr);
@@ -849,9 +818,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      // Get the guest user with subscription info
-      const user = await storage.getUser(GUEST_USER_ID);
-      
+      // Return a guest user instead
       return res.status(200).json({
         success: true,
         user: {
@@ -859,10 +826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: "guest",
           email: "guest@example.com",
           displayName: "Guest User",
-          profileImage: null,
-          subscriptionStatus: user?.subscriptionStatus || 'none',
-          subscriptionTier: user?.subscriptionTier || 'free',
-          analysisCredits: user?.analysisCredits || 1
+          profileImage: null
         }
       });
     } catch (error) {
@@ -1068,159 +1032,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         success: false,
         message: "Failed to update favorite status",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
-  // Subscription routes
-  app.get("/api/subscription/plans", async (req: Request, res: Response) => {
-    try {
-      // Always return the plans, even if Stripe is not configured
-      return res.status(200).json(stripeService.subscriptionPlans);
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to retrieve subscription plans",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
-  app.post("/api/subscription/create", async (req: Request, res: Response) => {
-    try {
-      // Check if Stripe is configured
-      if (!process.env.STRIPE_SECRET_KEY) {
-        return res.status(503).json({
-          success: false,
-          message: "Subscription service is currently unavailable. STRIPE_SECRET_KEY is not configured."
-        });
-      }
-      
-      // Validate request data
-      const validatedData = subscriptionCreateSchema.parse(req.body);
-
-      // For authenticated user flow, use the actual user ID (not implemented yet)
-      // For now, use the guest user ID
-      const userId = GUEST_USER_ID;
-      
-      // Get user from storage
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found"
-        });
-      }
-
-      // Create or get Stripe customer
-      let customerId = user.stripeCustomerId;
-      if (!customerId) {
-        const customer = await stripeService.createCustomer(user.email, user.displayName || user.username);
-        customerId = customer.id;
-        
-        // Update user with Stripe customer ID
-        await storage.updateUserSubscription(userId, { stripeCustomerId: customerId });
-      }
-
-      // Create subscription in Stripe
-      const subscriptionResponse = await stripeService.createSubscriptionSession(customerId, validatedData.planId);
-
-      // Find the plan to get credits amount
-      const plan = stripeService.subscriptionPlans.find(p => p.id === validatedData.planId);
-      
-      // Update user with subscription data
-      await storage.updateUserSubscription(userId, {
-        stripeSubscriptionId: subscriptionResponse.subscriptionId,
-        subscriptionStatus: 'pending',
-        // We'll update the tier and credits when payment is confirmed via webhook
-      });
-
-      return res.status(200).json(subscriptionResponse);
-    } catch (error) {
-      console.error("Subscription creation error:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Failed to create subscription",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
-  app.post("/api/subscription/cancel", async (req: Request, res: Response) => {
-    try {
-      // Check if Stripe is configured
-      if (!process.env.STRIPE_SECRET_KEY) {
-        return res.status(503).json({
-          success: false,
-          message: "Subscription service is currently unavailable. STRIPE_SECRET_KEY is not configured."
-        });
-      }
-      
-      // For authenticated user flow, use the actual user ID (not implemented yet)
-      // For now, use the guest user ID
-      const userId = GUEST_USER_ID;
-      
-      // Get user from storage
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found"
-        });
-      }
-
-      // Check if user has an active subscription
-      if (!user.stripeSubscriptionId) {
-        return res.status(400).json({
-          success: false,
-          message: "No active subscription found"
-        });
-      }
-
-      // Cancel subscription in Stripe
-      await stripeService.cancelSubscription(user.stripeSubscriptionId);
-
-      // Update user subscription status
-      await storage.updateUserSubscription(userId, {
-        subscriptionStatus: 'canceled'
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Subscription successfully canceled"
-      });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to cancel subscription",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
-
-  // Subscription webhook for handling Stripe events
-  app.post("/api/subscription/webhook", async (req: Request, res: Response) => {
-    try {
-      // Check if Stripe is configured
-      if (!process.env.STRIPE_SECRET_KEY) {
-        return res.status(503).json({
-          success: false,
-          message: "Subscription service is currently unavailable. STRIPE_SECRET_KEY is not configured."
-        });
-      }
-      
-      // Get the webhook event data
-      const event = req.body;
-      
-      // Handle the event
-      await stripeService.handleWebhookEvent(event);
-
-      return res.status(200).json({ received: true });
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to process webhook event",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

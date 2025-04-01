@@ -67,17 +67,34 @@ export default function Header() {
           
           {currentUser ? (
             <div className="flex items-center ml-2">
-              <Avatar className="h-8 w-8 border-2 border-primary/20">
-                <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
-                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">
-                  {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <LoginButton 
-                variant="ghost" 
-                size="sm" 
-                className="ml-1"
-              />
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/profile')}
+                className="cursor-pointer"
+              >
+                <Avatar className="h-8 w-8 border-2 border-primary/20">
+                  <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
+                  <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">
+                    {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </motion.div>
+              <div className="flex flex-col items-start">
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="h-auto p-0 ml-2 font-medium text-xs text-left"
+                  onClick={() => navigate('/profile')}
+                >
+                  Profile
+                </Button>
+                <LoginButton 
+                  variant="link" 
+                  size="sm" 
+                  className="h-auto p-0 ml-2 text-xs"
+                />
+              </div>
             </div>
           ) : (
             <LoginButton 

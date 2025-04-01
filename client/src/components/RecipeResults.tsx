@@ -91,7 +91,21 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     
     try {
       setIsSaving(true);
+      
+      // Set a timeout to prevent infinite loading state
+      const saveTimeout = setTimeout(() => {
+        setIsSaving(false);
+        toast({
+          title: "Taking too long",
+          description: "Saving is taking longer than expected. You can try again later.",
+          variant: "destructive"
+        });
+      }, 8000); // 8 seconds timeout
+      
       await saveRecipe(user.uid, result, imageUrl);
+      
+      // Clear the timeout since save succeeded
+      clearTimeout(saveTimeout);
       
       toast({
         title: "Recipe Saved!",
@@ -100,15 +114,38 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
       });
       
       triggerConfetti();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving recipe:", error);
+      
+      // Customize error message based on error type
+      let errorMessage = "There was a problem saving your recipe. Please try again.";
+      
+      if (error?.code === 'unavailable') {
+        errorMessage = "Firebase service is currently unavailable. Please try again later.";
+      } else if (error?.code === 'permission-denied') {
+        errorMessage = "You don't have permission to save this recipe.";
+      }
+      
       toast({
         title: "Save Failed",
-        description: "There was a problem saving your recipe. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
       setIsSaving(false);
+    }
+    
+    // Also save to local storage as a backup
+    try {
+      const existingRecipes = JSON.parse(localStorage.getItem('dishDetectiveSavedRecipes') || '[]');
+      const exists = existingRecipes.some((r: any) => r.foodName === result.foodName);
+      
+      if (!exists) {
+        const updatedRecipes = [...existingRecipes, result].slice(-10); // Keep last 10
+        localStorage.setItem('dishDetectiveSavedRecipes', JSON.stringify(updatedRecipes));
+      }
+    } catch (err) {
+      console.error("Error saving to local storage:", err);
     }
   };
   

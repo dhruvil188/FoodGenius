@@ -51,6 +51,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUserProfile(profile);
         } catch (error) {
           console.error('Error fetching user profile:', error);
+          // Set a basic profile if we couldn't fetch the full one
+          setUserProfile({
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+            createdAt: new Date().toISOString(),
+            recipeCount: 0
+          });
+          
+          // Only show an error toast if it's not an "unavailable" error
+          if ((error as any)?.code !== 'unavailable') {
+            toast({
+              title: "Connection Issue",
+              description: "Unable to load your complete profile. Some features may be limited.",
+              variant: "destructive"
+            });
+          }
         }
       } else {
         setUserProfile(null);

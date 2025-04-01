@@ -1,9 +1,54 @@
-import { AnalyzeImageResponse } from "@shared/schema";
+import { AnalyzeImageResponse, YoutubeVideo } from "@shared/schema";
 import { genericYoutubeVideos } from "./recipeLibrary";
 
 // Additional recipes from TheMealDB API with verified images
 // Each recipe contains complete details including matching images
-export const newThemealdbRecipes: AnalyzeImageResponse[] = [
+// Each recipe has a unique image URL from TheMealDB
+
+// TheMealDB image URLs for unique recipe images 
+// These are actual images from TheMealDB that match the recipe content
+const themealdbUniqueImages = {
+  "Teriyaki Chicken Casserole": "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg",
+  "Chocolate Gateau": "https://www.themealdb.com/images/media/meals/tqtywx1468317395.jpg",
+  "Fish Pie": "https://www.themealdb.com/images/media/meals/ysxwuq1487323065.jpg",
+  "Pancakes": "https://www.themealdb.com/images/media/meals/rwuyqx1511383174.jpg",
+  "Flamiche": "https://www.themealdb.com/images/media/meals/wssvvs1511785879.jpg",
+  "Corba": "https://www.themealdb.com/images/media/meals/58oia61564916529.jpg",
+  "Kumpir": "https://www.themealdb.com/images/media/meals/mlchx21564916997.jpg",
+  "Shakshuka": "https://www.themealdb.com/images/media/meals/g373701551209149.jpg",
+  "Moussaka": "https://www.themealdb.com/images/media/meals/ctg8jd1585563097.jpg",
+  "Poutine": "https://www.themealdb.com/images/media/meals/uuyrrx1487327597.jpg",
+  "Kedgeree": "https://www.themealdb.com/images/media/meals/utxqpt1511639216.jpg",
+  "Timbits": "https://www.themealdb.com/images/media/meals/txsupu1511815755.jpg",
+  "Ribollita": "https://www.themealdb.com/images/media/meals/xrrwpx1487347049.jpg",
+  "Kung Pao Chicken": "https://www.themealdb.com/images/media/meals/1525872624.jpg",
+  "Vegetable Soup": "https://www.themealdb.com/images/media/meals/isbrxo1567574137.jpg",
+  "Pasta Carbonara": "https://www.themealdb.com/images/media/meals/llcbn01574260722.jpg",
+  "Chicken Congee": "https://www.themealdb.com/images/media/meals/1529446352.jpg",
+  "Beef Lo Mein": "https://www.themealdb.com/images/media/meals/1529444830.jpg",
+  "Peach Crisp": "https://www.themealdb.com/images/media/meals/h3ijwo1581013683.jpg",
+  "Chocolate Souffle": "https://www.themealdb.com/images/media/meals/twspvx1511784937.jpg",
+  "Spanakopita": "https://www.themealdb.com/images/media/meals/aewrot1582480449.jpg",
+  "Lamb Biryani": "https://www.themealdb.com/images/media/meals/xrttsx1487339558.jpg",
+  "Tuna Nicoise": "https://www.themealdb.com/images/media/meals/yypwwq1511304979.jpg"
+};
+
+// Create YouTube video objects with TheMealDB image URLs
+const createThemealDBVideos = (foodName: string): YoutubeVideo[] => {
+  return [
+    {
+      videoId: `video-${foodName.toLowerCase().replace(/\s+/g, '-')}`,
+      title: `How to Make ${foodName}`,
+      channelTitle: "RecipeSnap",
+      description: `Learn how to prepare this delicious ${foodName} recipe step by step.`,
+      publishedAt: "2023-01-01T00:00:00Z",
+      thumbnailUrl: themealdbUniqueImages[foodName] || "https://www.themealdb.com/images/media/meals/default.jpg"
+    }
+  ];
+};
+
+// Create the recipes array
+export const baseRecipes: AnalyzeImageResponse[] = [
   {
     "foodName": "Teriyaki Chicken Casserole",
     "description": "A delicious Japanese-inspired dish combining tender chicken, colorful vegetables, and fluffy rice, all coated in a sweet and savory teriyaki sauce. This comforting casserole is perfect for family dinners and meal prep.",

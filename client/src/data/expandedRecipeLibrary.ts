@@ -13,7 +13,7 @@ import {
 } from "./recipeLibrary";
 import { theMealDBRecipes } from "./additionalRecipes";
 import { themealdbAdditionalRecipes } from "./themealdbRecipes";
-import { newThemealdbRecipes } from "./newThemealdbRecipes";
+import { newThemealdbRecipes } from "./newThemealdbRecipesExport";
 
 /**
  * Expanded library of pre-populated recipes from diverse cuisines around the world

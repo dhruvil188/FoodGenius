@@ -13,6 +13,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { generateMealPlan } from '@/data/mealPlanLibrary';
 
 // Types for meal plan preferences
 interface MealPlanPreferences {
@@ -85,154 +86,34 @@ export default function MealPrep() {
     restrictions: [],
   });
 
-  // Placeholder data for demo purposes
-  const demoMealPlan: MealPlan = {
-    days: Array.from({ length: 7 }).map((_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() + i);
-      
-      return {
-        date,
-        meals: preferences.mealsPerDay === '2' ? [
-          {
-            type: 'Lunch',
-            name: 'Grilled Vegetable Salad with Quinoa',
-            image: 'https://placehold.co/120x80',
-            calories: 450,
-            recipe: "1. Cook quinoa according to package instructions.\n2. Grill vegetables with olive oil.\n3. Mix with fresh herbs and lemon dressing.\n4. Serve warm or chilled.",
-            ingredients: ['Quinoa', 'Bell peppers', 'Zucchini', 'Red onion', 'Olive oil', 'Lemon juice', 'Fresh herbs'],
-            nutrients: {
-              protein: '12g',
-              carbs: '45g',
-              fats: '18g',
-            }
-          },
-          {
-            type: 'Dinner',
-            name: 'Herb-Crusted Salmon with Roasted Vegetables',
-            image: 'https://placehold.co/120x80',
-            calories: 550,
-            recipe: "1. Season salmon with herbs and spices.\n2. Roast in oven at 180°C for 15 minutes.\n3. Serve with seasonal roasted vegetables.",
-            ingredients: ['Salmon fillet', 'Fresh herbs', 'Lemon', 'Garlic', 'Olive oil', 'Broccoli', 'Carrots', 'Sweet potatoes'],
-            nutrients: {
-              protein: '35g',
-              carbs: '30g',
-              fats: '25g',
-            }
-          }
-        ] : [
-          {
-            type: 'Breakfast',
-            name: 'Greek Yogurt with Berries and Granola',
-            image: 'https://placehold.co/120x80',
-            calories: 320,
-            recipe: "1. Layer yogurt in a bowl.\n2. Top with fresh berries and granola.\n3. Drizzle with honey if desired.",
-            ingredients: ['Greek yogurt', 'Mixed berries', 'Granola', 'Honey'],
-            nutrients: {
-              protein: '15g',
-              carbs: '40g',
-              fats: '8g',
-            }
-          },
-          {
-            type: 'Lunch',
-            name: 'Mediterranean Chickpea Salad',
-            image: 'https://placehold.co/120x80',
-            calories: 420,
-            recipe: "1. Combine chickpeas, cucumber, tomatoes, and feta.\n2. Dress with olive oil and lemon juice.\n3. Season with herbs and serve.",
-            ingredients: ['Chickpeas', 'Cucumber', 'Cherry tomatoes', 'Feta cheese', 'Red onion', 'Olive oil', 'Lemon juice', 'Fresh herbs'],
-            nutrients: {
-              protein: '15g',
-              carbs: '45g',
-              fats: '20g',
-            }
-          },
-          {
-            type: 'Snack',
-            name: 'Apple Slices with Almond Butter',
-            image: 'https://placehold.co/120x80',
-            calories: 200,
-            recipe: "1. Slice apple into wedges.\n2. Serve with a side of almond butter for dipping.",
-            ingredients: ['Apple', 'Almond butter'],
-            nutrients: {
-              protein: '6g',
-              carbs: '25g',
-              fats: '10g',
-            }
-          },
-          {
-            type: 'Dinner',
-            name: 'Herb-Crusted Chicken with Quinoa and Roasted Vegetables',
-            image: 'https://placehold.co/120x80',
-            calories: 580,
-            recipe: "1. Season chicken with herbs and spices.\n2. Bake until fully cooked.\n3. Serve with quinoa and roasted seasonal vegetables.",
-            ingredients: ['Chicken breast', 'Fresh herbs', 'Quinoa', 'Bell peppers', 'Zucchini', 'Onion', 'Olive oil'],
-            nutrients: {
-              protein: '40g',
-              carbs: '45g',
-              fats: '22g',
-            }
-          }
-        ],
-        dailyNutrition: {
-          totalCalories: preferences.mealsPerDay === '2' ? 1000 : 1520,
-          totalProtein: preferences.mealsPerDay === '2' ? '47g' : '76g',
-          totalCarbs: preferences.mealsPerDay === '2' ? '75g' : '155g',
-          totalFats: preferences.mealsPerDay === '2' ? '43g' : '60g',
-        }
-      };
-    }),
-    groceryList: [
-      {
-        category: 'Proteins',
-        items: ['Chicken breast (500g)', 'Salmon fillets (400g)', 'Greek yogurt (500g)', 'Eggs (12)', 'Tofu (400g)']
-      },
-      {
-        category: 'Grains',
-        items: ['Quinoa (250g)', 'Brown rice (500g)', 'Whole grain bread (1 loaf)', 'Granola (200g)']
-      },
-      {
-        category: 'Fruits & Vegetables',
-        items: ['Spinach (200g)', 'Mixed berries (300g)', 'Avocados (3)', 'Bell peppers (4)', 'Zucchini (2)', 'Broccoli (1 head)', 'Carrots (500g)', 'Sweet potatoes (3)', 'Apples (5)', 'Lemons (3)', 'Red onions (2)']
-      },
-      {
-        category: 'Dairy & Alternatives',
-        items: ['Feta cheese (200g)', 'Almond milk (1L)', 'Almond butter (200g)']
-      },
-      {
-        category: 'Other',
-        items: ['Olive oil (if needed)', 'Mixed herbs (if needed)', 'Honey (if needed)', 'Chickpeas (400g can, 2)', 'Cherry tomatoes (200g)']
-      }
-    ],
-    nutritionSummary: {
-      averageCalories: preferences.mealsPerDay === '2' ? 1000 : 1520,
-      averageProtein: preferences.mealsPerDay === '2' ? '47g' : '76g',
-      averageCarbs: preferences.mealsPerDay === '2' ? '75g' : '155g',
-      averageFats: preferences.mealsPerDay === '2' ? '43g' : '60g',
-      recommendations: [
-        'Consider increasing protein intake through additional lean protein sources',
-        'Add more fiber-rich foods for better digestive health',
-        'Stay hydrated with at least 2L of water daily',
-        'Vary your vegetable intake for broader nutrient profile'
-      ]
-    }
-  };
-
   const handleSubmit = async () => {
     setIsGenerating(true);
     
-    // Here you would normally make an API call to generate a meal plan
-    // For now, we'll simulate a response after a short delay
-    setTimeout(() => {
-      setMealPlan(demoMealPlan);
+    try {
+      // Generate a meal plan based on user preferences using our comprehensive library
+      const generatedMealPlan = generateMealPlan(preferences);
+      
+      setMealPlan(generatedMealPlan);
+      // Set first day as selected - handle undefined dates
+      if (generatedMealPlan.days.length > 0) {
+        setSelectedDay(generatedMealPlan.days[0].date);
+      }
       setActiveTab('calendar');
-      setIsGenerating(false);
       
       toast({
         title: "Meal Plan Generated",
         description: "Your personalized meal plan is ready to explore!",
       });
-    }, 2000);
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+      toast({
+        title: "Generation Failed",
+        description: "We couldn't generate your meal plan. Please try different preferences.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleUpdatePreference = (field: keyof MealPlanPreferences, value: any) => {
@@ -651,8 +532,8 @@ export default function MealPrep() {
                 <CardContent>
                   <Calendar
                     mode="single"
-                    selected={selectedDay as Date}
-                    onSelect={(day) => setSelectedDay(day)}
+                    selected={selectedDay || undefined}
+                    onSelect={(day) => day && setSelectedDay(day)}
                     className="rounded-md border"
                     initialFocus
                   />

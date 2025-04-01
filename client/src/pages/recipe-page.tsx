@@ -47,27 +47,32 @@ export default function RecipePage() {
 
   // Get an appropriate image for a recipe based on name or tags
   const getRecipeImage = (recipe: AnalyzeImageResponse): string => {
+    console.log("Recipe object:", recipe);
+    
     // First check if the recipe has an imageUrl property (Food.com recipes have these)
     // Use a type assertion to access the non-standard property
     const recipeAny = recipe as any;
     if (recipeAny.imageUrl && typeof recipeAny.imageUrl === 'string' && recipeAny.imageUrl.trim() !== '') {
+      console.log("Using direct imageUrl:", recipeAny.imageUrl);
       return recipeAny.imageUrl;
     }
     
     // First recipe in the array might have an imageUrl
     if (recipe.recipes && 
         recipe.recipes.length > 0 && 
-        recipe.recipes[0].imageUrl && 
-        recipe.recipes[0].imageUrl.trim() !== '') {
-      return recipe.recipes[0].imageUrl;
+        (recipe.recipes[0] as any).imageUrl && 
+        typeof (recipe.recipes[0] as any).imageUrl === 'string' && 
+        (recipe.recipes[0] as any).imageUrl.trim() !== '') {
+      console.log("Using recipe[0] imageUrl:", (recipe.recipes[0] as any).imageUrl);
+      return (recipe.recipes[0] as any).imageUrl;
     }
     
     // Then try to use YouTube thumbnail if available (TheMealDB recipes have these)
     if (recipe.youtubeVideos && 
         recipe.youtubeVideos.length > 0 && 
         recipe.youtubeVideos[0].thumbnailUrl && 
-        recipe.youtubeVideos[0].thumbnailUrl.trim() !== '' &&
-        recipe.youtubeVideos[0].thumbnailUrl.includes('themealdb.com')) {
+        recipe.youtubeVideos[0].thumbnailUrl.trim() !== '') {
+      console.log("Using YouTube thumbnail:", recipe.youtubeVideos[0].thumbnailUrl);
       return recipe.youtubeVideos[0].thumbnailUrl;
     }
     
@@ -75,8 +80,8 @@ export default function RecipePage() {
     if (recipe.youtubeVideos) {
       for (const video of recipe.youtubeVideos) {
         if (video.thumbnailUrl && 
-            video.thumbnailUrl.trim() !== '' && 
-            video.thumbnailUrl.includes('themealdb.com')) {
+            video.thumbnailUrl.trim() !== '') {
+          console.log("Using YouTube video thumbnail:", video.thumbnailUrl);
           return video.thumbnailUrl;
         }
       }
@@ -84,22 +89,28 @@ export default function RecipePage() {
     
     // Then try exact match by name
     if (placeholderImages[recipe.foodName]) {
+      console.log("Using named placeholder:", placeholderImages[recipe.foodName]);
       return placeholderImages[recipe.foodName];
     }
     
     // Then look for category matches in tags
     const lowerTags = recipe.tags.map(tag => tag.toLowerCase());
     if (lowerTags.some(tag => tag.includes('soup'))) {
+      console.log("Using soup fallback");
       return fallbackImages.soup;
     } else if (lowerTags.some(tag => tag.includes('dessert') || tag.includes('sweet'))) {
+      console.log("Using dessert fallback");
       return fallbackImages.dessert;
     } else if (lowerTags.some(tag => tag.includes('vegetarian') || tag.includes('vegan'))) {
+      console.log("Using vegetarian fallback");
       return fallbackImages.vegetarian;
     } else if (lowerTags.some(tag => tag.includes('meat') || tag.includes('chicken') || tag.includes('beef'))) {
+      console.log("Using meat fallback");
       return fallbackImages.meat;
     }
     
     // Default fallback
+    console.log("Using default fallback");
     return fallbackImages.default;
   };
 

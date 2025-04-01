@@ -47,9 +47,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
   });
   
-  // Use Gemini 1.0 Flash for meal planning (more cost-effective)
+  // Use Gemini 1.0 Pro for meal planning (more cost-effective than 1.5 Pro)
   const mealPlanningModel = genAI.getGenerativeModel({
-    model: "gemini-1.0-flash",
+    model: "gemini-1.0-pro",
     generationConfig: {
       temperature: 0.7,
       topP: 0.95,

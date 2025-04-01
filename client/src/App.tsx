@@ -8,6 +8,8 @@ import Library from "@/pages/library";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import Profile from "@/pages/profile";
+import SavedRecipes from "@/pages/saved-recipes";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
@@ -20,6 +22,8 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/saved-recipes" component={SavedRecipes} />
       <Route component={NotFound} />
     </Switch>
   );

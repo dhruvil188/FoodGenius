@@ -25,7 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
 import { useAuth } from '@/context/AuthContext';
-import { saveRecipe as firebaseSaveRecipe } from '@/lib/firebase';
+import { saveRecipe } from '@/lib/firebase';
 
 interface RecipeResultsProps {
   result: AnalyzeImageResponse;
@@ -91,7 +91,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     
     try {
       setIsSaving(true);
-      await firebaseSaveRecipe(user.uid, result, imageUrl);
+      await saveRecipe(user.uid, result, imageUrl);
       
       toast({
         title: "Recipe Saved!",

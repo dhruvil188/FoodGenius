@@ -35,11 +35,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     process.env.GEMINI_API_KEY || ""
   );
 
-  // Define the model to use for image analysis
-  const model = genAI.getGenerativeModel({
+  // Define different models for different tasks
+  // Use Gemini 1.5 Pro for image analysis (more accurate)
+  const imageAnalysisModel = genAI.getGenerativeModel({
     model: "gemini-1.5-pro",
     generationConfig: {
       temperature: 0.4,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,
+    },
+  });
+  
+  // Use Gemini 1.0 Flash for meal planning (more cost-effective)
+  const mealPlanningModel = genAI.getGenerativeModel({
+    model: "gemini-1.0-flash",
+    generationConfig: {
+      temperature: 0.7,
       topP: 0.95,
       topK: 40,
       maxOutputTokens: 8192,
@@ -232,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       try {
         // Start a chat session and send message with the food image
-        const chatSession = model.startChat({
+        const chatSession = imageAnalysisModel.startChat({
           history: [],
         });
         
@@ -1120,8 +1132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
       
       try {
-        // Use Gemini API to generate the meal plan
-        const chatSession = model.startChat({
+        // Use Gemini API to generate the meal plan (with cost-effective model)
+        const chatSession = mealPlanningModel.startChat({
           history: [],
         });
         

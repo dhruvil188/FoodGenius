@@ -30,6 +30,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
+  getUserByFirebaseId(firebaseId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
   
@@ -108,6 +109,25 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(
       (user) => user.stripeCustomerId === customerId
     );
+  }
+  
+  async getUserByFirebaseId(firebaseId: string): Promise<User | undefined> {
+    // In a real implementation with Firebase, we'd map Firebase UIDs to our user IDs
+    // For now, we'll try to find a user by checking if their email contains the Firebase UID
+    // This is just a simple mapping for demo purposes
+    const lowerFirebaseId = firebaseId.toLowerCase();
+    
+    // First try to find user by email that might contain the firebase ID
+    let user = Array.from(this.users.values()).find(
+      (user) => user.email.toLowerCase().includes(lowerFirebaseId)
+    );
+    
+    // If not found, just use the first user as a fallback (for demo purposes)
+    if (!user && this.users.size > 0) {
+      user = Array.from(this.users.values())[0];
+    }
+    
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {

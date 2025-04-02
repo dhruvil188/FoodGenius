@@ -1052,7 +1052,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const user = await storage.getUser(req.body.userId);
+      // First try to get the user by Firebase UID
+      let user = await storage.getUserByFirebaseId(req.body.userId);
+      
+      // If not found and the userId is a number, try to get the user by numeric ID
+      if (!user && !isNaN(Number(req.body.userId))) {
+        user = await storage.getUser(Number(req.body.userId));
+      }
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1095,7 +1101,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const user = await storage.getUser(req.body.userId);
+      // First try to get the user by Firebase UID
+      let user = await storage.getUserByFirebaseId(req.body.userId);
+      
+      // If not found and the userId is a number, try to get the user by numeric ID
+      if (!user && !isNaN(Number(req.body.userId))) {
+        user = await storage.getUser(Number(req.body.userId));
+      }
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1151,7 +1163,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const user = await storage.getUser(req.body.userId);
+      // First try to get the user by Firebase UID
+      let user = await storage.getUserByFirebaseId(req.body.userId);
+      
+      // If not found and the userId is a number, try to get the user by numeric ID
+      if (!user && !isNaN(Number(req.body.userId))) {
+        user = await storage.getUser(Number(req.body.userId));
+      }
+      
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1196,7 +1215,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const user = await storage.getUser(req.body.userId);
+      // First try to get the user by Firebase UID
+      let user = await storage.getUserByFirebaseId(req.body.userId);
+      
+      // If not found and the userId is a number, try to get the user by numeric ID
+      if (!user && !isNaN(Number(req.body.userId))) {
+        user = await storage.getUser(Number(req.body.userId));
+      }
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }

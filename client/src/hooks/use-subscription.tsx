@@ -7,7 +7,10 @@ import { useToast } from './use-toast';
 export function useSubscription() {
   const { currentUser } = useAuth();
   const { toast } = useToast();
-  const userId = currentUser?.uid ? parseInt(currentUser.uid) : undefined;
+  
+  // Get the firebase UID or fallback to a stringified number if using the internal auth system
+  // This allows compatibility with both Firebase and our internal auth
+  const userId = currentUser?.uid || undefined;
 
   const { 
     data: subscriptionData,

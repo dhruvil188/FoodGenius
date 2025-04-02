@@ -627,16 +627,17 @@ function generatePrompt(planRequest: DietPlanRequest): string {
     `For each day, generate exactly ${mealsPerDay} different meals. Each meal should be appropriate for the time of day (breakfast, lunch, dinner, snacks).\n` +
     "Make sure each daily plan is different (no repeating the exact same meals).\n" +
     "For EACH meal, provide:\n" +
-    "1. Meal name\n" +
+    "1. Meal name (use creative, appetizing names)\n" +
     "2. Time of day to eat\n" +
-    "3. List of ingredients with precise quantities\n" +
+    "3. List of ingredients with precise quantities and brief explanations (e.g., '2 tbsp extra virgin olive oil (for heart-healthy fats)')\n" +
     "4. Detailed step-by-step cooking instructions including:\n" +
-    "   - Preparation steps (chopping, marinating, etc.)\n" +
-    "   - Cooking temperatures and times\n" +
-    "   - Cooking methods (sauté, bake, steam, etc.)\n" +
-    "   - Indicators for doneness\n" +
-    "   - Plating and serving suggestions\n" +
-    "5. Nutritional information (calories, protein, carbs, fat)\n\n" +
+    "   - Preparation steps with timing (chopping, marinating, etc.)\n" +
+    "   - Exact cooking temperatures and times (e.g., '375°F for 25 minutes' or 'medium-high heat for 3-4 minutes per side')\n" +
+    "   - Specific cooking methods (sauté, bake, steam, etc.) with equipment needed\n" +
+    "   - Clear indicators for doneness (e.g., 'until golden brown' or 'internal temperature reaches 165°F')\n" +
+    "   - Professional plating and serving suggestions with garnishes\n" +
+    "   - Tips for meal prep or storage if applicable\n" +
+    "5. Detailed nutritional information (calories, protein, carbs, fat) with additional health benefits\n\n" +
     
     "***EXTREMELY IMPORTANT***: Your response MUST be a valid, parseable JSON object. Do not include explanations, text, or markdown outside the JSON. " +
     "Use proper JSON syntax with double quotes for all strings and property names. All numbers must be numeric values without quotes. " +
@@ -650,27 +651,42 @@ function generatePrompt(planRequest: DietPlanRequest): string {
       "day": "Monday",
       "meals": [
         {
-          "name": "Meal name",
-          "timeOfDay": "Breakfast/Lunch/Dinner/Snack",
-          "ingredients": ["Ingredient 1 with quantity", "Ingredient 2 with quantity"],
-          "instructions": ["Step 1", "Step 2", "Step 3"],
+          "name": "Golden Mediterranean Sunrise Bowl",
+          "timeOfDay": "Breakfast",
+          "ingredients": [
+            "1/2 cup Greek yogurt (high in protein and probiotics for gut health)",
+            "1/4 cup granola (provides fiber and sustained energy)",
+            "1 tbsp honey (natural sweetener with antimicrobial properties)",
+            "1/4 cup mixed berries (rich in antioxidants and vitamin C)",
+            "1 tbsp sliced almonds (heart-healthy fats and vitamin E)"
+          ],
+          "instructions": [
+            "Prepare all ingredients (2 minutes): Wash berries and pat dry with paper towel.",
+            "In a medium serving bowl, spread the Greek yogurt as the base layer.",
+            "Sprinkle granola evenly over the yogurt, creating a crunchy layer.",
+            "Arrange mixed berries decoratively on top of the granola.",
+            "Drizzle honey in a circular pattern for even distribution of sweetness.",
+            "Finish by scattering sliced almonds on top for extra crunch and visual appeal.",
+            "For best texture and flavor contrast, serve immediately after assembly.",
+            "Meal prep tip: Store granola and berries separately and assemble just before eating to maintain crunchiness."
+          ],
           "nutritionalInfo": {
-            "calories": 123,
-            "protein": 12,
-            "carbs": 34,
-            "fat": 5
+            "calories": 320,
+            "protein": 18,
+            "carbs": 42,
+            "fat": 12
           }
         }
       ],
-      "totalDailyCalories": 1200
+      "totalDailyCalories": 1900
     }
   ],
-  "planSummary": "Brief summary of overall plan",
+  "planSummary": "A nutrient-rich Mediterranean-inspired meal plan focused on balanced macronutrients, complex carbohydrates, lean proteins, and healthy fats. Each meal incorporates fresh, seasonal ingredients with attention to proper portion control for optimal weight management while providing sustained energy throughout the day.",
   "weeklyNutritionAverage": {
-    "calories": 1500,
-    "protein": 100,
-    "carbs": 150,
-    "fat": 50
+    "calories": 1800,
+    "protein": 105,
+    "carbs": 180,
+    "fat": 65
   }
 }\n\n` +
     

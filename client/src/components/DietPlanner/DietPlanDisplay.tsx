@@ -19,9 +19,18 @@ import {
   Coffee, 
   Salad,
   Drumstick,
-  Cookie
+  Cookie,
+  Timer,
+  ChefHat,
+  ShoppingCart,
+  Thermometer,
+  Sparkles,
+  Bookmark,
+  Star,
+  CheckCircle2
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DietPlanDisplayProps {
   dietPlan: DietPlanResponse;
@@ -167,27 +176,27 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
                             <AccordionItem value="nutritional-info">
                               <AccordionTrigger className="py-2">
                                 <div className="flex items-center text-sm font-medium">
-                                  <Info className="h-4 w-4 mr-2" />
+                                  <Info className="h-4 w-4 mr-2 text-blue-500" />
                                   Nutritional Information
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent>
-                                <div className="grid grid-cols-4 gap-2 p-2 bg-muted/30 rounded-md">
-                                  <div className="text-center">
+                                <div className="grid grid-cols-4 gap-4 p-4 bg-muted/30 rounded-md">
+                                  <div className="text-center p-2 bg-background rounded shadow-sm">
                                     <div className="text-sm text-muted-foreground">Calories</div>
-                                    <div className="font-medium">{meal.nutritionalInfo.calories}</div>
+                                    <div className="font-medium text-orange-500 text-lg">{meal.nutritionalInfo.calories}</div>
                                   </div>
-                                  <div className="text-center">
+                                  <div className="text-center p-2 bg-background rounded shadow-sm">
                                     <div className="text-sm text-muted-foreground">Protein</div>
-                                    <div className="font-medium">{meal.nutritionalInfo.protein}g</div>
+                                    <div className="font-medium text-primary text-lg">{meal.nutritionalInfo.protein}g</div>
                                   </div>
-                                  <div className="text-center">
+                                  <div className="text-center p-2 bg-background rounded shadow-sm">
                                     <div className="text-sm text-muted-foreground">Carbs</div>
-                                    <div className="font-medium">{meal.nutritionalInfo.carbs}g</div>
+                                    <div className="font-medium text-amber-500 text-lg">{meal.nutritionalInfo.carbs}g</div>
                                   </div>
-                                  <div className="text-center">
+                                  <div className="text-center p-2 bg-background rounded shadow-sm">
                                     <div className="text-sm text-muted-foreground">Fat</div>
-                                    <div className="font-medium">{meal.nutritionalInfo.fat}g</div>
+                                    <div className="font-medium text-yellow-600 text-lg">{meal.nutritionalInfo.fat}g</div>
                                   </div>
                                 </div>
                               </AccordionContent>
@@ -196,32 +205,105 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
                             <AccordionItem value="ingredients">
                               <AccordionTrigger className="py-2">
                                 <div className="flex items-center text-sm font-medium">
-                                  <Utensils className="h-4 w-4 mr-2" />
+                                  <ShoppingCart className="h-4 w-4 mr-2 text-emerald-500" />
                                   Ingredients
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent>
-                                <ul className="list-disc pl-6 space-y-1">
-                                  {meal.ingredients.map((ingredient, i) => (
-                                    <li key={i} className="text-sm">{ingredient}</li>
-                                  ))}
-                                </ul>
+                                <div className="bg-muted/20 p-3 rounded-md">
+                                  <TooltipProvider>
+                                    <ul className="space-y-3">
+                                      {meal.ingredients.map((ingredient, i) => {
+                                        // Extract quantity and name for styling
+                                        const matches = ingredient.match(/^([\d\/.]+\s*[a-zA-Z]*|\d+)\s+(.+)$/);
+                                        let quantity = "";
+                                        let ingredientName = ingredient;
+                                        let healthBenefit = "";
+                                        
+                                        if (matches && matches.length >= 3) {
+                                          quantity = matches[1];
+                                          ingredientName = matches[2];
+                                        }
+                                        
+                                        // Extract health benefits if present in parentheses
+                                        const benefitMatch = ingredientName.match(/\((.*?)\)/);
+                                        if (benefitMatch && benefitMatch.length >= 2) {
+                                          healthBenefit = benefitMatch[1];
+                                          ingredientName = ingredientName.replace(/\s*\(.*?\)\s*/, '');
+                                        }
+                                        
+                                        return (
+                                          <li key={i} className="flex items-start py-1 border-b border-muted last:border-0">
+                                            <CheckCircle2 className="h-4 w-4 mr-2 mt-1 text-green-500 flex-shrink-0" />
+                                            <div>
+                                              <span className="font-semibold text-sm">{quantity}</span>
+                                              <span className="text-sm ml-1">{ingredientName}</span>
+                                              {healthBenefit && (
+                                                <Tooltip>
+                                                  <TooltipTrigger asChild>
+                                                    <span className="ml-1 inline-flex text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5 cursor-help">
+                                                      <Star className="h-3 w-3 mr-1" /> info
+                                                    </span>
+                                                  </TooltipTrigger>
+                                                  <TooltipContent className="max-w-xs">
+                                                    <p>{healthBenefit}</p>
+                                                  </TooltipContent>
+                                                </Tooltip>
+                                              )}
+                                            </div>
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
+                                  </TooltipProvider>
+                                </div>
                               </AccordionContent>
                             </AccordionItem>
                             
                             <AccordionItem value="instructions">
                               <AccordionTrigger className="py-2">
                                 <div className="flex items-center text-sm font-medium">
-                                  <CalendarDays className="h-4 w-4 mr-2" />
+                                  <ChefHat className="h-4 w-4 mr-2 text-amber-600" />
                                   Cooking Instructions
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent>
-                                <ol className="list-decimal pl-6 space-y-2">
-                                  {meal.instructions.map((step, i) => (
-                                    <li key={i} className="text-sm">{step}</li>
-                                  ))}
-                                </ol>
+                                <div className="bg-muted/20 rounded-md p-3">
+                                  <ol className="space-y-4">
+                                    {meal.instructions.map((step, i) => {
+                                      // Detect time information in the step
+                                      const hasTime = /\b\d+\s*(minute|min|hour|hr|second|sec)s?\b/i.test(step);
+                                      // Detect temperature information in the step
+                                      const hasTemp = /\b\d+\s*°[FC]\b|\b\d+\s*degrees\b/i.test(step);
+                                      
+                                      return (
+                                        <li key={i} className="relative pl-8 pb-4 border-b border-muted last:border-0 last:pb-1">
+                                          <span className="absolute left-0 top-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                                            {i+1}
+                                          </span>
+                                          <p className="text-sm">{step}</p>
+                                          <div className="flex gap-2 mt-2">
+                                            {hasTime && (
+                                              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
+                                                <Timer className="h-3 w-3" /> Time
+                                              </Badge>
+                                            )}
+                                            {hasTemp && (
+                                              <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200 flex items-center gap-1">
+                                                <Thermometer className="h-3 w-3" /> Temp
+                                              </Badge>
+                                            )}
+                                            {step.toLowerCase().includes("serve") && (
+                                              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1">
+                                                <Sparkles className="h-3 w-3" /> Plating
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </li>
+                                      );
+                                    })}
+                                  </ol>
+                                </div>
                               </AccordionContent>
                             </AccordionItem>
                           </Accordion>

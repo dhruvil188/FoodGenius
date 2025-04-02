@@ -1,55 +1,64 @@
-import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Lock, CreditCard } from 'lucide-react';
 
-interface ProtectedFeatureProps {
+export interface ProtectedFeatureProps {
   children: React.ReactNode;
-  featureName?: string;
-  description?: string;
+  feature: string;
+  fallbackMessage: string;
 }
 
-export default function ProtectedFeature({
-  children,
-  featureName = "this feature",
-  description = "Please sign in to access this feature."
-}: ProtectedFeatureProps) {
-  const { currentUser, isLoading, login } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-      </div>
-    );
+/**
+ * Component that renders premium features only for users with credits or paid subscriptions
+ * and shows a fallback message for free users
+ */
+const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({ 
+  children, 
+  feature,
+  fallbackMessage
+}) => {
+  const { currentUser } = useAuth();
+  
+  // For now, always grant access if the user is logged in
+  // In a production app, we would check for subscription status from custom claims or database
+  const hasAccess = !!currentUser;
+  
+  if (hasAccess) {
+    return <>{children}</>;
   }
+  
+  return (
+    <Card className="border-amber-200 bg-amber-50">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-center text-amber-800 flex items-center justify-center">
+          <Lock className="h-4 w-4 mr-2" />
+          Premium Feature
+        </CardTitle>
+        <CardDescription className="text-center text-amber-700">
+          {fallbackMessage}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="text-center pt-0 pb-2 space-y-2">
+        <p className="text-sm text-amber-800">
+          This feature requires credits or a subscription to use.
+        </p>
+      </CardContent>
+      <CardFooter className="flex justify-center pt-0">
+        <Button 
+          className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white"
+          onClick={() => {
+            // TODO: Implement subscription/credits purchase flow
+            alert('Subscription flow would open here');
+          }}
+        >
+          <CreditCard className="h-4 w-4 mr-2" />
+          Upgrade Account
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
 
-  if (!currentUser) {
-    return (
-      <Card className="w-full max-w-md mx-auto border border-slate-200 shadow-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl font-semibold food-gradient-text">Sign In Required</CardTitle>
-          <CardDescription>
-            You need to be signed in to use {featureName}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-slate-600 mb-4 text-center">
-            {description}
-          </p>
-          <div className="flex items-center justify-center">
-            <Button onClick={login} className="px-6">
-              Sign In with Google
-            </Button>
-          </div>
-        </CardContent>
-        <CardFooter className="text-center text-xs text-slate-500 pt-0">
-          We only use your information to personalize your experience.
-        </CardFooter>
-      </Card>
-    );
-  }
-
-  return <>{children}</>;
-}
+export default ProtectedFeature;

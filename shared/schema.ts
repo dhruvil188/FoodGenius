@@ -313,5 +313,79 @@ export const firebaseAuthSyncSchema = z.object({
   photoURL: z.string().nullable(),
 });
 
+// Diet Plan Schemas
+export const mealSchema = z.object({
+  name: z.string(),
+  timeOfDay: z.string(),
+  ingredients: z.array(z.string()),
+  instructions: z.array(z.string()),
+  nutritionalInfo: z.object({
+    calories: z.number(),
+    protein: z.number(),
+    carbs: z.number(),
+    fat: z.number()
+  }),
+});
+
+export type Meal = z.infer<typeof mealSchema>;
+
+export const dailyPlanSchema = z.object({
+  day: z.string(),
+  meals: z.array(mealSchema),
+  totalDailyCalories: z.number(),
+});
+
+export type DailyPlan = z.infer<typeof dailyPlanSchema>;
+
+export const dietPlanRequestSchema = z.object({
+  mealsPerDay: z.number().min(2).max(5),
+  dietType: z.string(),
+  healthGoals: z.array(z.string()),
+  calorieTarget: z.number(),
+  excludedFoods: z.array(z.string()),
+  medicalConditions: z.array(z.string()),
+  cookingSkill: z.string(),
+  timeConstraint: z.number(),
+  budgetLevel: z.string(),
+  preferredCuisines: z.array(z.string()),
+  seasonalPreference: z.string(),
+  proteinPreference: z.string(),
+  extraNotes: z.string().optional(),
+});
+
+export type DietPlanRequest = z.infer<typeof dietPlanRequestSchema>;
+
+export const dietPlanResponseSchema = z.object({
+  weeklyPlan: z.array(dailyPlanSchema),
+  planSummary: z.string(),
+  weeklyNutritionAverage: z.object({
+    calories: z.number(),
+    protein: z.number(),
+    carbs: z.number(),
+    fat: z.number(),
+  }),
+});
+
+export type DietPlanResponse = z.infer<typeof dietPlanResponseSchema>;
+
+// Database schema for saved diet plans
+export const savedDietPlans = pgTable("saved_diet_plans", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  planName: text("plan_name").notNull(),
+  planData: jsonb("plan_data").notNull(), // Store the full diet plan JSON
+  mealsPerDay: integer("meals_per_day").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  tags: text("tags").array(),
+});
+
+export const insertSavedDietPlanSchema = createInsertSchema(savedDietPlans).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertSavedDietPlan = z.infer<typeof insertSavedDietPlanSchema>;
+export type SavedDietPlan = typeof savedDietPlans.$inferSelect;
+
 export type FirebaseAuthSync = z.infer<typeof firebaseAuthSyncSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;

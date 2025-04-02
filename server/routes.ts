@@ -1,12 +1,24 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
+
+// Extend Express Request type to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 import {
   analyzeImageRequestSchema,
+  dietPlanRequestSchema,
   loginSchema,
   registerSchema,
   firebaseAuthSyncSchema,
   type AnalyzeImageResponse,
+  type DietPlanRequest,
+  type DietPlanResponse,
   type AuthResponse
 } from "@shared/schema";
 
@@ -33,6 +45,13 @@ import {
   deleteRecipe,
   toggleFavorite
 } from "./services/recipeService";
+import {
+  generateDietPlan,
+  saveDietPlan,
+  getUserDietPlans,
+  getDietPlanById,
+  deleteDietPlan
+} from "./services/dietPlanService";
 
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
@@ -40,9 +59,7 @@ const GUEST_USER_ID = 1;
 // Setup Stripe if API key available
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2023-10-16",
-  });
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
 /**
@@ -237,6 +254,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(200).json(updatedRecipe);
   }));
   
+  // ==== Diet Plan Routes ====
+  
+  // Generate a diet plan
+  app.post("/api/diet-plans/generate", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    // Validate the request body
+    const validatedData = dietPlanRequestSchema.parse(req.body);
+    
+    // Check user has enough credits
+    if (req.user.credits <= 0 && req.user.subscriptionTier === 'free') {
+      throw new ValidationError("You don't have enough credits. Please upgrade your subscription.");
+    }
+    
+    // Generate diet plan with AI
+    const dietPlan = await generateDietPlan(req.user.id, validatedData);
+    
+    // Return diet plan result
+    return res.status(200).json(dietPlan);
+  }));
+  
+  // Save a generated diet plan
+  app.post("/api/diet-plans", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const { planName, dietPlan, mealsPerDay } = req.body;
+    
+    if (!planName || !dietPlan || !mealsPerDay) {
+      throw new ValidationError("Missing required fields");
+    }
+    
+    const savedPlan = await saveDietPlan(req.user.id, planName, dietPlan, mealsPerDay);
+    return res.status(201).json(savedPlan);
+  }));
+  
+  // Get all saved diet plans for a user
+  app.get("/api/diet-plans", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const dietPlans = await getUserDietPlans(req.user.id);
+    return res.status(200).json(dietPlans);
+  }));
+  
+  // Get diet plan by ID
+  app.get("/api/diet-plans/:id", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const planId = parseInt(req.params.id);
+    const dietPlan = await getDietPlanById(planId, req.user.id);
+    return res.status(200).json(dietPlan);
+  }));
+  
+  // Delete a diet plan
+  app.delete("/api/diet-plans/:id", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const planId = parseInt(req.params.id);
+    await deleteDietPlan(planId, req.user.id);
+    return res.status(200).json({ success: true });
+  }));
+
   // ==== Stripe Routes ====
   
   // Only setup Stripe routes if API key is available

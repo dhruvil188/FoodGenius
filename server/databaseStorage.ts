@@ -1,8 +1,9 @@
 import { 
-  users, sessions, savedRecipes,
+  users, sessions, savedRecipes, savedDietPlans,
   type User, type InsertUser, 
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
+  type SavedDietPlan, type InsertSavedDietPlan,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -306,6 +307,42 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedRecipe;
+  }
+
+  // Diet plan methods
+  async getSavedDietPlans(userId: number): Promise<SavedDietPlan[]> {
+    return db.select()
+      .from(savedDietPlans)
+      .where(eq(savedDietPlans.userId, userId))
+      .orderBy(desc(savedDietPlans.createdAt));
+  }
+
+  async getSavedDietPlanById(id: number): Promise<SavedDietPlan | undefined> {
+    const [dietPlan] = await db.select().from(savedDietPlans).where(eq(savedDietPlans.id, id));
+    return dietPlan;
+  }
+
+  async createSavedDietPlan(dietPlanData: InsertSavedDietPlan): Promise<SavedDietPlan> {
+    const [dietPlan] = await db.insert(savedDietPlans).values({
+      ...dietPlanData,
+      createdAt: new Date()
+    }).returning();
+    
+    return dietPlan;
+  }
+
+  async deleteSavedDietPlan(id: number): Promise<boolean> {
+    const result = await db.delete(savedDietPlans).where(eq(savedDietPlans.id, id));
+    return !!result;
+  }
+
+  async updateSavedDietPlan(id: number, updates: Partial<SavedDietPlan>): Promise<SavedDietPlan | undefined> {
+    const [updatedDietPlan] = await db.update(savedDietPlans)
+      .set(updates)
+      .where(eq(savedDietPlans.id, id))
+      .returning();
+    
+    return updatedDietPlan;
   }
 }
 

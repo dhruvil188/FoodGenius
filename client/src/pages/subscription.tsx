@@ -1,261 +1,57 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSubscription } from '@/hooks/use-subscription';
-import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'wouter';
+import { useEffect, useRef } from 'react';
 import LoginButton from '@/components/LoginButton';
 
-// Separate authenticated component to avoid conditional hook calls
-function AuthenticatedContent() {
-  const { toast } = useToast();
-  const [isAnnual, setIsAnnual] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Safe to call these hooks here - will only be rendered when user is logged in
-  const subscription = useSubscription();
-  const { 
-    credits = 0, 
-    hasActiveSubscription = false, 
-    subscriptionTier = 'free',
-    subscriptionData = null,
-    createSubscription = async () => ({ clientSecret: null })
-  } = subscription || {};
-
-  const handleSubscribe = async (priceId: string) => {
-    setIsLoading(true);
-    try {
-      const result = await createSubscription(priceId);
-      
-      if (result?.clientSecret) {
-        toast({
-          title: 'Subscription started',
-          description: 'Your subscription has been initiated.',
-        });
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'stripe-pricing-table': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        'pricing-table-id': string;
+        'publishable-key': string;
+        'client-reference-id'?: string;
+        'customer-email'?: string;
       }
-    } catch (error) {
-      toast({
-        title: 'Subscription failed',
-        description: error instanceof Error ? error.message : 'An unknown error occurred',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }
+}
+
+// Component for authenticated users showing Stripe pricing table
+function AuthenticatedContent() {
+  const auth = useAuth();
+  const stripePricingTableRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    // Load the Stripe Pricing Table script
+    const script = document.createElement('script');
+    script.src = 'https://js.stripe.com/v3/pricing-table.js';
+    script.async = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      // Clean up on unmount
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   return (
-    <>
-      {/* Credit Status */}
-      <motion.div 
-        className="mb-12"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <Card className="bg-white shadow-md border border-slate-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xl">Your Credit Status</CardTitle>
-            <CardDescription>Current subscription and available credits</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row justify-between gap-6">
-              <div className="flex-1">
-                <div className="mb-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-slate-500">Available Credits</span>
-                    <span className="text-sm font-bold">{credits} credits</span>
-                  </div>
-                  <Progress value={credits} max={subscriptionTier === 'premium' ? 50 : 20} className="h-2" />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-500">Subscription Status</span>
-                    <Badge variant={hasActiveSubscription ? "default" : "outline"} className={hasActiveSubscription ? "bg-green-500 hover:bg-green-600" : ""}>
-                      {hasActiveSubscription ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-slate-500">Plan</span>
-                    <span className="text-sm font-medium capitalize">{subscriptionTier}</span>
-                  </div>
-                  {subscriptionData && subscriptionData.subscription && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-slate-500">Renewal Date</span>
-                      <span className="text-sm font-medium">
-                        {new Date(subscriptionData.subscription.currentPeriodEnd).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-      
-      {/* Pricing Section */}
-      <motion.div 
-        className="w-full mb-12"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-      >
-        <div className="flex justify-center items-center mb-8">
-          <span className={`text-sm font-medium mr-2 ${!isAnnual ? 'text-primary' : 'text-slate-500'}`}>Monthly</span>
-          <Switch id="billing-toggle" checked={isAnnual} onCheckedChange={setIsAnnual} />
-          <span className={`text-sm font-medium ml-2 ${isAnnual ? 'text-primary' : 'text-slate-500'}`}>
-            Annual <Badge variant="outline" className="ml-1.5 bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200">Save 20%</Badge>
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Basic Plan */}
-          <Card className="border border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="bg-gradient-to-br from-slate-50 to-slate-100 pb-8">
-              <CardTitle className="flex justify-between items-center">
-                <span className="text-xl font-bold">Basic Plan</span>
-                <Badge variant="outline" className="ml-2">Most Popular</Badge>
-              </CardTitle>
-              <div className="mt-4">
-                <div className="flex items-baseline text-left">
-                  <span className="text-4xl font-extrabold">£{isAnnual ? '5.60' : '7'}</span>
-                  <span className="ml-1 text-xl text-slate-500 font-medium">/month</span>
-                </div>
-                {isAnnual && (
-                  <div className="text-sm text-slate-500 mt-1">£67.20 billed annually</div>
-                )}
-                <div className="flex items-center text-sm text-emerald-600 font-medium mt-2">
-                  <span className="bg-emerald-100 rounded-full w-5 h-5 flex items-center justify-center mr-2">
-                    <i className="fas fa-check text-xs"></i>
-                  </span>
-                  <span>20 recipe analyses per month</span>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-6 pb-2">
-              <ul className="space-y-3">
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Complete recipe instructions</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Nutritional information</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Recipe variations</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Health benefits analysis</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Side dish recommendations</span>
-                </li>
-              </ul>
-            </CardContent>
-            <CardFooter className="flex justify-center pb-8">
-              <Button 
-                onClick={() => handleSubscribe(import.meta.env.VITE_BASIC_PLAN_PRICE_ID || 'price_1ObaMfD9qqKTtl0qxdw6OMpj')} 
-                disabled={isLoading}
-                className="w-full bg-primary hover:bg-primary/90 text-white"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Processing...</span>
-                  </div>
-                ) : 'Subscribe Now'}
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Premium Plan */}
-          <Card className="border border-primary/30 shadow-xl overflow-hidden relative hover:shadow-2xl transition-shadow duration-300">
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-primary to-emerald-600 text-white text-xs font-bold px-4 py-1 rounded-bl-lg">
-              BEST VALUE
-            </div>
-            <CardHeader className="bg-gradient-to-br from-emerald-50 to-green-100 pb-8">
-              <CardTitle className="flex justify-between items-center">
-                <span className="text-xl font-bold">Premium Plan</span>
-              </CardTitle>
-              <div className="mt-4">
-                <div className="flex items-baseline text-left">
-                  <span className="text-4xl font-extrabold">£{isAnnual ? '9.60' : '12'}</span>
-                  <span className="ml-1 text-xl text-slate-500 font-medium">/month</span>
-                </div>
-                {isAnnual && (
-                  <div className="text-sm text-slate-500 mt-1">£115.20 billed annually</div>
-                )}
-                <div className="flex items-center text-sm text-emerald-600 font-medium mt-2">
-                  <span className="bg-emerald-100 rounded-full w-5 h-5 flex items-center justify-center mr-2">
-                    <i className="fas fa-check text-xs"></i>
-                  </span>
-                  <span>50 recipe analyses per month</span>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-6 pb-2">
-              <ul className="space-y-3">
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Everything in Basic plan</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Cost estimation & alternatives</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Cooking science explanations</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Cultural context & history</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Advanced cooking techniques</span>
-                </li>
-                <li className="flex">
-                  <i className="fas fa-check text-primary mr-3 mt-1"></i>
-                  <span className="text-sm">Priority support</span>
-                </li>
-              </ul>
-            </CardContent>
-            <CardFooter className="flex justify-center pb-8">
-              <Button 
-                onClick={() => handleSubscribe(import.meta.env.VITE_PREMIUM_PLAN_PRICE_ID || 'price_1ObaMfD9qqKTtl0qdKQQAkjS')} 
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Processing...</span>
-                  </div>
-                ) : 'Subscribe Now'}
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </motion.div>
-    </>
+    <motion.div 
+      className="w-full"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.5 }}
+      ref={stripePricingTableRef}
+    >
+      <stripe-pricing-table
+        pricing-table-id="prctbl_1R9IbVRp4HZDUL91mFDGhAlx"
+        publishable-key="pk_live_51R9AjYRp4HZDUL91ckxYco82qgJQ9Sm6BMiwc4n6rPPWEGXcqM1kcOSG7WyUQ0v6DXDVObTe4CCfYy2vxJJGDsSb00e0wVjj8D"
+        client-reference-id={auth?.currentUser?.uid}
+        customer-email={auth?.currentUser?.email || undefined}
+      />
+    </motion.div>
   );
 }
 

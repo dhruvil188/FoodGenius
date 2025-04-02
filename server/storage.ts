@@ -29,8 +29,14 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
+  
+  // Subscription methods
+  updateStripeCustomerId(userId: number, customerId: string): Promise<User>;
+  updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User>;
+  updateUserCredits(userId: number, credits: number): Promise<User>;
 
   // Session methods
   createSession(session: InsertSession): Promise<Session>;
@@ -71,7 +77,12 @@ export class MemStorage implements IStorage {
       displayName: 'Demo User',
       profileImage: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      credits: 1,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      subscriptionStatus: 'free',
+      subscriptionTier: 'free'
     };
     this.users.set(demoUser.id, demoUser);
   }
@@ -92,6 +103,12 @@ export class MemStorage implements IStorage {
       (user) => user.email.toLowerCase() === email.toLowerCase()
     );
   }
+  
+  async getUserByStripeCustomerId(customerId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.stripeCustomerId === customerId
+    );
+  }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userId++;
@@ -105,7 +122,12 @@ export class MemStorage implements IStorage {
       displayName: insertUser.displayName || null,
       profileImage: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      credits: 1, // Start with one free credit
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      subscriptionStatus: 'free',
+      subscriptionTier: 'free'
     };
     
     this.users.set(id, user);
@@ -118,6 +140,60 @@ export class MemStorage implements IStorage {
 
     const updatedUser = { ...user, ...updates, updatedAt: new Date() };
     this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  // Subscription methods
+  async updateStripeCustomerId(userId: number, customerId: string): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const updatedUser = await this.updateUser(userId, { 
+      stripeCustomerId: customerId 
+    });
+    
+    if (!updatedUser) {
+      throw new Error('Failed to update user');
+    }
+    
+    return updatedUser;
+  }
+
+  async updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const updatedUser = await this.updateUser(userId, { 
+      stripeCustomerId: stripeInfo.customerId,
+      stripeSubscriptionId: stripeInfo.subscriptionId,
+      subscriptionStatus: 'active',
+      subscriptionTier: 'basic', // Can be 'basic', 'premium' etc.
+      credits: user.credits ? user.credits + 20 : 20 // Start with 20 credits for basic plan
+    });
+    
+    if (!updatedUser) {
+      throw new Error('Failed to update user');
+    }
+    
+    return updatedUser;
+  }
+
+  async updateUserCredits(userId: number, credits: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const updatedUser = await this.updateUser(userId, { credits });
+    
+    if (!updatedUser) {
+      throw new Error('Failed to update user');
+    }
+    
     return updatedUser;
   }
 

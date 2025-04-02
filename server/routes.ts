@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage, generateToken, verifyPassword, hashPassword } from "./storage";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import Stripe from "stripe";
 import {
   analyzeImageRequestSchema,
   analyzeImageResponseSchema,
@@ -1033,6 +1034,290 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: "Failed to update favorite status",
         error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Setup Stripe instance
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.warn('STRIPE_SECRET_KEY environment variable not set. Stripe payments will not work.');
+  }
+  
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+  
+  // Stripe API routes
+  app.post('/api/stripe/create-customer', async (req: Request, res: Response) => {
+    if (!req.body.userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+    
+    try {
+      const user = await storage.getUser(req.body.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Create a Stripe customer
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.username,
+        metadata: {
+          userId: user.id.toString()
+        }
+      });
+      
+      // Update the user with the Stripe customer ID
+      const updatedUser = await storage.updateStripeCustomerId(user.id, customer.id);
+      
+      res.json({
+        customerId: customer.id,
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          username: updatedUser.username,
+          subscriptionStatus: updatedUser.subscriptionStatus,
+          subscriptionTier: updatedUser.subscriptionTier,
+          credits: updatedUser.credits
+        }
+      });
+    } catch (error) {
+      console.error('Error creating Stripe customer:', error);
+      return res.status(500).json({ 
+        error: 'Failed to create Stripe customer',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  app.post('/api/stripe/create-subscription', async (req: Request, res: Response) => {
+    if (!req.body.userId || !req.body.priceId) {
+      return res.status(400).json({ error: 'Missing userId or priceId' });
+    }
+    
+    try {
+      const user = await storage.getUser(req.body.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // If the user doesn't have a Stripe customer ID, create one
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.username,
+          metadata: {
+            userId: user.id.toString()
+          }
+        });
+        customerId = customer.id;
+        await storage.updateStripeCustomerId(user.id, customerId);
+      }
+      
+      // Create a subscription
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: [{ price: req.body.priceId }],
+        payment_behavior: 'default_incomplete',
+        expand: ['latest_invoice.payment_intent'],
+      });
+      
+      // Update the user with subscription info
+      await storage.updateUserStripeInfo(user.id, {
+        customerId, 
+        subscriptionId: subscription.id
+      });
+      
+      // Return the subscription and client secret
+      const invoice = subscription.latest_invoice as Stripe.Invoice;
+      const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+      
+      res.json({
+        subscriptionId: subscription.id,
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      return res.status(500).json({ 
+        error: 'Failed to create subscription',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  app.post('/api/stripe/check-subscription', async (req: Request, res: Response) => {
+    if (!req.body.userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+    
+    try {
+      const user = await storage.getUser(req.body.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // If user doesn't have a subscription, return the current credits
+      if (!user.stripeSubscriptionId) {
+        return res.json({
+          active: false,
+          credits: user.credits,
+          subscriptionStatus: user.subscriptionStatus,
+          subscriptionTier: user.subscriptionTier
+        });
+      }
+      
+      // Get the subscription from Stripe
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      
+      // Return the subscription status and user credits
+      return res.json({
+        active: subscription.status === 'active',
+        subscriptionStatus: subscription.status,
+        subscriptionTier: user.subscriptionTier,
+        credits: user.credits,
+        subscription: {
+          id: subscription.id,
+          status: subscription.status,
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+        }
+      });
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      return res.status(500).json({ 
+        error: 'Failed to check subscription',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  app.post('/api/stripe/update-credits', async (req: Request, res: Response) => {
+    if (!req.body.userId || req.body.credits === undefined) {
+      return res.status(400).json({ error: 'Missing userId or credits' });
+    }
+    
+    try {
+      const user = await storage.getUser(req.body.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      const credits = Math.max(0, req.body.credits); // Ensure credits can't be negative
+      const updatedUser = await storage.updateUserCredits(user.id, credits);
+      
+      return res.json({
+        success: true,
+        credits: updatedUser.credits
+      });
+    } catch (error) {
+      console.error('Error updating credits:', error);
+      return res.status(500).json({ 
+        error: 'Failed to update credits',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  // Stripe webhook endpoint to handle subscription events
+  app.post('/api/stripe/webhook', async (req: Request, res: Response) => {
+    let event;
+    
+    try {
+      // Verify webhook signature
+      const signature = req.headers['stripe-signature'] as string;
+      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      
+      if (!endpointSecret) {
+        return res.status(400).json({ 
+          error: 'Stripe webhook secret not set'
+        });
+      }
+      
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        endpointSecret
+      );
+    } catch (error) {
+      console.error('Webhook signature verification failed:', error);
+      return res.status(400).json({ 
+        error: 'Webhook signature verification failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+    
+    // Handle the event
+    const data = event.data.object as any;
+    
+    try {
+      switch (event.type) {
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated': {
+          const subscription = data as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+          
+          // Find user by Stripe customer ID
+          const users = await storage.getUserByStripeCustomerId(customerId);
+          if (!users) {
+            console.error('User not found for customer ID:', customerId);
+            break;
+          }
+          
+          // Update subscription status and add credits based on the plan
+          const status = subscription.status;
+          let tier = 'basic';
+          let creditAmount = 20; // Default to basic plan credits
+          
+          // Check the subscription items for the price ID to determine the plan
+          const item = subscription.items.data[0];
+          if (item && item.price.id) {
+            const priceId = item.price.id;
+            // Set tier and credits based on the price ID
+            // The premium plan typically costs more and offers more credits
+            if (priceId.includes('premium')) {
+              tier = 'premium';
+              creditAmount = 50;
+            }
+          }
+          
+          // Update user with subscription status and credits
+          await storage.updateUser(users.id, {
+            subscriptionStatus: status,
+            subscriptionTier: tier,
+            // Only add credits if subscription is active or trialing
+            ...(status === 'active' || status === 'trialing' ? { 
+              credits: Math.max(users.credits || 0, creditAmount) 
+            } : {})
+          });
+          
+          break;
+        }
+        case 'customer.subscription.deleted': {
+          const subscription = data as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+          
+          // Find user by Stripe customer ID
+          const users = await storage.getUserByStripeCustomerId(customerId);
+          if (!users) {
+            console.error('User not found for customer ID:', customerId);
+            break;
+          }
+          
+          // Update user to mark subscription as canceled
+          await storage.updateUser(users.id, {
+            subscriptionStatus: 'canceled',
+            // Don't remove existing credits, just mark as canceled
+          });
+          
+          break;
+        }
+      }
+      
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Error handling webhook event:', error);
+      return res.status(500).json({ 
+        error: 'Error handling webhook event',
+        details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });

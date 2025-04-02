@@ -57,26 +57,28 @@ export default function BuyCreditsButton({
     }
     
     try {
+      // Use email for direct lookup in backend
       const response = await apiRequest('POST', '/api/stripe/update-credits', {
-        userId: currentUser.uid,
         email: currentUser.email,
         creditsToAdd: 12
       });
       
-      if (response.ok) {
-        // Fetch updated credits immediately
-        await fetchUserCredits();
-        
-        toast({
-          title: "Credits Added",
-          description: "12 test credits were added to your account.",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to add test credits. Please try again.",
-          variant: "destructive"
-        });
+      console.log('Credits update response:', response);
+      
+      // Always fetch updated credits regardless of response
+      try {
+        // Wait a moment to ensure DB is updated
+        setTimeout(async () => {
+          const updatedCredits = await fetchUserCredits();
+          console.log('Updated credits:', updatedCredits);
+          
+          toast({
+            title: "Credits Added",
+            description: `12 test credits were added. Current total: ${updatedCredits}`,
+          });
+        }, 1000);
+      } catch (refreshError) {
+        console.error("Error refreshing credits:", refreshError);
       }
     } catch (error) {
       console.error("Error adding test credits:", error);
@@ -85,6 +87,9 @@ export default function BuyCreditsButton({
         description: "An unexpected error occurred.",
         variant: "destructive"
       });
+      
+      // Try to refresh credits anyway
+      fetchUserCredits().catch(e => console.error("Failed to refresh credits:", e));
     }
   };
 

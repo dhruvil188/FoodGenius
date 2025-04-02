@@ -670,6 +670,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // If user exists, return success with existing user data
           console.log('Existing user found, returning user data:', existingUser);
           
+          // Generate a token for the user
+          const token = generateToken();
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+          
+          await storage.createSession({
+            userId: existingUser.id,
+            token,
+            expiresAt
+          });
+          
           const authResponse: AuthResponse = {
             success: true,
             message: "Welcome back!",
@@ -680,7 +691,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               displayName: existingUser.displayName || null,
               profileImage: existingUser.profileImage || null,
               credits: existingUser.credits || 0
-            }
+            },
+            token
           };
           
           return res.status(200).json(authResponse);
@@ -702,6 +714,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log('Created new user for Firebase auth:', newUser);
         
+        // Create session token for new user
+        const token = generateToken();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+        
+        await storage.createSession({
+          userId: newUser.id,
+          token,
+          expiresAt
+        });
+        
         const authResponse: AuthResponse = {
           success: true,
           message: "Account created successfully!",
@@ -712,7 +735,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             displayName: newUser.displayName || null,
             profileImage: newUser.profileImage || null,
             credits: newUser.credits || 0
-          }
+          },
+          token
         };
         
         return res.status(201).json(authResponse);

@@ -59,14 +59,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoadingCredits(true);
     
     try {
-      const response = await apiRequest('GET', '/api/auth/me');
-      const data = await response.json();
+      // apiRequest already parses the JSON, so we don't need to do it again
+      const data = await apiRequest('GET', '/api/auth/me');
       
-      if (data.success && data.user) {
+      // Add some debug logging to see the response
+      console.log("User data from /api/auth/me:", data);
+      
+      if (data && data.success && data.user) {
         const credits = data.user.credits || 0;
+        console.log("Setting user credits to:", credits);
         setUserCredits(credits);
         return credits;
       } else {
+        console.log("No valid user data received, setting credits to 0");
         setUserCredits(0);
         return 0;
       }
@@ -104,13 +109,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             profileImage: user.photoURL
           });
           
-          console.log('User registered or synced with database:', await registerResponse.json());
+          console.log('User registered or synced with database:', registerResponse);
+          
+          // Wait a moment before fetching credits to allow the database to update
+          setTimeout(() => {
+            // Fetch user credits after login
+            fetchUserCredits();
+          }, 1000);
         } catch (error) {
           console.error('Error registering user with database:', error);
         }
-        
-        // Fetch user credits after login
-        fetchUserCredits();
       }
       
       return user;

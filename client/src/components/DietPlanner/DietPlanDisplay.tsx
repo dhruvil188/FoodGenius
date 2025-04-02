@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DietPlanResponse, SavedDietPlan } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,23 @@ const getDayNumber = (day: string): number => {
 
 export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlanDisplayProps) {
   const [planName, setPlanName] = useState("My Diet Plan");
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Check if we're on a mobile device
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    // Initial check
+    checkIfMobile();
+    
+    // Add event listener
+    window.addEventListener('resize', checkIfMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
   
   // Sort the weekly plan by day of week
   const sortedWeeklyPlan = [...dietPlan.weeklyPlan].sort(
@@ -115,8 +132,8 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
           <Tabs defaultValue="0" className="w-full">
             <TabsList className="grid grid-cols-7 mb-4">
               {sortedWeeklyPlan.map((day, index) => (
-                <TabsTrigger key={day.day} value={index.toString()}>
-                  {day.day.substring(0, 3)}
+                <TabsTrigger key={day.day} value={index.toString()} className="text-xs sm:text-sm">
+                  {isMobile ? day.day.substring(0, 3) : day.day.charAt(0).toUpperCase() + day.day.slice(1)}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -124,10 +141,10 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
             {sortedWeeklyPlan.map((day, dayIndex) => (
               <TabsContent key={day.day} value={dayIndex.toString()} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">{day.day}</h3>
-                  <Badge variant="outline">
-                    <Flame className="h-4 w-4 mr-1 text-orange-500" />
-                    {day.totalDailyCalories} calories
+                  <h3 className="text-xl font-semibold capitalize">{day.day}</h3>
+                  <Badge variant="outline" className="flex items-center gap-1 px-3 py-1.5">
+                    <Flame className="h-4 w-4 text-orange-500" />
+                    <span className="font-medium">{day.totalDailyCalories} calories</span>
                   </Badge>
                 </div>
                 

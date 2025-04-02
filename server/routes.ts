@@ -2,6 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage, generateToken, verifyPassword, hashPassword } from "./storage";
 import { firestoreStorage } from "./firestore-storage";
+import { auth } from "./firebase-admin";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import {
   analyzeImageRequestSchema,
@@ -743,6 +744,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
+      // Check if this is a Firebase token login
+      if (req.body.idToken) {
+        try {
+          // Verify the Firebase token
+          const decodedToken = await auth.verifyIdToken(req.body.idToken);
+          const firebaseUid = decodedToken.uid;
+          
+          // Get user data from decoded token
+          const email = decodedToken.email;
+          const displayName = decodedToken.name;
+          
+          if (!email) {
+            return res.status(400).json({
+              success: false,
+              message: "Email missing from Firebase token"
+            });
+          }
+          
+          // Find user by Firebase UID
+          let user = await storage.getUserByFirebaseUid(firebaseUid);
+          
+          // If not found by UID, try by email
+          if (!user) {
+            user = await storage.getUserByEmail(email);
+            
+            // If found by email but no Firebase UID, update the user
+            if (user && !user.firebaseUid) {
+              user = await storage.updateUser(user.id, { 
+                firebaseUid,
+                displayName: displayName || user.displayName
+              });
+            } else if (!user) {
+              // Create new user
+              const username = email.split('@')[0];
+              user = await storage.createUser({
+                username,
+                email,
+                password: generateToken(), // Random password for Firebase users
+                displayName: displayName || username,
+                firebaseUid
+              } as any);
+            }
+          }
+          
+          if (!user) {
+            return res.status(500).json({
+              success: false,
+              message: "Failed to create or retrieve user"
+            });
+          }
+          
+          // Create session token
+          const token = generateToken();
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+          
+          await storage.createSession({
+            userId: user.id,
+            token,
+            expiresAt
+          });
+          
+          // Return user data
+          const authResponse: AuthResponse = {
+            success: true,
+            user: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              displayName: user.displayName || user.username,
+              profileImage: user.profileImage || null,
+              firebaseUid: user.firebaseUid,
+              stripeCustomerId: user.stripeCustomerId || null,
+              stripeSubscriptionId: user.stripeSubscriptionId || null,
+              analysisCount: user.analysisCount || 0,
+              maxAnalyses: user.maxAnalyses || 1,
+              planType: user.planType || 'free',
+              remainingAnalyses: await storage.getRemainingAnalyses(user.id)
+            },
+            token,
+            message: "Firebase login successful"
+          };
+          
+          return res.status(200).json(authResponse);
+        } catch (firebaseError) {
+          console.error('Firebase authentication error:', firebaseError);
+          return res.status(401).json({
+            success: false,
+            message: "Invalid Firebase token",
+            error: firebaseError instanceof Error ? firebaseError.message : "Unknown error"
+          });
+        }
+      }
+      
+      // Regular email/password login
       // Validate request data
       const validatedData = loginSchema.parse(req.body);
       

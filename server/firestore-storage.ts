@@ -141,7 +141,7 @@ export class FirestoreStorage implements IStorage {
   // Saved recipe methods
   async getSavedRecipes(userId: number): Promise<SavedRecipe[]> {
     const snapshot = await this.savedRecipesCollection.where('userId', '==', userId).get();
-    return snapshot.docs.map(doc => convertTimestampsToDate(doc.data()) as SavedRecipe);
+    return snapshot.docs.map((doc: any) => convertTimestampsToDate(doc.data()) as SavedRecipe);
   }
 
   async getSavedRecipeById(id: number): Promise<SavedRecipe | undefined> {

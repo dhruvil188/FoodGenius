@@ -45,31 +45,73 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
     // Log the extracted JSON
     console.log("Extracted JSON:", jsonStr);
     
-    // Apply more aggressive cleaning to fix JSON syntax errors
-    let cleanedJson = cleanJsonString(jsonStr);
-    
-    // Additional cleaning for common JSON issues
-    cleanedJson = cleanedJson
-      // Fix unescaped quotes in values
-      .replace(/([a-zA-Z0-9])"([a-zA-Z0-9])/g, '$1\\"$2')
-      // Fix missing quotes around property names
-      .replace(/(\{|\,)\s*([a-zA-Z0-9_]+)\s*\:/g, '$1"$2":')
-      // Fix trailing commas before closing brackets
-      .replace(/,(\s*[\]}])/g, '$1');
+    // Apply cleaning to fix JSON syntax errors
+    const cleanedJson = cleanJsonString(jsonStr);
     
     console.log("Cleaned JSON:", cleanedJson);
     
-    // Use safe parsing with fallback
+    // Parse the cleaned JSON
     let dietPlan: DietPlanResponse;
+    
     try {
       dietPlan = JSON.parse(cleanedJson);
+      
+      // Check if the diet plan is empty or incomplete
+      if (!dietPlan.weeklyPlan || dietPlan.weeklyPlan.length === 0) {
+        // Try to extract partial data from the text
+        const partialDays = extractPartialDietPlanData(text);
+        
+        if (partialDays.length > 0) {
+          // We have partial data, create a partial plan
+          dietPlan = {
+            weeklyPlan: partialDays,
+            planSummary: "Partial diet plan generated. Some data may be incomplete.",
+            weeklyNutritionAverage: calculateAverageNutrition(partialDays)
+          };
+        } else {
+          // No usable data found
+          dietPlan = {
+            weeklyPlan: [],
+            planSummary: "Diet plan could not be generated. Please try again with different preferences.",
+            weeklyNutritionAverage: {
+              calories: 0,
+              protein: 0,
+              carbs: 0,
+              fat: 0
+            }
+          };
+        }
+      }
+      
+      // Validate the structure against our schema
+      return dietPlanResponseSchema.parse(dietPlan);
+      
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
       
-      // Last resort: try to fix by reconstructing JSON structure
-      const dummyStructure: DietPlanResponse = {
+      // Try to extract partial data
+      const partialDays = extractPartialDietPlanData(text);
+      
+      if (partialDays.length > 0) {
+        // We were able to extract some data
+        const partialPlan: DietPlanResponse = {
+          weeklyPlan: partialDays,
+          planSummary: "Partial diet plan generated from incomplete data.",
+          weeklyNutritionAverage: calculateAverageNutrition(partialDays)
+        };
+        
+        // Try to validate against schema
+        try {
+          return dietPlanResponseSchema.parse(partialPlan);
+        } catch (schemaError) {
+          console.error("Schema validation error for partial plan:", schemaError);
+        }
+      }
+      
+      // Fallback to minimal structure
+      const fallbackPlan: DietPlanResponse = {
         weeklyPlan: [],
-        planSummary: "Error generating complete plan. Please try again.",
+        planSummary: "Error generating complete plan. Please try again with different preferences.",
         weeklyNutritionAverage: {
           calories: 0,
           protein: 0,
@@ -78,21 +120,118 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         }
       };
       
-      // Try to validate against schema anyway
-      try {
-        return dietPlanResponseSchema.parse(dummyStructure);
-      } catch (schemaError) {
-        console.error("Schema validation error:", schemaError);
-        throw new Error("Invalid plan format returned. Please try again.");
-      }
+      return dietPlanResponseSchema.parse(fallbackPlan);
     }
-    
-    // Validate the response against our schema
-    return dietPlanResponseSchema.parse(dietPlan);
   } catch (error) {
     console.error("Error generating diet plan:", error);
     throw new Error("Failed to generate diet plan. Please try again later.");
   }
+}
+
+/**
+ * Helper function to extract partial diet plan data from text
+ */
+function extractPartialDietPlanData(text: string): { day: string; meals: any[]; totalDailyCalories: number; }[] {
+  const partialDays: { day: string; meals: any[]; totalDailyCalories: number; }[] = [];
+  
+  // Extract days of the week with their meals
+  const dayRegex = /"day"\s*:\s*"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"/g;
+  const dayMatches = [...text.matchAll(dayRegex)];
+  
+  for (const dayMatch of dayMatches) {
+    const dayName = dayMatch[1];
+    const dayIndex = text.indexOf(dayMatch[0]);
+    
+    // Find the meals array for this day
+    let mealsStart = text.indexOf('"meals"', dayIndex);
+    if (mealsStart === -1) continue;
+    
+    mealsStart = text.indexOf('[', mealsStart);
+    if (mealsStart === -1) continue;
+    
+    // Find the end of the meals array or the next day
+    let mealsEnd = -1;
+    let bracketCount = 1;
+    for (let i = mealsStart + 1; i < text.length; i++) {
+      if (text[i] === '[') bracketCount++;
+      else if (text[i] === ']') {
+        bracketCount--;
+        if (bracketCount === 0) {
+          mealsEnd = i + 1;
+          break;
+        }
+      }
+    }
+    
+    if (mealsEnd === -1) {
+      // Array wasn't closed properly, find the next day or end of string
+      const nextDayMatch = text.indexOf('"day"', dayIndex + dayMatch[0].length);
+      mealsEnd = nextDayMatch !== -1 ? nextDayMatch : text.length;
+    }
+    
+    // Extract the meals array
+    let mealsText = text.substring(mealsStart, mealsEnd);
+    
+    // Try to parse the meals array
+    try {
+      // Clean up the array text
+      mealsText = cleanJsonString(mealsText);
+      const meals = JSON.parse(mealsText);
+      
+      // Calculate total calories
+      const totalDailyCalories = meals.reduce((sum: number, meal: any) => {
+        return sum + (meal.nutritionalInfo?.calories || 0);
+      }, 0);
+      
+      // Add this day to our partial results
+      partialDays.push({
+        day: dayName,
+        meals: meals,
+        totalDailyCalories
+      });
+    } catch (error) {
+      console.warn(`Could not parse meals for ${dayName}:`, error);
+      // Continue to the next day
+    }
+  }
+  
+  return partialDays;
+}
+
+/**
+ * Calculate weekly nutrition averages from partial data
+ */
+function calculateAverageNutrition(days: { day: string; meals: any[]; totalDailyCalories: number; }[]): { calories: number; protein: number; carbs: number; fat: number; } {
+  if (days.length === 0) {
+    return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  }
+  
+  let totalCalories = 0;
+  let totalProtein = 0;
+  let totalCarbs = 0;
+  let totalFat = 0;
+  let mealCount = 0;
+  
+  for (const day of days) {
+    for (const meal of day.meals) {
+      if (meal.nutritionalInfo) {
+        totalCalories += meal.nutritionalInfo.calories || 0;
+        totalProtein += meal.nutritionalInfo.protein || 0;
+        totalCarbs += meal.nutritionalInfo.carbs || 0;
+        totalFat += meal.nutritionalInfo.fat || 0;
+        mealCount++;
+      }
+    }
+  }
+  
+  // Calculate daily averages
+  const daysCount = days.length;
+  return {
+    calories: Math.round(totalCalories / (daysCount || 1)),
+    protein: Math.round(totalProtein / (daysCount || 1)),
+    carbs: Math.round(totalCarbs / (daysCount || 1)),
+    fat: Math.round(totalFat / (daysCount || 1))
+  };
 }
 
 /**

@@ -90,38 +90,140 @@ export function extractJsonFromText(text: string): string {
  * Cleans a JSON string to make it valid
  */
 export function cleanJsonString(jsonStr: string): string {
-  // Remove any markdown formatting, comments, or explanations outside the JSON
-  const cleanStr = jsonStr
-    // Replace trailing commas
-    .replace(/,\s*}/g, '}') 
-    .replace(/,\s*\]/g, ']')
+  try {
+    // First attempt: Try to parse the JSON as is
+    JSON.parse(jsonStr);
+    return jsonStr; // If it parses, return it unchanged
+  } catch (error) {
+    // If parsing fails, apply cleaning operations
     
-    // Fix property names: ensure all property names are properly quoted
-    .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+    // Safe truncation for unfinished arrays or objects
+    let safeJson = jsonStr;
     
-    // Replace single quotes with double quotes
-    .replace(/'/g, '"')
+    // Process for truncated arrays - find the last complete array element and properly close the array
+    const findIncompleteArrays = (str: string): string => {
+      let result = str;
+      let openBracketPos = -1;
+      let openBraceStack = 0;
+      let lastCompleteObjectEnd = -1;
+      
+      // Find incomplete arrays
+      for (let i = 0; i < str.length; i++) {
+        if (str[i] === '[' && openBracketPos === -1) {
+          openBracketPos = i;
+          lastCompleteObjectEnd = i; // Reset on new array start
+        } else if (str[i] === '{') {
+          openBraceStack++;
+        } else if (str[i] === '}') {
+          openBraceStack--;
+          if (openBraceStack === 0 && openBracketPos !== -1) {
+            // Found a complete object in an array
+            lastCompleteObjectEnd = i + 1;
+          }
+        } else if (str[i] === ']') {
+          if (openBracketPos !== -1) {
+            openBracketPos = -1; // Array closed properly
+          }
+        }
+      }
+      
+      // If we have an open array with a complete object, truncate after the last complete object
+      if (openBracketPos !== -1 && lastCompleteObjectEnd > openBracketPos) {
+        const arrayStart = str.substring(0, openBracketPos + 1);
+        const completeContent = str.substring(openBracketPos + 1, lastCompleteObjectEnd);
+        
+        // Add closing bracket and any needed structure after the array
+        const remainingStructure = str.substring(lastCompleteObjectEnd).match(/^[^,]*?([\]}])/);
+        if (remainingStructure) {
+          const closingChar = remainingStructure[1];
+          const restOfJson = str.substring(str.indexOf(closingChar) + 1);
+          result = arrayStart + completeContent + "]" + restOfJson;
+        } else {
+          result = arrayStart + completeContent + "]";
+        }
+      }
+      
+      return result;
+    };
     
-    // Fix common formatting issues
-    .replace(/\n/g, ' ')         // Remove newlines
-    .replace(/\t/g, ' ')         // Remove tabs
-    .replace(/\s+/g, ' ')        // Normalize whitespace
+    safeJson = findIncompleteArrays(safeJson);
     
-    // Fix unescaped quotes in string values
-    .replace(/:\s*"([^"]*?)([^\\])"([^,"}\]])/g, ':"$1$2\\"$3')
+    // Apply standard JSON cleaning operations
+    safeJson = safeJson
+      // Replace trailing commas
+      .replace(/,\s*}/g, '}') 
+      .replace(/,\s*\]/g, ']')
+      
+      // Fix property names: ensure all property names are properly quoted
+      .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+      
+      // Replace single quotes with double quotes
+      .replace(/'/g, '"')
+      
+      // Fix common formatting issues
+      .replace(/\n/g, ' ')         // Remove newlines
+      .replace(/\t/g, ' ')         // Remove tabs
+      .replace(/\s+/g, ' ')        // Normalize whitespace
+      
+      // Fix unescaped quotes in string values
+      .replace(/:\s*"([^"]*?)([^\\])"([^,"}\]])/g, ':"$1$2\\"$3')
+      
+      // Fix missing commas between objects in an array
+      .replace(/}\s*{/g, '},{')
+      
+      // Ensure balanced brackets and braces
+      .replace(/\}\s*\}/g, '}}')
+      .replace(/\]\s*\]/g, ']]')
+      
+      // Fix unclosed objects and arrays at the end of the string
+      .replace(/\{([^{}]*?)$/g, '{$1}')
+      .replace(/\[([^\[\]]*?)$/g, '[$1]')
+      
+      // Ensure numbers are not in quotes
+      .replace(/"(\d+)\.?(\d*)"/g, (match, p1, p2) => {
+        // Keep numbers with decimals as is, but remove quotes
+        if (p2) return `${p1}.${p2}`;
+        return p1;
+      })
+      
+      // Fix boolean values
+      .replace(/"(true|false)"/gi, (_, bool) => bool.toLowerCase());
     
-    // Fix missing commas between objects in an array
-    .replace(/}\s*{/g, '},{')
-    
-    // Ensure numbers are not in quotes
-    .replace(/"(\d+)\.?(\d*)"/g, (match, p1, p2) => {
-      // Keep numbers with decimals as is, but remove quotes
-      if (p2) return `${p1}.${p2}`;
-      return p1;
-    })
-    
-    // Fix boolean values
-    .replace(/"(true|false)"/gi, (_, bool) => bool.toLowerCase());
-    
-  return cleanStr;
+    // Check if the JSON is now valid
+    try {
+      JSON.parse(safeJson);
+      return safeJson;
+    } catch (secondError) {
+      // If it's still not valid, try more aggressive repairs
+      
+      // Try to reconstruct the minimal valid structure
+      if (safeJson.includes('"weeklyPlan"')) {
+        // Try to extract weeklyPlan array
+        const weeklyPlanMatch = safeJson.match(/"weeklyPlan"\s*:\s*(\[.*?\])/);
+        if (weeklyPlanMatch) {
+          try {
+            const weeklyPlanArray = JSON.parse(weeklyPlanMatch[1]);
+            
+            // Create a minimal valid structure
+            return JSON.stringify({
+              weeklyPlan: weeklyPlanArray,
+              planSummary: "Diet plan generated with limited data",
+              weeklyNutritionAverage: {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0
+              }
+            });
+          } catch (error) {
+            // If we can't parse the weeklyPlan array, return a minimal structure
+            return '{"weeklyPlan":[],"planSummary":"Error parsing plan data","weeklyNutritionAverage":{"calories":0,"protein":0,"carbs":0,"fat":0}}';
+          }
+        }
+      }
+      
+      // Last resort: return minimal valid structure
+      return '{"weeklyPlan":[],"planSummary":"Error parsing plan data","weeklyNutritionAverage":{"calories":0,"protein":0,"carbs":0,"fat":0}}';
+    }
+  }
 }

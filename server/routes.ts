@@ -906,28 +906,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      // Get user from session if available
+      // Check for both regular auth token and Firebase token
       const authToken = req.headers.authorization?.split(' ')[1] || req.cookies?.authToken;
+      const firebaseToken = req.headers['x-firebase-token'] || req.cookies?.firebaseToken;
+      const userEmail = req.headers['x-user-email'] as string;
       
-      // If there's a valid auth token, try to get the user from it
+      let user = null;
+      
+      // Try to get user from standard session
       if (authToken) {
         const session = await storage.getSessionByToken(authToken);
         if (session) {
-          const user = await storage.getUser(session.userId);
-          if (user) {
-            return res.status(200).json({
-              success: true,
-              user: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                displayName: user.displayName || user.username,
-                profileImage: user.profileImage,
-                credits: user.credits || 5 // Default to 5 credits if not set
-              }
-            });
-          }
+          user = await storage.getUser(session.userId);
         }
+      }
+      
+      // If we have a Firebase user email, try to get the user by email
+      if (!user && userEmail) {
+        console.log(`Looking up user by email: ${userEmail}`);
+        user = await storage.getUserByEmail(userEmail);
+        
+        // If we found the user by email
+        if (user) {
+          console.log(`Found user by email: ${userEmail}, id: ${user.id}, credits: ${user.credits}`);
+        }
+      }
+      
+      // If we found a user, return their info
+      if (user) {
+        return res.status(200).json({
+          success: true,
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            displayName: user.displayName || user.username,
+            profileImage: user.profileImage,
+            credits: user.credits || 5 // Default to 5 credits if not set
+          }
+        });
+      }
+      
+      // For testing: if an email was specified but not found, return a clear error
+      if (userEmail && userEmail !== 'guest@example.com') {
+        console.log(`Requested email ${userEmail} not found in database`);
+        return res.status(200).json({
+          success: true,
+          user: {
+            id: GUEST_USER_ID,
+            username: "guest",
+            email: "guest@example.com",
+            displayName: "Guest User",
+            profileImage: null,
+            credits: 5, // Default guest credits
+            message: `Your email ${userEmail} was found in Firebase but not in our database. Please log out and log in again.`
+          }
+        });
       }
       
       // Return a guest user with default credits if not authenticated
@@ -943,6 +977,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
+      console.error("Error retrieving user:", error);
       return res.status(500).json({
         success: false,
         message: "Failed to retrieve user information",

@@ -10,12 +10,14 @@ import {
   registerSchema,
   authResponseSchema,
   insertSavedRecipeSchema,
+  firebaseAuthSyncSchema,
   type AnalyzeImageResponse,
   type YoutubeVideo,
   type AuthResponse,
   type User,
   type InsertSavedRecipe,
   type SavedRecipe,
+  type FirebaseAuthSync,
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -834,6 +836,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({
         success: false,
         message: "Failed to retrieve user information",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  // Firebase Auth sync endpoint - syncs Firebase user with our database
+  app.post("/api/auth/firebase-sync", async (req: Request, res: Response) => {
+    try {
+      // Validate request data using the Firebase auth sync schema
+      const validatedData = firebaseAuthSyncSchema.parse(req.body);
+      
+      // Sync the Firebase user with our database
+      const user = await storage.syncFirebaseUser({
+        uid: validatedData.uid,
+        email: validatedData.email,
+        displayName: validatedData.displayName,
+        photoURL: validatedData.photoURL
+      });
+      
+      // Create session token
+      const token = generateToken();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+      
+      await storage.createSession({
+        userId: user.id,
+        token,
+        expiresAt
+      });
+      
+      // Return successful response with user data and token
+      const authResponse: AuthResponse = {
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName || null,
+          profileImage: user.profileImage || null,
+          credits: typeof user.credits === 'number' ? user.credits : 0,
+          subscriptionStatus: user.subscriptionStatus || 'free',
+          subscriptionTier: user.subscriptionTier || 'free'
+        },
+        token,
+        message: "Firebase authentication successful"
+      };
+      
+      return res.status(200).json(authResponse);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: "Validation failed",
+          errors: fromZodError(error).message
+        });
+      }
+      
+      console.error("Firebase auth sync error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Firebase authentication sync failed",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

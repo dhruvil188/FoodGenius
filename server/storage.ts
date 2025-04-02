@@ -29,9 +29,11 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
   getUserByStripeCustomerId(customerId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
+  syncFirebaseUser(firebaseData: { uid: string, email: string, displayName: string | null, photoURL: string | null }): Promise<User>;
   
   // Subscription methods
   updateStripeCustomerId(userId: number, customerId: string): Promise<User>;
@@ -78,6 +80,7 @@ export class MemStorage implements IStorage {
       profileImage: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      firebaseUid: null,
       credits: 1,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
@@ -104,6 +107,12 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.firebaseUid === firebaseUid
+    );
+  }
+
   async getUserByStripeCustomerId(customerId: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
       (user) => user.stripeCustomerId === customerId
@@ -123,6 +132,7 @@ export class MemStorage implements IStorage {
       profileImage: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      firebaseUid: null,
       credits: 1, // Start with one free credit
       stripeCustomerId: null,
       stripeSubscriptionId: null,
@@ -195,6 +205,102 @@ export class MemStorage implements IStorage {
     }
     
     return updatedUser;
+  }
+  
+  async syncFirebaseUser(firebaseData: { uid: string, email: string, displayName: string | null, photoURL: string | null }): Promise<User> {
+    // First, check if the user already exists with this Firebase UID
+    let user = await this.getUserByFirebaseUid(firebaseData.uid);
+    
+    if (user) {
+      // User exists, update their profile data if needed
+      const updatedUser = await this.updateUser(user.id, {
+        email: firebaseData.email, // Update in case the email changed in Firebase
+        displayName: firebaseData.displayName,
+        profileImage: firebaseData.photoURL,
+        updatedAt: new Date()
+      });
+      
+      if (!updatedUser) {
+        throw new Error('Failed to update existing user');
+      }
+      
+      return updatedUser;
+    }
+    
+    // Check if a user with this email already exists
+    user = await this.getUserByEmail(firebaseData.email);
+    
+    if (user) {
+      // User exists but isn't linked to Firebase yet, update their profile
+      const updatedUser = await this.updateUser(user.id, {
+        firebaseUid: firebaseData.uid,
+        displayName: firebaseData.displayName || user.displayName,
+        profileImage: firebaseData.photoURL || user.profileImage,
+        updatedAt: new Date()
+      });
+      
+      if (!updatedUser) {
+        throw new Error('Failed to link existing user');
+      }
+      
+      return updatedUser;
+    }
+    
+    // Create a new user
+    const username = await this.generateUniqueUsername(firebaseData.email, firebaseData.displayName);
+    const randomPassword = Math.random().toString(36).substring(2, 15);
+    const { hash, salt } = hashPassword(randomPassword);
+    
+    const newUser: User = {
+      id: this.userId++,
+      username,
+      email: firebaseData.email,
+      password: `${hash}.${salt}`,
+      displayName: firebaseData.displayName,
+      profileImage: firebaseData.photoURL,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      firebaseUid: firebaseData.uid,
+      credits: 1, // Start with one free credit
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      subscriptionStatus: 'free',
+      subscriptionTier: 'free'
+    };
+    
+    this.users.set(newUser.id, newUser);
+    return newUser;
+  }
+  
+  private async generateUniqueUsername(email: string, displayName: string | null): Promise<string> {
+    // Start with the part before @ in the email
+    let baseUsername = email.split('@')[0].toLowerCase();
+    
+    // If displayName is available, use that instead
+    if (displayName) {
+      // Convert display name to lowercase, replace spaces with underscores
+      baseUsername = displayName.toLowerCase().replace(/\s+/g, '_');
+    }
+    
+    // Remove special characters
+    baseUsername = baseUsername.replace(/[^a-z0-9_]/g, '');
+    
+    // Ensure username is at least 3 characters
+    if (baseUsername.length < 3) {
+      baseUsername = baseUsername + '000'.substring(0, 3 - baseUsername.length);
+    }
+    
+    // Check if username already exists
+    let username = baseUsername;
+    let counter = 1;
+    
+    while (await this.getUserByUsername(username)) {
+      // If username exists, append a number
+      username = `${baseUsername}${counter}`;
+      counter++;
+    }
+    
+    return username;
   }
 
   // Session methods

@@ -136,11 +136,17 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
   
   // Extract days of the week with their meals
   const dayRegex = /"day"\s*:\s*"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"/g;
-  const dayMatches = [...text.matchAll(dayRegex)];
+  
+  // Using exec instead of matchAll for better compatibility
+  const dayMatches: { day: string, index: number }[] = [];
+  let match;
+  while ((match = dayRegex.exec(text)) !== null) {
+    dayMatches.push({ day: match[1], index: match.index });
+  }
   
   for (const dayMatch of dayMatches) {
-    const dayName = dayMatch[1];
-    const dayIndex = text.indexOf(dayMatch[0]);
+    const dayName = dayMatch.day;
+    const dayIndex = dayMatch.index;
     
     // Find the meals array for this day
     let mealsStart = text.indexOf('"meals"', dayIndex);
@@ -165,7 +171,7 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
     
     if (mealsEnd === -1) {
       // Array wasn't closed properly, find the next day or end of string
-      const nextDayMatch = text.indexOf('"day"', dayIndex + dayMatch[0].length);
+      const nextDayMatch = text.indexOf('"day"', dayIndex + dayName.length + 10); // Adding offset for "day":"..."
       mealsEnd = nextDayMatch !== -1 ? nextDayMatch : text.length;
     }
     

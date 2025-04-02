@@ -32,7 +32,15 @@ const syncFirebaseUser = async (user: User) => {
       throw new Error('Failed to sync user with database');
     }
     
-    return await response.json();
+    const result = await response.json();
+    
+    // Save the auth token in localStorage
+    if (result.token) {
+      localStorage.setItem("recipe_snap_token", result.token);
+      console.log("Token saved to localStorage");
+    }
+    
+    return result;
   } catch (error) {
     console.error('Error syncing user with database:', error);
     throw error;
@@ -80,6 +88,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
+      // Remove the token from localStorage
+      localStorage.removeItem("recipe_snap_token");
+      
+      // Call the backend to end the session
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem("recipe_snap_token")}`,
+          },
+        });
+      } catch (e) {
+        console.error("Error logging out from backend:", e);
+      }
+      
+      // Sign out from Firebase
       await signOutUser();
     } catch (error) {
       console.error("Logout error:", error);

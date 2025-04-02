@@ -12,6 +12,8 @@ export const users = pgTable("users", {
   profileImage: text("profile_image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  // Firebase authentication
+  firebaseUid: text("firebase_uid").unique(),
   // Subscription fields
   credits: integer("credits").default(1),
   stripeCustomerId: text("stripe_customer_id"),
@@ -303,4 +305,13 @@ export const authResponseSchema = z.object({
   message: z.string().optional(),
 });
 
+// Firebase auth sync schema
+export const firebaseAuthSyncSchema = z.object({
+  uid: z.string(),
+  email: z.string().email(),
+  displayName: z.string().nullable(),
+  photoURL: z.string().nullable(),
+});
+
+export type FirebaseAuthSync = z.infer<typeof firebaseAuthSyncSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;

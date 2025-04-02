@@ -1,29 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { verifyFirebaseToken } from "./middleware/authMiddleware";
-import session from "express-session";
-import memorystore from "memorystore";
-
-const MemoryStore = memorystore(session);
 
 const app = express();
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: false, limit: '20mb' }));
-
-// Setup session middleware
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'recipe-snap-session-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }, // 1 day
-  store: new MemoryStore({
-    checkPeriod: 86400000 // prune expired entries every 24h
-  })
-}));
-
-// Apply Firebase token authentication middleware
-app.use(verifyFirebaseToken);
 
 app.use((req, res, next) => {
   const start = Date.now();

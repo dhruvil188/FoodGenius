@@ -29,7 +29,6 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
 
@@ -44,12 +43,6 @@ export interface IStorage {
   createSavedRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   deleteSavedRecipe(id: number): Promise<boolean>;
   updateSavedRecipe(id: number, recipe: Partial<SavedRecipe>): Promise<SavedRecipe | undefined>;
-  
-  // Stripe integration methods
-  updateStripeCustomerId(userId: number, customerId: string): Promise<User | undefined>;
-  updateUserSubscription(userId: number, subscriptionId: string, planType: string, maxAnalyses: number): Promise<User | undefined>;
-  incrementAnalysisCount(userId: number): Promise<User | undefined>;
-  getRemainingAnalyses(userId: number): Promise<number>;
 }
 
 export class MemStorage implements IStorage {
@@ -77,12 +70,6 @@ export class MemStorage implements IStorage {
       password: `${hash}:${salt}`,
       displayName: 'Demo User',
       profileImage: null,
-      firebaseUid: null,
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-      analysisCount: 0,
-      maxAnalyses: 1,
-      planType: 'free',
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -105,12 +92,6 @@ export class MemStorage implements IStorage {
       (user) => user.email.toLowerCase() === email.toLowerCase()
     );
   }
-  
-  async getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => (user as any).firebaseUid === firebaseUid
-    );
-  }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userId++;
@@ -123,12 +104,6 @@ export class MemStorage implements IStorage {
       password: `${hash}:${salt}`,
       displayName: insertUser.displayName || null,
       profileImage: null,
-      firebaseUid: (insertUser as any).firebaseUid || null,
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-      analysisCount: 0,
-      maxAnalyses: 1,
-      planType: 'free',
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -217,61 +192,6 @@ export class MemStorage implements IStorage {
     const updatedRecipe = { ...recipe, ...updates };
     this.savedRecipes.set(id, updatedRecipe);
     return updatedRecipe;
-  }
-
-  // Stripe integration methods
-  async updateStripeCustomerId(userId: number, customerId: string): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-
-    const updatedUser = { 
-      ...user, 
-      stripeCustomerId: customerId,
-      updatedAt: new Date()
-    };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
-  }
-
-  async updateUserSubscription(userId: number, subscriptionId: string, planType: string, maxAnalyses: number): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-
-    const updatedUser = { 
-      ...user, 
-      stripeSubscriptionId: subscriptionId,
-      planType,
-      maxAnalyses,
-      updatedAt: new Date()
-    };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
-  }
-
-  async incrementAnalysisCount(userId: number): Promise<User | undefined> {
-    const user = this.users.get(userId);
-    if (!user) return undefined;
-
-    const updatedUser = { 
-      ...user, 
-      analysisCount: (user.analysisCount || 0) + 1,
-      updatedAt: new Date()
-    };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
-  }
-
-  async getRemainingAnalyses(userId: number): Promise<number> {
-    const user = this.users.get(userId);
-    if (!user) return 0;
-
-    if (user.planType === 'unlimited') {
-      return Infinity;
-    }
-
-    const usedAnalyses = user.analysisCount || 0;
-    const maxAnalyses = user.maxAnalyses || 0;
-    return Math.max(0, maxAnalyses - usedAnalyses);
   }
 }
 

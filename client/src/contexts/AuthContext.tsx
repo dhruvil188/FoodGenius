@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, signInWithGoogle, signOutUser } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   currentUser: User | null;
@@ -11,18 +12,63 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// Function to sync Firebase user with our backend
+const syncFirebaseUser = async (user: User) => {
+  try {
+    const response = await fetch('/api/auth/firebase-sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to sync user with database');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error syncing user with database:', error);
+    throw error;
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      
+      // If a user is signed in, sync with our backend
+      if (user) {
+        try {
+          console.log("Attempting to sync Firebase user with backend...");
+          const result = await syncFirebaseUser(user);
+          console.log("User sync successful:", result);
+        } catch (error) {
+          console.error("Error syncing user with backend:", error);
+          toast({
+            title: "Authentication Error",
+            description: "Failed to synchronize your account. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }
+      
       setIsLoading(false);
     });
 
     return unsubscribe;
-  }, []);
+  }, [toast]);
 
   const login = async () => {
     try {

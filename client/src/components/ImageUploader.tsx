@@ -1,10 +1,13 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast";
 import Webcam from 'react-webcam';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiRequest } from '@/lib/api';
+import BuyCreditsButton from './BuyCreditsButton';
 
 interface ImageUploaderProps {
   onAnalyzeImage: (imageData: string) => void;
@@ -16,12 +19,39 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
+  const [userCredits, setUserCredits] = useState<number>(0);
+  const [isLoadingCredits, setIsLoadingCredits] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   
   const { toast } = useToast();
+  const { currentUser } = useAuth();
+  
+  // Fetch user credits when component mounts or user changes
+  useEffect(() => {
+    if (currentUser) {
+      fetchUserCredits();
+    }
+  }, [currentUser]);
+  
+  const fetchUserCredits = async () => {
+    if (!currentUser) return;
+    
+    setIsLoadingCredits(true);
+    try {
+      const response = await apiRequest('GET', '/api/auth/me');
+      const data = await response.json();
+      if (data.success && data.user) {
+        setUserCredits(data.user.credits || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching user credits:', error);
+    } finally {
+      setIsLoadingCredits(false);
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -125,10 +155,49 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
   const handleAnalyzeImage = async () => {
     if (!selectedImage) return;
     
+    // Check if user has enough credits
+    if (userCredits < 1) {
+      toast({
+        title: "Insufficient Credits",
+        description: "You need at least 1 credit to analyze an image. Please purchase more credits to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsAnalyzing(true);
     
-    // Pass the image to the parent component
-    onAnalyzeImage(selectedImage);
+    try {
+      // Deduct a credit from the user
+      const deductResponse = await apiRequest('POST', '/api/stripe/update-credits', {
+        action: 'deduct',
+        amount: 1
+      });
+      
+      if (deductResponse.ok) {
+        // Refresh user credits
+        fetchUserCredits();
+        
+        // Pass the image to the parent component for analysis
+        onAnalyzeImage(selectedImage);
+      } else {
+        const errorData = await deductResponse.json();
+        toast({
+          title: "Credit Error",
+          description: errorData.message || "There was an error processing your credits.",
+          variant: "destructive"
+        });
+        setIsAnalyzing(false);
+      }
+    } catch (error) {
+      console.error('Error processing credits:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+      setIsAnalyzing(false);
+    }
   };
 
   const videoConstraints = {
@@ -437,7 +506,22 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                 </Button>
               </motion.div>
               
-
+              {/* Credits Display */}
+              {currentUser && (
+                <>
+                  <div className="mt-4 md:mt-0">
+                    <div className="flex items-center justify-center gap-2 bg-slate-100 rounded-full px-4 py-2 text-sm">
+                      <i className="fas fa-coins text-amber-500"></i>
+                      <span className="font-medium">{isLoadingCredits ? '...' : userCredits} credits</span>
+                      {userCredits < 1 && (
+                        <div className="ml-2">
+                          <BuyCreditsButton size="sm" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             
             {!selectedImage && (
@@ -448,6 +532,21 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                 transition={{ delay: 0.6 }}
               >
                 <i className="fas fa-info-circle mr-1"></i> Upload or capture an image of your food to get detailed cooking instructions and nutritional information
+              </motion.p>
+            )}
+            
+            {selectedImage && currentUser && (
+              <motion.p 
+                className="mt-4 text-xs text-slate-500 flex items-center justify-center gap-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <i className="fas fa-info-circle mr-1"></i> 
+                <span>Analyzing an image costs</span>
+                <span className="flex items-center text-amber-600 font-medium">
+                  <i className="fas fa-coin text-amber-500 mr-1"></i>1 credit
+                </span>
               </motion.p>
             )}
           </motion.div>

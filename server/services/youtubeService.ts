@@ -1,4 +1,6 @@
-import { YoutubeVideo } from "@shared/schema";
+import axios from "axios";
+import { ValidationError } from "../middleware/errorHandler";
+import type { YoutubeVideo } from "@shared/schema";
 
 interface YouTubeSearchResponse {
   items: Array<{
@@ -26,52 +28,38 @@ interface YouTubeSearchResponse {
  * @returns Array of YouTube video objects
  */
 export async function searchYouTubeVideos(recipeName: string, maxResults: number = 5): Promise<YoutubeVideo[]> {
-  try {
-    // Check if YouTube API key is available
-    if (!process.env.YOUTUBE_API_KEY) {
-      console.error("YouTube API key is not set. Cannot fetch videos.");
-      return [];
-    }
+  if (!recipeName) {
+    throw new ValidationError("Recipe name is required to search for videos");
+  }
 
-    // Format the search query - be more specific to improve search relevance
-    const searchQuery = encodeURIComponent(`${recipeName} authentic recipe tutorial how to make`);
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  
+  if (!apiKey) {
+    console.warn("YOUTUBE_API_KEY not found. YouTube video search will not work.");
+    return [];
+  }
+  
+  try {
+    const searchQuery = encodeURIComponent(`${recipeName} recipe how to cook`);
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${searchQuery}&maxResults=${maxResults}&type=video&key=${apiKey}`;
     
-    // Build the YouTube Data API URL
-    const youtubeApiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${searchQuery}&type=video&maxResults=${maxResults}&key=${process.env.YOUTUBE_API_KEY}`;
+    const response = await axios.get<YouTubeSearchResponse>(url);
     
-    // Make the API request
-    console.log(`Searching YouTube for: ${recipeName}`);
-    const response = await fetch(youtubeApiUrl);
-    
-    // Handle API errors
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("YouTube API error:", errorData);
-      
-      // Check specifically for quota exceeded error
-      if (response.status === 403 && errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
-        console.error("YouTube API quota exceeded.");
-      }
-      
+    if (!response.data.items || response.data.items.length === 0) {
       return [];
     }
     
-    // Parse the response
-    const data = await response.json() as YouTubeSearchResponse;
-    
-    // Transform the YouTube response to our schema
-    const videos: YoutubeVideo[] = data.items.map(item => ({
+    return response.data.items.map((item: any) => ({
       videoId: item.id.videoId,
       title: item.snippet.title,
-      channelTitle: item.snippet.channelTitle,
+      channelName: item.snippet.channelTitle,
       description: item.snippet.description,
-      publishedAt: item.snippet.publishedAt,
-      thumbnailUrl: item.snippet.thumbnails.medium.url
+      thumbnailUrl: item.snippet.thumbnails.medium.url,
+      publishedAt: item.snippet.publishedAt
     }));
-    
-    return videos;
   } catch (error) {
-    console.error("Error fetching YouTube videos:", error);
+    console.error("YouTube API Error:", error);
+    // Return empty array instead of throwing so recipe analysis still works
     return [];
   }
 }

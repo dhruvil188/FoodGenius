@@ -13,22 +13,7 @@ export default function CreditsDisplay({
 }: CreditsDisplayProps) {
   const { currentUser, userCredits, isLoadingCredits, fetchUserCredits } = useAuth();
   
-  // Refresh credits every 10 seconds if user is logged in
-  useEffect(() => {
-    if (currentUser) {
-      // Initial fetch
-      fetchUserCredits();
-      
-      // Set up interval for periodic refresh
-      const intervalId = setInterval(() => {
-        console.log('Auto-refreshing user credits...');
-        fetchUserCredits();
-      }, 10000); // 10 seconds
-      
-      // Clean up interval on unmount
-      return () => clearInterval(intervalId);
-    }
-  }, [currentUser, fetchUserCredits]);
+  // Skip automatic refresh - we'll handle it with the button click
 
   if (!currentUser) {
     return null;

@@ -51,9 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const fetchUserCredits = async (): Promise<number> => {
-    if (!currentUser) {
-      setUserCredits(null);
-      return 0;
+    // Already loading or no current user
+    if (isLoadingCredits || !currentUser) {
+      return userCredits || 0;
     }
     
     setIsLoadingCredits(true);
@@ -62,18 +62,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // apiRequest already parses the JSON, so we don't need to do it again
       const data = await apiRequest('GET', '/api/auth/me');
       
-      // Add some debug logging to see the response
-      console.log("User data from /api/auth/me:", data);
+      // Debug only if we're in development
+      if (import.meta.env.DEV) {
+        console.log("User data from /api/auth/me:", data);
+      }
       
       if (data && data.success && data.user) {
         const credits = data.user.credits || 0;
-        console.log("Setting user credits to:", credits);
-        setUserCredits(credits);
+        
+        // Only update if different to avoid excessive re-renders
+        if (credits !== userCredits) {
+          if (import.meta.env.DEV) {
+            console.log("Setting user credits to:", credits);
+          }
+          setUserCredits(credits);
+        }
+        
         return credits;
       } else {
-        console.log("No valid user data received, setting credits to 0");
-        setUserCredits(0);
-        return 0;
+        console.log("No valid user data received");
+        return userCredits || 0;
       }
     } catch (error) {
       console.error('Error fetching user credits:', error);
@@ -82,8 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: 'Could not fetch your credits. Please try again.',
         variant: 'destructive'
       });
-      setUserCredits(0);
-      return 0;
+      return userCredits || 0;
     } finally {
       setIsLoadingCredits(false);
     }

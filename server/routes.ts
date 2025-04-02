@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage, generateToken, verifyPassword, hashPassword } from "./storage";
+import { generateToken, verifyPassword, hashPassword } from "./utils";
+import { databaseStorage as storage } from "./databaseStorage";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import Stripe from "stripe";
 import {

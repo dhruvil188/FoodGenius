@@ -1052,13 +1052,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      // First try to get the user by Firebase UID
-      let user = await storage.getUserByFirebaseId(req.body.userId);
-      
-      // If not found and the userId is a number, try to get the user by numeric ID
-      if (!user && !isNaN(Number(req.body.userId))) {
-        user = await storage.getUser(Number(req.body.userId));
-      }
+      const user = await storage.getUser(req.body.userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1101,13 +1095,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      // First try to get the user by Firebase UID
-      let user = await storage.getUserByFirebaseId(req.body.userId);
-      
-      // If not found and the userId is a number, try to get the user by numeric ID
-      if (!user && !isNaN(Number(req.body.userId))) {
-        user = await storage.getUser(Number(req.body.userId));
-      }
+      const user = await storage.getUser(req.body.userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1163,14 +1151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      // First try to get the user by Firebase UID
-      let user = await storage.getUserByFirebaseId(req.body.userId);
-      
-      // If not found and the userId is a number, try to get the user by numeric ID
-      if (!user && !isNaN(Number(req.body.userId))) {
-        user = await storage.getUser(Number(req.body.userId));
-      }
-      
+      const user = await storage.getUser(req.body.userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1215,13 +1196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      // First try to get the user by Firebase UID
-      let user = await storage.getUserByFirebaseId(req.body.userId);
-      
-      // If not found and the userId is a number, try to get the user by numeric ID
-      if (!user && !isNaN(Number(req.body.userId))) {
-        user = await storage.getUser(Number(req.body.userId));
-      }
+      const user = await storage.getUser(req.body.userId);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -1237,114 +1212,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating credits:', error);
       return res.status(500).json({ 
         error: 'Failed to update credits',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-  
-  // Create a Stripe Checkout session for direct checkout
-  app.post('/api/stripe/create-checkout-session', async (req: Request, res: Response) => {
-    if (!req.body.userId || !req.body.priceId) {
-      return res.status(400).json({ error: 'Missing userId or priceId' });
-    }
-    
-    try {
-      // First try to get the user by Firebase UID
-      let user = await storage.getUserByFirebaseId(req.body.userId);
-      
-      // If not found and the userId is a number, try to get the user by numeric ID
-      if (!user && !isNaN(Number(req.body.userId))) {
-        user = await storage.getUser(Number(req.body.userId));
-      }
-      
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      
-      // Create a customer if one doesn't exist
-      let customerId = user.stripeCustomerId;
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: user.email,
-          name: user.displayName || user.username,
-          metadata: {
-            userId: user.id.toString(),
-            firebaseId: req.body.userId
-          }
-        });
-        
-        customerId = customer.id;
-        // Update user with Stripe customer ID
-        await storage.updateStripeCustomerId(user.id, customerId);
-      }
-      
-      // Create checkout session
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        customer: customerId,
-        line_items: [
-          {
-            price: req.body.priceId,
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        allow_promotion_codes: true,
-        subscription_data: {
-          trial_period_days: 0,
-          metadata: {
-            userId: user.id.toString(),
-            firebaseId: req.body.userId
-          }
-        },
-        success_url: `${req.headers.origin}/subscription?success=true`,
-        cancel_url: `${req.headers.origin}/subscription?canceled=true`,
-      });
-      
-      return res.json({ url: session.url });
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-      return res.status(500).json({ 
-        error: 'Failed to create checkout session',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-  
-  // Create a Stripe Customer Portal session for managing subscription
-  app.post('/api/stripe/create-portal-session', async (req: Request, res: Response) => {
-    if (!req.body.userId) {
-      return res.status(400).json({ error: 'Missing userId' });
-    }
-    
-    try {
-      // First try to get the user by Firebase UID
-      let user = await storage.getUserByFirebaseId(req.body.userId);
-      
-      // If not found and the userId is a number, try to get the user by numeric ID
-      if (!user && !isNaN(Number(req.body.userId))) {
-        user = await storage.getUser(Number(req.body.userId));
-      }
-      
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      
-      if (!user.stripeCustomerId) {
-        return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
-      }
-      
-      // Create the customer portal session
-      const session = await stripe.billingPortal.sessions.create({
-        customer: user.stripeCustomerId,
-        return_url: `${req.headers.origin}/subscription`,
-      });
-      
-      return res.json({ url: session.url });
-    } catch (error) {
-      console.error('Error creating portal session:', error);
-      return res.status(500).json({ 
-        error: 'Failed to create portal session',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -1383,95 +1250,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       switch (event.type) {
-        // Handle payment success from the payment link flow
-        case 'checkout.session.completed': {
-          const session = data as Stripe.Checkout.Session;
-          
-          // If customer_email is present but no customer ID, this is likely from a payment link
-          if (session.customer_email && !session.customer) {
-            // Try to find user by email
-            const user = await storage.getUserByEmail(session.customer_email);
-            if (!user) {
-              console.error('User not found for email:', session.customer_email);
-              break;
-            }
-            
-            // If user found, update their credits (use the appropriate amount based on the payment)
-            // For basic plan (£7)
-            if (session.amount_total === 700) {
-              await storage.updateUser(user.id, {
-                subscriptionStatus: 'active',
-                subscriptionTier: 'basic',
-                credits: Math.max(user.credits || 0, 20) // Basic plan gives 20 credits
-              });
-            }
-            // For premium plan (£12)
-            else if (session.amount_total === 1200) {
-              await storage.updateUser(user.id, {
-                subscriptionStatus: 'active',
-                subscriptionTier: 'premium',
-                credits: Math.max(user.credits || 0, 50) // Premium plan gives 50 credits
-              });
-            }
-            // Default case for other payment amounts
-            else {
-              await storage.updateUser(user.id, {
-                subscriptionStatus: 'active',
-                subscriptionTier: 'basic',
-                credits: Math.max(user.credits || 0, 20) // Default to basic plan credits
-              });
-            }
-          }
-          // If customer ID exists, handle the usual checkout flow
-          else if (session.customer) {
-            const customerId = session.customer as string;
-            const user = await storage.getUserByStripeCustomerId(customerId);
-            
-            if (!user) {
-              // If user not found by Stripe customer ID, try by email
-              if (session.customer_email) {
-                const userByEmail = await storage.getUserByEmail(session.customer_email);
-                if (userByEmail) {
-                  // Update user with Stripe customer ID
-                  await storage.updateStripeCustomerId(userByEmail.id, customerId);
-                  
-                  // Update subscription status
-                  await storage.updateUser(userByEmail.id, {
-                    subscriptionStatus: 'active',
-                    subscriptionTier: 'basic', // Default to basic if unclear
-                    credits: Math.max(userByEmail.credits || 0, 20) // Default to basic plan credits
-                  });
-                } else {
-                  console.error('User not found for customer email:', session.customer_email);
-                }
-              } else {
-                console.error('User not found for customer ID:', customerId);
-              }
-              break;
-            }
-            
-            // Update subscription status based on mode
-            if (session.mode === 'subscription') {
-              // Credits will be handled by the subscription events below
-              await storage.updateUser(user.id, {
-                subscriptionStatus: 'active'
-              });
-            } else if (session.mode === 'payment') {
-              // One-time payment, assign credits based on amount
-              if (session.amount_total === 700) {
-                await storage.updateUser(user.id, {
-                  credits: Math.max(user.credits || 0, 20) // Basic plan gives 20 credits
-                });
-              } else if (session.amount_total === 1200) {
-                await storage.updateUser(user.id, {
-                  credits: Math.max(user.credits || 0, 50) // Premium plan gives 50 credits
-                });
-              }
-            }
-          }
-          break;
-        }
-          
         case 'customer.subscription.created':
         case 'customer.subscription.updated': {
           const subscription = data as Stripe.Subscription;

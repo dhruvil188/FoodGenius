@@ -12,8 +12,6 @@ export const users = pgTable("users", {
   profileImage: text("profile_image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  // Firebase integration
-  firebaseUid: text("firebase_uid").unique(),
   // Subscription fields
   credits: integer("credits").default(1),
   stripeCustomerId: text("stripe_customer_id"),
@@ -306,23 +304,3 @@ export const authResponseSchema = z.object({
 });
 
 export type AuthResponse = z.infer<typeof authResponseSchema>;
-
-// Transactions for credit purchases
-export const transactions = pgTable("transactions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  amount: integer("amount").notNull(), // Amount in cents
-  credits: integer("credits").notNull(), // Credits purchased
-  stripeSessionId: text("stripe_session_id"), // Stripe Checkout Session ID
-  stripePaymentIntentId: text("stripe_payment_intent_id"), // Stripe Payment Intent ID
-  status: text("status").notNull(), // 'completed', 'pending', 'failed'
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const insertTransactionSchema = createInsertSchema(transactions).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
-export type Transaction = typeof transactions.$inferSelect;

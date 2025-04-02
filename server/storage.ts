@@ -1,9 +1,8 @@
 import { 
-  users, sessions, savedRecipes, transactions,
+  users, sessions, savedRecipes,
   type User, type InsertUser, 
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
-  type Transaction, type InsertTransaction,
   type AnalyzeImageResponse
 } from "@shared/schema";
 import { randomBytes, pbkdf2Sync } from 'crypto';
@@ -50,33 +49,23 @@ export interface IStorage {
   createSavedRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   deleteSavedRecipe(id: number): Promise<boolean>;
   updateSavedRecipe(id: number, recipe: Partial<SavedRecipe>): Promise<SavedRecipe | undefined>;
-  
-  // Transaction methods for credit purchases
-  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
-  getUserTransactions(userId: number): Promise<Transaction[]>;
-  getTransactionBySessionId(sessionId: string): Promise<Transaction | undefined>;
-  updateTransactionStatus(id: number, status: string, paymentIntentId?: string): Promise<Transaction | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private userSessions: Map<string, Session>;
   private savedRecipes: Map<number, SavedRecipe>;
-  private transactions: Map<number, Transaction>;
   private userId: number;
   private sessionId: number;
   private recipeId: number;
-  private transactionId: number;
 
   constructor() {
     this.users = new Map();
     this.userSessions = new Map();
     this.savedRecipes = new Map();
-    this.transactions = new Map();
     this.userId = 1;
     this.sessionId = 1;
     this.recipeId = 1;
-    this.transactionId = 1;
     
     // Add a demo account for testing
     const { hash, salt } = hashPassword('password123');
@@ -89,7 +78,6 @@ export class MemStorage implements IStorage {
       profileImage: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      firebaseUid: null,
       credits: 1,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
@@ -135,7 +123,6 @@ export class MemStorage implements IStorage {
       profileImage: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      firebaseUid: null, // No Firebase UID for users created in MemStorage
       credits: 1, // Start with one free credit
       stripeCustomerId: null,
       stripeSubscriptionId: null,
@@ -282,58 +269,6 @@ export class MemStorage implements IStorage {
     this.savedRecipes.set(id, updatedRecipe);
     return updatedRecipe;
   }
-
-  // Transaction methods for credit purchases
-  async createTransaction(transactionData: InsertTransaction): Promise<Transaction> {
-    const id = this.transactionId++;
-    const transaction: Transaction = {
-      id,
-      userId: transactionData.userId,
-      amount: transactionData.amount,
-      credits: transactionData.credits,
-      stripeSessionId: transactionData.stripeSessionId || null,
-      stripePaymentIntentId: transactionData.stripePaymentIntentId || null,
-      status: transactionData.status,
-      createdAt: new Date()
-    };
-    
-    this.transactions.set(id, transaction);
-    return transaction;
-  }
-
-  async getUserTransactions(userId: number): Promise<Transaction[]> {
-    return Array.from(this.transactions.values()).filter(
-      (transaction) => transaction.userId === userId
-    );
-  }
-
-  async getTransactionBySessionId(sessionId: string): Promise<Transaction | undefined> {
-    return Array.from(this.transactions.values()).find(
-      (transaction) => transaction.stripeSessionId === sessionId
-    );
-  }
-
-  async updateTransactionStatus(id: number, status: string, paymentIntentId?: string): Promise<Transaction | undefined> {
-    const transaction = this.transactions.get(id);
-    if (!transaction) return undefined;
-
-    const updates: Partial<Transaction> = { status };
-    if (paymentIntentId) {
-      updates.stripePaymentIntentId = paymentIntentId;
-    }
-
-    const updatedTransaction = { ...transaction, ...updates };
-    this.transactions.set(id, updatedTransaction);
-    return updatedTransaction;
-  }
 }
 
-// Import our new Firebase storage
-import { firebaseStorage } from './firebaseStorage';
-
-// You can switch between MemStorage and FirebaseStorage as needed
-// For development, you might want to use MemStorage
-// For production, use FirebaseStorage
-export const storage = process.env.USE_FIREBASE_STORAGE === 'true' 
-  ? firebaseStorage 
-  : new MemStorage();
+export const storage = new MemStorage();

@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage, generateToken, verifyPassword, hashPassword } from "./storage";
+import { firestoreStorage } from "./firestore-storage";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import {
   analyzeImageRequestSchema,
@@ -20,6 +21,13 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getMockAnalysisResponse } from "./mockData";
 import { searchYouTubeVideos } from "./services/youtubeService";
+import { 
+  createPaymentIntent, 
+  getOrCreateSubscription,
+  handleStripeWebhook,
+  getRemainingAnalyses,
+  incrementAnalysisCount
+} from "./stripe-routes";
 
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
@@ -1036,6 +1044,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Stripe payment routes
+  app.post("/api/create-payment-intent", createPaymentIntent);
+  app.post("/api/subscription", getOrCreateSubscription);
+  app.post("/api/webhook", handleStripeWebhook);
+  app.get("/api/subscription/remaining", getRemainingAnalyses);
+  app.post("/api/subscription/increment-analysis", incrementAnalysisCount);
 
   const httpServer = createServer(app);
   return httpServer;

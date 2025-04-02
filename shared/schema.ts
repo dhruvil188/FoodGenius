@@ -12,6 +12,11 @@ export const users = pgTable("users", {
   profileImage: text("profile_image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  analysisCount: integer("analysis_count").default(0),
+  maxAnalyses: integer("max_analyses").default(1),
+  planType: text("plan_type").default("free"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -287,6 +292,12 @@ export const authResponseSchema = z.object({
     email: z.string(),
     displayName: z.string().nullable(),
     profileImage: z.string().nullable(),
+    stripeCustomerId: z.string().nullable(),
+    stripeSubscriptionId: z.string().nullable(),
+    analysisCount: z.number().default(0),
+    maxAnalyses: z.number().default(1),
+    planType: z.string().default("free"),
+    remainingAnalyses: z.number().optional(),
   }),
   token: z.string(),
   success: z.boolean(),

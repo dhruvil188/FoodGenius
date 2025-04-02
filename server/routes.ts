@@ -656,6 +656,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
+      console.log('Registration request received:', req.body);
+      
+      // For Firebase users (they already have a uid)
+      if (req.body.uid) {
+        // Skip password validation for Firebase users
+        const { uid, email, username, displayName, profileImage } = req.body;
+        
+        // Check if user already exists by email
+        const existingUser = await storage.getUserByEmail(email);
+        
+        if (existingUser) {
+          // If user exists, return success with existing user data
+          console.log('Existing user found, returning user data:', existingUser);
+          
+          const authResponse: AuthResponse = {
+            success: true,
+            message: "Welcome back!",
+            user: {
+              id: existingUser.id,
+              username: existingUser.username,
+              email: existingUser.email,
+              displayName: existingUser.displayName || null,
+              profileImage: existingUser.profileImage || null,
+              credits: existingUser.credits || 0
+            }
+          };
+          
+          return res.status(200).json(authResponse);
+        }
+        
+        // Create a random password for Firebase users (they'll always login via Firebase)
+        const randomPassword = Math.random().toString(36).slice(-10);
+        const { hash, salt } = hashPassword(randomPassword);
+        
+        // Create new user
+        const newUser = await storage.createUser({
+          username,
+          email,
+          password: `${hash}.${salt}`, // Store hashed password
+          displayName: displayName || username,
+          profileImage: profileImage || null,
+          credits: 1 // Start with 1 free credit
+        });
+        
+        console.log('Created new user for Firebase auth:', newUser);
+        
+        const authResponse: AuthResponse = {
+          success: true,
+          message: "Account created successfully!",
+          user: {
+            id: newUser.id,
+            username: newUser.username,
+            email: newUser.email,
+            displayName: newUser.displayName || null,
+            profileImage: newUser.profileImage || null,
+            credits: newUser.credits || 0
+          }
+        };
+        
+        return res.status(201).json(authResponse);
+      }
+      
+      // For regular users (non-Firebase)
       // Validate request data
       const validatedData = registerSchema.parse(req.body);
       

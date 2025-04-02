@@ -93,6 +93,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const token = await getIdToken(user);
         localStorage.setItem("recipe_snap_token", token);
         
+        // Register or sync the user with our database
+        try {
+          // Send the user's Firebase information to our server to ensure they exist in our database
+          const registerResponse = await apiRequest('POST', '/api/auth/register', {
+            username: user.displayName || user.email?.split('@')[0] || 'user_' + Math.floor(Math.random() * 1000),
+            email: user.email,
+            uid: user.uid,
+            displayName: user.displayName,
+            profileImage: user.photoURL
+          });
+          
+          console.log('User registered or synced with database:', await registerResponse.json());
+        } catch (error) {
+          console.error('Error registering user with database:', error);
+        }
+        
         // Fetch user credits after login
         fetchUserCredits();
       }

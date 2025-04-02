@@ -1,10 +1,8 @@
-import React from 'react';
-import { Card } from "@/components/ui/card";
+import React from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from '@/contexts/AuthContext';
-import { LockIcon } from 'lucide-react';
-import LoginButton from './LoginButton';
-import { useLocation } from 'wouter';
+import { Loader2 } from "lucide-react";
 
 interface ProtectedFeatureProps {
   children: React.ReactNode;
@@ -14,54 +12,44 @@ interface ProtectedFeatureProps {
 
 export default function ProtectedFeature({
   children,
-  featureName = "Feature",
-  description = "Sign in to unlock this feature"
+  featureName = "this feature",
+  description = "Please sign in to access this feature."
 }: ProtectedFeatureProps) {
-  const { currentUser, userMetadata } = useAuth();
-  const [_, navigate] = useLocation();
-  
-  // If the user is logged in
-  if (currentUser) {
-    // Check if they have a subscription or remaining analyses
-    if (userMetadata && userMetadata.remainingAnalyses > 0) {
-      // If they do, show the children (the protected feature)
-      return <>{children}</>;
-    }
-    
-    // If they're logged in but have no remaining analyses, prompt them to subscribe
+  const { currentUser, isLoading, login } = useAuth();
+
+  if (isLoading) {
     return (
-      <Card className="flex flex-col items-center justify-center p-8 text-center">
-        <LockIcon className="h-12 w-12 text-yellow-500 mb-4" />
-        <h3 className="text-xl font-semibold mb-2">No Remaining Analyses</h3>
-        <p className="text-muted-foreground mb-6 max-w-md">
-          You've used all your recipe analyses for this month. Subscribe to a plan to continue using this feature.
-        </p>
-        <div className="space-y-3">
-          <Button onClick={() => navigate('/subscription')} className="w-full">
-            Subscribe Now
-          </Button>
-          <Button variant="outline" onClick={() => navigate('/library')} className="w-full">
-            Browse Recipe Library
-          </Button>
-        </div>
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <Card className="w-full max-w-md mx-auto border border-slate-200 shadow-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl font-semibold food-gradient-text">Sign In Required</CardTitle>
+          <CardDescription>
+            You need to be signed in to use {featureName}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-slate-600 mb-4 text-center">
+            {description}
+          </p>
+          <div className="flex items-center justify-center">
+            <Button onClick={login} className="px-6">
+              Sign In with Google
+            </Button>
+          </div>
+        </CardContent>
+        <CardFooter className="text-center text-xs text-slate-500 pt-0">
+          We only use your information to personalize your experience.
+        </CardFooter>
       </Card>
     );
   }
-  
-  // Not logged in, show login prompt
-  return (
-    <Card className="flex flex-col items-center justify-center p-8 text-center">
-      <LockIcon className="h-12 w-12 text-yellow-500 mb-4" />
-      <h3 className="text-xl font-semibold mb-2">{featureName} Requires Sign In</h3>
-      <p className="text-muted-foreground mb-6 max-w-md">
-        {description}
-      </p>
-      <div className="space-y-3">
-        <LoginButton fullWidth variant="default" />
-        <Button variant="outline" onClick={() => navigate('/library')} className="w-full">
-          Browse Recipe Library
-        </Button>
-      </div>
-    </Card>
-  );
+
+  return <>{children}</>;
 }

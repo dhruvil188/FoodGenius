@@ -7,22 +7,13 @@ import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LoginButton from './LoginButton';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { CreditCard, User, LogOut, Settings } from 'lucide-react';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
-  const { currentUser, userMetadata, logout } = useAuth();
+  const { currentUser } = useAuth();
   
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -75,51 +66,19 @@ export default function Header() {
           </Button>
           
           {currentUser ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8 border-2 border-primary/20">
-                    <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
-                    <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">
-                      {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{currentUser.displayName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{currentUser.email}</p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {userMetadata && (
-                  <>
-                    <DropdownMenuLabel className="font-normal text-xs text-muted-foreground">
-                      <div className="flex justify-between">
-                        <span>Plan:</span>
-                        <span className="font-medium text-foreground capitalize">{userMetadata.planType}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Remaining Analyses:</span>
-                        <span className="font-medium text-foreground">{userMetadata.remainingAnalyses}/{userMetadata.maxAnalyses}</span>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <DropdownMenuItem onClick={() => navigate('/subscription')}>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  <span>Subscription</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center ml-2">
+              <Avatar className="h-8 w-8 border-2 border-primary/20">
+                <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
+                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">
+                  {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <LoginButton 
+                variant="link" 
+                size="sm" 
+                className="h-auto p-0 ml-2 text-xs"
+              />
+            </div>
           ) : (
             <LoginButton 
               variant="outline" 

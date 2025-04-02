@@ -1242,6 +1242,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Create a Stripe Checkout session for direct checkout
+  app.post('/api/stripe/create-checkout-session', async (req: Request, res: Response) => {
+    if (!req.body.userId || !req.body.priceId) {
+      return res.status(400).json({ error: 'Missing userId or priceId' });
+    }
+    
+    try {
+      // First try to get the user by Firebase UID
+      let user = await storage.getUserByFirebaseId(req.body.userId);
+      
+      // If not found and the userId is a number, try to get the user by numeric ID
+      if (!user && !isNaN(Number(req.body.userId))) {
+        user = await storage.getUser(Number(req.body.userId));
+      }
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Create a customer if one doesn't exist
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: user.displayName || user.username,
+          metadata: {
+            userId: user.id.toString(),
+            firebaseId: req.body.userId
+          }
+        });
+        
+        customerId = customer.id;
+        // Update user with Stripe customer ID
+        await storage.updateStripeCustomerId(user.id, customerId);
+      }
+      
+      // Create checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        customer: customerId,
+        line_items: [
+          {
+            price: req.body.priceId,
+            quantity: 1,
+          },
+        ],
+        mode: 'subscription',
+        allow_promotion_codes: true,
+        subscription_data: {
+          trial_period_days: 0,
+          metadata: {
+            userId: user.id.toString(),
+            firebaseId: req.body.userId
+          }
+        },
+        success_url: `${req.headers.origin}/subscription?success=true`,
+        cancel_url: `${req.headers.origin}/subscription?canceled=true`,
+      });
+      
+      return res.json({ url: session.url });
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      return res.status(500).json({ 
+        error: 'Failed to create checkout session',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
   // Create a Stripe Customer Portal session for managing subscription
   app.post('/api/stripe/create-portal-session', async (req: Request, res: Response) => {
     if (!req.body.userId) {

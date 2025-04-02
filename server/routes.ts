@@ -65,37 +65,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/analyze-image", async (req: Request, res: Response) => {
     try {
-      // Check for Firebase authentication email in headers
-      const userEmail = req.headers["x-user-email"] as string;
-      
-      if (!userEmail) {
-        return res.status(401).json({
-          error: "Authentication required",
-          message: "You must be logged in to analyze images"
-        });
-      }
-      
-      // Find the user by email
-      const user = await storage.getUserByEmail(userEmail);
-      
-      if (!user) {
-        return res.status(404).json({
-          error: "User not found",
-          message: "No account found with this email. Please try logging in again."
-        });
-      }
-      
-      // Check if the user has enough credits (handling null/undefined credits)
-      const userCredits = user.credits ?? 0;
-      if (userCredits < 1) {
-        return res.status(402).json({
-          error: "Insufficient credits",
-          message: "You need at least 1 credit to analyze an image. Please purchase more credits to continue.",
-          creditsNeeded: 1,
-          creditsAvailable: userCredits
-        });
-      }
-
       // Validate the request body
       const validatedData = analyzeImageRequestSchema.parse(req.body);
       const { imageData } = validatedData;
@@ -596,23 +565,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             const validatedResponse = analyzeImageResponseSchema.parse(responseWithVideos);
-            
-            // Deduct a credit from the user after successful analysis
-            try {
-              // Make sure we have a non-null value for credits before deducting
-              if (user.credits !== null && user.credits !== undefined) {
-                // Update user credits in the database
-                await storage.updateUserCredits(user.id, Math.max(0, user.credits - 1));
-                console.log(`Deducted 1 credit from user ${user.id}, remaining credits: ${user.credits - 1}`);
-              } else {
-                console.error(`Cannot deduct credit: user ${user.id} has null or undefined credits`);
-              }
-            } catch (creditError) {
-              console.error("Failed to deduct credit:", creditError);
-              // We still return the response even if credit deduction fails
-              // This prevents losing the analysis results due to credit system issues
-            }
-            
             return res.status(200).json(validatedResponse);
           } catch (validationErr) {
             console.error("Schema validation error:", validationErr);
@@ -704,93 +656,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
-      console.log('Registration request received:', req.body);
-      
-      // For Firebase users (they already have a uid)
-      if (req.body.uid) {
-        // Skip password validation for Firebase users
-        const { uid, email, username, displayName, profileImage } = req.body;
-        
-        // Check if user already exists by email
-        const existingUser = await storage.getUserByEmail(email);
-        
-        if (existingUser) {
-          // If user exists, return success with existing user data
-          console.log('Existing user found, returning user data:', existingUser);
-          
-          // Generate a token for the user
-          const token = generateToken();
-          const expiresAt = new Date();
-          expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
-          
-          await storage.createSession({
-            userId: existingUser.id,
-            token,
-            expiresAt
-          });
-          
-          const authResponse: AuthResponse = {
-            success: true,
-            message: "Welcome back!",
-            user: {
-              id: existingUser.id,
-              username: existingUser.username,
-              email: existingUser.email,
-              displayName: existingUser.displayName || null,
-              profileImage: existingUser.profileImage || null,
-              credits: existingUser.credits || 0
-            },
-            token
-          };
-          
-          return res.status(200).json(authResponse);
-        }
-        
-        // Create a random password for Firebase users (they'll always login via Firebase)
-        const randomPassword = Math.random().toString(36).slice(-10);
-        const { hash, salt } = hashPassword(randomPassword);
-        
-        // Create new user
-        const newUser = await storage.createUser({
-          username,
-          email,
-          password: `${hash}.${salt}`, // Store hashed password
-          displayName: displayName || username,
-          profileImage: profileImage || null,
-          credits: 1 // Start with 1 free credit
-        });
-        
-        console.log('Created new user for Firebase auth:', newUser);
-        
-        // Create session token for new user
-        const token = generateToken();
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
-        
-        await storage.createSession({
-          userId: newUser.id,
-          token,
-          expiresAt
-        });
-        
-        const authResponse: AuthResponse = {
-          success: true,
-          message: "Account created successfully!",
-          user: {
-            id: newUser.id,
-            username: newUser.username,
-            email: newUser.email,
-            displayName: newUser.displayName || null,
-            profileImage: newUser.profileImage || null,
-            credits: newUser.credits || 0
-          },
-          token
-        };
-        
-        return res.status(201).json(authResponse);
-      }
-      
-      // For regular users (non-Firebase)
       // Validate request data
       const validatedData = registerSchema.parse(req.body);
       
@@ -954,65 +819,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      // Check for both regular auth token and Firebase token
-      const authToken = req.headers.authorization?.split(' ')[1] || req.cookies?.authToken;
-      const firebaseToken = req.headers['x-firebase-token'] || req.cookies?.firebaseToken;
-      const userEmail = req.headers['x-user-email'] as string;
-      
-      let user = null;
-      
-      // Try to get user from standard session
-      if (authToken) {
-        const session = await storage.getSessionByToken(authToken);
-        if (session) {
-          user = await storage.getUser(session.userId);
-        }
-      }
-      
-      // If we have a Firebase user email, try to get the user by email
-      if (!user && userEmail) {
-        console.log(`Looking up user by email: ${userEmail}`);
-        user = await storage.getUserByEmail(userEmail);
-        
-        // If we found the user by email
-        if (user) {
-          console.log(`Found user by email: ${userEmail}, id: ${user.id}, credits: ${user.credits}`);
-        }
-      }
-      
-      // If we found a user, return their info
-      if (user) {
-        return res.status(200).json({
-          success: true,
-          user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            displayName: user.displayName || user.username,
-            profileImage: user.profileImage,
-            credits: user.credits || 5 // Default to 5 credits if not set
-          }
-        });
-      }
-      
-      // For testing: if an email was specified but not found, return a clear error
-      if (userEmail && userEmail !== 'guest@example.com') {
-        console.log(`Requested email ${userEmail} not found in database`);
-        return res.status(200).json({
-          success: true,
-          user: {
-            id: GUEST_USER_ID,
-            username: "guest",
-            email: "guest@example.com",
-            displayName: "Guest User",
-            profileImage: null,
-            credits: 5, // Default guest credits
-            message: `Your email ${userEmail} was found in Firebase but not in our database. Please log out and log in again.`
-          }
-        });
-      }
-      
-      // Return a guest user with default credits if not authenticated
+      // Return a guest user instead
       return res.status(200).json({
         success: true,
         user: {
@@ -1020,12 +827,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: "guest",
           email: "guest@example.com",
           displayName: "Guest User",
-          profileImage: null,
-          credits: 5 // Default guest credits
+          profileImage: null
         }
       });
     } catch (error) {
-      console.error("Error retrieving user:", error);
       return res.status(500).json({
         success: false,
         message: "Failed to retrieve user information",
@@ -1386,101 +1191,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post('/api/stripe/update-credits', async (req: Request, res: Response) => {
-    // Two modes of operation:
-    // 1. Using session token (normal API operation)
-    // 2. Direct credit addition (testing mode)
-    
-    let user;
-    const { email, creditsToAdd } = req.body;
-    
-    if (email && creditsToAdd) {
-      // Mode 2: Direct addition for testing
-      console.log(`Finding user by email for direct credit addition: ${email}`);
-      user = await storage.getUserByEmail(email);
-      
-      if (!user) {
-        console.error(`User with email ${email} not found`);
-        return res.status(404).json({ 
-          error: 'User not found',
-          message: `No user found with email: ${email}`
-        });
-      }
-      
-      // Add credits directly
-      const updatedUser = await storage.updateUserCredits(
-        user.id,
-        (user.credits || 0) + creditsToAdd
-      );
-      
-      console.log(`Added ${creditsToAdd} credits to user ${user.id}. New total: ${updatedUser.credits}`);
-      
-      return res.status(200).json({ 
-        success: true,
-        message: `Added ${creditsToAdd} credits to user account`,
-        user: { id: updatedUser.id, credits: updatedUser.credits }
-      });
-    }
-    
-    // Mode 1: Using authentication (regular API operation)
-    const authToken = req.headers.authorization?.split(' ')[1] || req.cookies?.authToken;
-    if (!authToken) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-    
-    const session = await storage.getSessionByToken(authToken);
-    if (!session) {
-      return res.status(401).json({ error: 'Invalid or expired session' });
-    }
-    
-    // Get user from session
-    user = await storage.getUser(session.userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    // Check for required parameters
-    const { action, amount } = req.body;
-    if (!action || amount === undefined || amount <= 0) {
-      return res.status(400).json({ error: 'Missing or invalid action/amount parameters' });
+    if (!req.body.userId || req.body.credits === undefined) {
+      return res.status(400).json({ error: 'Missing userId or credits' });
     }
     
     try {
-      let newCreditAmount: number;
-      
-      const currentCredits = user.credits || 0;
-      
-      if (action === 'add') {
-        // Add credits to the user's account
-        newCreditAmount = currentCredits + amount;
-      } else if (action === 'deduct') {
-        // Check if user has enough credits
-        if (currentCredits < amount) {
-          return res.status(400).json({ 
-            error: 'Insufficient credits',
-            message: `You need ${amount} credits for this action, but you only have ${currentCredits}.`
-          });
-        }
-        // Deduct credits from the user's account
-        newCreditAmount = currentCredits - amount;
-      } else if (action === 'set') {
-        // Set credits to a specific amount (admin function)
-        newCreditAmount = amount;
-      } else {
-        return res.status(400).json({ error: 'Invalid action. Use "add", "deduct", or "set".' });
+      const user = await storage.getUser(req.body.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
       }
       
-      // Ensure credits can't be negative
-      newCreditAmount = Math.max(0, newCreditAmount);
-      
-      // Update the user's credits
-      const updatedUser = await storage.updateUserCredits(user.id, newCreditAmount);
+      const credits = Math.max(0, req.body.credits); // Ensure credits can't be negative
+      const updatedUser = await storage.updateUserCredits(user.id, credits);
       
       return res.json({
         success: true,
-        credits: updatedUser.credits,
-        previousCredits: user.credits,
-        action,
-        amount
+        credits: updatedUser.credits
       });
     } catch (error) {
       console.error('Error updating credits:', error);
@@ -1491,39 +1217,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Stripe webhook endpoint to handle payment events
+  // Stripe webhook endpoint to handle subscription events
   app.post('/api/stripe/webhook', async (req: Request, res: Response) => {
     let event;
     
     try {
-      // Get the raw body and signature
+      // Verify webhook signature
       const signature = req.headers['stripe-signature'] as string;
       const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
       
       if (!endpointSecret) {
-        console.error('Webhook Secret not found in environment variables');
         return res.status(400).json({ 
           error: 'Stripe webhook secret not set'
         });
       }
-
-      console.log('Received webhook with signature:', signature ? 'Present' : 'Missing');
       
-      try {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          signature,
-          endpointSecret
-        );
-        console.log('Successfully verified webhook:', event.type);
-      } catch (err) {
-        console.error('⚠️ Webhook signature verification failed:', err);
-        return res.status(400).send(`Webhook Error: ${err instanceof Error ? err.message : 'Unknown Error'}`);
-      }
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        endpointSecret
+      );
     } catch (error) {
-      console.error('Webhook processing error:', error);
+      console.error('Webhook signature verification failed:', error);
       return res.status(400).json({ 
-        error: 'Webhook processing error',
+        error: 'Webhook signature verification failed',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -1533,28 +1250,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       switch (event.type) {
-        case 'checkout.session.completed': {
-          // Handle completed checkout session for one-time payments
-          const session = data as Stripe.Checkout.Session;
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated': {
+          const subscription = data as Stripe.Subscription;
+          const customerId = subscription.customer as string;
           
-          // Extract the email from the session
-          const customerEmail = session.customer_details?.email;
-          if (!customerEmail) {
-            console.error('No customer email found in checkout session');
+          // Find user by Stripe customer ID
+          const users = await storage.getUserByStripeCustomerId(customerId);
+          if (!users) {
+            console.error('User not found for customer ID:', customerId);
             break;
           }
           
-          // Find user by email
-          const user = await storage.getUserByEmail(customerEmail);
-          if (!user) {
-            console.error('User not found for email:', customerEmail);
+          // Update subscription status and add credits based on the plan
+          const status = subscription.status;
+          let tier = 'basic';
+          let creditAmount = 20; // Default to basic plan credits
+          
+          // Check the subscription items for the price ID to determine the plan
+          const item = subscription.items.data[0];
+          if (item && item.price.id) {
+            const priceId = item.price.id;
+            // Set tier and credits based on the price ID
+            // The premium plan typically costs more and offers more credits
+            if (priceId.includes('premium')) {
+              tier = 'premium';
+              creditAmount = 50;
+            }
+          }
+          
+          // Update user with subscription status and credits
+          await storage.updateUser(users.id, {
+            subscriptionStatus: status,
+            subscriptionTier: tier,
+            // Only add credits if subscription is active or trialing
+            ...(status === 'active' || status === 'trialing' ? { 
+              credits: Math.max(users.credits || 0, creditAmount) 
+            } : {})
+          });
+          
+          break;
+        }
+        case 'customer.subscription.deleted': {
+          const subscription = data as Stripe.Subscription;
+          const customerId = subscription.customer as string;
+          
+          // Find user by Stripe customer ID
+          const users = await storage.getUserByStripeCustomerId(customerId);
+          if (!users) {
+            console.error('User not found for customer ID:', customerId);
             break;
           }
           
-          console.log(`Adding 12 credits to user ${user.id} with email ${customerEmail}`);
-          
-          // Add 12 credits to the user's account
-          await storage.updateUserCredits(user.id, (user.credits || 0) + 12);
+          // Update user to mark subscription as canceled
+          await storage.updateUser(users.id, {
+            subscriptionStatus: 'canceled',
+            // Don't remove existing credits, just mark as canceled
+          });
           
           break;
         }

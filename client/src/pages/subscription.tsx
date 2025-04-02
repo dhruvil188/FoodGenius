@@ -1,76 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/use-subscription';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
+import LoginButton from '@/components/LoginButton';
 
-export default function SubscriptionPage() {
-  let auth = null;
-  let subscription = null;
-  let error = false;
-  
-  try {
-    auth = useAuth();
-  } catch (e) {
-    console.error("Auth context error:", e);
-    error = true;
-  }
-  
-  try {
-    if (!error && auth?.currentUser) {
-      subscription = useSubscription();
-    }
-  } catch (e) {
-    console.error("Subscription context error:", e);
-  }
-  
-  const currentUser = auth?.currentUser || null;
-  const credits = subscription?.credits || 0;
-  const hasActiveSubscription = subscription?.hasActiveSubscription || false;
-  const subscriptionTier = subscription?.subscriptionTier || 'free';
-  const subscriptionData = subscription?.subscriptionData || null;
-  const createSubscriptionFn = subscription?.createSubscription;
-  
+// Separate authenticated component to avoid conditional hook calls
+function AuthenticatedContent() {
   const { toast } = useToast();
   const [isAnnual, setIsAnnual] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [_, setLocation] = useLocation();
+  
+  // Safe to call these hooks here - will only be rendered when user is logged in
+  const subscription = useSubscription();
+  const { 
+    credits = 0, 
+    hasActiveSubscription = false, 
+    subscriptionTier = 'free',
+    subscriptionData = null,
+    createSubscription = async () => ({ clientSecret: null })
+  } = subscription || {};
 
   const handleSubscribe = async (priceId: string) => {
-    if (!currentUser) {
-      toast({
-        title: 'Authentication required',
-        description: 'Please login to subscribe',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    if (!createSubscriptionFn) {
-      toast({
-        title: 'Subscription service unavailable',
-        description: 'Please try again later',
-        variant: 'destructive'
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
-      const result = await createSubscriptionFn(priceId);
+      const result = await createSubscription(priceId);
       
       if (result?.clientSecret) {
-        // Redirect to a checkout page with Stripe Elements
-        // This is just a placeholder - in a real app, you would use the client secret
-        // to render Stripe Elements
         toast({
           title: 'Subscription started',
           description: 'Your subscription has been initiated.',
@@ -88,79 +50,56 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <motion.div 
-      className="container max-w-5xl py-12 px-4 md:px-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <motion.div
-        className="text-center mb-12"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
-            Recipe Snap Subscription
-          </span>
-        </h1>
-        <p className="text-slate-500 max-w-2xl mx-auto">
-          Get unlimited access to AI-powered recipe analysis and unlock the full potential of your cooking experience.
-        </p>
-      </motion.div>
-
+    <>
       {/* Credit Status */}
-      {currentUser && (
-        <motion.div 
-          className="mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <Card className="bg-white shadow-md border border-slate-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl">Your Credit Status</CardTitle>
-              <CardDescription>Current subscription and available credits</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row justify-between gap-6">
-                <div className="flex-1">
-                  <div className="mb-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium text-slate-500">Available Credits</span>
-                      <span className="text-sm font-bold">{credits} credits</span>
-                    </div>
-                    <Progress value={credits} max={subscriptionTier === 'premium' ? 50 : 20} className="h-2" />
+      <motion.div 
+        className="mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Card className="bg-white shadow-md border border-slate-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl">Your Credit Status</CardTitle>
+            <CardDescription>Current subscription and available credits</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row justify-between gap-6">
+              <div className="flex-1">
+                <div className="mb-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium text-slate-500">Available Credits</span>
+                    <span className="text-sm font-bold">{credits} credits</span>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-slate-500">Subscription Status</span>
-                      <Badge variant={hasActiveSubscription ? "default" : "outline"} className={hasActiveSubscription ? "bg-green-500 hover:bg-green-600" : ""}>
-                        {hasActiveSubscription ? "Active" : "Inactive"}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-slate-500">Plan</span>
-                      <span className="text-sm font-medium capitalize">{subscriptionTier}</span>
-                    </div>
-                    {subscriptionData?.subscription && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-slate-500">Renewal Date</span>
-                        <span className="text-sm font-medium">
-                          {new Date(subscriptionData.subscription.currentPeriodEnd).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
+                  <Progress value={credits} max={subscriptionTier === 'premium' ? 50 : 20} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-slate-500">Subscription Status</span>
+                    <Badge variant={hasActiveSubscription ? "default" : "outline"} className={hasActiveSubscription ? "bg-green-500 hover:bg-green-600" : ""}>
+                      {hasActiveSubscription ? "Active" : "Inactive"}
+                    </Badge>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-slate-500">Plan</span>
+                    <span className="text-sm font-medium capitalize">{subscriptionTier}</span>
+                  </div>
+                  {subscriptionData && subscriptionData.subscription && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-slate-500">Renewal Date</span>
+                      <span className="text-sm font-medium">
+                        {new Date(subscriptionData.subscription.currentPeriodEnd).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+      
       {/* Pricing Section */}
       <motion.div 
         className="w-full mb-12"
@@ -316,8 +255,67 @@ export default function SubscriptionPage() {
           </Card>
         </div>
       </motion.div>
+    </>
+  );
+}
 
-      {/* FAQs */}
+// Login component for unauthenticated users
+function UnauthenticatedContent() {
+  return (
+    <motion.div 
+      className="mb-12 text-center"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.4 }}
+    >
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle>Sign in to Subscribe</CardTitle>
+          <CardDescription>You need to be logged in to subscribe to Recipe Snap</CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center pb-6">
+          <LoginButton 
+            variant="default" 
+            size="lg" 
+            fullWidth={false} 
+            className="px-8"
+          />
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+export default function SubscriptionPage() {
+  const auth = useAuth();
+  const currentUser = auth?.currentUser || null;
+
+  return (
+    <motion.div 
+      className="container max-w-5xl py-12 px-4 md:px-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">
+          <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
+            Recipe Snap Subscription
+          </span>
+        </h1>
+        <p className="text-slate-500 max-w-2xl mx-auto">
+          Get unlimited access to AI-powered recipe analysis and unlock the full potential of your cooking experience.
+        </p>
+      </motion.div>
+
+      {currentUser ? <AuthenticatedContent /> : <UnauthenticatedContent />}
+
+      {/* FAQs - shown to both authenticated and unauthenticated users */}
       <motion.div 
         className="w-full"
         initial={{ opacity: 0, y: 20 }}

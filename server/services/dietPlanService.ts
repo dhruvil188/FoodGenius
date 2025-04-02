@@ -122,8 +122,8 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
               // Find the next day section if any
               for (const nextDay of daysOfWeek) {
                 if (nextDay === day) continue;
-                const nextDayRegex = new RegExp(`"day"\\s*:\\s*"${nextDay}"`, 'i');
-                const nextDayIndex = text.indexOf(nextDayRegex, dayIndex + 10);
+                const nextDayStr = `"day":"${nextDay}"`;
+                const nextDayIndex = text.indexOf(nextDayStr, dayIndex + 10);
                 if (nextDayIndex !== -1 && nextDayIndex < endIndex) {
                   endIndex = nextDayIndex;
                 }
@@ -144,8 +144,8 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         
         // Sort the days of the week in the correct order
         partialDays.sort((a, b) => {
-          const dayOrder = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6};
-          return dayOrder[a.day.toLowerCase()] - dayOrder[b.day.toLowerCase()];
+          const dayOrder: { [key: string]: number } = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6};
+          return (dayOrder[a.day.toLowerCase()] ?? 0) - (dayOrder[b.day.toLowerCase()] ?? 0);
         });
         
         // We were able to extract some data - ensure all seven days are present

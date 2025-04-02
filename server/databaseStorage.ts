@@ -8,7 +8,7 @@ import {
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken } from "./utils";
-import { IStorage } from "./storage";
+import type { IStorage } from "./storage";
 
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {

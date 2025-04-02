@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import BuyCreditsButton from './BuyCreditsButton';
 
@@ -11,7 +11,24 @@ export default function CreditsDisplay({
   variant = 'simple',
   className = ''
 }: CreditsDisplayProps) {
-  const { currentUser, userCredits, isLoadingCredits } = useAuth();
+  const { currentUser, userCredits, isLoadingCredits, fetchUserCredits } = useAuth();
+  
+  // Refresh credits every 10 seconds if user is logged in
+  useEffect(() => {
+    if (currentUser) {
+      // Initial fetch
+      fetchUserCredits();
+      
+      // Set up interval for periodic refresh
+      const intervalId = setInterval(() => {
+        console.log('Auto-refreshing user credits...');
+        fetchUserCredits();
+      }, 10000); // 10 seconds
+      
+      // Clean up interval on unmount
+      return () => clearInterval(intervalId);
+    }
+  }, [currentUser, fetchUserCredits]);
 
   if (!currentUser) {
     return null;

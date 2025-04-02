@@ -1,9 +1,10 @@
 import { 
-  users, sessions, savedRecipes,
+  users, sessions, savedRecipes, savedDietPlans,
   type User, type InsertUser, 
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
-  type AnalyzeImageResponse
+  type SavedDietPlan, type InsertSavedDietPlan,
+  type AnalyzeImageResponse, type DietPlanResponse
 } from "@shared/schema";
 import { hashPassword, verifyPassword, generateToken } from './utils';
 import { databaseStorage } from './databaseStorage';
@@ -39,6 +40,13 @@ export interface IStorage {
   createSavedRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   deleteSavedRecipe(id: number): Promise<boolean>;
   updateSavedRecipe(id: number, recipe: Partial<SavedRecipe>): Promise<SavedRecipe | undefined>;
+  
+  // Diet plan methods
+  getSavedDietPlans(userId: number): Promise<SavedDietPlan[]>;
+  getSavedDietPlanById(id: number): Promise<SavedDietPlan | undefined>;
+  createSavedDietPlan(dietPlan: InsertSavedDietPlan): Promise<SavedDietPlan>;
+  deleteSavedDietPlan(id: number): Promise<boolean>;
+  updateSavedDietPlan(id: number, dietPlan: Partial<SavedDietPlan>): Promise<SavedDietPlan | undefined>;
 }
 
 // Use the database storage implementation

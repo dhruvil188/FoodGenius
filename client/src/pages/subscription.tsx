@@ -1,8 +1,12 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LoginButton from '@/components/LoginButton';
+import { useSubscription } from '@/hooks/use-subscription';
+import { Button } from '@/components/ui/button';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 declare global {
   namespace JSX {
@@ -20,6 +24,9 @@ declare global {
 // Component for authenticated users showing Stripe pricing table
 function AuthenticatedContent() {
   const auth = useAuth();
+  const subscription = useSubscription();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const stripePricingTableRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -37,6 +44,33 @@ function AuthenticatedContent() {
     };
   }, []);
 
+  // Add function to open Stripe Customer Portal
+  const openCustomerPortal = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiRequest('POST', '/api/stripe/create-portal-session', {
+        userId: auth?.currentUser?.uid
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to open customer portal');
+      }
+      
+      const { url } = await response.json();
+      
+      // Redirect to Stripe Customer Portal
+      window.location.href = url;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Failed to open customer portal',
+        variant: "destructive"
+      });
+      setIsLoading(false);
+    }
+  };
+
   return (
     <motion.div 
       className="w-full"
@@ -45,6 +79,38 @@ function AuthenticatedContent() {
       transition={{ duration: 0.5, delay: 0.5 }}
       ref={stripePricingTableRef}
     >
+      {/* Show Manage Subscription button for existing subscribers */}
+      {subscription?.hasActiveSubscription && (
+        <div className="mb-10 text-center">
+          <Card className="max-w-xl mx-auto">
+            <CardHeader>
+              <CardTitle>Manage Your Subscription</CardTitle>
+              <CardDescription>
+                You currently have an active {subscription.subscriptionTier} subscription with {subscription.credits} credits remaining.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center pb-6">
+              <Button 
+                onClick={openCustomerPortal} 
+                disabled={isLoading}
+                className="bg-primary text-white hover:bg-primary/90"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Loading...</span>
+                  </div>
+                ) : 'Manage Subscription'}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      
+      {/* Show pricing table for new subscribers or upgrades */}
       <stripe-pricing-table
         pricing-table-id="prctbl_1R9IbVRp4HZDUL91mFDGhAlx"
         publishable-key="pk_live_51R9AjYRp4HZDUL91ckxYco82qgJQ9Sm6BMiwc4n6rPPWEGXcqM1kcOSG7WyUQ0v6DXDVObTe4CCfYy2vxJJGDsSb00e0wVjj8D"

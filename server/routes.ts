@@ -1242,6 +1242,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Create a Stripe Customer Portal session for managing subscription
+  app.post('/api/stripe/create-portal-session', async (req: Request, res: Response) => {
+    if (!req.body.userId) {
+      return res.status(400).json({ error: 'Missing userId' });
+    }
+    
+    try {
+      // First try to get the user by Firebase UID
+      let user = await storage.getUserByFirebaseId(req.body.userId);
+      
+      // If not found and the userId is a number, try to get the user by numeric ID
+      if (!user && !isNaN(Number(req.body.userId))) {
+        user = await storage.getUser(Number(req.body.userId));
+      }
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      if (!user.stripeCustomerId) {
+        return res.status(400).json({ error: 'User does not have a Stripe customer ID' });
+      }
+      
+      // Create the customer portal session
+      const session = await stripe.billingPortal.sessions.create({
+        customer: user.stripeCustomerId,
+        return_url: `${req.headers.origin}/subscription`,
+      });
+      
+      return res.json({ url: session.url });
+    } catch (error) {
+      console.error('Error creating portal session:', error);
+      return res.status(500).json({ 
+        error: 'Failed to create portal session',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
   // Stripe webhook endpoint to handle subscription events
   app.post('/api/stripe/webhook', async (req: Request, res: Response) => {
     let event;

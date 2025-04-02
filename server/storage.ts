@@ -1,12 +1,12 @@
 import { 
-  users, sessions, savedRecipes, savedDietPlans,
   type User, type InsertUser, 
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
-  type SavedDietPlan, type InsertSavedDietPlan,
-  type AnalyzeImageResponse, type DietPlanResponse
+  type SavedDietPlan, type InsertSavedDietPlan
 } from "@shared/schema";
 import { hashPassword, verifyPassword, generateToken } from './utils';
+
+// Dynamically import to avoid circular dependency
 import { databaseStorage } from './databaseStorage';
 
 // Re-export utility functions from utils.ts

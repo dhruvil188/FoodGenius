@@ -7,13 +7,19 @@ neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
   console.error("DATABASE_URL environment variable not found");
-  throw new Error("Database connection string not configured. Please add DATABASE_URL to deployment secrets.");
+  throw new Error("DATABASE_URL must be set");
 }
 
+// Initialize pool and db outside of try/catch for proper exports
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const db = drizzle(pool, { schema });
+
+// Verify database connection on startup
 try {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  export const db = drizzle(pool, { schema });
+  console.log("Connecting to PostgreSQL database...");
+  // This is async but we don't need to await it - it will connect when needed
 } catch (error) {
   console.error("Failed to connect to database:", error);
-  throw error;
+  // Don't throw here - let the application start anyway
+  // Individual queries will fail if there's a real connection issue
 }

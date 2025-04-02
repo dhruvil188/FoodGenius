@@ -7,9 +7,6 @@ import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LoginButton from './LoginButton';
-import { useSubscription } from '@/hooks/use-subscription';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -17,7 +14,6 @@ export default function Header() {
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
   const { currentUser } = useAuth();
-  const subscription = useSubscription();
   
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -52,32 +48,13 @@ export default function Header() {
             Recipe Library
           </Button>
           
-          {subscription && currentUser && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div
-                    className="hidden md:flex px-3 py-1 border border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary cursor-pointer rounded-md text-sm font-medium"
-                    onClick={() => navigate('/subscription')}
-                  >
-                    <i className="fas fa-coins mr-2 text-amber-500"></i>
-                    {subscription.credits} credits
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Available recipe analyses</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          
           <Button 
             variant="outline"
             className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
             onClick={() => navigate('/subscription')}
           >
             <i className="fas fa-crown mr-2"></i>
-            {subscription?.hasActiveSubscription ? 'Manage Plan' : 'Upgrade'}
+            Upgrade
           </Button>
           
           <Button 

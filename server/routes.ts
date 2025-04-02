@@ -1383,6 +1383,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       switch (event.type) {
+        // Handle payment success from the payment link flow
+        case 'checkout.session.completed': {
+          const session = data as Stripe.Checkout.Session;
+          
+          // If customer_email is present but no customer ID, this is likely from a payment link
+          if (session.customer_email && !session.customer) {
+            // Try to find user by email
+            const user = await storage.getUserByEmail(session.customer_email);
+            if (!user) {
+              console.error('User not found for email:', session.customer_email);
+              break;
+            }
+            
+            // If user found, update their credits (use the appropriate amount based on the payment)
+            // For basic plan (£7)
+            if (session.amount_total === 700) {
+              await storage.updateUser(user.id, {
+                subscriptionStatus: 'active',
+                subscriptionTier: 'basic',
+                credits: Math.max(user.credits || 0, 20) // Basic plan gives 20 credits
+              });
+            }
+            // For premium plan (£12)
+            else if (session.amount_total === 1200) {
+              await storage.updateUser(user.id, {
+                subscriptionStatus: 'active',
+                subscriptionTier: 'premium',
+                credits: Math.max(user.credits || 0, 50) // Premium plan gives 50 credits
+              });
+            }
+            // Default case for other payment amounts
+            else {
+              await storage.updateUser(user.id, {
+                subscriptionStatus: 'active',
+                subscriptionTier: 'basic',
+                credits: Math.max(user.credits || 0, 20) // Default to basic plan credits
+              });
+            }
+          }
+          // If customer ID exists, handle the usual checkout flow
+          else if (session.customer) {
+            const customerId = session.customer as string;
+            const user = await storage.getUserByStripeCustomerId(customerId);
+            
+            if (!user) {
+              // If user not found by Stripe customer ID, try by email
+              if (session.customer_email) {
+                const userByEmail = await storage.getUserByEmail(session.customer_email);
+                if (userByEmail) {
+                  // Update user with Stripe customer ID
+                  await storage.updateStripeCustomerId(userByEmail.id, customerId);
+                  
+                  // Update subscription status
+                  await storage.updateUser(userByEmail.id, {
+                    subscriptionStatus: 'active',
+                    subscriptionTier: 'basic', // Default to basic if unclear
+                    credits: Math.max(userByEmail.credits || 0, 20) // Default to basic plan credits
+                  });
+                } else {
+                  console.error('User not found for customer email:', session.customer_email);
+                }
+              } else {
+                console.error('User not found for customer ID:', customerId);
+              }
+              break;
+            }
+            
+            // Update subscription status based on mode
+            if (session.mode === 'subscription') {
+              // Credits will be handled by the subscription events below
+              await storage.updateUser(user.id, {
+                subscriptionStatus: 'active'
+              });
+            } else if (session.mode === 'payment') {
+              // One-time payment, assign credits based on amount
+              if (session.amount_total === 700) {
+                await storage.updateUser(user.id, {
+                  credits: Math.max(user.credits || 0, 20) // Basic plan gives 20 credits
+                });
+              } else if (session.amount_total === 1200) {
+                await storage.updateUser(user.id, {
+                  credits: Math.max(user.credits || 0, 50) // Premium plan gives 50 credits
+                });
+              }
+            }
+          }
+          break;
+        }
+          
         case 'customer.subscription.created':
         case 'customer.subscription.updated': {
           const subscription = data as Stripe.Subscription;

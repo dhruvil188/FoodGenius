@@ -41,11 +41,20 @@ export default function Header() {
         <div className="flex items-center gap-3">
           <Button 
             variant="outline"
-            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
+            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all mr-2"
             onClick={() => navigate('/library')}
           >
             <i className="fas fa-book mr-2"></i>
             Recipe Library
+          </Button>
+          
+          <Button 
+            variant="outline"
+            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all"
+            onClick={() => navigate('/subscription')}
+          >
+            <i className="fas fa-crown mr-2"></i>
+            Upgrade
           </Button>
           
           <Button 

@@ -25,8 +25,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
   displayName: true,
-  profileImage: true,
-  credits: true,
 });
 
 // Auth schemas for form validation

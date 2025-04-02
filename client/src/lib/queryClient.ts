@@ -24,30 +24,6 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  // If using Firebase, get the current user's email and add it to headers
-  try {
-    // Dynamically import firebase auth to avoid circular dependencies
-    const { auth } = await import('./firebase');
-    
-    if (auth.currentUser?.email) {
-      // Add Firebase user email to headers
-      headers["x-user-email"] = auth.currentUser.email;
-      console.log(`Adding email header: ${auth.currentUser.email}`);
-      
-      // Try to get Firebase ID token if available
-      try {
-        const idToken = await auth.currentUser.getIdToken(true);
-        if (idToken) {
-          headers["x-firebase-token"] = idToken;
-        }
-      } catch (tokenError) {
-        console.warn("Could not get Firebase ID token:", tokenError);
-      }
-    }
-  } catch (error) {
-    console.warn("Error adding Firebase auth info to request:", error);
-  }
-  
   const res = await fetch(url, {
     method,
     headers,
@@ -72,29 +48,6 @@ export const getQueryFn: <T>(options: {
     const headers: Record<string, string> = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
-    }
-    
-    // If using Firebase, get the current user's email and add it to headers
-    try {
-      // Dynamically import firebase auth to avoid circular dependencies
-      const { auth } = await import('./firebase');
-      
-      if (auth.currentUser?.email) {
-        // Add Firebase user email to headers
-        headers["x-user-email"] = auth.currentUser.email;
-        
-        // Try to get Firebase ID token if available
-        try {
-          const idToken = await auth.currentUser.getIdToken(true);
-          if (idToken) {
-            headers["x-firebase-token"] = idToken;
-          }
-        } catch (tokenError) {
-          console.warn("Could not get Firebase ID token:", tokenError);
-        }
-      }
-    } catch (error) {
-      console.warn("Error adding Firebase auth info to request:", error);
     }
     
     const res = await fetch(queryKey[0] as string, {

@@ -7,7 +7,6 @@ import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LoginButton from './LoginButton';
-import CreditsDisplay from './CreditsDisplay';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -68,9 +67,6 @@ export default function Header() {
           
           {currentUser ? (
             <div className="flex items-center ml-2">
-              <div className="hidden md:block mr-4">
-                <CreditsDisplay />
-              </div>
               <Avatar className="h-8 w-8 border-2 border-primary/20">
                 <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
                 <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">

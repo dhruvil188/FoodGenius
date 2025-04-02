@@ -55,18 +55,25 @@ export default function BuyCreditsButton({
       });
       return;
     }
-    
+
     try {
-      // Use email for direct lookup in backend
+      // Display email being used
+      toast({
+        title: "Adding Credits",
+        description: `Sending request for email: ${currentUser.email || 'Not available'}`,
+      });
+      
+      // Use email for direct lookup in backend or fallback to "guest@example.com" for testing
+      const email = currentUser.email || "guest@example.com";
+      
       const response = await apiRequest('POST', '/api/stripe/update-credits', {
-        email: currentUser.email,
+        email: email,
         creditsToAdd: 12
       });
       
       console.log('Credits update response:', response);
       
-      // Always fetch updated credits regardless of response
-      try {
+      if (response && response.success) {
         // Wait a moment to ensure DB is updated
         setTimeout(async () => {
           const updatedCredits = await fetchUserCredits();
@@ -77,19 +84,41 @@ export default function BuyCreditsButton({
             description: `12 test credits were added. Current total: ${updatedCredits}`,
           });
         }, 1000);
-      } catch (refreshError) {
-        console.error("Error refreshing credits:", refreshError);
+      } else {
+        throw new Error(response?.message || "Failed to add credits");
       }
     } catch (error) {
       console.error("Error adding test credits:", error);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: "Error Adding Credits",
+        description: error instanceof Error ? error.message : "An unexpected error occurred. Using guest@example.com for testing.",
         variant: "destructive"
       });
       
-      // Try to refresh credits anyway
-      fetchUserCredits().catch(e => console.error("Failed to refresh credits:", e));
+      // Try with the default test account if Firebase account failed
+      try {
+        const response = await apiRequest('POST', '/api/stripe/update-credits', {
+          email: "guest@example.com",
+          creditsToAdd: 12
+        });
+        
+        if (response && response.success) {
+          setTimeout(async () => {
+            const updatedCredits = await fetchUserCredits();
+            toast({
+              title: "Credits Added to Test Account",
+              description: `12 test credits were added to the guest account. Current total: ${updatedCredits}`,
+            });
+          }, 1000);
+        }
+      } catch (fallbackError) {
+        console.error("Even fallback credit addition failed:", fallbackError);
+        toast({
+          title: "Credit System Error",
+          description: "Could not add credits to any account. Please contact support.",
+          variant: "destructive"
+        });
+      }
     }
   };
 

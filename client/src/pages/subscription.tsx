@@ -1,50 +1,53 @@
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import LoginButton from '@/components/LoginButton';
 import { useSubscription } from '@/hooks/use-subscription';
 import { Button } from '@/components/ui/button';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { CheckCircle } from 'lucide-react';
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'stripe-pricing-table': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
-        'pricing-table-id': string;
-        'publishable-key': string;
-        'client-reference-id'?: string;
-        'customer-email'?: string;
-      }
-    }
-  }
-}
-
-// Component for authenticated users showing Stripe pricing table
+// Component for authenticated users showing subscription options
 function AuthenticatedContent() {
   const auth = useAuth();
   const subscription = useSubscription();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const stripePricingTableRef = useRef<HTMLDivElement>(null);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   
-  useEffect(() => {
-    // Load the Stripe Pricing Table script
-    const script = document.createElement('script');
-    script.src = 'https://js.stripe.com/v3/pricing-table.js';
-    script.async = true;
-    document.body.appendChild(script);
+  const handleSubscribe = async (priceId: string) => {
+    setIsLoading(true);
+    setLoadingPlan(priceId);
     
-    return () => {
-      // Clean up on unmount
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+    try {
+      const response = await apiRequest('POST', '/api/stripe/create-checkout-session', {
+        userId: auth?.currentUser?.uid,
+        priceId
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create checkout session');
       }
-    };
-  }, []);
+      
+      const { url } = await response.json();
+      
+      // Redirect to Stripe Checkout
+      window.location.href = url;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Failed to create checkout session',
+        variant: "destructive"
+      });
+      setIsLoading(false);
+      setLoadingPlan(null);
+    }
+  };
 
-  // Add function to open Stripe Customer Portal
+  // Function to open Stripe Customer Portal
   const openCustomerPortal = async () => {
     setIsLoading(true);
     try {
@@ -72,16 +75,15 @@ function AuthenticatedContent() {
   };
 
   return (
-    <motion.div 
-      className="w-full"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.5 }}
-      ref={stripePricingTableRef}
-    >
+    <>
       {/* Show Manage Subscription button for existing subscribers */}
       {subscription?.hasActiveSubscription && (
-        <div className="mb-10 text-center">
+        <motion.div 
+          className="mb-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           <Card className="max-w-xl mx-auto">
             <CardHeader>
               <CardTitle>Manage Your Subscription</CardTitle>
@@ -107,17 +109,134 @@ function AuthenticatedContent() {
               </Button>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       )}
       
-      {/* Show pricing table for new subscribers or upgrades */}
-      <stripe-pricing-table
-        pricing-table-id="prctbl_1R9IbVRp4HZDUL91mFDGhAlx"
-        publishable-key="pk_live_51R9AjYRp4HZDUL91ckxYco82qgJQ9Sm6BMiwc4n6rPPWEGXcqM1kcOSG7WyUQ0v6DXDVObTe4CCfYy2vxJJGDsSb00e0wVjj8D"
-        client-reference-id={auth?.currentUser?.uid}
-        customer-email={auth?.currentUser?.email || undefined}
-      />
-    </motion.div>
+      {/* Show subscription options */}
+      <motion.div 
+        className="text-center mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
+        <h2 className="text-2xl font-bold mb-4">Choose Your Plan</h2>
+        <p className="text-slate-500 max-w-2xl mx-auto">
+          Select the plan that best suits your needs and start creating amazing recipes today.
+        </p>
+      </motion.div>
+
+      <motion.div 
+        className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.8 }}
+      >
+        {/* Basic Plan */}
+        <div className="flex">
+          <Card className="flex flex-col border-emerald-100 shadow-md w-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Basic Plan</CardTitle>
+              <CardDescription>For casual cooks and beginners</CardDescription>
+              <div className="mt-2">
+                <span className="text-3xl font-bold">£7</span>
+                <span className="text-slate-500">/month</span>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-grow">
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 shrink-0" />
+                  <span>20 recipe analyses per month</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 shrink-0" />
+                  <span>Full access to Recipe Library</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 shrink-0" />
+                  <span>Save favorite recipes</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-emerald-500 mr-2 shrink-0" />
+                  <span>Standard support</span>
+                </li>
+              </ul>
+            </CardContent>
+            <CardFooter className="flex justify-center pb-8">
+              <Button 
+                onClick={() => handleSubscribe('price_1ObpvEL5ptA6B8ZdyxO1BxTc')} 
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading && loadingPlan === 'price_1ObpvEL5ptA6B8ZdyxO1BxTc' ? (
+                  <div className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Processing...</span>
+                  </div>
+                ) : 'Subscribe Now'}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        {/* Premium Plan */}
+        <div className="flex">
+          <Card className="relative flex flex-col border-primary shadow-lg w-full overflow-hidden">
+            <div className="absolute top-0 right-0 bg-primary text-white px-3 py-1 text-xs font-medium rounded-bl-md">
+              POPULAR
+            </div>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Premium Plan</CardTitle>
+              <CardDescription>For enthusiastic home chefs</CardDescription>
+              <div className="mt-2">
+                <span className="text-3xl font-bold">£12</span>
+                <span className="text-slate-500">/month</span>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-grow">
+              <ul className="space-y-3">
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0" />
+                  <span>50 recipe analyses per month</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0" />
+                  <span>Full access to Recipe Library</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0" />
+                  <span>Save favorite recipes</span>
+                </li>
+                <li className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-primary mr-2 shrink-0" />
+                  <span>Priority support</span>
+                </li>
+              </ul>
+            </CardContent>
+            <CardFooter className="flex justify-center pb-8">
+              <Button 
+                onClick={() => handleSubscribe('price_1ObpveL5ptA6B8ZdIKdxbXPi')} 
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white"
+              >
+                {isLoading && loadingPlan === 'price_1ObpveL5ptA6B8ZdIKdxbXPi' ? (
+                  <div className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Processing...</span>
+                  </div>
+                ) : 'Subscribe Now'}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </motion.div>
+    </>
   );
 }
 

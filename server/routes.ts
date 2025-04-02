@@ -844,6 +844,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Firebase Auth sync endpoint - syncs Firebase user with our database
   app.post("/api/auth/firebase-sync", async (req: Request, res: Response) => {
     try {
+      console.log("📝 Firebase Auth Sync - Received request:", req.body);
+      
       // Validate request data using the Firebase auth sync schema
       const validatedData = firebaseAuthSyncSchema.parse(req.body);
       

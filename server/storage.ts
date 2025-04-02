@@ -208,10 +208,18 @@ export class MemStorage implements IStorage {
   }
   
   async syncFirebaseUser(firebaseData: { uid: string, email: string, displayName: string | null, photoURL: string | null }): Promise<User> {
+    console.log("📝 Firebase Sync - Received user data:", { 
+      uid: firebaseData.uid, 
+      email: firebaseData.email,
+      displayName: firebaseData.displayName
+    });
+    
     // First, check if the user already exists with this Firebase UID
     let user = await this.getUserByFirebaseUid(firebaseData.uid);
     
     if (user) {
+      console.log("✅ Found existing user with Firebase UID:", user.id, user.username);
+      
       // User exists, update their profile data if needed
       const updatedUser = await this.updateUser(user.id, {
         email: firebaseData.email, // Update in case the email changed in Firebase
@@ -221,9 +229,11 @@ export class MemStorage implements IStorage {
       });
       
       if (!updatedUser) {
+        console.error("❌ Failed to update existing user:", user.id);
         throw new Error('Failed to update existing user');
       }
       
+      console.log("🔄 Updated existing user profile:", updatedUser.id);
       return updatedUser;
     }
     
@@ -231,6 +241,8 @@ export class MemStorage implements IStorage {
     user = await this.getUserByEmail(firebaseData.email);
     
     if (user) {
+      console.log("📧 Found existing user with email:", user.id, user.username);
+      
       // User exists but isn't linked to Firebase yet, update their profile
       const updatedUser = await this.updateUser(user.id, {
         firebaseUid: firebaseData.uid,
@@ -240,14 +252,20 @@ export class MemStorage implements IStorage {
       });
       
       if (!updatedUser) {
+        console.error("❌ Failed to link existing user:", user.id);
         throw new Error('Failed to link existing user');
       }
       
+      console.log("🔗 Linked existing account with Firebase UID:", updatedUser.id);
       return updatedUser;
     }
     
+    console.log("🆕 Creating new user for Firebase account");
+    
     // Create a new user
     const username = await this.generateUniqueUsername(firebaseData.email, firebaseData.displayName);
+    console.log("👤 Generated unique username:", username);
+    
     const randomPassword = Math.random().toString(36).substring(2, 15);
     const { hash, salt } = hashPassword(randomPassword);
     
@@ -269,6 +287,12 @@ export class MemStorage implements IStorage {
     };
     
     this.users.set(newUser.id, newUser);
+    console.log("✨ Created new user:", { 
+      id: newUser.id, 
+      username: newUser.username, 
+      email: newUser.email,
+      firebaseUid: newUser.firebaseUid 
+    });
     return newUser;
   }
   
@@ -313,6 +337,12 @@ export class MemStorage implements IStorage {
     };
     
     this.userSessions.set(session.token, session);
+    console.log("🔑 Created new session:", { 
+      id: session.id, 
+      userId: session.userId, 
+      token: session.token.substring(0, 10) + '...',
+      expires: session.expiresAt
+    });
     return session;
   }
 

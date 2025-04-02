@@ -56,6 +56,12 @@ export class FirestoreStorage implements IStorage {
     return convertTimestampsToDate(snapshot.docs[0].data()) as User;
   }
 
+  async getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined> {
+    const snapshot = await this.usersCollection.where('firebaseUid', '==', firebaseUid).limit(1).get();
+    if (snapshot.empty) return undefined;
+    return convertTimestampsToDate(snapshot.docs[0].data()) as User;
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     // Get the highest ID for auto-increment
     const usersSnapshot = await this.usersCollection.orderBy('id', 'desc').limit(1).get();

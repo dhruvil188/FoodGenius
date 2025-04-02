@@ -710,7 +710,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: user.username,
           email: user.email,
           displayName: user.displayName,
-          profileImage: user.profileImage
+          profileImage: user.profileImage,
+          firebaseUid: user.firebaseUid,
+          stripeCustomerId: user.stripeCustomerId,
+          stripeSubscriptionId: user.stripeSubscriptionId,
+          analysisCount: user.analysisCount || 0,
+          maxAnalyses: user.maxAnalyses || 1,
+          planType: user.planType || 'free',
+          remainingAnalyses: await storage.getRemainingAnalyses(user.id)
         },
         token,
         message: "Registration successful"
@@ -778,7 +785,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: user.username,
           email: user.email,
           displayName: user.displayName,
-          profileImage: user.profileImage
+          profileImage: user.profileImage,
+          firebaseUid: user.firebaseUid,
+          stripeCustomerId: user.stripeCustomerId,
+          stripeSubscriptionId: user.stripeSubscriptionId,
+          analysisCount: user.analysisCount || 0,
+          maxAnalyses: user.maxAnalyses || 1,
+          planType: user.planType || 'free',
+          remainingAnalyses: await storage.getRemainingAnalyses(user.id)
         },
         token,
         message: "Login successful"
@@ -824,8 +838,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Firebase authentication handler
+  app.post("/api/auth/firebase", async (req: Request, res: Response) => {
+    try {
+      const { firebaseUid, email, displayName } = req.body;
+      
+      if (!firebaseUid || !email) {
+        return res.status(400).json({
+          success: false,
+          message: "Firebase UID and email are required"
+        });
+      }
+      
+      // Check if user already exists
+      let user = await storage.getUserByFirebaseUid(firebaseUid);
+      
+      if (!user) {
+        // Check if email is already in use
+        const existingEmailUser = await storage.getUserByEmail(email);
+        if (existingEmailUser) {
+          // Update existing user with Firebase UID
+          user = await storage.updateUser(existingEmailUser.id, { 
+            firebaseUid,
+            displayName: displayName || existingEmailUser.displayName
+          });
+        } else {
+          // Create new user
+          const generatedUsername = email.split('@')[0];
+          user = await storage.createUser({
+            username: generatedUsername,
+            email,
+            password: generateToken(), // Generate a random password for Firebase users
+            displayName: displayName || generatedUsername,
+            firebaseUid
+          } as any);
+        }
+      }
+      
+      // At this point, user should definitely exist and be defined
+      if (!user) {
+        throw new Error("Failed to retrieve or create user account");
+      }
+      
+      // Create session
+      const token = generateToken();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 days token expiration
+      
+      await storage.createSession({
+        userId: user.id,
+        token,
+        expiresAt
+      });
+      
+      // Return user data
+      const authResponse: AuthResponse = {
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          displayName: user.displayName || user.username,
+          profileImage: user.profileImage || null,
+          firebaseUid: user.firebaseUid,
+          stripeCustomerId: user.stripeCustomerId || null,
+          stripeSubscriptionId: user.stripeSubscriptionId || null,
+          analysisCount: user.analysisCount || 0,
+          maxAnalyses: user.maxAnalyses || 1,
+          planType: user.planType || 'free',
+          remainingAnalyses: await storage.getRemainingAnalyses(user.id)
+        },
+        token,
+        message: "Firebase authentication successful"
+      };
+      
+      return res.status(200).json(authResponse);
+    } catch (error) {
+      console.error('Firebase auth error:', error);
+      return res.status(500).json({
+        success: false,
+        message: "Authentication failed",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
+      // Check if user is authenticated via Firebase
+      if (req.userId) {
+        const user = await storage.getUser(req.userId);
+        if (user) {
+          return res.status(200).json({
+            success: true,
+            user: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              displayName: user.displayName,
+              profileImage: user.profileImage,
+              firebaseUid: user.firebaseUid,
+              stripeCustomerId: user.stripeCustomerId,
+              stripeSubscriptionId: user.stripeSubscriptionId,
+              analysisCount: user.analysisCount || 0,
+              maxAnalyses: user.maxAnalyses || 1,
+              planType: user.planType || 'free',
+              remainingAnalyses: await storage.getRemainingAnalyses(user.id)
+            }
+          });
+        }
+      }
+      
       // Return a guest user instead
       return res.status(200).json({
         success: true,
@@ -834,7 +957,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: "guest",
           email: "guest@example.com",
           displayName: "Guest User",
-          profileImage: null
+          profileImage: null,
+          firebaseUid: null,
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+          analysisCount: 0,
+          maxAnalyses: 0,
+          planType: 'free',
+          remainingAnalyses: 0
         }
       });
     } catch (error) {
@@ -849,7 +979,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Saved recipes routes
   app.get("/api/recipes", async (req: Request, res: Response) => {
     try {
-      const recipes = await storage.getSavedRecipes(GUEST_USER_ID);
+      // If the user is authenticated, use their ID, otherwise use guest ID
+      const userId = req.userId || GUEST_USER_ID;
+      
+      // Get guest recipes for public browsing, plus user-specific recipes if authenticated
+      let recipes = [];
+      
+      if (userId === GUEST_USER_ID) {
+        // Guest user - only show public recipes
+        recipes = await storage.getSavedRecipes(GUEST_USER_ID);
+      } else {
+        // Authenticated user - show both personal and public recipes
+        const userRecipes = await storage.getSavedRecipes(userId);
+        const guestRecipes = await storage.getSavedRecipes(GUEST_USER_ID);
+        
+        // Combine both sets, ensuring no duplicates
+        const allRecipes = [...userRecipes, ...guestRecipes];
+        const uniqueIds = new Set();
+        
+        recipes = allRecipes.filter(recipe => {
+          const duplicate = uniqueIds.has(recipe.id);
+          uniqueIds.add(recipe.id);
+          return !duplicate;
+        });
+      }
       
       return res.status(200).json({
         success: true,
@@ -866,6 +1019,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/recipes", async (req: Request, res: Response) => {
     try {
+      // If the user is authenticated, use their ID, otherwise use guest ID
+      const userId = req.userId || GUEST_USER_ID;
       
       // Extract recipe data from request
       const recipeData: AnalyzeImageResponse = req.body.recipe;
@@ -879,7 +1034,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create saved recipe entry
       const savedRecipe = await storage.createSavedRecipe({
-        userId: GUEST_USER_ID,
+        userId: userId,
         recipeData: recipeData,
         foodName: recipeData.foodName,
         description: recipeData.description,
@@ -922,8 +1077,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if recipe belongs to the guest user
-      if (recipe.userId !== GUEST_USER_ID) {
+      // Check if recipe belongs to the user or guest
+      const userId = req.userId || GUEST_USER_ID;
+      if (recipe.userId !== userId && recipe.userId !== GUEST_USER_ID) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to access this recipe"
@@ -963,8 +1119,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if recipe belongs to the guest user
-      if (recipe.userId !== GUEST_USER_ID) {
+      // Check if recipe belongs to the user
+      const userId = req.userId || GUEST_USER_ID;
+      if (recipe.userId !== userId) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to delete this recipe"
@@ -1021,8 +1178,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if recipe belongs to the guest user
-      if (recipe.userId !== GUEST_USER_ID) {
+      // Check if recipe belongs to the user
+      const userId = req.userId || GUEST_USER_ID;
+      if (recipe.userId !== userId) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to update this recipe"

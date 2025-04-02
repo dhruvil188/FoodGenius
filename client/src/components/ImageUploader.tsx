@@ -5,8 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from "@/hooks/use-toast";
 import Webcam from 'react-webcam';
-import { apiRequest } from '@/lib/api';
-import { useSubscription } from '@/hooks/use-subscription';
 
 interface ImageUploaderProps {
   onAnalyzeImage: (imageData: string) => void;
@@ -124,38 +122,8 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
     }
   }, [webcamRef]);
 
-  // Use try/catch to prevent the error if AuthProvider is not available yet
-  let subscriptionData = { decrementCredits: async () => true, credits: 10, hasActiveSubscription: true };
-  try {
-    subscriptionData = useSubscription();
-  } catch (error) {
-    console.error("Subscription error:", error);
-  }
-  const { decrementCredits, credits, hasActiveSubscription } = subscriptionData;
-  
   const handleAnalyzeImage = async () => {
     if (!selectedImage) return;
-
-    // Check if user has credits
-    if (credits <= 0 && !hasActiveSubscription) {
-      toast({
-        title: "No credits remaining",
-        description: "Please subscribe to analyze more images",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Try to decrement credits
-    const success = await decrementCredits();
-    if (!success) {
-      toast({
-        title: "Error processing credits",
-        description: "We couldn't process your credits. Please try again.",
-        variant: "destructive"
-      });
-      return;
-    }
     
     setIsAnalyzing(true);
     

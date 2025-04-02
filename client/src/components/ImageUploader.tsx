@@ -141,29 +141,17 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
     setIsAnalyzing(true);
     
     try {
-      // Deduct a credit from the user
-      const deductResponse = await apiRequest('POST', '/api/stripe/update-credits', {
-        action: 'deduct',
-        amount: 1
-      });
+      // Instead of handling credits separately, let the server handle it as part of the image analysis
+      // This ensures that credits are only deducted if analysis is successful
       
-      if (deductResponse.ok) {
-        // Refresh user credits
-        fetchUserCredits();
-        
-        // Pass the image to the parent component for analysis
-        onAnalyzeImage(selectedImage);
-      } else {
-        const errorData = await deductResponse.json();
-        toast({
-          title: "Credit Error",
-          description: errorData.message || "There was an error processing your credits.",
-          variant: "destructive"
-        });
-        setIsAnalyzing(false);
-      }
+      // Pass the image to the parent component for analysis
+      onAnalyzeImage(selectedImage);
+      
+      // Note: The credits will be deducted on the server side only when the analysis is successful
+      // The fetchUserCredits() will be called from the parent component after analysis is complete
+      
     } catch (error) {
-      console.error('Error processing credits:', error);
+      console.error('Error processing request:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

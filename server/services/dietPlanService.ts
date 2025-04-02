@@ -182,9 +182,14 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
  */
 function extractPartialDietPlanData(text: string): { day: string; meals: any[]; totalDailyCalories: number; }[] {
   const partialDays: { day: string; meals: any[]; totalDailyCalories: number; }[] = [];
+  const extractedDays = new Set<string>(); // Track days we've already extracted
   
-  // Extract days of the week with their meals
-  const dayRegex = /"day"\s*:\s*"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"/g;
+  // Days of the week
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  
+  // Step 1: Try to extract using the standard approach
+  const dayRegexStr = `"day"\\s*:\\s*"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"`;
+  const dayRegex = new RegExp(dayRegexStr, 'g');
   
   // Using exec instead of matchAll for better compatibility
   const dayMatches: { day: string, index: number }[] = [];
@@ -193,16 +198,32 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
     dayMatches.push({ day: match[1], index: match.index });
   }
   
+  console.log(`Found ${dayMatches.length} days in the text:`, dayMatches.map(m => m.day).join(', '));
+  
+  // Process day matches
   for (const dayMatch of dayMatches) {
     const dayName = dayMatch.day;
     const dayIndex = dayMatch.index;
     
+    // Skip if we've already extracted this day
+    if (extractedDays.has(dayName)) {
+      continue;
+    }
+    
+    console.log(`Processing ${dayName} at index ${dayIndex}`);
+    
     // Find the meals array for this day
     let mealsStart = text.indexOf('"meals"', dayIndex);
-    if (mealsStart === -1) continue;
+    if (mealsStart === -1) {
+      console.log(`No meals array found for ${dayName}`);
+      continue;
+    }
     
     mealsStart = text.indexOf('[', mealsStart);
-    if (mealsStart === -1) continue;
+    if (mealsStart === -1) {
+      console.log(`No opening bracket for meals array found for ${dayName}`);
+      continue;
+    }
     
     // Find the end of the meals array or the next day
     let mealsEnd = -1;
@@ -220,18 +241,87 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
     
     if (mealsEnd === -1) {
       // Array wasn't closed properly, find the next day or end of string
-      const nextDayMatch = text.indexOf('"day"', dayIndex + dayName.length + 10); // Adding offset for "day":"..."
-      mealsEnd = nextDayMatch !== -1 ? nextDayMatch : text.length;
+      console.log(`Array not properly closed for ${dayName}, trying to find next day`);
+      let nextDayIndex = text.length;
+      
+      // Look for the next day marker
+      for (const day of daysOfWeek) {
+        if (day === dayName) continue;
+        
+        const nextDayMatch = text.indexOf(`"day":"${day}"`, dayIndex + dayName.length);
+        if (nextDayMatch !== -1 && nextDayMatch < nextDayIndex) {
+          nextDayIndex = nextDayMatch;
+        }
+      }
+      
+      // Use the closest next day or the end of the string
+      mealsEnd = nextDayIndex;
     }
     
     // Extract the meals array
     let mealsText = text.substring(mealsStart, mealsEnd);
+    console.log(`Extracted meals text for ${dayName} (${mealsText.length} chars)`);
     
     // Try to parse the meals array
     try {
       // Clean up the array text
       mealsText = cleanJsonString(mealsText);
-      const meals = JSON.parse(mealsText);
+      
+      // Add closing bracket if missing
+      if (!mealsText.trim().endsWith(']')) {
+        mealsText = mealsText.trim() + ']';
+      }
+      
+      // Try to parse it
+      let meals;
+      try {
+        meals = JSON.parse(mealsText);
+      } catch (parseError) {
+        console.log(`JSON parse error for ${dayName}, trying fallback approach`);
+        
+        // Fallback approach - extract individual meals
+        const mealRegexStr = `\\{\\s*"name"\\s*:\\s*"([^"]+)"`;
+        const mealRegex = new RegExp(mealRegexStr, 'g');
+        const mealMatches = [];
+        let mealMatch;
+        
+        while ((mealMatch = mealRegex.exec(mealsText)) !== null) {
+          const mealStart = mealMatch.index;
+          
+          // Find the end of this meal object
+          let mealEnd = -1;
+          let braceCount = 1;
+          for (let i = mealStart + 1; i < mealsText.length; i++) {
+            if (mealsText[i] === '{') braceCount++;
+            else if (mealsText[i] === '}') {
+              braceCount--;
+              if (braceCount === 0) {
+                mealEnd = i + 1;
+                break;
+              }
+            }
+          }
+          
+          if (mealEnd !== -1) {
+            const mealObj = mealsText.substring(mealStart, mealEnd);
+            try {
+              const cleanedMealObj = cleanJsonString(mealObj);
+              const parsedMeal = JSON.parse(cleanedMealObj);
+              mealMatches.push(parsedMeal);
+            } catch (err) {
+              console.warn(`Could not parse individual meal: ${mealMatch[1]}`);
+            }
+          }
+        }
+        
+        if (mealMatches.length > 0) {
+          meals = mealMatches;
+          console.log(`Successfully extracted ${meals.length} meals for ${dayName} using fallback approach`);
+        } else {
+          console.warn(`No meals could be extracted for ${dayName}`);
+          continue;
+        }
+      }
       
       // Calculate total calories
       let totalDailyCalories = 0;
@@ -239,25 +329,165 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
         totalDailyCalories = meals.reduce((sum: number, meal: any) => {
           return sum + (meal.nutritionalInfo?.calories || 0);
         }, 0);
+        
+        // Add this day to our partial results
+        partialDays.push({
+          day: dayName,
+          meals: meals,
+          totalDailyCalories
+        });
+        
+        // Mark this day as extracted
+        extractedDays.add(dayName);
+        console.log(`Successfully added ${dayName} with ${meals.length} meals and ${totalDailyCalories} calories`);
       } else {
         console.warn(`Meals is not an array for ${dayName}`);
-        // If meals is not an array, we can't use it
         continue;
       }
-      
-      // Add this day to our partial results
-      partialDays.push({
-        day: dayName,
-        meals: meals,
-        totalDailyCalories
-      });
     } catch (error) {
       console.warn(`Could not parse meals for ${dayName}:`, error);
       // Continue to the next day
     }
   }
   
-  return partialDays;
+  // Step 2: For days that weren't found, try a more targeted approach
+  for (const day of daysOfWeek) {
+    if (extractedDays.has(day)) {
+      continue; // Skip days we've already extracted
+    }
+    
+    console.log(`Trying targeted extraction for ${day}`);
+    
+    // Try to find this day in the text
+    const dayPatternStr = `["']day["']\\s*:\\s*["']${day}["']`;
+    const dayPattern = new RegExp(dayPatternStr, 'i');
+    const dayMatch = text.match(dayPattern);
+    
+    if (dayMatch) {
+      const dayStartIndex = dayMatch.index;
+      
+      // Find the meals
+      const mealsPatternStr = `["']meals["']\\s*:\\s*\\[`;
+      const mealsPattern = new RegExp(mealsPatternStr, 'i');
+      const mealsMatch = text.substring(dayStartIndex ?? 0).match(mealsPattern);
+      
+      if (mealsMatch && mealsMatch.index !== undefined) {
+        const mealsStartIndex = (dayStartIndex ?? 0) + mealsMatch.index + mealsMatch[0].length;
+        
+        // Find the end of the meals array
+        let mealsEndIndex = -1;
+        let bracketCount = 1;
+        for (let i = mealsStartIndex; i < text.length; i++) {
+          if (text[i] === '[') bracketCount++;
+          else if (text[i] === ']') {
+            bracketCount--;
+            if (bracketCount === 0) {
+              mealsEndIndex = i + 1;
+              break;
+            }
+          }
+        }
+        
+        if (mealsEndIndex === -1) {
+          // Try to find the next day or the end of the object
+          const nextDayPatternStr = `["']day["']\\s*:`;
+          const nextDayPattern = new RegExp(nextDayPatternStr);
+          const nextDayMatch = text.substring(mealsStartIndex).match(nextDayPattern);
+          
+          if (nextDayMatch && nextDayMatch.index !== undefined) {
+            mealsEndIndex = mealsStartIndex + nextDayMatch.index;
+          } else {
+            // Look for the end of the current day object
+            const endOfDayPatternStr = `},\\s*{`;
+            const endOfDayPattern = new RegExp(endOfDayPatternStr);
+            const endOfDayMatch = text.substring(mealsStartIndex).match(endOfDayPattern);
+            
+            if (endOfDayMatch && endOfDayMatch.index !== undefined) {
+              mealsEndIndex = mealsStartIndex + endOfDayMatch.index;
+            } else {
+              // Just go to end of text
+              mealsEndIndex = text.length;
+            }
+          }
+        }
+        
+        if (mealsEndIndex > mealsStartIndex) {
+          // Extract and try to parse the meals array
+          let mealsText = text.substring(mealsStartIndex - 1, mealsEndIndex); // Include opening bracket
+          
+          try {
+            // Clean up and try to parse
+            mealsText = cleanJsonString(mealsText);
+            let meals = JSON.parse(mealsText);
+            
+            if (Array.isArray(meals)) {
+              // Calculate total calories
+              const totalDailyCalories = meals.reduce((sum: number, meal: any) => {
+                return sum + (meal.nutritionalInfo?.calories || 0);
+              }, 0);
+              
+              // Add this day to our results
+              partialDays.push({
+                day: day,
+                meals: meals,
+                totalDailyCalories
+              });
+              
+              extractedDays.add(day);
+              console.log(`Successfully extracted ${day} using targeted approach`);
+            }
+          } catch (error) {
+            console.warn(`Failed to parse meals for ${day} using targeted approach:`, error);
+          }
+        }
+      }
+    }
+  }
+  
+  // Step 3: Last resort - create skeleton days for any missing days
+  for (const day of daysOfWeek) {
+    if (!extractedDays.has(day)) {
+      console.log(`Creating skeleton day for ${day}`);
+      
+      // Create placeholder day with default meal structure
+      partialDays.push({
+        day: day,
+        meals: [
+          {
+            name: `${day} Breakfast`,
+            timeOfDay: "Breakfast",
+            ingredients: ["Contact support for more details"],
+            instructions: ["This data could not be fully extracted"],
+            nutritionalInfo: {
+              calories: 0,
+              protein: 0,
+              carbs: 0,
+              fat: 0
+            }
+          }
+        ],
+        totalDailyCalories: 0
+      });
+      
+      extractedDays.add(day);
+    }
+  }
+  
+  // Sort days in correct order
+  return partialDays.sort((a, b) => {
+    const dayOrder: { [key: string]: number } = {
+      "monday": 0, 
+      "tuesday": 1, 
+      "wednesday": 2, 
+      "thursday": 3, 
+      "friday": 4, 
+      "saturday": 5, 
+      "sunday": 6
+    };
+    const aDay = a.day.toLowerCase();
+    const bDay = b.day.toLowerCase();
+    return (dayOrder[aDay] ?? 0) - (dayOrder[bDay] ?? 0);
+  });
 }
 
 /**

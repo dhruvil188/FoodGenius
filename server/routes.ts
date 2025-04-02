@@ -819,7 +819,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/auth/me", async (req: Request, res: Response) => {
     try {
-      // Return a guest user instead
+      // Get user from session if available
+      const authToken = req.headers.authorization?.split(' ')[1] || req.cookies?.authToken;
+      
+      // If there's a valid auth token, try to get the user from it
+      if (authToken) {
+        const session = await storage.getSessionByToken(authToken);
+        if (session) {
+          const user = await storage.getUser(session.userId);
+          if (user) {
+            return res.status(200).json({
+              success: true,
+              user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                displayName: user.displayName || user.username,
+                profileImage: user.profileImage,
+                credits: user.credits || 5 // Default to 5 credits if not set
+              }
+            });
+          }
+        }
+      }
+      
+      // Return a guest user with default credits if not authenticated
       return res.status(200).json({
         success: true,
         user: {
@@ -827,7 +851,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: "guest",
           email: "guest@example.com",
           displayName: "Guest User",
-          profileImage: null
+          profileImage: null,
+          credits: 5 // Default guest credits
         }
       });
     } catch (error) {
@@ -1217,19 +1242,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       let newCreditAmount: number;
       
+      const currentCredits = user.credits || 0;
+      
       if (action === 'add') {
         // Add credits to the user's account
-        newCreditAmount = user.credits + amount;
+        newCreditAmount = currentCredits + amount;
       } else if (action === 'deduct') {
         // Check if user has enough credits
-        if (user.credits < amount) {
+        if (currentCredits < amount) {
           return res.status(400).json({ 
             error: 'Insufficient credits',
-            message: `You need ${amount} credits for this action, but you only have ${user.credits}.`
+            message: `You need ${amount} credits for this action, but you only have ${currentCredits}.`
           });
         }
         // Deduct credits from the user's account
-        newCreditAmount = user.credits - amount;
+        newCreditAmount = currentCredits - amount;
       } else if (action === 'set') {
         // Set credits to a specific amount (admin function)
         newCreditAmount = amount;

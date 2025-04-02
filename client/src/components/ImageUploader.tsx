@@ -19,39 +19,12 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
-  const [userCredits, setUserCredits] = useState<number>(0);
-  const [isLoadingCredits, setIsLoadingCredits] = useState(false);
-  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   
   const { toast } = useToast();
-  const { currentUser } = useAuth();
-  
-  // Fetch user credits when component mounts or user changes
-  useEffect(() => {
-    if (currentUser) {
-      fetchUserCredits();
-    }
-  }, [currentUser]);
-  
-  const fetchUserCredits = async () => {
-    if (!currentUser) return;
-    
-    setIsLoadingCredits(true);
-    try {
-      const response = await apiRequest('GET', '/api/auth/me');
-      const data = await response.json();
-      if (data.success && data.user) {
-        setUserCredits(data.user.credits || 0);
-      }
-    } catch (error) {
-      console.error('Error fetching user credits:', error);
-    } finally {
-      setIsLoadingCredits(false);
-    }
-  };
+  const { currentUser, userCredits, isLoadingCredits, fetchUserCredits } = useAuth();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -156,7 +129,7 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
     if (!selectedImage) return;
     
     // Check if user has enough credits
-    if (userCredits < 1) {
+    if (!userCredits || userCredits < 1) {
       toast({
         title: "Insufficient Credits",
         description: "You need at least 1 credit to analyze an image. Please purchase more credits to continue.",
@@ -512,8 +485,8 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
                   <div className="mt-4 md:mt-0">
                     <div className="flex items-center justify-center gap-2 bg-slate-100 rounded-full px-4 py-2 text-sm">
                       <i className="fas fa-coins text-amber-500"></i>
-                      <span className="font-medium">{isLoadingCredits ? '...' : userCredits} credits</span>
-                      {userCredits < 1 && (
+                      <span className="font-medium">{isLoadingCredits ? '...' : userCredits || 0} credits</span>
+                      {(!userCredits || userCredits < 1) && (
                         <div className="ml-2">
                           <BuyCreditsButton size="sm" />
                         </div>

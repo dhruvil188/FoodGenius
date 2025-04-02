@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb, timestamp, varchar, numeric, date, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -10,12 +10,6 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   displayName: text("display_name"),
   profileImage: text("profile_image"),
-  // Firebase authentication ID
-  firebaseUid: text("firebase_uid").unique(),
-  // Stripe customer ID for payments
-  stripeCustomerId: text("stripe_customer_id").unique(),
-  // Track free analysis usage
-  freeAnalysisUsed: boolean("free_analysis_used").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -25,8 +19,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
   displayName: true,
-  firebaseUid: true,
-  stripeCustomerId: true,
 });
 
 // Auth schemas for form validation
@@ -302,76 +294,3 @@ export const authResponseSchema = z.object({
 });
 
 export type AuthResponse = z.infer<typeof authResponseSchema>;
-
-// Subscription plan types
-export const planTypes = ["basic", "premium", "unlimited"] as const;
-export type PlanType = typeof planTypes[number];
-
-// Subscription statuses
-export const subscriptionStatuses = ["active", "past_due", "canceled", "incomplete", "incomplete_expired", "trialing"] as const;
-export type SubscriptionStatus = typeof subscriptionStatuses[number];
-
-// Stripe subscription schema
-export const subscriptions = pgTable("subscriptions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  stripeCustomerId: text("stripe_customer_id").notNull(),
-  stripeSubscriptionId: text("stripe_subscription_id").notNull(),
-  planType: text("plan_type").$type<PlanType>().notNull(),
-  status: text("status").$type<SubscriptionStatus>().notNull(),
-  currentPeriodStart: timestamp("current_period_start").notNull(),
-  currentPeriodEnd: timestamp("current_period_end").notNull(),
-  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
-export type Subscription = typeof subscriptions.$inferSelect;
-
-// Analysis usage tracking
-export const analysisUsage = pgTable("analysis_usage", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  subscriptionId: integer("subscription_id").references(() => subscriptions.id),
-  analysisCount: integer("analysis_count").default(0).notNull(),
-  analysisLimit: integer("analysis_limit").notNull(),
-  resetDate: timestamp("reset_date").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const insertAnalysisUsageSchema = createInsertSchema(analysisUsage).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type InsertAnalysisUsage = z.infer<typeof insertAnalysisUsageSchema>;
-export type AnalysisUsage = typeof analysisUsage.$inferSelect;
-
-// Payment history
-export const payments = pgTable("payments", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  subscriptionId: integer("subscription_id").references(() => subscriptions.id),
-  stripeInvoiceId: text("stripe_invoice_id").notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  status: text("status").notNull(),
-  paymentDate: timestamp("payment_date").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const insertPaymentSchema = createInsertSchema(payments).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type InsertPayment = z.infer<typeof insertPaymentSchema>;
-export type Payment = typeof payments.$inferSelect;

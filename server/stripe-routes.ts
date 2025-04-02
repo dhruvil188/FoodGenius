@@ -82,7 +82,9 @@ export const getOrCreateSubscription = async (req: Request, res: Response) => {
       
       return res.json({
         subscriptionId: subscription.id,
-        clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
+        clientSecret: typeof subscription.latest_invoice === 'object' && subscription.latest_invoice?.payment_intent 
+          ? (subscription.latest_invoice.payment_intent as any).client_secret 
+          : null,
       });
     }
     
@@ -165,7 +167,9 @@ export const getOrCreateSubscription = async (req: Request, res: Response) => {
     
     res.json({
       subscriptionId: subscription.id,
-      clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
+      clientSecret: typeof subscription.latest_invoice === 'object' && subscription.latest_invoice?.payment_intent 
+        ? (subscription.latest_invoice.payment_intent as any).client_secret 
+        : null,
     });
   } catch (error: any) {
     console.error('Subscription error:', error);

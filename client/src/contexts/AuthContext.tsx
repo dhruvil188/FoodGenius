@@ -13,9 +13,29 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Check if we're in development mode
+const isDevelopment = 
+  window.location.hostname === 'localhost' || 
+  window.location.hostname.includes('replit.') || 
+  window.location.hostname.includes('repl.co');
+
+if (isDevelopment) {
+  console.log('Development mode detected - configuring Firebase for development environment');
+  // Note: for production, you need to add this domain to Firebase Console
+  // under Authentication > Settings > Authorized Domains
+}
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Configure Auth provider
 const googleProvider = new GoogleAuthProvider();
+
+// Add custom parameters for Google provider
+googleProvider.setCustomParameters({
+  // Force account selection even if one account is available
+  prompt: 'select_account'
+});
 
 // Define the type for our context
 interface AuthContextType {

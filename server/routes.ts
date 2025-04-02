@@ -65,6 +65,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/analyze-image", async (req: Request, res: Response) => {
     try {
+      // Check for Firebase authentication email in headers
+      const userEmail = req.headers["x-user-email"] as string;
+      
+      if (!userEmail) {
+        return res.status(401).json({
+          error: "Authentication required",
+          message: "You must be logged in to analyze images"
+        });
+      }
+      
+      // Find the user by email
+      const user = await storage.getUserByEmail(userEmail);
+      
+      if (!user) {
+        return res.status(404).json({
+          error: "User not found",
+          message: "No account found with this email. Please try logging in again."
+        });
+      }
+      
+      // Check if the user has enough credits (handling null/undefined credits)
+      const userCredits = user.credits ?? 0;
+      if (userCredits < 1) {
+        return res.status(402).json({
+          error: "Insufficient credits",
+          message: "You need at least 1 credit to analyze an image. Please purchase more credits to continue.",
+          creditsNeeded: 1,
+          creditsAvailable: userCredits
+        });
+      }
+
       // Validate the request body
       const validatedData = analyzeImageRequestSchema.parse(req.body);
       const { imageData } = validatedData;
@@ -565,6 +596,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             const validatedResponse = analyzeImageResponseSchema.parse(responseWithVideos);
+            
+            // Deduct a credit from the user after successful analysis
+            try {
+              // Make sure we have a non-null value for credits before deducting
+              if (user.credits !== null && user.credits !== undefined) {
+                // Update user credits in the database
+                await storage.updateUserCredits(user.id, Math.max(0, user.credits - 1));
+                console.log(`Deducted 1 credit from user ${user.id}, remaining credits: ${user.credits - 1}`);
+              } else {
+                console.error(`Cannot deduct credit: user ${user.id} has null or undefined credits`);
+              }
+            } catch (creditError) {
+              console.error("Failed to deduct credit:", creditError);
+              // We still return the response even if credit deduction fails
+              // This prevents losing the analysis results due to credit system issues
+            }
+            
             return res.status(200).json(validatedResponse);
           } catch (validationErr) {
             console.error("Schema validation error:", validationErr);

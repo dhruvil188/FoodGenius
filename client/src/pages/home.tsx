@@ -124,6 +124,11 @@ export default function Home() {
         setAnalysisResult(response);
         setStage("results");
         
+        // After successful analysis, refresh the user's credit balance
+        if (fetchUserCredits) {
+          fetchUserCredits();
+        }
+        
         // Trigger confetti effect when recipe is found
         setTimeout(() => {
           confetti({

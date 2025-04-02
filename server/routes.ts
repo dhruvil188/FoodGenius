@@ -1405,9 +1405,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (item && item.price.id) {
             const priceId = item.price.id;
             // Set tier and credits based on the price ID
-            // Match our specific price IDs
-            if (priceId === 'price_1R9IaHRp4HZDUL91yeZ3Uo0P') {
-              // You can update the tier and credit amount here based on which plan this price ID represents
+            // The premium plan typically costs more and offers more credits
+            if (priceId.includes('premium')) {
               tier = 'premium';
               creditAmount = 50;
             }

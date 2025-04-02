@@ -4,49 +4,44 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User, InsertUser } from "@shared/schema";
+import { loginSchema, registerSchema, User, authResponseSchema } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
 
 type AuthContextType = {
-  user: any;
+  user: User | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<any, Error, { email: string; password: string }>;
-  logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<any, Error, InsertUser>;
-};
-
-type LoginData = {
-  email: string;
-  password: string;
+  loginMutation: UseMutationResult<z.infer<typeof authResponseSchema>, Error, z.infer<typeof loginSchema>>;
+  logoutMutation: UseMutationResult<{success: boolean}, Error, void>;
+  registerMutation: UseMutationResult<z.infer<typeof authResponseSchema>, Error, z.infer<typeof registerSchema>>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<any>({
+  } = useQuery<User | null, Error>({
     queryKey: ["/api/auth/me"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
+    mutationFn: async (credentials: z.infer<typeof loginSchema>) => {
       const res = await apiRequest("POST", "/api/auth/login", credentials);
-      return await res.json();
+      return authResponseSchema.parse(await res.json());
     },
     onSuccess: (data) => {
-      localStorage.setItem("auth_token", data.token);
       queryClient.setQueryData(["/api/auth/me"], data.user);
-      
       toast({
-        title: "Login successful",
-        description: "Welcome back!",
+        title: "Welcome back!",
+        description: "You have been successfully logged in.",
       });
     },
     onError: (error: Error) => {
@@ -59,17 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (userData: InsertUser) => {
-      const res = await apiRequest("POST", "/api/auth/register", userData);
-      return await res.json();
+    mutationFn: async (credentials: z.infer<typeof registerSchema>) => {
+      const res = await apiRequest("POST", "/api/auth/register", credentials);
+      return authResponseSchema.parse(await res.json());
     },
     onSuccess: (data) => {
-      localStorage.setItem("auth_token", data.token);
       queryClient.setQueryData(["/api/auth/me"], data.user);
-      
       toast({
-        title: "Registration successful",
-        description: "Your account has been created successfully!",
+        title: "Account created!",
+        description: "Your account has been successfully created.",
       });
     },
     onError: (error: Error) => {
@@ -83,14 +76,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/auth/logout");
-      localStorage.removeItem("auth_token");
-      queryClient.setQueryData(["/api/auth/me"], null);
+      const res = await apiRequest("POST", "/api/auth/logout");
+      return { success: true };
     },
     onSuccess: () => {
+      queryClient.setQueryData(["/api/auth/me"], null);
       toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account.",
+        title: "Logged out",
+        description: "You have been successfully logged out.",
       });
     },
     onError: (error: Error) => {
@@ -105,7 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user ?? null,
         isLoading,
         error,
         loginMutation,

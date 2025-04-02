@@ -1,7 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Route, useLocation, Redirect } from "wouter";
-import { useEffect } from "react";
+import { Redirect, Route } from "wouter";
 
 export function ProtectedRoute({
   path,
@@ -16,12 +15,13 @@ export function ProtectedRoute({
     return (
       <Route path={path}>
         <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-border" />
         </div>
       </Route>
     );
   }
 
+  // Redirect to login if user is not authenticated
   if (!user) {
     return (
       <Route path={path}>
@@ -30,5 +30,6 @@ export function ProtectedRoute({
     );
   }
 
+  // Return the protected component if user is authenticated
   return <Route path={path} component={Component} />;
 }

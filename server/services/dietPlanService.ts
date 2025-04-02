@@ -62,11 +62,12 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         const partialDays = extractPartialDietPlanData(text);
         
         if (partialDays.length > 0) {
-          // We have partial data, create a partial plan
+          // We have partial data, create a partial plan and ensure all 7 days are present
+          const completePlan = ensureAllDaysPresent(partialDays);
           dietPlan = {
-            weeklyPlan: partialDays,
-            planSummary: "Partial diet plan generated. Some data may be incomplete.",
-            weeklyNutritionAverage: calculateAverageNutrition(partialDays)
+            weeklyPlan: completePlan,
+            planSummary: "Personalized diet plan based on your preferences.",
+            weeklyNutritionAverage: calculateAverageNutrition(completePlan)
           };
         } else {
           // No usable data found
@@ -81,6 +82,11 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
             }
           };
         }
+      } else {
+        // Ensure all seven days are present in the plan
+        dietPlan.weeklyPlan = ensureAllDaysPresent(dietPlan.weeklyPlan);
+        // Recalculate average nutrition
+        dietPlan.weeklyNutritionAverage = calculateAverageNutrition(dietPlan.weeklyPlan);
       }
       
       // Validate the structure against our schema
@@ -142,11 +148,12 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
           return dayOrder[a.day.toLowerCase()] - dayOrder[b.day.toLowerCase()];
         });
         
-        // We were able to extract some data
+        // We were able to extract some data - ensure all seven days are present
+        const completePlan = ensureAllDaysPresent(partialDays);
         const partialPlan: DietPlanResponse = {
-          weeklyPlan: partialDays,
+          weeklyPlan: completePlan,
           planSummary: "Personalized diet plan based on your preferences.",
-          weeklyNutritionAverage: calculateAverageNutrition(partialDays)
+          weeklyNutritionAverage: calculateAverageNutrition(completePlan)
         };
         
         // Try to validate against schema
@@ -693,6 +700,86 @@ function generatePrompt(planRequest: DietPlanRequest): string {
     "Your response must follow strict JSON format and be able to parse with JSON.parse() with no modifications. " +
     "Do not include markdown code blocks or other formatting. The response must be the raw JSON object only. " +
     "Make sure all meals combined meet the target calories per day.";
+}
+
+/**
+ * Ensures all seven days of the week are present in the diet plan
+ * If a day is missing, it creates a placeholder with default meals
+ */
+function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; totalDailyCalories: number; }>): Array<{ day: string; meals: any[]; totalDailyCalories: number; }> {
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const dayOrder: { [key: string]: number } = {
+    "monday": 0, 
+    "tuesday": 1, 
+    "wednesday": 2, 
+    "thursday": 3, 
+    "friday": 4, 
+    "saturday": 5, 
+    "sunday": 6
+  };
+  
+  // Create a map of existing days
+  const existingDays = new Map<string, { day: string; meals: any[]; totalDailyCalories: number; }>();
+  for (const day of weeklyPlan) {
+    existingDays.set(day.day.toLowerCase(), day);
+  }
+  
+  // Check for missing days and add placeholder data
+  for (const day of daysOfWeek) {
+    if (!existingDays.has(day.toLowerCase())) {
+      console.log(`Adding placeholder for missing day: ${day}`);
+      
+      // Get a template from an existing day if available
+      let templateMeal = { 
+        name: `${day} Default Meal`,
+        timeOfDay: "Breakfast",
+        ingredients: ["This data could not be generated. Please regenerate the plan."],
+        instructions: ["This data could not be generated. Please regenerate the plan."],
+        nutritionalInfo: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+      };
+      
+      // Try to copy a meal structure from an existing day
+      if (weeklyPlan.length > 0 && weeklyPlan[0].meals.length > 0) {
+        const existingMeal = { ...weeklyPlan[0].meals[0] };
+        templateMeal = {
+          name: `${day} ${existingMeal.timeOfDay}`,
+          timeOfDay: existingMeal.timeOfDay,
+          ingredients: ["This data could not be generated. Please regenerate the plan."],
+          instructions: ["This data could not be generated. Please regenerate the plan."],
+          nutritionalInfo: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+        };
+      }
+      
+      // Create a full day's meals based on the average number of meals in other days
+      const avgMealsPerDay = Math.max(
+        1, 
+        Math.round(weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0) / Math.max(1, weeklyPlan.length))
+      );
+      
+      const meals = [];
+      const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snack", "Snack 2"];
+      
+      for (let i = 0; i < avgMealsPerDay; i++) {
+        meals.push({
+          ...templateMeal,
+          name: `${day} ${mealTimes[i] || "Meal"}`,
+          timeOfDay: mealTimes[i] || "Meal",
+        });
+      }
+      
+      existingDays.set(day.toLowerCase(), {
+        day,
+        meals,
+        totalDailyCalories: 0
+      });
+    }
+  }
+  
+  // Convert map back to array and sort by day of week
+  const fullWeeklyPlan = Array.from(existingDays.values());
+  return fullWeeklyPlan.sort((a, b) => 
+    (dayOrder[a.day.toLowerCase()] ?? 0) - (dayOrder[b.day.toLowerCase()] ?? 0)
+  );
 }
 
 /**

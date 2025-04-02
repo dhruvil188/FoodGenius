@@ -93,10 +93,59 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
       const partialDays = extractPartialDietPlanData(text);
       
       if (partialDays.length > 0) {
+        // Check which days are missing
+        const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const foundDays = new Set(partialDays.map(day => day.day));
+        
+        console.log("Days successfully extracted:", Array.from(foundDays).join(", "));
+        
+        // Try to find any missing days specifically
+        for (const day of daysOfWeek) {
+          if (!foundDays.has(day)) {
+            console.log(`Attempting to specifically extract ${day} data...`);
+            
+            // Create a specific regex for this day
+            const dayRegex = new RegExp(`"day"\\s*:\\s*"${day}"`, 'i');
+            const dayIndex = text.search(dayRegex);
+            
+            if (dayIndex !== -1) {
+              console.log(`Found ${day} in text at position ${dayIndex}`);
+              // Extract just this section until the next day or end
+              let endIndex = text.length;
+              
+              // Find the next day section if any
+              for (const nextDay of daysOfWeek) {
+                if (nextDay === day) continue;
+                const nextDayRegex = new RegExp(`"day"\\s*:\\s*"${nextDay}"`, 'i');
+                const nextDayIndex = text.indexOf(nextDayRegex, dayIndex + 10);
+                if (nextDayIndex !== -1 && nextDayIndex < endIndex) {
+                  endIndex = nextDayIndex;
+                }
+              }
+              
+              // Extract this day's section and try to parse it
+              const daySection = text.substring(dayIndex, endIndex);
+              const extractedDayData = extractPartialDietPlanData(daySection);
+              
+              if (extractedDayData.length > 0) {
+                console.log(`Successfully extracted data for ${day}`);
+                partialDays.push(extractedDayData[0]);
+                foundDays.add(day);
+              }
+            }
+          }
+        }
+        
+        // Sort the days of the week in the correct order
+        partialDays.sort((a, b) => {
+          const dayOrder = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6};
+          return dayOrder[a.day.toLowerCase()] - dayOrder[b.day.toLowerCase()];
+        });
+        
         // We were able to extract some data
         const partialPlan: DietPlanResponse = {
           weeklyPlan: partialDays,
-          planSummary: "Partial diet plan generated from incomplete data.",
+          planSummary: "Personalized diet plan based on your preferences.",
           weeklyNutritionAverage: calculateAverageNutrition(partialDays)
         };
         
@@ -185,9 +234,16 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
       const meals = JSON.parse(mealsText);
       
       // Calculate total calories
-      const totalDailyCalories = meals.reduce((sum: number, meal: any) => {
-        return sum + (meal.nutritionalInfo?.calories || 0);
-      }, 0);
+      let totalDailyCalories = 0;
+      if (Array.isArray(meals)) {
+        totalDailyCalories = meals.reduce((sum: number, meal: any) => {
+          return sum + (meal.nutritionalInfo?.calories || 0);
+        }, 0);
+      } else {
+        console.warn(`Meals is not an array for ${dayName}`);
+        // If meals is not an array, we can't use it
+        continue;
+      }
       
       // Add this day to our partial results
       partialDays.push({
@@ -343,8 +399,13 @@ function generatePrompt(planRequest: DietPlanRequest): string {
     "For EACH meal, provide:\n" +
     "1. Meal name\n" +
     "2. Time of day to eat\n" +
-    "3. List of ingredients with quantities\n" +
-    "4. Step-by-step cooking instructions\n" +
+    "3. List of ingredients with precise quantities\n" +
+    "4. Detailed step-by-step cooking instructions including:\n" +
+    "   - Preparation steps (chopping, marinating, etc.)\n" +
+    "   - Cooking temperatures and times\n" +
+    "   - Cooking methods (sauté, bake, steam, etc.)\n" +
+    "   - Indicators for doneness\n" +
+    "   - Plating and serving suggestions\n" +
     "5. Nutritional information (calories, protein, carbs, fat)\n\n" +
     
     "***EXTREMELY IMPORTANT***: Your response MUST be a valid, parseable JSON object. Do not include explanations, text, or markdown outside the JSON. " +

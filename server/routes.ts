@@ -1405,10 +1405,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (item && item.price.id) {
             const priceId = item.price.id;
             // Set tier and credits based on the price ID
-            // The premium plan typically costs more and offers more credits
-            if (priceId.includes('premium')) {
+            // Match our specific price IDs
+            if (priceId === 'price_1R9vgMRp4HZDUL91nkvQp7fK') {
               tier = 'premium';
               creditAmount = 50;
+            } else if (priceId === 'price_1R9vfyRp4HZDUL91XtWJrdh0') {
+              tier = 'basic';
+              creditAmount = 20;
             }
           }
           

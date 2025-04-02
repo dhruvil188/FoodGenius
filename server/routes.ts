@@ -1191,22 +1191,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post('/api/stripe/update-credits', async (req: Request, res: Response) => {
-    if (!req.body.userId || req.body.credits === undefined) {
-      return res.status(400).json({ error: 'Missing userId or credits' });
+    // Require authentication
+    const authToken = req.headers.authorization?.split(' ')[1] || req.cookies?.authToken;
+    if (!authToken) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const session = await storage.getSessionByToken(authToken);
+    if (!session) {
+      return res.status(401).json({ error: 'Invalid or expired session' });
+    }
+    
+    // Get user from session
+    const user = await storage.getUser(session.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Check for required parameters
+    const { action, amount } = req.body;
+    if (!action || amount === undefined || amount <= 0) {
+      return res.status(400).json({ error: 'Missing or invalid action/amount parameters' });
     }
     
     try {
-      const user = await storage.getUser(req.body.userId);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+      let newCreditAmount: number;
+      
+      if (action === 'add') {
+        // Add credits to the user's account
+        newCreditAmount = user.credits + amount;
+      } else if (action === 'deduct') {
+        // Check if user has enough credits
+        if (user.credits < amount) {
+          return res.status(400).json({ 
+            error: 'Insufficient credits',
+            message: `You need ${amount} credits for this action, but you only have ${user.credits}.`
+          });
+        }
+        // Deduct credits from the user's account
+        newCreditAmount = user.credits - amount;
+      } else if (action === 'set') {
+        // Set credits to a specific amount (admin function)
+        newCreditAmount = amount;
+      } else {
+        return res.status(400).json({ error: 'Invalid action. Use "add", "deduct", or "set".' });
       }
       
-      const credits = Math.max(0, req.body.credits); // Ensure credits can't be negative
-      const updatedUser = await storage.updateUserCredits(user.id, credits);
+      // Ensure credits can't be negative
+      newCreditAmount = Math.max(0, newCreditAmount);
+      
+      // Update the user's credits
+      const updatedUser = await storage.updateUserCredits(user.id, newCreditAmount);
       
       return res.json({
         success: true,
-        credits: updatedUser.credits
+        credits: updatedUser.credits,
+        previousCredits: user.credits,
+        action,
+        amount
       });
     } catch (error) {
       console.error('Error updating credits:', error);
@@ -1217,7 +1259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Stripe webhook endpoint to handle subscription events
+  // Stripe webhook endpoint to handle payment events
   app.post('/api/stripe/webhook', async (req: Request, res: Response) => {
     let event;
     
@@ -1250,63 +1292,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       switch (event.type) {
-        case 'customer.subscription.created':
-        case 'customer.subscription.updated': {
-          const subscription = data as Stripe.Subscription;
-          const customerId = subscription.customer as string;
+        case 'checkout.session.completed': {
+          // Handle completed checkout session for one-time payments
+          const session = data as Stripe.Checkout.Session;
           
-          // Find user by Stripe customer ID
-          const users = await storage.getUserByStripeCustomerId(customerId);
-          if (!users) {
-            console.error('User not found for customer ID:', customerId);
+          // Extract the email from the session
+          const customerEmail = session.customer_details?.email;
+          if (!customerEmail) {
+            console.error('No customer email found in checkout session');
             break;
           }
           
-          // Update subscription status and add credits based on the plan
-          const status = subscription.status;
-          let tier = 'basic';
-          let creditAmount = 20; // Default to basic plan credits
-          
-          // Check the subscription items for the price ID to determine the plan
-          const item = subscription.items.data[0];
-          if (item && item.price.id) {
-            const priceId = item.price.id;
-            // Set tier and credits based on the price ID
-            // The premium plan typically costs more and offers more credits
-            if (priceId.includes('premium')) {
-              tier = 'premium';
-              creditAmount = 50;
-            }
-          }
-          
-          // Update user with subscription status and credits
-          await storage.updateUser(users.id, {
-            subscriptionStatus: status,
-            subscriptionTier: tier,
-            // Only add credits if subscription is active or trialing
-            ...(status === 'active' || status === 'trialing' ? { 
-              credits: Math.max(users.credits || 0, creditAmount) 
-            } : {})
-          });
-          
-          break;
-        }
-        case 'customer.subscription.deleted': {
-          const subscription = data as Stripe.Subscription;
-          const customerId = subscription.customer as string;
-          
-          // Find user by Stripe customer ID
-          const users = await storage.getUserByStripeCustomerId(customerId);
-          if (!users) {
-            console.error('User not found for customer ID:', customerId);
+          // Find user by email
+          const user = await storage.getUserByEmail(customerEmail);
+          if (!user) {
+            console.error('User not found for email:', customerEmail);
             break;
           }
           
-          // Update user to mark subscription as canceled
-          await storage.updateUser(users.id, {
-            subscriptionStatus: 'canceled',
-            // Don't remove existing credits, just mark as canceled
-          });
+          console.log(`Adding 12 credits to user ${user.id} with email ${customerEmail}`);
+          
+          // Add 12 credits to the user's account
+          await storage.updateUserCredits(user.id, (user.credits || 0) + 12);
           
           break;
         }

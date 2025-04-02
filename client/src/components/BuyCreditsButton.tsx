@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/api";
 
 interface BuyCreditsButtonProps {
   variant?: "default" | "outline" | "ghost" | "link";
@@ -18,7 +19,7 @@ export default function BuyCreditsButton({
   className = "",
   showCredits = false
 }: BuyCreditsButtonProps) {
-  const { currentUser } = useAuth();
+  const { currentUser, fetchUserCredits } = useAuth();
   const { toast } = useToast();
   
   // Hard-coded payment link from Stripe
@@ -36,17 +37,81 @@ export default function BuyCreditsButton({
     
     // Open Stripe payment page in a new tab
     window.open(PAYMENT_LINK, '_blank');
+    
+    // Inform user about email matching
+    toast({
+      title: "Payment Process",
+      description: "Please use the same email as your account email for payment. Refresh the page after completing payment to see updated credits.",
+    });
+  };
+  
+  // For testing only - adds credits directly to the current user
+  const handleAddTestCredits = async () => {
+    if (!currentUser) {
+      toast({
+        title: "Login Required",
+        description: "Please sign in to test credits",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const response = await apiRequest('POST', '/api/stripe/update-credits', {
+        userId: currentUser.uid,
+        email: currentUser.email,
+        creditsToAdd: 12
+      });
+      
+      if (response.ok) {
+        // Fetch updated credits immediately
+        await fetchUserCredits();
+        
+        toast({
+          title: "Credits Added",
+          description: "12 test credits were added to your account.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to add test credits. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error adding test credits:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
-    <Button 
-      variant={variant} 
-      size={size} 
-      onClick={handleBuyCredits}
-      className={`${fullWidth ? 'w-full' : ''} ${className}`}
-    >
-      <i className="fas fa-coins mr-2"></i>
-      {showCredits ? "Buy More Credits" : "Buy Credits"}
-    </Button>
+    <div className="flex gap-2">
+      <Button 
+        variant={variant} 
+        size={size} 
+        onClick={handleBuyCredits}
+        className={`${fullWidth ? 'w-full' : ''} ${className}`}
+      >
+        <i className="fas fa-coins mr-2"></i>
+        {showCredits ? "Buy More Credits" : "Buy Credits"}
+      </Button>
+      
+      {/* Only show in development for testing */}
+      {import.meta.env.DEV && (
+        <Button 
+          variant="outline" 
+          size={size} 
+          onClick={handleAddTestCredits}
+          className={fullWidth ? 'w-full' : ''}
+        >
+          <i className="fas fa-plus-circle mr-2"></i>
+          Test Add Credits
+        </Button>
+      )}
+    </div>
   );
 }

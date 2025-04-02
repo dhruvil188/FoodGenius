@@ -1216,7 +1216,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post('/api/stripe/update-credits', async (req: Request, res: Response) => {
-    // Require authentication
+    // Two modes of operation:
+    // 1. Using session token (normal API operation)
+    // 2. Direct credit addition (testing mode)
+    
+    let user;
+    const { email, creditsToAdd } = req.body;
+    
+    if (email && creditsToAdd) {
+      // Mode 2: Direct addition for testing
+      console.log(`Finding user by email for direct credit addition: ${email}`);
+      user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        console.error(`User with email ${email} not found`);
+        return res.status(404).json({ 
+          error: 'User not found',
+          message: `No user found with email: ${email}`
+        });
+      }
+      
+      // Add credits directly
+      const updatedUser = await storage.updateUserCredits(
+        user.id,
+        (user.credits || 0) + creditsToAdd
+      );
+      
+      console.log(`Added ${creditsToAdd} credits to user ${user.id}. New total: ${updatedUser.credits}`);
+      
+      return res.status(200).json({ 
+        success: true,
+        message: `Added ${creditsToAdd} credits to user account`,
+        user: { id: updatedUser.id, credits: updatedUser.credits }
+      });
+    }
+    
+    // Mode 1: Using authentication (regular API operation)
     const authToken = req.headers.authorization?.split(' ')[1] || req.cookies?.authToken;
     if (!authToken) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -1228,7 +1263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Get user from session
-    const user = await storage.getUser(session.userId);
+    user = await storage.getUser(session.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -1291,25 +1326,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let event;
     
     try {
-      // Verify webhook signature
+      // Get the raw body and signature
       const signature = req.headers['stripe-signature'] as string;
       const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
       
       if (!endpointSecret) {
+        console.error('Webhook Secret not found in environment variables');
         return res.status(400).json({ 
           error: 'Stripe webhook secret not set'
         });
       }
+
+      console.log('Received webhook with signature:', signature ? 'Present' : 'Missing');
       
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        signature,
-        endpointSecret
-      );
+      try {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          signature,
+          endpointSecret
+        );
+        console.log('Successfully verified webhook:', event.type);
+      } catch (err) {
+        console.error('⚠️ Webhook signature verification failed:', err);
+        return res.status(400).send(`Webhook Error: ${err instanceof Error ? err.message : 'Unknown Error'}`);
+      }
     } catch (error) {
-      console.error('Webhook signature verification failed:', error);
+      console.error('Webhook processing error:', error);
       return res.status(400).json({ 
-        error: 'Webhook signature verification failed',
+        error: 'Webhook processing error',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
     }

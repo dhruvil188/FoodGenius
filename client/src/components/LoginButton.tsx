@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "../hooks/use-auth";
+import { useLocation } from "wouter";
 
 interface LoginButtonProps {
   variant?: "default" | "outline" | "ghost" | "link";
@@ -15,13 +16,14 @@ export default function LoginButton({
   fullWidth = false,
   className = ""
 }: LoginButtonProps) {
-  const { currentUser, login, logout } = useAuth();
+  const { user, logoutMutation } = useAuth();
+  const [, navigate] = useLocation();
 
   const handleAuth = async () => {
-    if (currentUser) {
-      await logout();
+    if (user) {
+      logoutMutation.mutate();
     } else {
-      await login();
+      navigate("/auth");
     }
   };
 
@@ -31,8 +33,16 @@ export default function LoginButton({
       size={size} 
       onClick={handleAuth}
       className={`${fullWidth ? 'w-full' : ''} ${className}`}
+      disabled={logoutMutation.isPending}
     >
-      {currentUser ? "Sign Out" : "Sign In with Google"}
+      {logoutMutation.isPending ? (
+        <span className="flex items-center gap-2">
+          <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+          Signing out...
+        </span>
+      ) : (
+        user ? "Sign Out" : "Sign In"
+      )}
     </Button>
   );
 }

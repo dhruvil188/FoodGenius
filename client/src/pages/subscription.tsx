@@ -164,11 +164,11 @@ function AuthenticatedContent() {
             </CardContent>
             <CardFooter className="flex justify-center pb-8">
               <Button 
-                onClick={() => handleSubscribe('price_1R9vfyRp4HZDUL91XtWJrdh0')} 
+                onClick={() => handleSubscribe('price_1R9IaHRp4HZDUL91yeZ3Uo0P')} 
                 disabled={isLoading}
                 className="w-full"
               >
-                {isLoading && loadingPlan === 'price_1R9vfyRp4HZDUL91XtWJrdh0' ? (
+                {isLoading && loadingPlan === 'price_1R9IaHRp4HZDUL91yeZ3Uo0P' ? (
                   <div className="flex items-center gap-2">
                     <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
@@ -218,11 +218,11 @@ function AuthenticatedContent() {
             </CardContent>
             <CardFooter className="flex justify-center pb-8">
               <Button 
-                onClick={() => handleSubscribe('price_1R9vgMRp4HZDUL91nkvQp7fK')} 
+                onClick={() => handleSubscribe('price_1R9IaHRp4HZDUL91yeZ3Uo0P')} 
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white"
               >
-                {isLoading && loadingPlan === 'price_1R9vgMRp4HZDUL91nkvQp7fK' ? (
+                {isLoading && loadingPlan === 'price_1R9IaHRp4HZDUL91yeZ3Uo0P' ? (
                   <div className="flex items-center gap-2">
                     <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>

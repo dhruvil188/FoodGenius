@@ -34,7 +34,16 @@ export async function analyzeImage(imageData: string, userId: number): Promise<A
   }
   
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    // Configure the Gemini 1.5 Flash model with appropriate parameters
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        temperature: 0.4,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 2048,
+      }
+    });
     
     // Remove the data:image/jpeg;base64, part
     const base64Image = imageData.split(",")[1];

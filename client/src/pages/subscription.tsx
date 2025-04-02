@@ -17,34 +17,12 @@ function AuthenticatedContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   
-  const handleSubscribe = async (priceId: string) => {
+  const handleSubscribe = (plan: string) => {
     setIsLoading(true);
-    setLoadingPlan(priceId);
+    setLoadingPlan(plan);
     
-    try {
-      const response = await apiRequest('POST', '/api/stripe/create-checkout-session', {
-        userId: auth?.currentUser?.uid,
-        priceId
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create checkout session');
-      }
-      
-      const { url } = await response.json();
-      
-      // Redirect to Stripe Checkout
-      window.location.href = url;
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Failed to create checkout session',
-        variant: "destructive"
-      });
-      setIsLoading(false);
-      setLoadingPlan(null);
-    }
+    // Direct link to Stripe payment page
+    window.location.href = "https://buy.stripe.com/5kA8Ar0td64m80g6oo";
   };
 
   // Function to open Stripe Customer Portal

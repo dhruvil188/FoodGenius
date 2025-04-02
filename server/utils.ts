@@ -47,16 +47,39 @@ export function safeJsonParse<T>(jsonString: string, fallback: T): T {
  * Safely extracts a JSON object from a potentially malformed string
  */
 export function extractJsonFromText(text: string): string {
-  // First try to extract JSON from code blocks (most common format)
+  // First try to extract JSON from code blocks (most common format from AI responses)
   const codeBlockMatch = text.match(/```(?:json)?\s*\n([\s\S]*?)\n\s*```/);
   if (codeBlockMatch && codeBlockMatch[1]) {
     return codeBlockMatch[1].trim();
   }
   
-  // Then try to find JSON object directly 
-  const directJsonMatch = text.match(/(\{[\s\S]*\})/);
-  if (directJsonMatch && directJsonMatch[1]) {
-    return directJsonMatch[1].trim();
+  // Then try to find JSON object directly - looking for the most complete { to } pattern
+  const directJsonMatch = text.match(/(\{[\s\S]*\})/g);
+  if (directJsonMatch && directJsonMatch.length > 0) {
+    // Find the longest match which is likely the most complete JSON object
+    const longestMatch = directJsonMatch.reduce((acc, match) => 
+      match.length > acc.length ? match : acc, "");
+    
+    if (longestMatch) {
+      return longestMatch.trim();
+    }
+  }
+  
+  // Try to detect where the JSON object starts and ends
+  let startIndex = text.indexOf('{');
+  if (startIndex !== -1) {
+    let bracketCount = 1;
+    let endIndex = startIndex + 1;
+    
+    while (bracketCount > 0 && endIndex < text.length) {
+      if (text[endIndex] === '{') bracketCount++;
+      if (text[endIndex] === '}') bracketCount--;
+      endIndex++;
+    }
+    
+    if (bracketCount === 0) {
+      return text.substring(startIndex, endIndex).trim();
+    }
   }
   
   // As a last resort, use the whole text
@@ -67,9 +90,38 @@ export function extractJsonFromText(text: string): string {
  * Cleans a JSON string to make it valid
  */
 export function cleanJsonString(jsonStr: string): string {
-  return jsonStr
-    .replace(/,\s*}/g, '}') // Fix trailing commas in objects
-    .replace(/,\s*\]/g, ']') // Fix trailing commas in arrays
-    .replace(/(\w+):/g, '"$1":') // Convert unquoted property names to quoted
-    .replace(/'/g, '"'); // Replace single quotes with double quotes
+  // Remove any markdown formatting, comments, or explanations outside the JSON
+  const cleanStr = jsonStr
+    // Replace trailing commas
+    .replace(/,\s*}/g, '}') 
+    .replace(/,\s*\]/g, ']')
+    
+    // Fix property names: ensure all property names are properly quoted
+    .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+    
+    // Replace single quotes with double quotes
+    .replace(/'/g, '"')
+    
+    // Fix common formatting issues
+    .replace(/\n/g, ' ')         // Remove newlines
+    .replace(/\t/g, ' ')         // Remove tabs
+    .replace(/\s+/g, ' ')        // Normalize whitespace
+    
+    // Fix unescaped quotes in string values
+    .replace(/:\s*"([^"]*?)([^\\])"([^,"}\]])/g, ':"$1$2\\"$3')
+    
+    // Fix missing commas between objects in an array
+    .replace(/}\s*{/g, '},{')
+    
+    // Ensure numbers are not in quotes
+    .replace(/"(\d+)\.?(\d*)"/g, (match, p1, p2) => {
+      // Keep numbers with decimals as is, but remove quotes
+      if (p2) return `${p1}.${p2}`;
+      return p1;
+    })
+    
+    // Fix boolean values
+    .replace(/"(true|false)"/gi, (_, bool) => bool.toLowerCase());
+    
+  return cleanStr;
 }

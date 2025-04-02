@@ -9,10 +9,9 @@ import RecipePage from "@/pages/recipe-page";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
-import AuthPage from "@/pages/auth-page";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { AuthProvider } from "./hooks/use-auth";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 function Router() {
   return (

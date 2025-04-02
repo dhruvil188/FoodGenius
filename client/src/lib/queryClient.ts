@@ -1,83 +1,79 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryFunction } from "@tanstack/react-query";
+
+async function throwIfResNotOk(res: Response) {
+  if (!res.ok) {
+    const text = (await res.text()) || res.statusText;
+    throw new Error(`${res.status}: ${text}`);
+  }
+}
+
+export async function apiRequest(
+  method: string,
+  url: string,
+  data?: unknown | undefined,
+): Promise<Response> {
+  // Get auth token from localStorage if available
+  const token = localStorage.getItem("recipe_snap_token");
+  
+  // Prepare headers with auth token if available
+  const headers: Record<string, string> = {};
+  if (data) {
+    headers["Content-Type"] = "application/json";
+  }
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  
+  const res = await fetch(url, {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined,
+    credentials: "include",
+  });
+
+  await throwIfResNotOk(res);
+  return res;
+}
+
+type UnauthorizedBehavior = "returnNull" | "throw";
+export const getQueryFn: <T>(options: {
+  on401: UnauthorizedBehavior;
+}) => QueryFunction<T> =
+  ({ on401: unauthorizedBehavior }) =>
+  async ({ queryKey }) => {
+    // Get auth token from localStorage if available
+    const token = localStorage.getItem("recipe_snap_token");
+    
+    // Prepare headers with auth token if available
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    
+    const res = await fetch(queryKey[0] as string, {
+      credentials: "include",
+      headers
+    });
+
+    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      return null;
+    }
+
+    await throwIfResNotOk(res);
+    return await res.json();
+  };
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
+      queryFn: getQueryFn({ on401: "throw" }),
+      refetchInterval: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      retry: false,
+    },
+    mutations: {
+      retry: false,
     },
   },
 });
-
-type ApiRequestOptions = RequestInit & {
-  on401?: "error" | "returnNull";
-};
-
-export const getQueryFn = (options: ApiRequestOptions = {}) => {
-  return async ({ queryKey }: any) => {
-    const [endpoint] = queryKey;
-    const token = localStorage.getItem("auth_token");
-
-    const response = await fetch(endpoint, {
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-      },
-      ...options,
-    });
-
-    if (response.status === 401) {
-      if (options.on401 === "returnNull") {
-        return null;
-      }
-      throw new Error("Unauthorized");
-    }
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(
-        errorData?.message || `Request failed with status ${response.status}`
-      );
-    }
-
-    if (response.status === 204) {
-      return null;
-    }
-
-    return response.json();
-  };
-};
-
-export const apiRequest = async (
-  method: string,
-  endpoint: string,
-  data?: any,
-  options: Omit<ApiRequestOptions, "method" | "body"> = {}
-) => {
-  const token = localStorage.getItem("auth_token");
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
-
-  const response = await fetch(endpoint, {
-    method,
-    headers,
-    body: data ? JSON.stringify(data) : undefined,
-    ...options,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || `Request failed with status ${response.status}`
-    );
-  }
-
-  if (response.status === 204) {
-    return response;
-  }
-
-  return response;
-};

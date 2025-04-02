@@ -165,7 +165,7 @@ function AuthenticatedContent() {
             </CardContent>
             <CardFooter className="flex justify-center pb-8">
               <Button 
-                onClick={() => handleSubscribe('price_basic')} 
+                onClick={() => handleSubscribe(import.meta.env.VITE_BASIC_PLAN_PRICE_ID || 'price_1ObaMfD9qqKTtl0qxdw6OMpj')} 
                 disabled={isLoading}
                 className="w-full bg-primary hover:bg-primary/90 text-white"
               >
@@ -237,7 +237,7 @@ function AuthenticatedContent() {
             </CardContent>
             <CardFooter className="flex justify-center pb-8">
               <Button 
-                onClick={() => handleSubscribe('price_premium')} 
+                onClick={() => handleSubscribe(import.meta.env.VITE_PREMIUM_PLAN_PRICE_ID || 'price_1ObaMfD9qqKTtl0qdKQQAkjS')} 
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white"
               >

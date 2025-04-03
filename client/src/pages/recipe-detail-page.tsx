@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import { motion } from 'framer-motion';
 export default function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { user } = useAuth();
+  const { currentUser: user } = useAuth();
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("instructions");
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -28,7 +28,11 @@ export default function RecipeDetailPage() {
     error 
   } = useQuery<SavedRecipe>({
     queryKey: ["/api/recipes", parseInt(id)],
-    enabled: !!user && !!id,
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/recipes/${id}`);
+      return await response.json();
+    },
+    enabled: !!id,
   });
   
   // Parse the recipe data from the JSON field

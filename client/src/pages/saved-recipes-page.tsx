@@ -13,7 +13,7 @@ import { useLocation } from 'wouter';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 
 export default function SavedRecipesPage() {
-  const { user } = useAuth();
+  const { currentUser: user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('all');
   const [, navigate] = useLocation();
@@ -222,20 +222,9 @@ export default function SavedRecipesPage() {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate(`/recipe/${recipe.id}`)}
+                  onClick={() => navigate(`/recipes/${recipe.id}`)}
                 >
                   <i className="fas fa-book-open mr-2"></i> View
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => toast({
-                    title: "Coming Soon",
-                    description: "Recipe editing will be available soon!",
-                  })}
-                >
-                  <i className="fas fa-edit mr-2"></i> Edit
                 </Button>
               </div>
               

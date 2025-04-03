@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, registerSchema } from "@shared/schema";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,8 @@ import Hero from "@/components/Hero";
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState<string>("login");
   const [, navigate] = useLocation();
-  const { user, isLoading, loginMutation, registerMutation } = useAuth();
+  const { currentUser: user, isLoading, login } = useAuth();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Redirect to home if already logged in
   useEffect(() => {
@@ -28,34 +29,16 @@ const AuthPage = () => {
     }
   }, [user, navigate]);
 
-  // Login form
-  const loginForm = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  // Register form
-  const registerForm = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-
-  // Handle login submission
-  const onLoginSubmit = (values: z.infer<typeof loginSchema>) => {
-    loginMutation.mutate(values);
-  };
-
-  // Handle register submission
-  const onRegisterSubmit = (values: z.infer<typeof registerSchema>) => {
-    registerMutation.mutate(values);
+  // Handle login with Google
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoggingIn(true);
+      await login();
+    } catch (error) {
+      console.error("Google login error:", error);
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
   
   // Switch tab handler to clear forms

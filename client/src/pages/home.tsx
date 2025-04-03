@@ -403,22 +403,22 @@ export default function Home() {
         </section>
         
         {/* Recipe Magic in Action Section */}
-        <section id="recipe-magic" className="py-16 bg-white">
+        <section id="recipe-magic" className="py-12 sm:py-16 bg-white">
           <div className="container max-w-7xl mx-auto px-4">
             <motion.div 
-              className="text-center mb-10"
+              className="text-center mb-8 sm:mb-10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
+              <Badge className="mb-3 sm:mb-4 bg-primary/10 text-primary border-none py-1 sm:py-1.5 px-3 sm:px-4 text-xs sm:text-sm">
                 AI-POWERED RECIPES
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                 Recipe <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Magic</span> In Action
               </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto px-2">
                 Take a look at the incredible recipe insights our AI generates from a single food photo.
               </p>
             </motion.div>
@@ -699,28 +699,28 @@ export default function Home() {
         </section>
         
         {/* Recipe Fusion Power Section */}
-        <section id="recipe-fusion" className="py-20 bg-gradient-to-br from-green-50 to-white">
+        <section id="recipe-fusion" className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-green-50 to-white">
           <div className="container max-w-7xl mx-auto px-4">
             <motion.div 
-              className="text-center mb-12"
+              className="text-center mb-8 sm:mb-10 md:mb-12"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
+              <Badge className="mb-3 sm:mb-4 bg-primary/10 text-primary border-none py-1 sm:py-1.5 px-3 sm:px-4 text-xs sm:text-sm">
                 FUSION RECIPES
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                 Recipe <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Fusion</span> Power
               </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto px-2">
                 Combine any dishes to create unique fusion recipes with our AI-powered recipe chat.
                 Ask for Thai-Italian fusion or Mexican-Japanese mashups - the possibilities are endless!
               </p>
             </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center mb-8">
               <motion.div 
                 className="md:col-span-5 lg:col-span-4"
                 initial={{ opacity: 0, x: -20 }}
@@ -753,11 +753,11 @@ export default function Home() {
                         </div>
                       </div>
                       
-                      <div className="flex gap-2">
-                        <button className="bg-slate-100 hover:bg-slate-200 transition-colors rounded-lg py-2 px-3 text-xs flex-1 text-slate-700">
+                      <div className="grid grid-cols-2 gap-2">
+                        <button className="bg-slate-100 hover:bg-slate-200 transition-colors rounded-lg py-2 px-3 text-xs text-slate-700">
                           Pasta + Curry
                         </button>
-                        <button className="bg-slate-100 hover:bg-slate-200 transition-colors rounded-lg py-2 px-3 text-xs flex-1 text-slate-700">
+                        <button className="bg-slate-100 hover:bg-slate-200 transition-colors rounded-lg py-2 px-3 text-xs text-slate-700">
                           Tacos + Sushi
                         </button>
                       </div>
@@ -810,7 +810,7 @@ export default function Home() {
                   
                   <div className="flex flex-col md:flex-row">
                     {/* Left panel - Chat interface */}
-                    <div className="w-full md:w-2/5 p-4 bg-slate-50 border-r border-slate-200">
+                    <div className="w-full md:w-2/5 p-3 sm:p-4 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200">
                       <div className="flex items-center mb-3">
                         <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
                           <i className="fas fa-comments text-primary text-sm"></i>
@@ -818,30 +818,30 @@ export default function Home() {
                         <h3 className="font-bold">Recipe Chat</h3>
                       </div>
                       
-                      <div className="space-y-3 p-3 bg-white rounded-lg shadow-sm mb-3 border border-slate-100">
+                      <div className="space-y-3 p-2.5 sm:p-3 bg-white rounded-lg shadow-sm mb-3 border border-slate-100">
                         <div className="flex">
-                          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
                             <i className="fas fa-user text-white text-xs"></i>
                           </div>
-                          <div className="bg-primary/10 rounded-lg p-2.5 text-sm max-w-[85%]">
+                          <div className="bg-primary/10 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm max-w-[85%]">
                             Can you create a fusion dish combining tacos and sushi?
                           </div>
                         </div>
                         
                         <div className="flex justify-end">
-                          <div className="bg-primary rounded-lg p-2.5 text-sm text-white max-w-[85%]">
+                          <div className="bg-primary rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm text-white max-w-[85%]">
                             I'll create a Sushi Taco fusion recipe for you! This will combine the best elements of both dishes.
                           </div>
-                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center ml-2 flex-shrink-0">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-100 flex items-center justify-center ml-2 flex-shrink-0">
                             <i className="fas fa-robot text-green-600 text-xs"></i>
                           </div>
                         </div>
                         
                         <div className="flex">
-                          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
+                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
                             <i className="fas fa-user text-white text-xs"></i>
                           </div>
-                          <div className="bg-primary/10 rounded-lg p-2.5 text-sm max-w-[85%]">
+                          <div className="bg-primary/10 rounded-lg p-2 sm:p-2.5 text-xs sm:text-sm max-w-[85%]">
                             Great! Can you include avocado and spicy mayo too?
                           </div>
                         </div>
@@ -851,28 +851,28 @@ export default function Home() {
                         <input 
                           type="text" 
                           placeholder="Type a message..." 
-                          className="w-full p-2.5 pr-10 rounded-lg border border-slate-200 text-sm focus:border-primary/30 focus:ring-1 focus:ring-primary/30"
+                          className="w-full p-2 sm:p-2.5 pr-9 sm:pr-10 rounded-lg border border-slate-200 text-xs sm:text-sm focus:border-primary/30 focus:ring-1 focus:ring-primary/30"
                         />
-                        <button className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-primary bg-primary/10 rounded-full w-7 h-7 flex items-center justify-center hover:bg-primary/20 transition-colors">
+                        <button className="absolute right-2 sm:right-2.5 top-1/2 transform -translate-y-1/2 text-primary bg-primary/10 rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-primary/20 transition-colors">
                           <i className="fas fa-paper-plane text-xs"></i>
                         </button>
                       </div>
                     </div>
                     
                     {/* Right panel - Recipe result */}
-                    <div className="w-full md:w-3/5 p-4">
-                      <div className="flex justify-between mb-4">
+                    <div className="w-full md:w-3/5 p-3 sm:p-4">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
                         <div>
-                          <h3 className="font-bold text-xl">Sushi Tacos</h3>
-                          <div className="flex items-center text-sm text-slate-500">
+                          <h3 className="font-bold text-lg sm:text-xl">Sushi Tacos</h3>
+                          <div className="flex items-center text-xs sm:text-sm text-slate-500">
                             <span className="flex items-center mr-3"><i className="fas fa-clock mr-1"></i> 30 mins</span>
                             <span className="flex items-center"><i className="fas fa-utensils mr-1"></i> Medium</span>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <span className="w-24 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 text-sm">Fusion</span>
-                          <span className="w-24 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-800 text-sm">Japanese</span>
-                          <span className="w-24 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-800 text-sm">Mexican</span>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-3 py-1 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 text-xs">Fusion</span>
+                          <span className="px-3 py-1 rounded-full bg-red-50 flex items-center justify-center text-red-800 text-xs">Japanese</span>
+                          <span className="px-3 py-1 rounded-full bg-green-50 flex items-center justify-center text-green-800 text-xs">Mexican</span>
                         </div>
                       </div>
                       
@@ -881,10 +881,10 @@ export default function Home() {
                         animate={{ opacity: 1 }}
                         className="rounded-lg overflow-hidden shadow-md border border-slate-200 mb-4"
                       >
-                        <div className="relative bg-gradient-to-r from-amber-400 to-red-500 h-40">
+                        <div className="relative bg-gradient-to-r from-amber-400 to-red-500 h-32 sm:h-40">
                           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm font-medium border border-white/30">
-                              <i className="fas fa-camera mr-2"></i>
+                            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 sm:px-4 sm:py-2 text-white text-xs sm:text-sm font-medium border border-white/30">
+                              <i className="fas fa-camera mr-1.5 sm:mr-2"></i>
                               AI-Generated Recipe Image
                             </div>
                           </div>
@@ -893,7 +893,7 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="p-3 bg-white">
-                          <p className="text-sm text-slate-700">
+                          <p className="text-xs sm:text-sm text-slate-700">
                             These fusion Sushi Tacos feature crispy nori shells filled with sushi rice, fresh sashimi-grade 
                             fish, avocado, and cucumber, topped with spicy mayo, sesame seeds, and lime.
                           </p>
@@ -902,47 +902,47 @@ export default function Home() {
                       
                       <div className="border border-slate-200 rounded-lg overflow-hidden">
                         <div className="flex border-b">
-                          <button className="flex-1 p-2.5 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5">
+                          <button className="flex-1 p-2 sm:p-2.5 text-xs sm:text-sm font-medium text-primary border-b-2 border-primary bg-primary/5">
                             Ingredients
                           </button>
-                          <button className="flex-1 p-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors">
+                          <button className="flex-1 p-2 sm:p-2.5 text-xs sm:text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors">
                             Instructions
                           </button>
-                          <button className="flex-1 p-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors">
+                          <button className="flex-1 p-2 sm:p-2.5 text-xs sm:text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors">
                             Tips
                           </button>
                         </div>
                         
-                        <div className="p-4">
-                          <ul className="space-y-2 text-sm">
+                        <div className="p-3 sm:p-4">
+                          <ul className="space-y-2 text-xs sm:text-sm">
                             <li className="flex items-center">
-                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <input type="checkbox" className="mr-2 sm:mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
                               <span>8 small crispy nori sheets</span>
                             </li>
                             <li className="flex items-center">
-                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <input type="checkbox" className="mr-2 sm:mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
                               <span>2 cups sushi rice, cooked and seasoned</span>
                             </li>
                             <li className="flex items-center">
-                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <input type="checkbox" className="mr-2 sm:mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
                               <span>200g sashimi-grade salmon or tuna, sliced</span>
                             </li>
                             <li className="flex items-center">
-                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <input type="checkbox" className="mr-2 sm:mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
                               <span>1 ripe avocado, sliced</span>
                             </li>
                             <li className="flex items-center">
-                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <input type="checkbox" className="mr-2 sm:mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
                               <span>Spicy mayo (Japanese mayo + sriracha)</span>
                             </li>
                           </ul>
                           
-                          <div className="flex gap-2 mt-4">
-                            <button className="flex-1 text-sm bg-primary/10 text-primary py-2 px-3 rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+                            <button className="text-xs sm:text-sm bg-primary/10 text-primary py-2 px-3 rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center">
                               <i className="fas fa-list-check mr-1.5"></i>
                               Complete Recipe
                             </button>
-                            <button className="flex-1 text-sm bg-slate-100 text-slate-700 py-2 px-3 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center">
+                            <button className="text-xs sm:text-sm bg-slate-100 text-slate-700 py-2 px-3 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center">
                               <i className="fas fa-print mr-1.5"></i>
                               Print Recipe
                             </button>
@@ -952,19 +952,19 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  <div className="bg-gray-800 text-white p-2.5 flex justify-between items-center text-xs">
+                  <div className="bg-gray-800 text-white p-2 sm:p-2.5 flex justify-between items-center text-xs">
                     <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-green-500 flex items-center justify-center mr-2">
                         <i className="fas fa-robot text-white text-xs"></i>
                       </div>
                       <span>AI Recipe Fusion</span>
                     </div>
                     <a 
                       href="/chat" 
-                      className="flex items-center bg-green-600 hover:bg-green-700 transition-colors rounded-full px-3 py-1.5 text-white"
+                      className="flex items-center bg-green-600 hover:bg-green-700 transition-colors rounded-full px-2 py-1 sm:px-3 sm:py-1.5 text-white text-xs"
                     >
                       <span>Try Recipe Chat</span>
-                      <i className="fas fa-arrow-right ml-1.5"></i>
+                      <i className="fas fa-arrow-right ml-1 sm:ml-1.5"></i>
                     </a>
                   </div>
                 </div>
@@ -978,14 +978,14 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <div className="inline-flex gap-2 flex-wrap justify-center">
-                <span className="w-40 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 text-sm">Thai-Italian</span>
-                <span className="w-40 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-800 text-sm">Korean-Mexican</span>
-                <span className="w-40 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-800 text-sm">Indian-Mediterranean</span>
-                <span className="w-40 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-800 text-sm">Japanese-Peruvian</span>
-                <span className="w-40 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 text-sm">French-Vietnamese</span>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <span className="px-4 py-1.5 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 text-xs">Thai-Italian</span>
+                <span className="px-4 py-1.5 rounded-full bg-red-50 flex items-center justify-center text-red-800 text-xs">Korean-Mexican</span>
+                <span className="px-4 py-1.5 rounded-full bg-green-50 flex items-center justify-center text-green-800 text-xs">Indian-Mediterranean</span>
+                <span className="px-4 py-1.5 rounded-full bg-purple-50 flex items-center justify-center text-purple-800 text-xs">Japanese-Peruvian</span>
+                <span className="px-4 py-1.5 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 text-xs">French-Vietnamese</span>
               </div>
-              <p className="text-slate-500 text-sm mt-4 max-w-xl mx-auto">
+              <p className="text-slate-500 text-xs sm:text-sm mt-4 max-w-xl mx-auto px-4">
                 Our AI has studied thousands of recipes across 120+ cuisines to create perfect fusion dishes that respect culinary traditions.
               </p>
             </motion.div>
@@ -993,22 +993,22 @@ export default function Home() {
         </section>
         
         {/* Features Section */}
-        <section id="features" className="py-16 bg-gradient-to-b from-white to-slate-50">
+        <section id="features" className="py-12 sm:py-16 bg-gradient-to-b from-white to-slate-50">
           <div className="container max-w-7xl mx-auto px-4">
             <motion.div 
-              className="text-center mb-16"
+              className="text-center mb-10 sm:mb-16"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
+              <Badge className="mb-3 sm:mb-4 bg-primary/10 text-primary border-none py-1 sm:py-1.5 px-3 sm:px-4 text-xs sm:text-sm">
                 POWERFUL FEATURES
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                 Every <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Tool</span> You Need
               </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto px-2">
                 Discover why our platform is the ultimate solution for recreating any dish you see.
               </p>
             </motion.div>
@@ -1122,23 +1122,23 @@ export default function Home() {
 
         
         {/* Testimonials Section */}
-        <section id="testimonials" className="py-16 bg-white relative overflow-hidden">
+        <section id="testimonials" className="py-12 sm:py-16 bg-white relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-slate-50 to-white"></div>
           <div className="container max-w-7xl mx-auto px-4 relative z-10">
             <motion.div 
-              className="text-center mb-16"
+              className="text-center mb-10 sm:mb-16"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
+              <Badge className="mb-3 sm:mb-4 bg-primary/10 text-primary border-none py-1 sm:py-1.5 px-3 sm:px-4 text-xs sm:text-sm">
                 USER FEEDBACK
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                 What Our <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Users</span> Say
               </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto px-2">
                 Don't just take our word for it - hear from our community of food enthusiasts.
               </p>
             </motion.div>
@@ -1172,23 +1172,23 @@ export default function Home() {
         </section>
         
         {/* Upload Section */}
-        <section ref={uploadSectionRef} id="upload-section" className="py-16 bg-gradient-to-br from-primary/5 to-emerald-600/5 relative">
+        <section ref={uploadSectionRef} id="upload-section" className="py-12 sm:py-16 bg-gradient-to-br from-primary/5 to-emerald-600/5 relative">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PGNpcmNsZSBjeD0iMzYiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjM2IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSIzNiIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iMzYiIGN5PSI0OCIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMzYiIHI9IjEiLz48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIxIi8+PGNpcmNsZSBjeD0iMjQiIGN5PSIxMiIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iNDgiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjM2IiByPSIxIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIyNCIgcj0iMSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjQ4IiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjQ4IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iMSIvPjwvZz48L3N2Zz4=')]" style={{ opacity: 0.3, color: '#10b981' }}></div>
           <div className="container max-w-7xl mx-auto px-4 relative z-10">
             <motion.div 
-              className="text-center mb-10"
+              className="text-center mb-8 sm:mb-10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
+              <Badge className="mb-3 sm:mb-4 bg-primary/10 text-primary border-none py-1 sm:py-1.5 px-3 sm:px-4 text-xs sm:text-sm">
                 START COOKING
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
                 Discover Your <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Recipe</span> Now
               </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto px-2">
                 Upload a food image to instantly get a complete recipe with ingredients, instructions, and nutritional information.
               </p>
             </motion.div>
@@ -1203,7 +1203,7 @@ export default function Home() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
+                    <div className="bg-white rounded-xl p-4 sm:p-8 shadow-sm border border-slate-100">
                       <ProtectedFeature
                         feature="AI Image Analysis"
                         fallbackMessage="Upload a food image to get a detailed recipe. Sign in to unlock this feature."
@@ -1221,7 +1221,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-white rounded-xl p-8 shadow-sm border border-slate-100"
+                    className="bg-white rounded-xl p-4 sm:p-8 shadow-sm border border-slate-100"
                   >
                     <LoadingAnimation />
                   </motion.div>
@@ -1234,7 +1234,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
-                    className="py-8 px-4"
+                    className="py-4 sm:py-8 px-2 sm:px-4"
                   >
                     <div className="container max-w-7xl mx-auto">
                       <RecipeResults 

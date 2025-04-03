@@ -32,16 +32,10 @@ export function getDatabaseUrl(): string {
       
       // Check if we're on Replit
       if (hostname.includes('replit')) {
-        console.log('Running on Replit, using Replit database connection...');
-        // We're on Replit, which provides built-in PostgreSQL database
-        // Set environment variables to ensure they're available to the client
-        process.env.PGHOST = process.env.PGHOST || 'localhost';
-        process.env.PGUSER = process.env.PGUSER || 'postgres';
-        process.env.PGPASSWORD = process.env.PGPASSWORD || 'postgres';
-        process.env.PGDATABASE = process.env.PGDATABASE || 'recipe_snap';
-        process.env.PGPORT = process.env.PGPORT || '5432';
-        
-        return `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?sslmode=require`;
+        console.log('Running on Replit, using neon connection...');
+        // If on Replit, try to connect to the Neon serverless database
+        // This matches how neon configures environment variables on Replit
+        return 'postgresql://postgres:postgres@localhost:5432/recipe_snap?sslmode=require';
       } else {
         // Local development fallback
         return 'postgresql://postgres:postgres@localhost:5432/recipe_snap';

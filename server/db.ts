@@ -17,16 +17,6 @@ export async function initializeDatabase() {
     const connectionString = getDatabaseUrl();
     console.log("Attempting to connect to PostgreSQL database...");
     
-    // Log available environment variables (without values for security)
-    console.log("Database environment variables present:", {
-      DATABASE_URL: !!process.env.DATABASE_URL,
-      PGHOST: !!process.env.PGHOST,
-      PGUSER: !!process.env.PGUSER,
-      PGPASSWORD: !!process.env.PGPASSWORD,
-      PGDATABASE: !!process.env.PGDATABASE,
-      PGPORT: !!process.env.PGPORT,
-    });
-    
     // Create a new pool with the connection string
     pool = new Pool({ connectionString });
     

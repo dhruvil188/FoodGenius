@@ -2,24 +2,33 @@ import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
+import { getDatabaseUrl } from './dbConfig';
 
+// Configure NeonDB to use WebSockets
 neonConfig.webSocketConstructor = ws;
 
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL environment variable not found");
-  throw new Error("DATABASE_URL must be set");
-}
+// Initialize pool with connection string
+let pool: Pool;
 
-// Initialize pool and db outside of try/catch for proper exports
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
-
-// Verify database connection on startup
 try {
+  // Get the database URL from our centralized config helper
+  const connectionString = getDatabaseUrl();
+  pool = new Pool({ connectionString });
   console.log("Connecting to PostgreSQL database...");
-  // This is async but we don't need to await it - it will connect when needed
 } catch (error) {
-  console.error("Failed to connect to database:", error);
-  // Don't throw here - let the application start anyway
-  // Individual queries will fail if there's a real connection issue
+  console.error("Failed to initialize database connection:", error);
+  
+  // In development, we might want to continue without a database
+  // but for production deployment, we should fail fast
+  if (process.env.NODE_ENV === 'production') {
+    throw error;
+  } else {
+    console.warn("WARNING: Starting without database connection. Some features may not work.");
+    // Create a dummy pool that will throw errors when used
+    // This allows the app to start but database operations will fail
+    pool = new Pool({ connectionString: 'postgresql://user:pass@localhost:5432/dummy' });
+  }
 }
+
+// Export Drizzle instance
+export const db = drizzle(pool, { schema });

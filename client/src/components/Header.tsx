@@ -38,24 +38,24 @@ export default function Header() {
   
   return (
     <motion.header 
-      className={`fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-3 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 px-2 md:px-4 py-3 transition-all duration-300 ${
         isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-white/80 backdrop-blur-sm border-b border-slate-100'
       }`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <div className="container max-w-7xl mx-auto flex items-center justify-between">
+      <div className="container max-w-7xl mx-auto px-0 flex items-center justify-between">
         <motion.div 
           onClick={() => navigate('/')}
-          className="cursor-pointer"
+          className="cursor-pointer ml-1"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
           <Logo size={isMobile ? 'small' : 'medium'} />
         </motion.div>
         
-        <div className="flex items-center gap-3 relative">
+        <div className="flex items-center gap-2 relative mr-1">
           {/* Desktop Menu */}
           <Button 
             variant="outline"
@@ -162,7 +162,7 @@ export default function Header() {
           </AnimatePresence>
           
           <Button 
-            className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
+            className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-5 shadow-md"
             onClick={() => {
               if (location === '/') {
                 // If already on home page, scroll to the upload section
@@ -173,7 +173,7 @@ export default function Header() {
               }
             }}
           >
-            <i className="fas fa-camera mr-2"></i>
+            <i className="fas fa-camera mr-1.5"></i>
             <span className="hidden md:inline">Analyze Dish</span>
             <span className="inline md:hidden">Analyze</span>
           </Button>

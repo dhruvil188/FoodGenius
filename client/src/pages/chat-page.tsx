@@ -390,8 +390,8 @@ const ChatPage: React.FC<ChatPageProps> = ({ id: conversationId }) => {
                   }
                 }}
               />
-              <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
-                Shift + Enter for new line
+              <div className="absolute bottom-2 right-3 text-xs text-muted-foreground">
+                Shift+Enter for new line
               </div>
             </div>
             <Button

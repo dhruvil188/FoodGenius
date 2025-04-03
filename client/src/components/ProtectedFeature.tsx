@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, CreditCard } from 'lucide-react';
-import { useLocation } from 'wouter';
 
 export interface ProtectedFeatureProps {
   children: React.ReactNode;
@@ -21,7 +20,6 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
   fallbackMessage
 }) => {
   const { currentUser } = useAuth();
-  const [, setLocation] = useLocation();
   
   // For now, always grant access if the user is logged in
   // In a production app, we would check for subscription status from custom claims or database
@@ -51,8 +49,8 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
         <Button 
           className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white"
           onClick={() => {
-            // Redirect to auth page for login
-            setLocation('/auth');
+            // TODO: Implement subscription/credits purchase flow
+            alert('Subscription flow would open here');
           }}
         >
           <CreditCard className="h-4 w-4 mr-2" />

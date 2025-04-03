@@ -148,16 +148,16 @@ export default function RecipePage() {
                     </div>
                   )}
                   <div className="absolute top-4 right-4 space-y-2">
-                    {recipe.difficulty && (
+                    {recipe.recipes && recipe.recipes[0] && recipe.recipes[0].difficulty && (
                       <Badge className={cn(
                         "px-3 py-1.5 text-sm font-medium shadow-md",
-                        recipe.difficulty === 'easy' ? "bg-green-100 text-green-800 hover:bg-green-200" :
-                        recipe.difficulty === 'medium' ? "bg-amber-100 text-amber-800 hover:bg-amber-200" :
+                        recipe.recipes[0].difficulty === 'easy' ? "bg-green-100 text-green-800 hover:bg-green-200" :
+                        recipe.recipes[0].difficulty === 'medium' ? "bg-amber-100 text-amber-800 hover:bg-amber-200" :
                         "bg-red-100 text-red-800 hover:bg-red-200"
                       )}>
-                        {recipe.difficulty === 'easy' ? (
+                        {recipe.recipes[0].difficulty === 'easy' ? (
                           <><i className="fas fa-leaf mr-1.5"></i>Easy</>
-                        ) : recipe.difficulty === 'medium' ? (
+                        ) : recipe.recipes[0].difficulty === 'medium' ? (
                           <><i className="fas fa-fire-alt mr-1.5"></i>Medium</>
                         ) : (
                           <><i className="fas fa-pepper-hot mr-1.5"></i>Hard</>
@@ -185,33 +185,33 @@ export default function RecipePage() {
                   </div>
                   
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                    {recipe.prepTime && (
+                    {recipe.recipes && recipe.recipes[0] && recipe.recipes[0].prepTime && (
                       <div className="bg-white p-3 rounded-lg shadow-sm text-center">
                         <div className="text-primary mb-1">
                           <i className="fas fa-clock text-lg"></i>
                         </div>
                         <div className="text-xs text-slate-500 uppercase font-medium">Prep Time</div>
-                        <div className="font-medium">{recipe.prepTime}</div>
+                        <div className="font-medium">{recipe.recipes[0].prepTime}</div>
                       </div>
                     )}
                     
-                    {recipe.cookingTime && (
+                    {recipe.recipes && recipe.recipes[0] && recipe.recipes[0].cookTime && (
                       <div className="bg-white p-3 rounded-lg shadow-sm text-center">
                         <div className="text-orange-500 mb-1">
                           <i className="fas fa-fire text-lg"></i>
                         </div>
                         <div className="text-xs text-slate-500 uppercase font-medium">Cook Time</div>
-                        <div className="font-medium">{recipe.cookingTime}</div>
+                        <div className="font-medium">{recipe.recipes[0].cookTime}</div>
                       </div>
                     )}
                     
-                    {recipe.servings && (
+                    {recipe.recipes && recipe.recipes[0] && recipe.recipes[0].servings && (
                       <div className="bg-white p-3 rounded-lg shadow-sm text-center">
                         <div className="text-emerald-500 mb-1">
                           <i className="fas fa-utensils text-lg"></i>
                         </div>
                         <div className="text-xs text-slate-500 uppercase font-medium">Servings</div>
-                        <div className="font-medium">{recipe.servings}</div>
+                        <div className="font-medium">{recipe.recipes[0].servings}</div>
                       </div>
                     )}
                   </div>
@@ -254,7 +254,7 @@ export default function RecipePage() {
                       {recipe.youtubeVideos.slice(0, 3).map((video, idx) => (
                         <a
                           key={idx}
-                          href={video.url}
+                          href={`https://www.youtube.com/watch?v=${video.videoId}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -322,7 +322,7 @@ export default function RecipePage() {
                       <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold">Ingredients</h2>
                         <Badge variant="outline" className="bg-green-50">
-                          <i className="fas fa-users mr-1.5"></i> {recipe.servings || "4"} servings
+                          <i className="fas fa-users mr-1.5"></i> {recipe.recipes && recipe.recipes[0] && recipe.recipes[0].servings ? recipe.recipes[0].servings : "4"} servings
                         </Badge>
                       </div>
                       

@@ -63,17 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAppUser(response.user);
       return response;
     } catch (error) {
-      // Check if it's an unauthorized domain error
-      if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'auth/unauthorized-domain') {
-        // Don't show the toast for unauthorized domain errors
-        console.warn("Firebase authentication domain error. Make sure image2recipe.com is added as an authorized domain in Firebase console.");
-        
-        // Try to continue with the app anyway if possible
-        // Don't display error message to the user
-      } else {
-        // For other errors, show a toast
-        handleApiError(error, "Failed to sign in with Google");
-      }
+      handleApiError(error, "Failed to sign in with Google");
     } finally {
       setIsLoading(false);
     }

@@ -699,10 +699,10 @@ export default function Home() {
         </section>
         
         {/* Recipe Fusion Power Section */}
-        <section id="recipe-fusion" className="py-16 bg-gradient-to-br from-green-50 to-white">
+        <section id="recipe-fusion" className="py-20 bg-gradient-to-br from-green-50 to-white">
           <div className="container max-w-7xl mx-auto px-4">
             <motion.div 
-              className="text-center mb-10"
+              className="text-center mb-12"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -716,66 +716,50 @@ export default function Home() {
               </h2>
               <p className="text-slate-600 max-w-2xl mx-auto">
                 Combine any dishes to create unique fusion recipes with our AI-powered recipe chat.
+                Ask for Thai-Italian fusion or Mexican-Japanese mashups - the possibilities are endless!
               </p>
             </motion.div>
             
-            <motion.div 
-              className="max-w-4xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
-                <div className="bg-black text-white p-2 flex items-center">
-                  <div className="flex space-x-2 mr-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  </div>
-                  <div className="flex-1 text-center text-green-400 text-sm">recipefusion.chat</div>
-                  <div className="flex space-x-2">
-                    <div className="w-4 h-4"><i className="fas fa-wifi text-xs"></i></div>
-                    <div className="w-4 h-4"><i className="fas fa-battery-full text-xs"></i></div>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col md:flex-row">
-                  {/* Left panel - Chat interface */}
-                  <div className="w-full md:w-2/5 p-4 bg-slate-50 border-r border-slate-200">
-                    <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
-                        <i className="fas fa-comments text-primary text-sm"></i>
-                      </div>
-                      <h3 className="font-bold">Recipe Chat</h3>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center mb-8">
+              <motion.div 
+                className="md:col-span-5 lg:col-span-4"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="rounded-xl overflow-hidden shadow-lg">
+                  <div className="bg-gradient-to-r from-primary to-emerald-600 text-white p-3 flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                      <i className="fas fa-robot text-primary text-lg"></i>
                     </div>
-                    
-                    <div className="space-y-3 p-2 bg-white rounded-lg shadow-sm mb-3">
-                      <div className="flex">
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
-                          <i className="fas fa-user text-white text-xs"></i>
-                        </div>
-                        <div className="bg-primary/10 rounded-lg p-2 text-sm max-w-[85%]">
-                          Can you create a fusion dish combining tacos and sushi?
+                    <div>
+                      <h3 className="font-bold text-lg leading-tight">Recipe Fusion AI</h3>
+                      <p className="text-xs text-white/80">Powered by advanced culinary intelligence</p>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-white">
+                    <h4 className="font-semibold text-slate-700 mb-2">What would you like to create?</h4>
+                    <div className="space-y-3 mb-4">
+                      <div className="flex gap-2">
+                        <div className="bg-primary/10 rounded-lg px-3 py-2 text-sm flex-1">
+                          <p className="font-medium text-primary">Fusion Examples:</p>
+                          <ul className="mt-1 space-y-1 text-slate-700">
+                            <li className="flex items-center text-xs"><i className="fas fa-utensils text-primary/70 mr-1.5"></i> Italian + Thai</li>
+                            <li className="flex items-center text-xs"><i className="fas fa-utensils text-primary/70 mr-1.5"></i> Mexican + Korean</li>
+                            <li className="flex items-center text-xs"><i className="fas fa-utensils text-primary/70 mr-1.5"></i> Indian + Mediterranean</li>
+                          </ul>
                         </div>
                       </div>
                       
-                      <div className="flex justify-end">
-                        <div className="bg-primary rounded-lg p-2 text-sm text-white max-w-[85%]">
-                          I'll create a Sushi Taco fusion recipe for you! This will combine the best elements of both dishes.
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center ml-2 flex-shrink-0">
-                          <i className="fas fa-robot text-green-600 text-xs"></i>
-                        </div>
-                      </div>
-                      
-                      <div className="flex">
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
-                          <i className="fas fa-user text-white text-xs"></i>
-                        </div>
-                        <div className="bg-primary/10 rounded-lg p-2 text-sm max-w-[85%]">
-                          Great! Can you include avocado and spicy mayo too?
-                        </div>
+                      <div className="flex gap-2">
+                        <button className="bg-slate-100 hover:bg-slate-200 transition-colors rounded-lg py-2 px-3 text-xs flex-1 text-slate-700">
+                          Pasta + Curry
+                        </button>
+                        <button className="bg-slate-100 hover:bg-slate-200 transition-colors rounded-lg py-2 px-3 text-xs flex-1 text-slate-700">
+                          Tacos + Sushi
+                        </button>
                       </div>
                     </div>
                     
@@ -783,112 +767,227 @@ export default function Home() {
                       <input 
                         type="text" 
                         placeholder="Describe dishes to combine..." 
-                        className="w-full p-2 pr-10 rounded-lg border border-slate-200 text-sm"
+                        className="w-full p-2.5 pr-10 rounded-lg border-2 border-primary/20 focus:border-primary/50 text-sm"
                       />
-                      <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary">
-                        <i className="fas fa-paper-plane"></i>
+                      <button className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-primary bg-primary/10 rounded-full w-7 h-7 flex items-center justify-center">
+                        <i className="fas fa-paper-plane text-xs"></i>
                       </button>
+                    </div>
+                    
+                    <div className="mt-4 bg-yellow-50 rounded-lg p-3">
+                      <div className="flex items-center mb-1">
+                        <i className="fas fa-lightbulb text-yellow-600 mr-2"></i>
+                        <h5 className="font-semibold text-sm text-yellow-800">How It Works</h5>
+                      </div>
+                      <p className="text-xs text-yellow-700 leading-snug">
+                        Our AI analyzes thousands of recipes to create perfect fusion dishes that blend flavors, techniques, and ingredients from different cuisines.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                className="md:col-span-7 lg:col-span-8"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <div className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
+                  <div className="bg-black text-white p-2 flex items-center">
+                    <div className="flex space-x-2 mr-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <div className="flex-1 text-center text-green-400 text-sm">recipefusion.chat</div>
+                    <div className="flex space-x-2">
+                      <div className="w-4 h-4"><i className="fas fa-wifi text-xs"></i></div>
+                      <div className="w-4 h-4"><i className="fas fa-battery-full text-xs"></i></div>
                     </div>
                   </div>
                   
-                  {/* Right panel - Recipe result */}
-                  <div className="w-full md:w-3/5 p-4">
-                    <div className="flex justify-between mb-4">
-                      <div>
-                        <h3 className="font-bold text-xl">Sushi Tacos</h3>
-                        <div className="flex items-center text-sm text-slate-500">
-                          <span className="flex items-center mr-3"><i className="fas fa-clock mr-1"></i> 30 mins</span>
-                          <span className="flex items-center"><i className="fas fa-utensils mr-1"></i> Medium</span>
+                  <div className="flex flex-col md:flex-row">
+                    {/* Left panel - Chat interface */}
+                    <div className="w-full md:w-2/5 p-4 bg-slate-50 border-r border-slate-200">
+                      <div className="flex items-center mb-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                          <i className="fas fa-comments text-primary text-sm"></i>
+                        </div>
+                        <h3 className="font-bold">Recipe Chat</h3>
+                      </div>
+                      
+                      <div className="space-y-3 p-3 bg-white rounded-lg shadow-sm mb-3 border border-slate-100">
+                        <div className="flex">
+                          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
+                            <i className="fas fa-user text-white text-xs"></i>
+                          </div>
+                          <div className="bg-primary/10 rounded-lg p-2.5 text-sm max-w-[85%]">
+                            Can you create a fusion dish combining tacos and sushi?
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end">
+                          <div className="bg-primary rounded-lg p-2.5 text-sm text-white max-w-[85%]">
+                            I'll create a Sushi Taco fusion recipe for you! This will combine the best elements of both dishes.
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center ml-2 flex-shrink-0">
+                            <i className="fas fa-robot text-green-600 text-xs"></i>
+                          </div>
+                        </div>
+                        
+                        <div className="flex">
+                          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 flex-shrink-0">
+                            <i className="fas fa-user text-white text-xs"></i>
+                          </div>
+                          <div className="bg-primary/10 rounded-lg p-2.5 text-sm max-w-[85%]">
+                            Great! Can you include avocado and spicy mayo too?
+                          </div>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Fusion</span>
-                        <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Japanese</span>
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Mexican</span>
+                      
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder="Type a message..." 
+                          className="w-full p-2.5 pr-10 rounded-lg border border-slate-200 text-sm focus:border-primary/30 focus:ring-1 focus:ring-primary/30"
+                        />
+                        <button className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-primary bg-primary/10 rounded-full w-7 h-7 flex items-center justify-center hover:bg-primary/20 transition-colors">
+                          <i className="fas fa-paper-plane text-xs"></i>
+                        </button>
                       </div>
                     </div>
                     
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="rounded-lg overflow-hidden shadow-md border border-slate-200 mb-4"
-                    >
-                      <div className="relative bg-gradient-to-r from-amber-400 to-red-500 h-40">
-                        <div className="absolute inset-0 bg-black/20">
+                    {/* Right panel - Recipe result */}
+                    <div className="w-full md:w-3/5 p-4">
+                      <div className="flex justify-between mb-4">
+                        <div>
+                          <h3 className="font-bold text-xl">Sushi Tacos</h3>
+                          <div className="flex items-center text-sm text-slate-500">
+                            <span className="flex items-center mr-3"><i className="fas fa-clock mr-1"></i> 30 mins</span>
+                            <span className="flex items-center"><i className="fas fa-utensils mr-1"></i> Medium</span>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Fusion</span>
+                          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Japanese</span>
+                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Mexican</span>
+                        </div>
+                      </div>
+                      
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="rounded-lg overflow-hidden shadow-md border border-slate-200 mb-4"
+                      >
+                        <div className="relative bg-gradient-to-r from-amber-400 to-red-500 h-40">
+                          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white text-sm font-medium border border-white/30">
+                              <i className="fas fa-camera mr-2"></i>
+                              AI-Generated Recipe Image
+                            </div>
+                          </div>
                           <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
                             AI-Generated Fusion
                           </div>
                         </div>
-                      </div>
-                      <div className="p-3 bg-white">
-                        <p className="text-sm text-slate-700">
-                          These fusion Sushi Tacos feature crispy nori shells filled with sushi rice, fresh sashimi-grade 
-                          fish, avocado, and cucumber, topped with spicy mayo, sesame seeds, and lime.
-                        </p>
-                      </div>
-                    </motion.div>
-                    
-                    <div className="border border-slate-200 rounded-lg">
-                      <div className="flex border-b">
-                        <button className="flex-1 p-2 text-sm font-medium text-primary border-b-2 border-primary">
-                          Ingredients
-                        </button>
-                        <button className="flex-1 p-2 text-sm font-medium text-slate-500">
-                          Instructions
-                        </button>
-                        <button className="flex-1 p-2 text-sm font-medium text-slate-500">
-                          Tips
-                        </button>
-                      </div>
+                        <div className="p-3 bg-white">
+                          <p className="text-sm text-slate-700">
+                            These fusion Sushi Tacos feature crispy nori shells filled with sushi rice, fresh sashimi-grade 
+                            fish, avocado, and cucumber, topped with spicy mayo, sesame seeds, and lime.
+                          </p>
+                        </div>
+                      </motion.div>
                       
-                      <div className="p-3">
-                        <ul className="space-y-1 text-sm">
-                          <li className="flex items-center">
-                            <input type="checkbox" className="mr-2 rounded border-slate-300 text-primary" />
-                            <span>8 small crispy nori sheets</span>
-                          </li>
-                          <li className="flex items-center">
-                            <input type="checkbox" className="mr-2 rounded border-slate-300 text-primary" />
-                            <span>2 cups sushi rice, cooked and seasoned</span>
-                          </li>
-                          <li className="flex items-center">
-                            <input type="checkbox" className="mr-2 rounded border-slate-300 text-primary" />
-                            <span>200g sashimi-grade salmon or tuna, sliced</span>
-                          </li>
-                          <li className="flex items-center">
-                            <input type="checkbox" className="mr-2 rounded border-slate-300 text-primary" />
-                            <span>1 ripe avocado, sliced</span>
-                          </li>
-                          <li className="flex items-center">
-                            <input type="checkbox" className="mr-2 rounded border-slate-300 text-primary" />
-                            <span>Spicy mayo (Japanese mayo + sriracha)</span>
-                          </li>
-                        </ul>
+                      <div className="border border-slate-200 rounded-lg overflow-hidden">
+                        <div className="flex border-b">
+                          <button className="flex-1 p-2.5 text-sm font-medium text-primary border-b-2 border-primary bg-primary/5">
+                            Ingredients
+                          </button>
+                          <button className="flex-1 p-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors">
+                            Instructions
+                          </button>
+                          <button className="flex-1 p-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors">
+                            Tips
+                          </button>
+                        </div>
                         
-                        <button className="mt-3 w-full text-sm bg-primary/10 text-primary py-1 px-2 rounded">
-                          Get Complete Recipe
-                        </button>
+                        <div className="p-4">
+                          <ul className="space-y-2 text-sm">
+                            <li className="flex items-center">
+                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <span>8 small crispy nori sheets</span>
+                            </li>
+                            <li className="flex items-center">
+                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <span>2 cups sushi rice, cooked and seasoned</span>
+                            </li>
+                            <li className="flex items-center">
+                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <span>200g sashimi-grade salmon or tuna, sliced</span>
+                            </li>
+                            <li className="flex items-center">
+                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <span>1 ripe avocado, sliced</span>
+                            </li>
+                            <li className="flex items-center">
+                              <input type="checkbox" className="mr-2.5 rounded border-slate-300 text-primary focus:ring-primary/30" />
+                              <span>Spicy mayo (Japanese mayo + sriracha)</span>
+                            </li>
+                          </ul>
+                          
+                          <div className="flex gap-2 mt-4">
+                            <button className="flex-1 text-sm bg-primary/10 text-primary py-2 px-3 rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center">
+                              <i className="fas fa-list-check mr-1.5"></i>
+                              Complete Recipe
+                            </button>
+                            <button className="flex-1 text-sm bg-slate-100 text-slate-700 py-2 px-3 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center">
+                              <i className="fas fa-print mr-1.5"></i>
+                              Print Recipe
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="bg-gray-800 text-white p-2 flex justify-between items-center text-xs">
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2">
-                      <i className="fas fa-robot text-white text-xs"></i>
+                  
+                  <div className="bg-gray-800 text-white p-2.5 flex justify-between items-center text-xs">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-2">
+                        <i className="fas fa-robot text-white text-xs"></i>
+                      </div>
+                      <span>AI Recipe Fusion</span>
                     </div>
-                    <span>AI Recipe Fusion</span>
+                    <a 
+                      href="/chat" 
+                      className="flex items-center bg-green-600 hover:bg-green-700 transition-colors rounded-full px-3 py-1.5 text-white"
+                    >
+                      <span>Try Recipe Chat</span>
+                      <i className="fas fa-arrow-right ml-1.5"></i>
+                    </a>
                   </div>
-                  <a 
-                    href="/chat" 
-                    className="flex items-center text-green-400 hover:text-green-300 transition-colors"
-                  >
-                    <span>Try Recipe Chat</span>
-                    <i className="fas fa-arrow-right ml-1"></i>
-                  </a>
                 </div>
+              </motion.div>
+            </div>
+            
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <div className="inline-flex gap-2 flex-wrap justify-center">
+                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Thai-Italian</Badge>
+                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Korean-Mexican</Badge>
+                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Indian-Mediterranean</Badge>
+                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Japanese-Peruvian</Badge>
+                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">French-Vietnamese</Badge>
               </div>
+              <p className="text-slate-500 text-sm mt-4 max-w-xl mx-auto">
+                Our AI has studied thousands of recipes across 120+ cuisines to create perfect fusion dishes that respect culinary traditions.
+              </p>
             </motion.div>
           </div>
         </section>
@@ -1106,8 +1205,8 @@ export default function Home() {
                   >
                     <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
                       <ProtectedFeature
-                        featureName="AI Image Analysis"
-                        description="Upload a food image to get a detailed recipe. Sign in to unlock this feature."
+                        feature="AI Image Analysis"
+                        fallbackMessage="Upload a food image to get a detailed recipe. Sign in to unlock this feature."
                       >
                         <ImageUploader onAnalyzeImage={handleAnalyzeImage} />
                       </ProtectedFeature>

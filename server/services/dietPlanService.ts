@@ -63,7 +63,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         
         if (partialDays.length > 0) {
           // We have partial data, create a partial plan and ensure all 7 days are present
-          const completePlan = ensureAllDaysPresent(partialDays);
+          const completePlan = ensureAllDaysPresent(partialDays, planRequest.calorieTarget);
           dietPlan = {
             weeklyPlan: completePlan,
             planSummary: "Personalized diet plan based on your preferences.",
@@ -84,7 +84,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         }
       } else {
         // Ensure all seven days are present in the plan
-        dietPlan.weeklyPlan = ensureAllDaysPresent(dietPlan.weeklyPlan);
+        dietPlan.weeklyPlan = ensureAllDaysPresent(dietPlan.weeklyPlan, planRequest.calorieTarget);
         // Recalculate average nutrition
         dietPlan.weeklyNutritionAverage = calculateAverageNutrition(dietPlan.weeklyPlan);
       }
@@ -149,7 +149,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         });
         
         // We were able to extract some data - ensure all seven days are present
-        const completePlan = ensureAllDaysPresent(partialDays);
+        const completePlan = ensureAllDaysPresent(partialDays, planRequest.calorieTarget);
         const partialPlan: DietPlanResponse = {
           weeklyPlan: completePlan,
           planSummary: "Personalized diet plan based on your preferences.",
@@ -461,7 +461,7 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
         "thursday": [
           {
             name: "Greek Yogurt with Berries and Granola",
-            timeOfDay: "Breakfast",
+            timeOfDay: "Breakfast (7:30 AM)",
             ingredients: [
               "1 cup Greek yogurt",
               "1/2 cup mixed berries (strawberries, blueberries, raspberries)",
@@ -478,7 +478,7 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
           },
           {
             name: "Mediterranean Chickpea Salad",
-            timeOfDay: "Lunch",
+            timeOfDay: "Lunch (12:30 PM)",
             ingredients: [
               "1 cup chickpeas, rinsed and drained",
               "1/2 cucumber, diced",
@@ -1128,7 +1128,7 @@ function generatePrompt(planRequest: DietPlanRequest): string {
   return "I need you to generate a personalized 7-day meal plan based on the following criteria:\n\n" +
     `Diet Type: ${dietType}\n` +
     `Health Goals: ${healthGoals.join(", ")}\n` +
-    `Calorie Target: ${calorieTarget} calories per day\n` +
+    `Calorie Target: ${calorieTarget >= 2600 ? '3000-3200' : calorieTarget <= 1800 ? '1500-1700' : '2000-2200'} calories per day\n` +
     `Meals Per Day: ${mealsPerDay}\n` +
     `Excluded Foods: ${excludedFoods.join(", ")}\n` +
     `Medical Conditions: ${medicalConditions.join(", ")}\n` +
@@ -1144,7 +1144,7 @@ function generatePrompt(planRequest: DietPlanRequest): string {
     "Make sure each daily plan is different (no repeating the exact same meals).\n" +
     "For EACH meal, provide:\n" +
     "1. Meal name (use creative, appetizing names)\n" +
-    "2. Time of day to eat\n" +
+    "2. Time of day to eat with specific times (e.g., 'Breakfast (7:30 AM)', 'Lunch (12:30 PM)', 'Dinner (6:30 PM)', 'Snack (3:30 PM)')\n" +
     "3. List of ingredients with precise quantities and brief explanations (e.g., '2 tbsp extra virgin olive oil (for heart-healthy fats)')\n" +
     "4. Detailed step-by-step cooking instructions including:\n" +
     "   - Preparation steps with timing (chopping, marinating, etc.)\n" +
@@ -1215,7 +1215,15 @@ function generatePrompt(planRequest: DietPlanRequest): string {
  * Ensures all seven days of the week are present in the diet plan
  * If a day is missing, it creates a placeholder with default meals
  */
-function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; totalDailyCalories: number; }>): Array<{ day: string; meals: any[]; totalDailyCalories: number; }> {
+function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; totalDailyCalories: number; }>, calorieTarget: string | number = 2200): Array<{ day: string; meals: any[]; totalDailyCalories: number; }> {
+  // Determine target calories based on calorie preference
+  const targetCalories = typeof calorieTarget === 'number' 
+    ? calorieTarget 
+    : calorieTarget === 'high' 
+      ? 3000 
+      : calorieTarget === 'low' 
+        ? 1600 
+        : 2200;
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const dayOrder: { [key: string]: number } = {
     "monday": 0, 

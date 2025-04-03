@@ -602,33 +602,17 @@ export async function deleteDietPlan(planId: number, userId: number): Promise<bo
 function generatePrompt(planRequest: DietPlanRequest): string {
   const {
     dietType,
-    healthGoals,
-    calorieTarget,
+    healthGoal,
     mealsPerDay,
-    excludedFoods,
-    medicalConditions,
-    cookingSkill,
-    timeConstraint,
-    budgetLevel,
-    preferredCuisines,
-    seasonalPreference,
-    proteinPreference,
+    allergies,
     extraNotes
   } = planRequest;
   
   return "I need you to generate a personalized 7-day meal plan based on the following criteria:\n\n" +
     `Diet Type: ${dietType}\n` +
-    `Health Goals: ${healthGoals.join(", ")}\n` +
-    `Calorie Target: ${calorieTarget} calories per day\n` +
+    `Health Goal: ${healthGoal}\n` +
     `Meals Per Day: ${mealsPerDay}\n` +
-    `Excluded Foods: ${excludedFoods.join(", ")}\n` +
-    `Medical Conditions: ${medicalConditions.join(", ")}\n` +
-    `Cooking Skill Level: ${cookingSkill}\n` +
-    `Time Constraint: ${timeConstraint} minutes per meal\n` +
-    `Budget Level: ${budgetLevel}\n` +
-    `Preferred Cuisines: ${preferredCuisines.join(", ")}\n` +
-    `Seasonal Preference: ${seasonalPreference}\n` +
-    `Protein Preference: ${proteinPreference}\n` +
+    `Allergies/Excluded Foods: ${allergies || "None"}\n` +
     `Additional Notes: ${extraNotes || "None"}\n\n` +
     
     `For each day, generate exactly ${mealsPerDay} different meals. Each meal should be appropriate for the time of day (breakfast, lunch, dinner, snacks).\n` +

@@ -870,9 +870,9 @@ export default function Home() {
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Fusion</span>
-                          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Japanese</span>
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Mexican</span>
+                          <span className="w-24 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 text-sm">Fusion</span>
+                          <span className="w-24 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-800 text-sm">Japanese</span>
+                          <span className="w-24 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-800 text-sm">Mexican</span>
                         </div>
                       </div>
                       
@@ -979,11 +979,11 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <div className="inline-flex gap-2 flex-wrap justify-center">
-                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Thai-Italian</Badge>
-                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Korean-Mexican</Badge>
-                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Indian-Mediterranean</Badge>
-                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">Japanese-Peruvian</Badge>
-                <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-3 py-1.5">French-Vietnamese</Badge>
+                <span className="w-40 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-800 text-sm">Thai-Italian</span>
+                <span className="w-40 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-800 text-sm">Korean-Mexican</span>
+                <span className="w-40 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-800 text-sm">Indian-Mediterranean</span>
+                <span className="w-40 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-800 text-sm">Japanese-Peruvian</span>
+                <span className="w-40 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 text-sm">French-Vietnamese</span>
               </div>
               <p className="text-slate-500 text-sm mt-4 max-w-xl mx-auto">
                 Our AI has studied thousands of recipes across 120+ cuisines to create perfect fusion dishes that respect culinary traditions.

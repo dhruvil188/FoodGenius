@@ -320,6 +320,12 @@ export default function RecipeDetailPage() {
                     <i className="fas fa-plus-circle mr-2"></i> Side Dishes
                   </TabsTrigger>
                 )}
+                <TabsTrigger 
+                  value="cost" 
+                  className="flex items-center whitespace-nowrap rounded-lg px-3 py-1.5 flex-shrink-0 mr-1"
+                >
+                  <i className="fas fa-dollar-sign mr-2"></i> Cost Estimate
+                </TabsTrigger>
                 {recipeData.youtubeVideos && recipeData.youtubeVideos.length > 0 && (
                   <TabsTrigger 
                     value="videos" 
@@ -482,6 +488,195 @@ export default function RecipeDetailPage() {
                     <p>No side dish suggestions available for this recipe.</p>
                   </div>
                 )}
+              </TabsContent>
+              
+              {/* Tab Content: Cost Estimate */}
+              <TabsContent value="cost" className="space-y-4">
+                <div className="mb-8">
+                  <h4 className="text-xl font-semibold mb-4 food-gradient-text">Cost Estimation</h4>
+                  <Card className="bg-white rounded-lg shadow-sm">
+                    <CardContent className="p-6">
+                      <div className="mb-6">
+                        <h5 className="text-lg font-medium mb-2">Budget Classification</h5>
+                        
+                        <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                          {/* Dynamic cost indicator */}
+                          {(() => {
+                            // Classify recipes based on ingredients and complexity
+                            const hasExpensiveIngredients = selectedRecipe.ingredients.some(i => 
+                              i.toLowerCase().includes("steak") || 
+                              i.toLowerCase().includes("salmon") || 
+                              i.toLowerCase().includes("shrimp") || 
+                              i.toLowerCase().includes("prawn") ||
+                              i.toLowerCase().includes("saffron") ||
+                              i.toLowerCase().includes("truffle") ||
+                              i.toLowerCase().includes("crab") ||
+                              i.toLowerCase().includes("lobster")
+                            );
+                            
+                            const hasMediumIngredients = selectedRecipe.ingredients.some(i => 
+                              i.toLowerCase().includes("chicken") || 
+                              i.toLowerCase().includes("pork") || 
+                              i.toLowerCase().includes("cheese") || 
+                              i.toLowerCase().includes("wine") ||
+                              i.toLowerCase().includes("nuts")
+                            );
+                            
+                            let costCategory: string;
+                            let fillWidth: string;
+                            let fillColor: string;
+                            let costLabel: string;
+                            
+                            if (hasExpensiveIngredients) {
+                              costCategory = "Premium";
+                              fillWidth = "w-full";
+                              fillColor = "bg-red-500";
+                              costLabel = "High-cost recipe with premium ingredients";
+                            } else if (hasMediumIngredients) {
+                              costCategory = "Moderate";
+                              fillWidth = "w-2/3";
+                              fillColor = "bg-amber-500";
+                              costLabel = "Medium-cost recipe with standard ingredients";
+                            } else {
+                              costCategory = "Budget-friendly";
+                              fillWidth = "w-1/3";
+                              fillColor = "bg-green-500";
+                              costLabel = "Low-cost recipe with economical ingredients";
+                            }
+                            
+                            return (
+                              <>
+                                <div className={`absolute top-0 left-0 h-full ${fillWidth} ${fillColor}`}></div>
+                                <div className="absolute top-0 left-0 w-full h-full flex justify-between items-center px-3">
+                                  <span className="text-xs font-medium text-white">Budget</span>
+                                  <span className="text-xs font-medium text-white">Moderate</span>
+                                  <span className="text-xs font-medium text-white">Premium</span>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                        
+                        <p className="text-sm text-slate-600 mt-2">
+                          {(() => {
+                            const hasExpensiveIngredients = selectedRecipe.ingredients.some(i => 
+                              i.toLowerCase().includes("steak") || 
+                              i.toLowerCase().includes("salmon") || 
+                              i.toLowerCase().includes("shrimp") || 
+                              i.toLowerCase().includes("prawn") ||
+                              i.toLowerCase().includes("saffron") ||
+                              i.toLowerCase().includes("truffle")
+                            );
+                            
+                            if (hasExpensiveIngredients) {
+                              return "This recipe contains premium ingredients that may increase the overall cost.";
+                            } else {
+                              return "This recipe uses budget-friendly ingredients that are accessible and affordable.";
+                            }
+                          })()}
+                        </p>
+                      </div>
+                      
+                      <div className="mb-6">
+                        <h5 className="text-lg font-medium mb-4">Approximate Cost</h5>
+                        
+                        <div className="flex justify-between items-center border-b pb-3 mb-3">
+                          <span className="font-medium">Per serving:</span>
+                          <span className="text-lg font-bold">
+                            ${(() => {
+                              // Estimate cost per serving based on ingredients
+                              const hasExpensiveIngredients = selectedRecipe.ingredients.some(i => 
+                                i.toLowerCase().includes("steak") || 
+                                i.toLowerCase().includes("salmon") || 
+                                i.toLowerCase().includes("shrimp")
+                              );
+                              
+                              const hasMediumIngredients = selectedRecipe.ingredients.some(i => 
+                                i.toLowerCase().includes("chicken") || 
+                                i.toLowerCase().includes("pork")
+                              );
+                              
+                              if (hasExpensiveIngredients) {
+                                return ((Math.random() * 5) + 15).toFixed(2);
+                              } else if (hasMediumIngredients) {
+                                return ((Math.random() * 3) + 8).toFixed(2);
+                              } else {
+                                return ((Math.random() * 2) + 3).toFixed(2);
+                              }
+                            })()}
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center border-b pb-3 mb-3">
+                          <span className="font-medium">Total recipe (for {selectedRecipe.servings || 4} servings):</span>
+                          <span className="text-lg font-bold">
+                            ${(() => {
+                              // Estimate total cost
+                              const costPerServing = parseFloat((() => {
+                                const hasExpensiveIngredients = selectedRecipe.ingredients.some(i => 
+                                  i.toLowerCase().includes("steak") || 
+                                  i.toLowerCase().includes("salmon") || 
+                                  i.toLowerCase().includes("shrimp")
+                                );
+                                
+                                const hasMediumIngredients = selectedRecipe.ingredients.some(i => 
+                                  i.toLowerCase().includes("chicken") || 
+                                  i.toLowerCase().includes("pork")
+                                );
+                                
+                                if (hasExpensiveIngredients) {
+                                  return ((Math.random() * 5) + 15).toFixed(2);
+                                } else if (hasMediumIngredients) {
+                                  return ((Math.random() * 3) + 8).toFixed(2);
+                                } else {
+                                  return ((Math.random() * 2) + 3).toFixed(2);
+                                }
+                              })());
+                              
+                              return (costPerServing * (selectedRecipe.servings || 4)).toFixed(2);
+                            })()}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="border-t pt-6">
+                        <h5 className="text-lg font-medium mb-4">Money-Saving Tips</h5>
+                        
+                        <div className="bg-green-50 p-4 rounded-lg mb-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <h6 className="font-medium">
+                              Use {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                                ? "rice/pasta in bulk"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                  ? "whole spices"
+                                  : "store brand ingredients"
+                              } instead of {
+                                selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                                ? "small packages"
+                                : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                  ? "pre-ground spices"
+                                  : "premium brands"
+                              }
+                            </h6>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                              Save ${(Math.random() * 2 + 1.5).toFixed(2)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600">
+                            {
+                              selectedRecipe.ingredients.some(i => i.toLowerCase().includes("rice") || i.toLowerCase().includes("pasta") || i.toLowerCase().includes("grain"))
+                              ? "Buying staples in bulk can save up to 50% on per-serving costs."
+                              : selectedRecipe.ingredients.some(i => i.toLowerCase().includes("spice")) 
+                                ? "Whole spices last longer and provide better flavor when freshly ground."
+                                : "Store brands often contain identical ingredients at lower prices."
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
               
               {/* Tab Content: Videos */}

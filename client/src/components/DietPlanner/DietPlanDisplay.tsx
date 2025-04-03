@@ -153,18 +153,16 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
                   <div className="flex items-center gap-2">
                     <h3 className="text-xl font-semibold capitalize">{day.day}</h3>
                     {day.meals.some(meal => meal.name === `${day.day} Breakfast` || meal.name === `${day.day} Lunch` || meal.name === `${day.day} Dinner`) && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                              Suggested Meals
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">These are suggested meals. Generate a new plan for detailed recipes for all days.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            Suggested Meals
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">These are suggested meals. Generate a new plan for detailed recipes for all days.</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                   <Badge variant="outline" className="flex items-center gap-1 px-3 py-1.5">
@@ -255,18 +253,16 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
                                               <span className="font-semibold text-sm">{quantity}</span>
                                               <span className="text-sm ml-1">{ingredientName}</span>
                                               {healthBenefit && (
-                                                <TooltipProvider>
-                                                  <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                      <span className="ml-1 inline-flex text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5 cursor-help">
-                                                        <Star className="h-3 w-3 mr-1" /> info
-                                                      </span>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className="max-w-xs">
-                                                      <p>{healthBenefit}</p>
-                                                    </TooltipContent>
-                                                  </Tooltip>
-                                                </TooltipProvider>
+                                                <Tooltip>
+                                                  <TooltipTrigger asChild>
+                                                    <span className="ml-1 inline-flex text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5 cursor-help">
+                                                      <Star className="h-3 w-3 mr-1" /> info
+                                                    </span>
+                                                  </TooltipTrigger>
+                                                  <TooltipContent className="max-w-xs">
+                                                    <p>{healthBenefit}</p>
+                                                  </TooltipContent>
+                                                </Tooltip>
                                               )}
                                             </div>
                                           </li>

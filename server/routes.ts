@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
+import crypto from "crypto";
 
 // Extend Express Request type to include user
 declare global {
@@ -42,6 +43,12 @@ import {
   deleteRecipe,
   toggleFavorite
 } from "./services/recipeService";
+import {
+  generateRecipeFromChatPrompt,
+  getChatMessages,
+  getUserConversations,
+  createChatMessage
+} from "./services/chatService";
 
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
@@ -242,6 +249,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const recipeId = parseInt(req.params.id);
     const updatedRecipe = await toggleFavorite(recipeId, req.user.id);
     return res.status(200).json(updatedRecipe);
+  }));
+
+  // ==== Chat Routes ====
+  
+  // Get user conversations (chat history)
+  app.get("/api/chat/conversations", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const conversations = await getUserConversations(req.user.id);
+    return res.status(200).json(conversations);
+  }));
+  
+  // Get messages for a specific conversation
+  app.get("/api/chat/messages/:conversationId", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const { conversationId } = req.params;
+    const messages = await getChatMessages(req.user.id, conversationId);
+    return res.status(200).json(messages);
+  }));
+  
+  // Create a new chat message
+  app.post("/api/chat/messages", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const { content, conversationId } = req.body;
+    
+    if (!content) {
+      throw new ValidationError("Message content is required");
+    }
+    
+    const message = await createChatMessage(
+      req.user.id,
+      content,
+      conversationId || crypto.randomUUID(), // Generate new conversation ID if not provided
+      'user'
+    );
+    
+    return res.status(201).json(message);
+  }));
+  
+  // Generate a recipe from chat prompt
+  app.post("/api/chat/generate-recipe", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const { prompt, conversationId } = req.body;
+    
+    if (!prompt) {
+      throw new ValidationError("Recipe prompt is required");
+    }
+    
+    // Check user has enough credits
+    if (req.user.credits <= 0 && req.user.subscriptionTier === 'free') {
+      throw new ValidationError("You don't have enough credits. Please upgrade your subscription.");
+    }
+    
+    // Generate recipe from chat prompt
+    const result = await generateRecipeFromChatPrompt(req.user.id, prompt, conversationId);
+    
+    return res.status(200).json(result);
   }));
   
 

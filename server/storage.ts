@@ -1,7 +1,9 @@
 import { 
   type User, type InsertUser, 
   type Session, type InsertSession,
-  type SavedRecipe, type InsertSavedRecipe
+  type SavedRecipe, type InsertSavedRecipe,
+  type ChatMessage, type InsertChatMessage,
+  type AnalyzeImageResponse
 } from "@shared/schema";
 import { hashPassword, verifyPassword, generateToken } from './utils';
 
@@ -39,6 +41,15 @@ export interface IStorage {
   createSavedRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   deleteSavedRecipe(id: number): Promise<boolean>;
   updateSavedRecipe(id: number, recipe: Partial<SavedRecipe>): Promise<SavedRecipe | undefined>;
+  
+  // Chat message methods
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  getChatMessages(userId: number, conversationId: string): Promise<ChatMessage[]>;
+  getConversations(userId: number): Promise<{ id: string, lastMessage: ChatMessage }[]>;
+  createRecipeFromChatPrompt(userId: number, prompt: string, conversationId?: string): Promise<{
+    recipe: AnalyzeImageResponse, 
+    message: ChatMessage
+  }>;
 }
 
 // Use the database storage implementation

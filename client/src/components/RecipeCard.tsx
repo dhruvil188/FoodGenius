@@ -95,8 +95,15 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
               </AccordionTrigger>
               <AccordionContent>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  {mainRecipe.ingredients && mainRecipe.ingredients.map((ingredient: string, i: number) => (
-                    <li key={i}>{ingredient}</li>
+                  {mainRecipe.ingredients && mainRecipe.ingredients.map((ingredient: any, i: number) => (
+                    <li key={i}>
+                      {typeof ingredient === 'string' 
+                        ? ingredient 
+                        : `${ingredient.amount || ''} ${ingredient.unit || ''} ${ingredient.item || ingredient.name || ''} ${ingredient.preparation ? `(${ingredient.preparation})` : ''}`
+                          .replace(/\s+/g, ' ')
+                          .trim()
+                      }
+                    </li>
                   ))}
                 </ul>
               </AccordionContent>

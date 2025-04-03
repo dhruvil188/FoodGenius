@@ -1127,6 +1127,7 @@ function generatePrompt(planRequest: DietPlanRequest): string {
   
   return "I need you to generate a personalized 7-day meal plan based on the following criteria:\n\n" +
     `Diet Type: ${dietType}\n` +
+    `IMPORTANT: Follow the requested Diet Type (${dietType}) STRICTLY. If ${dietType === 'vegetarian' ? 'vegetarian' : dietType === 'vegan' ? 'vegan' : dietType} is selected, DO NOT include any animal products ${dietType === 'vegetarian' ? 'except dairy and eggs' : dietType === 'vegan' ? 'of any kind' : ''}.\n` +
     `Health Goals: ${healthGoals.join(", ")}\n` +
     `Calorie Target: ${calorieTarget >= 2600 ? '3000-3200' : calorieTarget <= 1800 ? '1500-1700' : '2000-2200'} calories per day\n` +
     `Meals Per Day: ${mealsPerDay}\n` +
@@ -1281,22 +1282,24 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
         nutritionalInfo: { calories: 380, protein: 15, carbs: 35, fat: 20 }
       },
       {
-        name: "Herb-Roasted Chicken with Quinoa",
+        name: "Herb-Roasted Vegetable Quinoa Bowl",
         timeOfDay: "Dinner",
         ingredients: [
-          "5 oz chicken breast",
-          "1/2 cup cooked quinoa",
-          "1 cup roasted vegetables (bell peppers, zucchini, onions)",
+          "1 cup cooked quinoa",
+          "1.5 cups roasted vegetables (bell peppers, zucchini, onions, mushrooms)",
+          "1/2 cup chickpeas, rinsed and drained",
           "1 tbsp olive oil",
           "1 tsp dried herbs (thyme, rosemary, oregano)",
+          "1/4 cup crumbled feta cheese",
           "Salt and pepper to taste"
         ],
         instructions: [
-          "Season chicken with herbs, salt, and pepper",
-          "Roast chicken at 375°F for 25 minutes until cooked through",
-          "Serve with quinoa and roasted vegetables"
+          "Toss vegetables with olive oil, herbs, salt, and pepper",
+          "Roast vegetables at 375°F for 25 minutes until tender",
+          "Combine with quinoa and chickpeas in a bowl",
+          "Top with crumbled feta cheese and serve"
         ],
-        nutritionalInfo: { calories: 450, protein: 35, carbs: 30, fat: 18 }
+        nutritionalInfo: { calories: 450, protein: 18, carbs: 45, fat: 18 }
       },
       {
         name: "Apple with Almond Butter",
@@ -1332,42 +1335,48 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
         nutritionalInfo: { calories: 290, protein: 18, carbs: 5, fat: 22 }
       },
       {
-        name: "Turkey and Avocado Wrap",
+        name: "Hummus and Avocado Wrap",
         timeOfDay: "Lunch",
         ingredients: [
           "1 whole wheat tortilla",
-          "3 oz sliced turkey breast",
+          "1/3 cup hummus",
           "1/2 avocado, sliced",
           "1/4 cup shredded lettuce",
-          "1 tbsp hummus",
-          "1 tsp Dijon mustard"
+          "1/4 cup grated carrots",
+          "2 tbsp roasted red peppers",
+          "1 tsp Dijon mustard",
+          "Fresh ground black pepper"
         ],
         instructions: [
           "Spread hummus and mustard on tortilla",
-          "Layer turkey, avocado, and lettuce",
+          "Layer avocado, lettuce, carrots, and red peppers",
+          "Season with black pepper",
           "Roll up tightly and slice in half"
         ],
-        nutritionalInfo: { calories: 350, protein: 22, carbs: 30, fat: 18 }
+        nutritionalInfo: { calories: 350, protein: 12, carbs: 38, fat: 18 }
       },
       {
-        name: "Baked Salmon with Roasted Vegetables",
+        name: "Roasted Vegetable and Sweet Potato Buddha Bowl",
         timeOfDay: "Dinner",
         ingredients: [
-          "5 oz salmon fillet",
           "1 cup Brussels sprouts, halved",
-          "1/2 cup sweet potato, cubed",
-          "1 tbsp olive oil",
+          "1 cup sweet potato, cubed",
+          "1/2 cup chickpeas, rinsed and drained",
+          "1/4 cup red onion, sliced",
+          "2 tbsp olive oil",
           "1 clove garlic, minced",
           "1 tsp lemon zest",
+          "1 tbsp tahini sauce",
+          "1 tsp maple syrup",
           "Salt and pepper to taste"
         ],
         instructions: [
-          "Toss vegetables with olive oil, salt, and pepper",
-          "Roast vegetables at 400°F for 20 minutes",
-          "Season salmon with garlic, lemon zest, salt, and pepper",
-          "Bake salmon at 400°F for 12-15 minutes until flaky"
+          "Toss vegetables and chickpeas with olive oil, garlic, salt, and pepper",
+          "Roast at 400°F for 25 minutes until tender",
+          "Mix tahini, lemon zest, maple syrup, and 1 tbsp water for dressing",
+          "Serve vegetables and chickpeas in a bowl, drizzled with tahini dressing"
         ],
-        nutritionalInfo: { calories: 420, protein: 30, carbs: 25, fat: 22 }
+        nutritionalInfo: { calories: 420, protein: 15, carbs: 50, fat: 22 }
       },
       {
         name: "Greek Yogurt with Honey",
@@ -1423,24 +1432,28 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
         nutritionalInfo: { calories: 380, protein: 12, carbs: 45, fat: 18 }
       },
       {
-        name: "Grilled Lemon Herb Chicken with Sweet Potato",
+        name: "Lemon Herb Roasted Portobello with Sweet Potato",
         timeOfDay: "Dinner",
         ingredients: [
-          "5 oz chicken breast",
+          "2 large portobello mushroom caps",
           "1 medium sweet potato",
           "2 cups mixed green salad",
+          "1/4 cup cooked lentils",
           "1 tbsp olive oil",
           "1 tbsp lemon juice",
           "1 tsp herbs de Provence",
-          "1 tbsp balsamic vinaigrette for salad"
+          "1 tbsp balsamic vinaigrette for salad",
+          "1 tbsp nutritional yeast"
         ],
         instructions: [
-          "Marinate chicken in olive oil, lemon juice, and herbs for 30 minutes",
-          "Grill chicken until internal temperature reaches 165°F",
+          "Marinate portobellos in olive oil, lemon juice, and herbs for 30 minutes",
+          "Roast portobellos at 375°F for 20 minutes until tender",
           "Bake sweet potato at 400°F for 45 minutes until tender",
-          "Serve with mixed greens dressed with balsamic vinaigrette"
+          "Warm lentils and mix with mushrooms",
+          "Serve with mixed greens dressed with balsamic vinaigrette",
+          "Sprinkle nutritional yeast over the dish for a savory finish"
         ],
-        nutritionalInfo: { calories: 420, protein: 35, carbs: 30, fat: 15 }
+        nutritionalInfo: { calories: 420, protein: 18, carbs: 60, fat: 15 }
       },
       {
         name: "Fruit and Nut Mix",
@@ -1491,26 +1504,29 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
         nutritionalInfo: { calories: 330, protein: 18, carbs: 40, fat: 10 }
       },
       {
-        name: "Grilled Fish Tacos with Slaw",
+        name: "Crispy Cauliflower Tacos with Cabbage Slaw",
         timeOfDay: "Dinner",
         ingredients: [
-          "5 oz white fish (tilapia or cod)",
+          "2 cups cauliflower florets",
           "2 small corn tortillas",
           "1 cup cabbage slaw",
           "1/4 avocado, sliced",
           "2 tbsp Greek yogurt",
           "1 lime, cut into wedges",
           "Fresh cilantro",
-          "Spices (cumin, paprika, garlic powder)"
+          "1 tbsp olive oil",
+          "1 tsp each: cumin, paprika, garlic powder",
+          "1/4 cup black beans, rinsed and drained"
         ],
         instructions: [
-          "Season fish with spices and grill until flaky",
-          "Warm tortillas",
-          "Assemble tacos with fish, slaw, and avocado",
+          "Toss cauliflower with oil and spices, roast at 425°F for 20-25 min until crispy",
+          "Warm tortillas in a dry skillet",
+          "Mix black beans with a dash of cumin",
+          "Assemble tacos with beans, cauliflower, slaw, and avocado",
           "Top with Greek yogurt and cilantro",
           "Serve with lime wedges"
         ],
-        nutritionalInfo: { calories: 390, protein: 30, carbs: 30, fat: 15 }
+        nutritionalInfo: { calories: 390, protein: 15, carbs: 45, fat: 18 }
       },
       {
         name: "Hummus with Vegetable Sticks",
@@ -1547,43 +1563,56 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
         nutritionalInfo: { calories: 300, protein: 18, carbs: 20, fat: 16 }
       },
       {
-        name: "Grilled Chicken and Quinoa Salad",
+        name: "Mediterranean Quinoa and Chickpea Salad",
         timeOfDay: "Lunch",
         ingredients: [
-          "4 oz grilled chicken breast",
           "1/2 cup cooked quinoa",
+          "1/2 cup chickpeas, rinsed and drained",
+          "1/4 cup roasted red peppers, chopped",
           "1 cup mixed greens",
           "1/4 cup cherry tomatoes",
           "1/4 cucumber, sliced",
-          "1 tbsp olive oil and vinegar dressing"
+          "2 tbsp crumbled feta cheese",
+          "1 tbsp kalamata olives, sliced",
+          "1 tbsp olive oil and red wine vinegar dressing",
+          "1 tsp dried oregano"
         ],
         instructions: [
           "Place mixed greens in a bowl",
-          "Top with quinoa, chicken, tomatoes, and cucumber",
-          "Drizzle with dressing and toss to combine"
+          "Combine quinoa, chickpeas, red peppers, tomatoes, and cucumber",
+          "Top with feta cheese and olives",
+          "Sprinkle with oregano and drizzle with dressing",
+          "Toss to combine right before serving"
         ],
-        nutritionalInfo: { calories: 350, protein: 30, carbs: 25, fat: 12 }
+        nutritionalInfo: { calories: 350, protein: 15, carbs: 40, fat: 14 }
       },
       {
-        name: "Baked Salmon with Roasted Vegetables",
+        name: "Stuffed Bell Peppers with Lentils and Rice",
         timeOfDay: "Dinner",
         ingredients: [
-          "5 oz salmon fillet",
-          "1 cup mixed vegetables (broccoli, carrots, cauliflower)",
-          "1 small sweet potato, cubed",
+          "2 large bell peppers, halved and seeds removed",
+          "1/2 cup cooked lentils",
+          "1/2 cup cooked brown rice",
+          "1/4 cup diced onion",
+          "1/4 cup diced tomatoes",
+          "1 cup mixed vegetables (broccoli, carrots, cauliflower), chopped small",
           "1 tbsp olive oil",
-          "1 lemon, sliced",
-          "Fresh herbs (dill, parsley)",
+          "1 clove garlic, minced",
+          "1 tsp Italian herbs",
+          "2 tbsp grated parmesan cheese (optional)",
           "Salt and pepper to taste"
         ],
         instructions: [
-          "Preheat oven to 400°F",
-          "Season salmon with herbs, salt, and pepper",
-          "Toss vegetables and sweet potato with olive oil and seasonings",
-          "Roast vegetables for 20 minutes",
-          "Add salmon to the tray and roast for another 12-15 minutes"
+          "Preheat oven to 375°F",
+          "Sauté onions and garlic in olive oil until soft",
+          "Add chopped vegetables and cook for 5 minutes",
+          "Mix in lentils, rice, tomatoes, and herbs",
+          "Season with salt and pepper to taste",
+          "Fill bell pepper halves with mixture",
+          "Top with parmesan cheese if desired",
+          "Bake for 25-30 minutes until peppers are tender"
         ],
-        nutritionalInfo: { calories: 420, protein: 35, carbs: 30, fat: 18 }
+        nutritionalInfo: { calories: 420, protein: 18, carbs: 60, fat: 12 }
       },
       {
         name: "Greek Yogurt with Berries",
@@ -1625,11 +1654,11 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
             name: `${day} ${mealTimes[i]}`,
             timeOfDay: mealTimes[i],
             ingredients: [
-              "3 oz protein source",
-              "1 cup vegetables",
-              "1/2 cup complex carbohydrates",
-              "1 tbsp healthy fats",
-              "Herbs and spices to taste"
+              "1/2 cup plant-based protein (lentils, chickpeas, tofu)",
+              "1 cup mixed vegetables",
+              "1/2 cup complex carbohydrates (quinoa, brown rice, sweet potato)",
+              "1 tbsp healthy fats (olive oil, avocado, nuts)",
+              "Fresh or dried herbs and spices to taste"
             ],
             instructions: [
               "Prepare all ingredients according to your preference",
@@ -1638,9 +1667,9 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
             ],
             nutritionalInfo: { 
               calories: 350, 
-              protein: 25, 
-              carbs: 30, 
-              fat: 15 
+              protein: 15, 
+              carbs: 40, 
+              fat: 12 
             }
           };
           

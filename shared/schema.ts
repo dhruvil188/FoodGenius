@@ -315,5 +315,32 @@ export const firebaseAuthSyncSchema = z.object({
 
 
 
+// Chat message schema
+export const chatMessages = pgTable("chat_messages", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  role: text("role").notNull().default("user"), // Can be 'user' or 'assistant'
+  conversationId: text("conversation_id").notNull(), // Group messages by conversation
+  recipeOutput: jsonb("recipe_output"), // Store generated recipe JSON if this message contains a recipe
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+
+// Recipe Combination Request schema
+export const recipeCombinationRequestSchema = z.object({
+  prompt: z.string().min(1, "Prompt is required"),
+  conversationId: z.string().optional(),
+});
+
+export type RecipeCombinationRequest = z.infer<typeof recipeCombinationRequestSchema>;
+
 export type FirebaseAuthSync = z.infer<typeof firebaseAuthSyncSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;

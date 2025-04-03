@@ -1,11 +1,13 @@
 import { 
-  users, sessions, savedRecipes,
+  users, sessions, savedRecipes, chatMessages, 
   type User, type InsertUser, 
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
+  type ChatMessage, type InsertChatMessage,
+  type AnalyzeImageResponse
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken } from "./utils";
 import type { IStorage } from "./storage";
 
@@ -306,6 +308,75 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedRecipe;
+  }
+
+  // Chat message methods
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [newMessage] = await db.insert(chatMessages).values({
+      ...message,
+      createdAt: new Date()
+    }).returning();
+    
+    return newMessage;
+  }
+
+  async getChatMessages(userId: number, conversationId: string): Promise<ChatMessage[]> {
+    return db.select()
+      .from(chatMessages)
+      .where(and(
+        eq(chatMessages.userId, userId),
+        eq(chatMessages.conversationId, conversationId)
+      ))
+      .orderBy(chatMessages.createdAt);
+  }
+
+  async getConversations(userId: number): Promise<{ id: string, lastMessage: ChatMessage }[]> {
+    // Get the most recent message from each conversation for this user
+    const result = await db.execute(sql`
+      WITH ranked_messages AS (
+        SELECT 
+          *, 
+          ROW_NUMBER() OVER (PARTITION BY conversation_id ORDER BY created_at DESC) as rn
+        FROM chat_messages
+        WHERE user_id = ${userId}
+      )
+      SELECT * FROM ranked_messages
+      WHERE rn = 1
+      ORDER BY created_at DESC
+    `);
+    
+    // Parse the result into our expected format
+    const conversations = result.rows.map((row: any) => {
+      const message = {
+        id: row.id,
+        userId: row.user_id,
+        content: row.content,
+        role: row.role,
+        conversationId: row.conversation_id,
+        recipeOutput: row.recipe_output,
+        createdAt: row.created_at
+      } as ChatMessage;
+      
+      return {
+        id: String(row.conversation_id), // Explicitly convert to string
+        lastMessage: message
+      };
+    });
+    
+    return conversations;
+  }
+
+  async createRecipeFromChatPrompt(userId: number, prompt: string, conversationId?: string): Promise<{
+    recipe: AnalyzeImageResponse,
+    message: ChatMessage
+  }> {
+    // This method will be implemented in the chatService.ts file
+    // to avoid circular dependencies, we'll just define the method signature here
+    // and the actual implementation will be in chatService.ts
+    
+    // Import the chat service dynamically to avoid circular dependencies
+    const { generateRecipeFromChatPrompt } = await import('./services/chatService');
+    return generateRecipeFromChatPrompt(userId, prompt, conversationId);
   }
 }
 

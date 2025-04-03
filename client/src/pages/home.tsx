@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ImageUploader from "@/components/ImageUploader";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import RecipeResults from "@/components/RecipeResults";
+import RecipeCarousel from "@/components/RecipeCarousel"; // Import the RecipeCarousel component
 import { type AnalyzeImageResponse } from "@shared/schema";
 import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -1144,8 +1145,48 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
 
+        {/* Recipe Showcase Section */}
+        <section id="recipe-showcase" className="py-12 sm:py-16 bg-white relative overflow-hidden">
+          <div className="container max-w-7xl mx-auto px-4">
+            <motion.div 
+              className="text-center mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
+                RECIPE GALLERY
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Discover <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Amazing Recipes</span>
+              </h2>
+              <p className="text-slate-600 max-w-2xl mx-auto">
+                Browse through our collection of AI-analyzed recipes from the community. Get inspired for your next meal!
+              </p>
+            </motion.div>
+            
+            <ProtectedFeature
+              feature="Recipe Gallery"
+              fallbackMessage="Sign in to browse our recipe collection and save your favorites."
+            >
+              <RecipeCarousel />
+            </ProtectedFeature>
+            
+            <motion.div
+              className="mt-10 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Button variant="outline" onClick={() => setLocation("/saved-recipes")}>
+                View All Recipes
+              </Button>
+            </motion.div>
+          </div>
+        </section>
         
         {/* Testimonials Section */}
         <section id="testimonials" className="py-12 sm:py-16 bg-white relative overflow-hidden">

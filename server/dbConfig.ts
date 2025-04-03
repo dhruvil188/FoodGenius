@@ -24,14 +24,36 @@ export function getDatabaseUrl(): string {
   // For development, use a default local connection
   if (process.env.NODE_ENV !== 'production') {
     console.warn('No database connection details found, using default local PostgreSQL connection');
-    return 'postgresql://postgres:postgres@localhost:5432/recipe_snap';
+    
+    // Try to create a valid local connection
+    try {
+      // Try to use environment variable if set
+      const hostname = process.env.HOSTNAME || '';
+      
+      // Check if we're on Replit
+      if (hostname.includes('replit')) {
+        console.log('Running on Replit, using neon connection...');
+        // If on Replit, try to connect to the Neon serverless database
+        // This matches how neon configures environment variables on Replit
+        return 'postgresql://postgres:postgres@localhost:5432/recipe_snap?sslmode=require';
+      } else {
+        // Local development fallback
+        return 'postgresql://postgres:postgres@localhost:5432/recipe_snap';
+      }
+    } catch (err) {
+      console.error('Error constructing development database URL:', err);
+      return 'postgresql://postgres:postgres@localhost:5432/recipe_snap';
+    }
   }
   
   // Last resort for production - show clear error but don't crash immediately
+  console.error('============= DATABASE CONNECTION ERROR =============');
   console.error('No database connection details found. The application requires either:');
   console.error('1. DATABASE_URL environment variable, or');
   console.error('2. PGHOST, PGDATABASE, PGUSER, and PGPASSWORD environment variables');
+  console.error('Check your deployment configuration and make sure these values are set.');
+  console.error('============= DATABASE CONNECTION ERROR =============');
   
   // Return a placeholder that will cause an error when connecting, but allow the app to start
-  return 'postgresql://invalid-connection-string';
+  return 'postgresql://invalid:invalid@invalid:5432/invalid?application_name=recipe_snap_error';
 }

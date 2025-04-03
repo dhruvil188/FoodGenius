@@ -53,10 +53,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-lg md:text-xl font-bold text-green-700 dark:text-green-300">
-              {recipe.foodName}
+              {recipe.foodName || "Fusion Recipe"}
             </CardTitle>
             <CardDescription className="text-sm mt-1">
-              {recipe.description}
+              {recipe.description || "A custom fusion dish based on your suggestions."}
             </CardDescription>
           </div>
         </div>

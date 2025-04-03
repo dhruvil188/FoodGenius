@@ -20,6 +20,7 @@ import { Loader2, Send, PlusCircle, Clock, Trash2, MessageCircle, ChefHat } from
 import RecipeCard from "@/components/RecipeCard";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
+import SEO from "@/components/SEO";
 
 // Message interfaces
 interface ChatMessage {
@@ -199,6 +200,23 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] bg-background">
+      <SEO 
+        title="Recipe Fusion Chat | Recipe Snap"
+        description="Create unique fusion recipes by combining multiple dishes. Our AI chef generates creative recipes from your ideas."
+        canonical={activeConversationId ? `/chat/${activeConversationId}` : "/chat"}
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Recipe Fusion Chat - Recipe Snap",
+          "applicationCategory": "AICookingAssistant",
+          "description": "An AI-powered recipe chat that combines multiple dishes into creative fusion recipes.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        }}
+      />
       {/* Sidebar with conversation list */}
       <div className="w-full md:w-72 border-r border-border flex flex-col">
         <div className="p-4 border-b border-border bg-background/95 sticky top-0 z-10">

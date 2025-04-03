@@ -172,8 +172,12 @@ export async function generateRecipeFromChatPrompt(
         message: assistantMessage,
       };
     } else {
-      // For existing conversations, just send the user prompt
-      const result = await chat.sendMessage([{ text: prompt }]);
+      // For existing conversations, we need to provide specific instructions
+      // to maintain continuity and proper JSON formatting
+      const modificationPrompt = `Please update the previous recipe based on this request: ${prompt}\n` +
+        `Follow the same JSON format as before, creating a new complete recipe that incorporates these changes.`;
+      
+      const result = await chat.sendMessage([{ text: modificationPrompt }]);
       const responseText = result.response.text();
       
       console.log(`✅ Got response from Gemini AI for user ${userId}`);
@@ -333,11 +337,16 @@ export async function generateRecipeFromPrompt(
       };
     } else {
       // For existing conversations with more than one message,
-      // we need a different approach to handle continuation
-      const chat = model.startChat();
+      // we need to use the full conversation history
+      const chat = model.startChat({
+        history: historyPrompts,
+      });
       
-      // Send just the user prompt
-      const result = await chat.sendMessage([{ text: prompt }]);
+      // Add a special prompt to instruct the AI to update the recipe
+      const modificationPrompt = `Please update the previous recipe based on this request: ${prompt}\n` +
+        `Follow the same JSON format as before, creating a new complete recipe that incorporates these changes.`;
+      
+      const result = await chat.sendMessage([{ text: modificationPrompt }]);
       const responseText = result.response.text();
       
       console.log(`✅ Got response from Gemini AI for user ${userId}`);

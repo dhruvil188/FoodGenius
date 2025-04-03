@@ -338,18 +338,10 @@ export const dailyPlanSchema = z.object({
 export type DailyPlan = z.infer<typeof dailyPlanSchema>;
 
 export const dietPlanRequestSchema = z.object({
-  mealsPerDay: z.number().min(2).max(5),
   dietType: z.string(),
-  healthGoals: z.array(z.string()),
-  calorieTarget: z.number(),
-  excludedFoods: z.array(z.string()),
-  medicalConditions: z.array(z.string()),
-  cookingSkill: z.string(),
-  timeConstraint: z.number(),
-  budgetLevel: z.string(),
-  preferredCuisines: z.array(z.string()),
-  seasonalPreference: z.string(),
-  proteinPreference: z.string(),
+  healthGoal: z.string(),
+  mealsPerDay: z.number().min(2).max(5),
+  allergies: z.string().optional(),
   extraNotes: z.string().optional(),
 });
 

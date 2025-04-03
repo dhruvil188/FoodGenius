@@ -4,7 +4,8 @@ import {
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
   type ChatMessage, type InsertChatMessage,
-  type AnalyzeImageResponse
+  type AnalyzeImageResponse,
+  type AppUser
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -12,6 +13,20 @@ import { hashPassword, verifyPassword, generateToken } from "./utils";
 import type { IStorage } from "./storage";
 
 export class DatabaseStorage implements IStorage {
+  // Helper method to convert a full user to an AppUser (public user profile)
+  convertToAppUser(user: User): AppUser {
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      displayName: user.displayName,
+      profileImage: user.profileImage,
+      credits: user.credits || 0,
+      subscriptionStatus: user.subscriptionStatus || undefined,
+      subscriptionTier: user.subscriptionTier || undefined,
+    };
+  }
+  
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;

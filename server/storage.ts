@@ -3,7 +3,8 @@ import {
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
   type ChatMessage, type InsertChatMessage,
-  type AnalyzeImageResponse
+  type AnalyzeImageResponse,
+  type AppUser
 } from "@shared/schema";
 import { hashPassword, verifyPassword, generateToken } from './utils';
 
@@ -24,6 +25,9 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
   syncFirebaseUser(firebaseData: { uid: string, email: string, displayName: string | null, photoURL: string | null }): Promise<User>;
+  
+  // Helper methods
+  convertToAppUser(user: User): AppUser;
   
   // Subscription methods
   updateStripeCustomerId(userId: number, customerId: string): Promise<User>;

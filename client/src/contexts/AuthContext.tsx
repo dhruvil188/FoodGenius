@@ -1,75 +1,53 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User, onAuthStateChanged } from "firebase/auth";
-import { auth, signInWithGoogle, signOutUser } from "@/lib/firebase";
+import { User } from "firebase/auth";
+import { 
+  auth, 
+  setupAuthListener, 
+  signInWithGoogle, 
+  logoutUser, 
+  syncUserWithBackend 
+} from "@/services/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { AppUser, AuthResponse } from "@shared/schema";
+import { handleApiError, ErrorType, safeAsync } from "@/services/error";
 
 interface AuthContextType {
   currentUser: User | null;
+  appUser: AppUser | null;
   isLoading: boolean;
-  login: () => Promise<User | void>;
+  login: () => Promise<AuthResponse | void>;
   logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-// Function to sync Firebase user with our backend
-const syncFirebaseUser = async (user: User) => {
-  try {
-    const response = await fetch('/api/auth/firebase-sync', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL
-      }),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to sync user with database');
-    }
-    
-    const result = await response.json();
-    
-    // Save the auth token in localStorage
-    if (result.token) {
-      localStorage.setItem("recipe_snap_token", result.token);
-      console.log("Token saved to localStorage");
-    }
-    
-    return result;
-  } catch (error) {
-    console.error('Error syncing user with database:', error);
-    throw error;
-  }
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = setupAuthListener(async (user) => {
       setCurrentUser(user);
       
       // If a user is signed in, sync with our backend
       if (user) {
         try {
-          console.log("Attempting to sync Firebase user with backend...");
-          const result = await syncFirebaseUser(user);
-          console.log("User sync successful:", result);
+          const [error, result] = await safeAsync<AuthResponse>(
+            syncUserWithBackend(user),
+            "Failed to synchronize your account"
+          );
+          
+          if (result && !error) {
+            setAppUser(result.user);
+          }
         } catch (error) {
-          console.error("Error syncing user with backend:", error);
-          toast({
-            title: "Authentication Error",
-            description: "Failed to synchronize your account. Please try again.",
-            variant: "destructive",
-          });
+          handleApiError(error, "Failed to synchronize your account");
         }
+      } else {
+        // User is logged out
+        setAppUser(null);
       }
       
       setIsLoading(false);
@@ -80,38 +58,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async () => {
     try {
-      return await signInWithGoogle();
+      setIsLoading(true);
+      const response = await signInWithGoogle();
+      setAppUser(response.user);
+      return response;
     } catch (error) {
-      console.error("Login error:", error);
+      handleApiError(error, "Failed to sign in with Google");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = async () => {
     try {
-      // Remove the token from localStorage
-      localStorage.removeItem("recipe_snap_token");
-      
-      // Call the backend to end the session
-      try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem("recipe_snap_token")}`,
-          },
-        });
-      } catch (e) {
-        console.error("Error logging out from backend:", e);
-      }
-      
-      // Sign out from Firebase
-      await signOutUser();
+      setIsLoading(true);
+      await logoutUser();
+      setAppUser(null);
     } catch (error) {
-      console.error("Logout error:", error);
+      handleApiError(error, "Failed to log out");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const value = {
     currentUser,
+    appUser,
     isLoading,
     login,
     logout,

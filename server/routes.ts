@@ -17,7 +17,8 @@ import {
   registerSchema,
   firebaseAuthSyncSchema,
   type AnalyzeImageResponse,
-  type AuthResponse
+  type AuthResponse,
+  type AppUser
 } from "@shared/schema";
 
 // Import error handling middleware
@@ -50,6 +51,9 @@ import {
   createChatMessage,
   deleteConversation
 } from "./services/chatService";
+
+// Import storage for user conversion
+import { storage } from './storage';
 
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
@@ -135,16 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Return successful response with user data and token
     const authResponse: AuthResponse = {
       success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        displayName: user.displayName || null,
-        profileImage: user.profileImage || null,
-        credits: typeof user.credits === 'number' ? user.credits : 0,
-        subscriptionStatus: user.subscriptionStatus || 'free',
-        subscriptionTier: user.subscriptionTier || 'free'
-      },
+      user: storage.convertToAppUser(user),
       token,
       message: "Firebase authentication successful"
     };
@@ -165,16 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     return res.status(200).json({
       success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        displayName: user.displayName || null,
-        profileImage: user.profileImage || null,
-        credits: typeof user.credits === 'number' ? user.credits : 0,
-        subscriptionStatus: user.subscriptionStatus || 'free',
-        subscriptionTier: user.subscriptionTier || 'free'
-      }
+      user: storage.convertToAppUser(user)
     });
   }));
   
@@ -334,15 +320,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new ValidationError("Invalid credits amount");
       }
       
-      const user = await getUserById(req.user.id);
+      // Get the user and update their credits
+      const updatedUser = await storage.updateUserCredits(req.user.id, credits);
       
       // In production, this would be triggered by a Stripe webhook after payment confirmation
-      // Here we're just updating the credits directly for testing purposes
-      // In the actual service this would use storage.updateUserCredits
+      // Here we're updating the credits directly for testing purposes
       
       return res.status(200).json({ 
         success: true,
-        user: { ...user, credits }
+        user: storage.convertToAppUser(updatedUser)
       });
     }));
   }

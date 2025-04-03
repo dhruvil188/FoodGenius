@@ -284,23 +284,29 @@ export const insertSavedRecipeSchema = createInsertSchema(savedRecipes).omit({
 export type InsertSavedRecipe = z.infer<typeof insertSavedRecipeSchema>;
 export type SavedRecipe = typeof savedRecipes.$inferSelect;
 
+// App User schema - simplified user object for client-side use
+export const appUserSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  email: z.string(),
+  displayName: z.string().nullable(),
+  profileImage: z.string().nullable(),
+  // Subscription fields
+  credits: z.number().optional(),
+  subscriptionStatus: z.string().optional(),
+  subscriptionTier: z.string().optional(),
+});
+
 // Auth related types and schemas
 export const authResponseSchema = z.object({
-  user: z.object({
-    id: z.number(),
-    username: z.string(),
-    email: z.string(),
-    displayName: z.string().nullable(),
-    profileImage: z.string().nullable(),
-    // Subscription fields
-    credits: z.number().optional(),
-    subscriptionStatus: z.string().optional(),
-    subscriptionTier: z.string().optional(),
-  }),
+  user: appUserSchema,
   token: z.string(),
   success: z.boolean(),
   message: z.string().optional(),
 });
+
+// Type for the app user (public user profile without sensitive data)
+export type AppUser = z.infer<typeof appUserSchema>;
 
 // Firebase auth sync schema
 export const firebaseAuthSyncSchema = z.object({

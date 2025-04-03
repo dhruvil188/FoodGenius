@@ -724,53 +724,413 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
     existingDays.set(day.day.toLowerCase(), day);
   }
   
-  // Check for missing days and add placeholder data
+  // Predefined meal templates by day
+  const mealTemplates: Record<string, any[]> = {
+    "thursday": [
+      {
+        name: "Greek Yogurt with Berries and Granola",
+        timeOfDay: "Breakfast",
+        ingredients: [
+          "1 cup Greek yogurt",
+          "1/2 cup mixed berries (strawberries, blueberries, raspberries)",
+          "1/4 cup low-sugar granola",
+          "1 tbsp honey",
+          "1 tbsp chia seeds"
+        ],
+        instructions: [
+          "Place yogurt in a bowl",
+          "Top with berries, granola, and chia seeds",
+          "Drizzle with honey and serve cold"
+        ],
+        nutritionalInfo: { calories: 320, protein: 20, carbs: 40, fat: 10 }
+      },
+      {
+        name: "Mediterranean Chickpea Salad",
+        timeOfDay: "Lunch",
+        ingredients: [
+          "1 cup chickpeas, rinsed and drained",
+          "1/2 cucumber, diced",
+          "1/2 cup cherry tomatoes, halved",
+          "1/4 cup feta cheese, crumbled",
+          "2 tbsp olive oil",
+          "1 tbsp lemon juice",
+          "Salt and pepper to taste"
+        ],
+        instructions: [
+          "Combine chickpeas, cucumber, tomatoes, and feta in a bowl",
+          "Whisk olive oil, lemon juice, salt and pepper for dressing",
+          "Pour dressing over salad and toss to combine"
+        ],
+        nutritionalInfo: { calories: 380, protein: 15, carbs: 35, fat: 20 }
+      },
+      {
+        name: "Herb-Roasted Chicken with Quinoa",
+        timeOfDay: "Dinner",
+        ingredients: [
+          "5 oz chicken breast",
+          "1/2 cup cooked quinoa",
+          "1 cup roasted vegetables (bell peppers, zucchini, onions)",
+          "1 tbsp olive oil",
+          "1 tsp dried herbs (thyme, rosemary, oregano)",
+          "Salt and pepper to taste"
+        ],
+        instructions: [
+          "Season chicken with herbs, salt, and pepper",
+          "Roast chicken at 375°F for 25 minutes until cooked through",
+          "Serve with quinoa and roasted vegetables"
+        ],
+        nutritionalInfo: { calories: 450, protein: 35, carbs: 30, fat: 18 }
+      },
+      {
+        name: "Apple with Almond Butter",
+        timeOfDay: "Snack",
+        ingredients: [
+          "1 medium apple, sliced",
+          "1 tbsp almond butter"
+        ],
+        instructions: [
+          "Slice apple and serve with almond butter for dipping"
+        ],
+        nutritionalInfo: { calories: 180, protein: 5, carbs: 25, fat: 9 }
+      }
+    ],
+    "friday": [
+      {
+        name: "Spinach and Mushroom Omelette",
+        timeOfDay: "Breakfast",
+        ingredients: [
+          "2 large eggs",
+          "1 cup fresh spinach",
+          "1/4 cup mushrooms, sliced",
+          "1 tbsp olive oil",
+          "2 tbsp feta cheese",
+          "Salt and pepper to taste"
+        ],
+        instructions: [
+          "Whisk eggs with salt and pepper",
+          "Sauté mushrooms and spinach in olive oil",
+          "Pour eggs over vegetables and cook until set",
+          "Sprinkle with feta cheese before folding"
+        ],
+        nutritionalInfo: { calories: 290, protein: 18, carbs: 5, fat: 22 }
+      },
+      {
+        name: "Turkey and Avocado Wrap",
+        timeOfDay: "Lunch",
+        ingredients: [
+          "1 whole wheat tortilla",
+          "3 oz sliced turkey breast",
+          "1/2 avocado, sliced",
+          "1/4 cup shredded lettuce",
+          "1 tbsp hummus",
+          "1 tsp Dijon mustard"
+        ],
+        instructions: [
+          "Spread hummus and mustard on tortilla",
+          "Layer turkey, avocado, and lettuce",
+          "Roll up tightly and slice in half"
+        ],
+        nutritionalInfo: { calories: 350, protein: 22, carbs: 30, fat: 18 }
+      },
+      {
+        name: "Baked Salmon with Roasted Vegetables",
+        timeOfDay: "Dinner",
+        ingredients: [
+          "5 oz salmon fillet",
+          "1 cup Brussels sprouts, halved",
+          "1/2 cup sweet potato, cubed",
+          "1 tbsp olive oil",
+          "1 clove garlic, minced",
+          "1 tsp lemon zest",
+          "Salt and pepper to taste"
+        ],
+        instructions: [
+          "Toss vegetables with olive oil, salt, and pepper",
+          "Roast vegetables at 400°F for 20 minutes",
+          "Season salmon with garlic, lemon zest, salt, and pepper",
+          "Bake salmon at 400°F for 12-15 minutes until flaky"
+        ],
+        nutritionalInfo: { calories: 420, protein: 30, carbs: 25, fat: 22 }
+      },
+      {
+        name: "Greek Yogurt with Honey",
+        timeOfDay: "Snack",
+        ingredients: [
+          "3/4 cup Greek yogurt",
+          "1 tsp honey",
+          "1 tbsp walnuts, chopped"
+        ],
+        instructions: [
+          "Top yogurt with honey and walnuts"
+        ],
+        nutritionalInfo: { calories: 180, protein: 18, carbs: 15, fat: 7 }
+      }
+    ],
+    "saturday": [
+      {
+        name: "Avocado Toast with Poached Egg",
+        timeOfDay: "Breakfast",
+        ingredients: [
+          "1 slice whole grain bread",
+          "1/2 avocado, mashed",
+          "1 large egg",
+          "1 tsp lemon juice",
+          "Red pepper flakes",
+          "Salt and pepper to taste"
+        ],
+        instructions: [
+          "Toast bread until golden brown",
+          "Mash avocado with lemon juice, salt, and pepper",
+          "Spread avocado mixture on toast",
+          "Top with poached egg and red pepper flakes"
+        ],
+        nutritionalInfo: { calories: 300, protein: 15, carbs: 20, fat: 20 }
+      },
+      {
+        name: "Quinoa Bowl with Roasted Vegetables",
+        timeOfDay: "Lunch",
+        ingredients: [
+          "3/4 cup cooked quinoa",
+          "1 cup mixed roasted vegetables (bell peppers, zucchini, eggplant)",
+          "2 tbsp tahini sauce",
+          "1/4 cup chickpeas",
+          "1 tsp lemon juice",
+          "Fresh herbs (parsley, mint)"
+        ],
+        instructions: [
+          "Layer quinoa at the bottom of bowl",
+          "Top with roasted vegetables and chickpeas",
+          "Drizzle with tahini sauce and lemon juice",
+          "Garnish with fresh herbs"
+        ],
+        nutritionalInfo: { calories: 380, protein: 12, carbs: 45, fat: 18 }
+      },
+      {
+        name: "Grilled Lemon Herb Chicken with Sweet Potato",
+        timeOfDay: "Dinner",
+        ingredients: [
+          "5 oz chicken breast",
+          "1 medium sweet potato",
+          "2 cups mixed green salad",
+          "1 tbsp olive oil",
+          "1 tbsp lemon juice",
+          "1 tsp herbs de Provence",
+          "1 tbsp balsamic vinaigrette for salad"
+        ],
+        instructions: [
+          "Marinate chicken in olive oil, lemon juice, and herbs for 30 minutes",
+          "Grill chicken until internal temperature reaches 165°F",
+          "Bake sweet potato at 400°F for 45 minutes until tender",
+          "Serve with mixed greens dressed with balsamic vinaigrette"
+        ],
+        nutritionalInfo: { calories: 420, protein: 35, carbs: 30, fat: 15 }
+      },
+      {
+        name: "Fruit and Nut Mix",
+        timeOfDay: "Snack",
+        ingredients: [
+          "1/4 cup mixed dried fruits (apricots, cranberries)",
+          "1/4 cup mixed nuts (almonds, cashews, walnuts)",
+          "1 tbsp dark chocolate chips"
+        ],
+        instructions: [
+          "Combine all ingredients in a small container"
+        ],
+        nutritionalInfo: { calories: 200, protein: 6, carbs: 20, fat: 14 }
+      }
+    ],
+    "sunday": [
+      {
+        name: "Berry and Banana Smoothie Bowl",
+        timeOfDay: "Breakfast",
+        ingredients: [
+          "1 frozen banana",
+          "1 cup mixed berries",
+          "1/2 cup unsweetened almond milk",
+          "1 tbsp almond butter",
+          "1 tbsp chia seeds",
+          "1/4 cup granola for topping"
+        ],
+        instructions: [
+          "Blend banana, berries, almond milk, and almond butter until smooth",
+          "Pour into bowl and top with granola and chia seeds"
+        ],
+        nutritionalInfo: { calories: 340, protein: 10, carbs: 50, fat: 14 }
+      },
+      {
+        name: "Lentil Soup with Whole Grain Roll",
+        timeOfDay: "Lunch",
+        ingredients: [
+          "1 cup lentil soup",
+          "1 small whole grain roll",
+          "1 tsp olive oil",
+          "1 tbsp parmesan cheese (optional)"
+        ],
+        instructions: [
+          "Heat soup until hot",
+          "Serve with whole grain roll drizzled with olive oil",
+          "Sprinkle with parmesan if desired"
+        ],
+        nutritionalInfo: { calories: 330, protein: 18, carbs: 40, fat: 10 }
+      },
+      {
+        name: "Grilled Fish Tacos with Slaw",
+        timeOfDay: "Dinner",
+        ingredients: [
+          "5 oz white fish (tilapia or cod)",
+          "2 small corn tortillas",
+          "1 cup cabbage slaw",
+          "1/4 avocado, sliced",
+          "2 tbsp Greek yogurt",
+          "1 lime, cut into wedges",
+          "Fresh cilantro",
+          "Spices (cumin, paprika, garlic powder)"
+        ],
+        instructions: [
+          "Season fish with spices and grill until flaky",
+          "Warm tortillas",
+          "Assemble tacos with fish, slaw, and avocado",
+          "Top with Greek yogurt and cilantro",
+          "Serve with lime wedges"
+        ],
+        nutritionalInfo: { calories: 390, protein: 30, carbs: 30, fat: 15 }
+      },
+      {
+        name: "Hummus with Vegetable Sticks",
+        timeOfDay: "Snack",
+        ingredients: [
+          "1/4 cup hummus",
+          "1 cup vegetable sticks (carrots, celery, bell peppers)"
+        ],
+        instructions: [
+          "Serve hummus with vegetable sticks for dipping"
+        ],
+        nutritionalInfo: { calories: 160, protein: 6, carbs: 15, fat: 8 }
+      }
+    ],
+    "wednesday": [
+      {
+        name: "Veggie Omelette with Whole Grain Toast",
+        timeOfDay: "Breakfast",
+        ingredients: [
+          "2 large eggs",
+          "1/4 cup diced bell peppers",
+          "1/4 cup diced onions",
+          "1/4 cup spinach",
+          "1 slice whole grain toast",
+          "1 tsp olive oil",
+          "Salt and pepper to taste"
+        ],
+        instructions: [
+          "Sauté veggies in olive oil until soft",
+          "Whisk eggs and pour over vegetables",
+          "Cook until set and fold in half",
+          "Serve with whole grain toast"
+        ],
+        nutritionalInfo: { calories: 300, protein: 18, carbs: 20, fat: 16 }
+      },
+      {
+        name: "Grilled Chicken and Quinoa Salad",
+        timeOfDay: "Lunch",
+        ingredients: [
+          "4 oz grilled chicken breast",
+          "1/2 cup cooked quinoa",
+          "1 cup mixed greens",
+          "1/4 cup cherry tomatoes",
+          "1/4 cucumber, sliced",
+          "1 tbsp olive oil and vinegar dressing"
+        ],
+        instructions: [
+          "Place mixed greens in a bowl",
+          "Top with quinoa, chicken, tomatoes, and cucumber",
+          "Drizzle with dressing and toss to combine"
+        ],
+        nutritionalInfo: { calories: 350, protein: 30, carbs: 25, fat: 12 }
+      },
+      {
+        name: "Baked Salmon with Roasted Vegetables",
+        timeOfDay: "Dinner",
+        ingredients: [
+          "5 oz salmon fillet",
+          "1 cup mixed vegetables (broccoli, carrots, cauliflower)",
+          "1 small sweet potato, cubed",
+          "1 tbsp olive oil",
+          "1 lemon, sliced",
+          "Fresh herbs (dill, parsley)",
+          "Salt and pepper to taste"
+        ],
+        instructions: [
+          "Preheat oven to 400°F",
+          "Season salmon with herbs, salt, and pepper",
+          "Toss vegetables and sweet potato with olive oil and seasonings",
+          "Roast vegetables for 20 minutes",
+          "Add salmon to the tray and roast for another 12-15 minutes"
+        ],
+        nutritionalInfo: { calories: 420, protein: 35, carbs: 30, fat: 18 }
+      },
+      {
+        name: "Greek Yogurt with Berries",
+        timeOfDay: "Snack",
+        ingredients: [
+          "3/4 cup Greek yogurt",
+          "1/4 cup mixed berries",
+          "1 tsp honey"
+        ],
+        instructions: [
+          "Mix yogurt with berries and drizzle with honey"
+        ],
+        nutritionalInfo: { calories: 160, protein: 15, carbs: 20, fat: 3 }
+      }
+    ]
+  };
+  
+  // Check for missing days and add appropriate data
   for (const day of daysOfWeek) {
     if (!existingDays.has(day.toLowerCase())) {
-      console.log(`Adding placeholder for missing day: ${day}`);
+      console.log(`Creating detailed day for missing day: ${day}`);
       
-      // Get a template from an existing day if available
-      let templateMeal = { 
-        name: `${day} Balanced Meal`,
-        timeOfDay: "Breakfast",
-        ingredients: ["1 cup fresh vegetables", "3 oz lean protein", "1 serving complex carbs", "1 tbsp healthy fats", "Seasoning to taste"],
-        instructions: ["Prepare all ingredients", "Combine and cook according to your preference", "Plate and serve with fresh herbs"],
-        nutritionalInfo: { calories: 350, protein: 20, carbs: 30, fat: 15 }
-      };
+      let meals = [];
+      let totalDailyCalories = 0;
       
-      // Try to copy a meal structure from an existing day
-      if (weeklyPlan.length > 0 && weeklyPlan[0].meals.length > 0) {
-        const existingMeal = { ...weeklyPlan[0].meals[0] };
-        templateMeal = {
-          name: `${day} ${existingMeal.timeOfDay}`,
-          timeOfDay: existingMeal.timeOfDay,
-          ingredients: ["1 cup fresh ingredients", "2 tbsp healthy oils", "1/4 cup protein source", "Herbs and spices to taste"],
-          instructions: ["Prepare ingredients according to your preference", "Cook following standard methods for this meal type", "Season to taste and serve immediately"],
-          nutritionalInfo: { calories: 350, protein: 20, carbs: 30, fat: 15 }
-        };
+      // Use predefined templates if available
+      if (mealTemplates[day.toLowerCase()]) {
+        meals = [...mealTemplates[day.toLowerCase()]];
+        totalDailyCalories = meals.reduce((sum, meal) => {
+          return sum + (meal.nutritionalInfo?.calories || 0);
+        }, 0);
+      } else {
+        // Fallback for any days without templates
+        // This should never happen since we have templates for all days
+        const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snack"];
+        
+        for (let i = 0; i < 4; i++) {
+          const meal = {
+            name: `${day} ${mealTimes[i]}`,
+            timeOfDay: mealTimes[i],
+            ingredients: [
+              "3 oz protein source",
+              "1 cup vegetables",
+              "1/2 cup complex carbohydrates",
+              "1 tbsp healthy fats",
+              "Herbs and spices to taste"
+            ],
+            instructions: [
+              "Prepare all ingredients according to your preference",
+              "Combine ingredients following standard culinary techniques",
+              "Season to taste and serve immediately"
+            ],
+            nutritionalInfo: { 
+              calories: 350, 
+              protein: 25, 
+              carbs: 30, 
+              fat: 15 
+            }
+          };
+          
+          meals.push(meal);
+          totalDailyCalories += meal.nutritionalInfo.calories;
+        }
       }
-      
-      // Create a full day's meals based on the average number of meals in other days
-      const avgMealsPerDay = Math.max(
-        1, 
-        Math.round(weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0) / Math.max(1, weeklyPlan.length))
-      );
-      
-      const meals = [];
-      const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snack", "Snack 2"];
-      
-      for (let i = 0; i < avgMealsPerDay; i++) {
-        meals.push({
-          ...templateMeal,
-          name: `${day} ${mealTimes[i] || "Meal"}`,
-          timeOfDay: mealTimes[i] || "Meal",
-        });
-      }
-      
-      // Calculate the total daily calories from the meals
-      const totalDailyCalories = meals.reduce((sum, meal) => {
-        return sum + (meal.nutritionalInfo?.calories || 0);
-      }, 0);
       
       existingDays.set(day.toLowerCase(), {
         day,

@@ -254,7 +254,7 @@ export default function RecipePage() {
                       {recipe.youtubeVideos.slice(0, 3).map((video, idx) => (
                         <a
                           key={idx}
-                          href={video.url}
+                          href={`https://www.youtube.com/watch?v=${video.videoId}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center p-2 hover:bg-slate-100 rounded-lg transition-colors"

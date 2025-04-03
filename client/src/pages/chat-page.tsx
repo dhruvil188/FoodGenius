@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, PlusCircle, Clock } from "lucide-react";
+import { Loader2, Send, PlusCircle, Clock, Trash2 } from "lucide-react";
 import RecipeCard from "@/components/RecipeCard";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -113,6 +113,22 @@ const ChatPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
     },
   });
+  
+  // Delete a conversation
+  const deleteConversationMutation = useMutation({
+    mutationFn: async (conversationId: string) => {
+      const response = await apiRequest("DELETE", `/api/chat/conversations/${conversationId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
+      // If the active conversation was deleted, reset to new chat
+      if (activeConversationId === deleteConversationMutation.variables) {
+        setActiveConversationId(null);
+        navigate("/chat", { replace: true });
+      }
+    },
+  });
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -166,6 +182,13 @@ const ChatPage: React.FC = () => {
   const handleSelectConversation = (conversationId: string) => {
     setActiveConversationId(conversationId);
   };
+  
+  // Handle deleting a conversation
+  const handleDeleteConversation = (conversationId: string) => {
+    if (window.confirm("Are you sure you want to delete this conversation?")) {
+      deleteConversationMutation.mutate(conversationId);
+    }
+  };
 
   // Format conversation title based on first message
   const getConversationTitle = (conversation: Conversation) => {
@@ -200,25 +223,39 @@ const ChatPage: React.FC = () => {
           ) : (
             <div className="py-2">
               {conversations?.map((conversation: Conversation) => (
-                <button
-                  key={conversation.id}
-                  onClick={() => handleSelectConversation(conversation.id)}
-                  className={`w-full text-left p-3 hover:bg-secondary/50 transition-colors flex flex-col gap-1
+                <div 
+                  key={conversation.id} 
+                  className={`group w-full p-3 hover:bg-secondary/50 transition-colors flex justify-between items-center
                     ${activeConversationId === conversation.id ? "bg-secondary" : ""}
                   `}
                 >
-                  <span className="text-sm font-medium truncate">
-                    {getConversationTitle(conversation)}
-                  </span>
-                  <div className="flex items-center text-xs text-muted-foreground">
-                    <Clock size={12} className="mr-1" />
-                    <span>
-                      {formatDistanceToNow(new Date(conversation.lastMessage.createdAt), {
-                        addSuffix: true,
-                      })}
+                  <button
+                    onClick={() => handleSelectConversation(conversation.id)}
+                    className="flex-1 text-left flex flex-col gap-1"
+                  >
+                    <span className="text-sm font-medium truncate">
+                      {getConversationTitle(conversation)}
                     </span>
-                  </div>
-                </button>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Clock size={12} className="mr-1" />
+                      <span>
+                        {formatDistanceToNow(new Date(conversation.lastMessage.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteConversation(conversation.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-opacity"
+                    aria-label="Delete conversation"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               ))}
             </div>
           )}

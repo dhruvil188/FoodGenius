@@ -147,3 +147,10 @@ export async function createChatMessage(userId: number, content: string, convers
     conversationId,
   });
 }
+
+/**
+ * Delete a conversation and all its messages
+ */
+export async function deleteConversation(userId: number, conversationId: string): Promise<boolean> {
+  return storage.deleteConversation(userId, conversationId);
+}

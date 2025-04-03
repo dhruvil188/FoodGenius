@@ -47,7 +47,8 @@ import {
   generateRecipeFromChatPrompt,
   getChatMessages,
   getUserConversations,
-  createChatMessage
+  createChatMessage,
+  deleteConversation
 } from "./services/chatService";
 
 // Simple mock user ID for guest access
@@ -257,6 +258,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/chat/conversations", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const conversations = await getUserConversations(req.user.id);
     return res.status(200).json(conversations);
+  }));
+  
+  // Delete a conversation
+  app.delete("/api/chat/conversations/:conversationId", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const { conversationId } = req.params;
+    const success = await deleteConversation(req.user.id, conversationId);
+    
+    if (success) {
+      return res.status(200).json({ success: true });
+    } else {
+      return res.status(404).json({ success: false, message: "Conversation not found" });
+    }
   }));
   
   // Get messages for a specific conversation

@@ -156,33 +156,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
               </AccordionContent>
             </AccordionItem>
             
-            {mainRecipe.nutritionInfo && (
-              <AccordionItem value="nutrition">
-                <AccordionTrigger className="text-sm font-medium">
-                  Nutrition Information
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Calories:</span>
-                      <span>{mainRecipe.nutritionInfo.calories}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Protein:</span>
-                      <span>{mainRecipe.nutritionInfo.protein}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Carbs:</span>
-                      <span>{mainRecipe.nutritionInfo.carbs}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Fats:</span>
-                      <span>{mainRecipe.nutritionInfo.fats}</span>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            )}
+            {/* Nutrition section removed as requested */}
           </Accordion>
         )}
       </CardContent>

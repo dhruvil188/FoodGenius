@@ -366,6 +366,21 @@ export class DatabaseStorage implements IStorage {
     return conversations;
   }
 
+  async deleteConversation(userId: number, conversationId: string): Promise<boolean> {
+    // Delete all messages in the conversation for this user
+    const result = await db
+      .delete(chatMessages)
+      .where(
+        and(
+          eq(chatMessages.userId, userId),
+          eq(chatMessages.conversationId, conversationId)
+        )
+      )
+      .returning();
+    
+    return result.length > 0;
+  }
+
   async createRecipeFromChatPrompt(userId: number, prompt: string, conversationId?: string): Promise<{
     recipe: AnalyzeImageResponse,
     message: ChatMessage

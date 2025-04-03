@@ -126,27 +126,42 @@ async function optionalAuthenticate(req: Request, res: Response, next: NextFunct
 
 // Middleware to check database connectivity
 function checkDatabaseConnectivity(req: Request, res: Response, next: NextFunction) {
-  // Always proceed with the request even if database is not connected
-  // This prevents the red error card on mobile while still logging the issue
   if (!isDatabaseConnected()) {
-    // Log the warning but allow all requests to proceed
-    console.warn("⚠️ Database connection not established, some functionality may be limited");
+    const isDevelopment = process.env.NODE_ENV !== 'production';
     
-    // Only collect debug info, but don't block the request
-    const missingVars = [];
-    if (!process.env.DATABASE_URL) missingVars.push('DATABASE_URL');
-    if (!process.env.PGHOST) missingVars.push('PGHOST');
-    if (!process.env.PGDATABASE) missingVars.push('PGDATABASE');
-    if (!process.env.PGUSER) missingVars.push('PGUSER');
-    if (!process.env.PGPASSWORD) missingVars.push('PGPASSWORD');
-    
-    if (missingVars.length > 0) {
-      console.warn(`Missing database variables: ${missingVars.join(', ')}`);
+    if (isDevelopment) {
+      // In development, show a warning but allow the request to proceed
+      console.warn("⚠️ Database connection not established, some functionality may be limited");
+      next();
+    } else {
+      // In production, throw a proper database connection error
+      const missingVars = [];
+      if (!process.env.DATABASE_URL) missingVars.push('DATABASE_URL');
+      if (!process.env.PGHOST) missingVars.push('PGHOST');
+      if (!process.env.PGDATABASE) missingVars.push('PGDATABASE');
+      if (!process.env.PGUSER) missingVars.push('PGUSER');
+      if (!process.env.PGPASSWORD) missingVars.push('PGPASSWORD');
+      
+      const errorDetails = missingVars.length > 0 
+        ? `Missing required environment variables: ${missingVars.join(', ')}`
+        : 'Please check your database configuration';
+      
+      // Use our new DatabaseConnectionError class
+      const error = new DatabaseConnectionError("Database connection required", errorDetails);
+      
+      // Add additional properties for frontend handling
+      const responseObj = {
+        success: false,
+        message: error.message,
+        status: error.statusCode,
+        setup_required: true
+      };
+      
+      res.status(error.statusCode).json(responseObj);
     }
+  } else {
+    next();
   }
-  
-  // Always proceed to the next middleware
-  next();
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {

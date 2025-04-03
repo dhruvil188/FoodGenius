@@ -13,7 +13,7 @@ import { AuthResponse } from "@shared/schema";
 // Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "image2recipe.com", // Custom domain as authorized in Firebase console
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   messagingSenderId: "", // Optional in our use case
@@ -75,28 +75,6 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
     return await syncUserWithBackend(user);
   } catch (error) {
     console.error("Error signing in with Google:", error);
-    
-    // Check if it's an unauthorized domain error
-    if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'auth/unauthorized-domain') {
-      // Provide more helpful console message for developers
-      console.warn(
-        "Firebase authentication unauthorized domain error. " + 
-        "Please make sure you've added 'image2recipe.com' to your authorized domains in Firebase console."
-      );
-      
-      // Get the current user if possible - might work despite popup error
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        // If we have a user, try to sync with backend anyway
-        try {
-          return await syncUserWithBackend(currentUser);
-        } catch (syncError) {
-          console.error("Failed to sync after unauthorized domain:", syncError);
-        }
-      }
-    }
-    
-    // Re-throw the error for handling up the chain
     throw error;
   }
 }

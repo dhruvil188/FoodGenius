@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -138,41 +137,34 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
             </div>
           </div>
           
-          <Tabs defaultValue="0" className="w-full">
-            <TabsList className="grid grid-cols-7 mb-4">
-              {sortedWeeklyPlan.map((day, index) => (
-                <TabsTrigger key={day.day} value={index.toString()} className="text-xs sm:text-sm">
-                  {isMobile ? day.day.substring(0, 3) : day.day.charAt(0).toUpperCase() + day.day.slice(1)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            
-            {sortedWeeklyPlan.map((day, dayIndex) => (
-              <TabsContent key={day.day} value={dayIndex.toString()} className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-semibold capitalize">{day.day}</h3>
-                    {day.meals.some(meal => meal.name === `${day.day} Breakfast` || meal.name === `${day.day} Lunch` || meal.name === `${day.day} Dinner`) && (
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            Suggested Meals
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">These are suggested meals. Generate a new plan for detailed recipes for all days.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
+          <ScrollArea className="h-[70vh]">
+            <div className="space-y-8 pb-10">
+              {sortedWeeklyPlan.map((day, dayIndex) => (
+                <div key={day.day} className="space-y-4">
+                  <div className="flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-sm z-10 py-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-semibold capitalize">{day.day}</h3>
+                      {day.meals.some(meal => meal.name === `${day.day} Breakfast` || meal.name === `${day.day} Lunch` || meal.name === `${day.day} Dinner`) && (
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              Suggested Meals
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">These are suggested meals. Generate a new plan for detailed recipes for all days.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                    <Badge variant="outline" className="flex items-center gap-1 px-3 py-1.5">
+                      <Flame className="h-4 w-4 text-orange-500" />
+                      <span className="font-medium">{day.totalDailyCalories} calories</span>
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="flex items-center gap-1 px-3 py-1.5">
-                    <Flame className="h-4 w-4 text-orange-500" />
-                    <span className="font-medium">{day.totalDailyCalories} calories</span>
-                  </Badge>
-                </div>
-                
-                <ScrollArea className="h-[60vh]">
-                  <div className="space-y-6 pb-10">
+                  <Separator className="my-2" />
+                  
+                  <div className="space-y-6">
                     {day.meals.map((meal, mealIndex) => (
                       <Card key={mealIndex} className="overflow-hidden">
                         <CardHeader className="bg-muted/40 pb-2">
@@ -325,10 +317,10 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
                       </Card>
                     ))}
                   </div>
-                </ScrollArea>
-              </TabsContent>
-            ))}
-          </Tabs>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
     </div>

@@ -30,6 +30,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
   try {
     // Generate prompt for AI
     const prompt = generatePrompt(planRequest);
+    console.log("Generated prompt for Gemini:", prompt);
     
     // Get AI response
     const result = await model.generateContent(prompt);
@@ -50,7 +51,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
     
     console.log("Cleaned JSON:", cleanedJson);
     
-    // Parse the cleaned JSON
+    // Try to parse the cleaned JSON
     let dietPlan: DietPlanResponse;
     
     try {
@@ -58,34 +59,146 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
       
       // Check if the diet plan is empty or incomplete
       if (!dietPlan.weeklyPlan || dietPlan.weeklyPlan.length === 0) {
+        console.log("Diet plan is empty or has no weekly plan, trying to extract partial data");
+        
         // Try to extract partial data from the text
         const partialDays = extractPartialDietPlanData(text);
         
         if (partialDays.length > 0) {
-          // We have partial data, create a partial plan and ensure all 7 days are present
-          const completePlan = ensureAllDaysPresent(partialDays, planRequest.calorieTarget);
+          console.log(`Found ${partialDays.length} days of partial data`);
+          // We have partial data, sort it in the correct order
+          const sortedPlan = ensureAllDaysPresent(partialDays, planRequest.calorieTarget, planRequest.dietType);
+          
           dietPlan = {
-            weeklyPlan: completePlan,
+            weeklyPlan: sortedPlan,
             planSummary: "Personalized diet plan based on your preferences.",
-            weeklyNutritionAverage: calculateAverageNutrition(completePlan)
+            weeklyNutritionAverage: calculateAverageNutrition(sortedPlan)
           };
         } else {
-          // No usable data found
-          dietPlan = {
-            weeklyPlan: [],
-            planSummary: "Diet plan could not be generated. Please try again with different preferences.",
-            weeklyNutritionAverage: {
-              calories: 0,
-              protein: 0,
-              carbs: 0,
-              fat: 0
+          console.log("No partial data found in response, trying again with simplified prompt");
+          
+          // Try again with a simplified prompt
+          const simplifiedPrompt = `Generate a JSON 7-day meal plan for a ${planRequest.dietType} diet with ${planRequest.mealsPerDay} meals per day.
+           The daily calorie target is ${planRequest.calorieTarget}.
+           ${planRequest.dietType === 'vegetarian' ? 'MAKE SURE THERE ARE NO MEAT, FISH, OR SEAFOOD IN ANY MEAL.' : 
+           planRequest.dietType === 'vegan' ? 'MAKE SURE THERE ARE NO ANIMAL PRODUCTS OF ANY KIND IN ANY MEAL.' : ''}
+           Return ONLY the JSON with this structure:
+           {
+             "weeklyPlan": [
+               {
+                 "day": "Monday",
+                 "meals": [
+                   {
+                     "name": "Meal name",
+                     "timeOfDay": "Breakfast (7:30 AM)",
+                     "ingredients": ["ingredient 1", "ingredient 2"],
+                     "instructions": ["step 1", "step 2"],
+                     "nutritionalInfo": { "calories": 300, "protein": 20, "carbs": 30, "fat": 10 }
+                   }
+                 ],
+                 "totalDailyCalories": 2000
+               }
+             ],
+             "planSummary": "Brief summary of the diet plan",
+             "weeklyNutritionAverage": {
+               "calories": 2000,
+               "protein": 100,
+               "carbs": 250,
+               "fat": 70
+             }
+           }`;
+
+          try {
+            // Make a second API call with the simplified prompt
+            console.log("Making second Gemini API call with simplified prompt");
+            const secondResult = await model.generateContent(simplifiedPrompt);
+            const secondResponse = secondResult.response;
+            const secondText = secondResponse.text();
+            
+            console.log("Raw second response:", secondText);
+            
+            // Try to extract valid JSON
+            const secondJsonStr = extractJsonFromText(secondText);
+            const secondCleanedJson = cleanJsonString(secondJsonStr);
+            
+            console.log("Second cleaned JSON:", secondCleanedJson);
+            
+            try {
+              // Parse the second attempt
+              const secondAttempt = JSON.parse(secondCleanedJson);
+              
+              if (secondAttempt.weeklyPlan && secondAttempt.weeklyPlan.length > 0) {
+                console.log("Second attempt successful, found valid data");
+                // Sort days in the correct order
+                const sortedPlan = ensureAllDaysPresent(secondAttempt.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
+                
+                dietPlan = {
+                  weeklyPlan: sortedPlan,
+                  planSummary: secondAttempt.planSummary || "Personalized meal plan based on your dietary preferences.",
+                  weeklyNutritionAverage: secondAttempt.weeklyNutritionAverage || calculateAverageNutrition(sortedPlan)
+                };
+              } else {
+                throw new Error("Second attempt returned empty plan");
+              }
+            } catch (secondError) {
+              console.error("Error parsing second attempt:", secondError);
+              // Try one final attempt with an even more direct prompt
+              const finalPrompt = `Return just a 7-day meal plan JSON with ${planRequest.mealsPerDay} meals per day.
+                Diet: ${planRequest.dietType}. Calories: ${planRequest.calorieTarget}.
+                ONLY return the JSON, nothing else.`;
+                
+              const finalResult = await model.generateContent(finalPrompt);
+              const finalText = finalResult.response.text();
+              const finalJsonStr = extractJsonFromText(finalText);
+              const finalCleanedJson = cleanJsonString(finalJsonStr);
+              
+              try {
+                const finalAttempt = JSON.parse(finalCleanedJson);
+                if (finalAttempt.weeklyPlan && finalAttempt.weeklyPlan.length > 0) {
+                  const sortedPlan = ensureAllDaysPresent(finalAttempt.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
+                  dietPlan = {
+                    weeklyPlan: sortedPlan,
+                    planSummary: "Meal plan based on your dietary preferences.",
+                    weeklyNutritionAverage: finalAttempt.weeklyNutritionAverage || calculateAverageNutrition(sortedPlan)
+                  };
+                } else {
+                  throw new Error("Final attempt failed");
+                }
+              } catch (finalError) {
+                // Return an honest error message
+                dietPlan = {
+                  weeklyPlan: [],
+                  planSummary: "We couldn't generate a complete meal plan. Please try again with different preferences.",
+                  weeklyNutritionAverage: {
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0
+                  }
+                };
+              }
             }
-          };
+          } catch (retryError) {
+            console.error("Error during retry attempts:", retryError);
+            // Return an error message to the user
+            dietPlan = {
+              weeklyPlan: [],
+              planSummary: "We couldn't generate a meal plan at this time. Please try again later.",
+              weeklyNutritionAverage: {
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0
+              }
+            };
+          }
         }
       } else {
-        // Ensure all seven days are present in the plan
-        dietPlan.weeklyPlan = ensureAllDaysPresent(dietPlan.weeklyPlan, planRequest.calorieTarget);
-        // Recalculate average nutrition
+        // We have a plan with days, sort it to ensure correct order
+        console.log(`Found ${dietPlan.weeklyPlan.length} days in the plan`);
+        dietPlan.weeklyPlan = ensureAllDaysPresent(dietPlan.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
+        
+        // Recalculate average nutrition based on the days we actually have
         dietPlan.weeklyNutritionAverage = calculateAverageNutrition(dietPlan.weeklyPlan);
       }
       
@@ -95,65 +208,20 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
       
-      // Try to extract partial data
+      // Try to extract partial data using our extraction function
       const partialDays = extractPartialDietPlanData(text);
       
       if (partialDays.length > 0) {
-        // Check which days are missing
-        const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        const foundDays = new Set(partialDays.map(day => day.day));
-        
-        console.log("Days successfully extracted:", Array.from(foundDays).join(", "));
-        
-        // Try to find any missing days specifically
-        for (const day of daysOfWeek) {
-          if (!foundDays.has(day)) {
-            console.log(`Attempting to specifically extract ${day} data...`);
-            
-            // Create a specific regex for this day
-            const dayRegex = new RegExp(`"day"\\s*:\\s*"${day}"`, 'i');
-            const dayIndex = text.search(dayRegex);
-            
-            if (dayIndex !== -1) {
-              console.log(`Found ${day} in text at position ${dayIndex}`);
-              // Extract just this section until the next day or end
-              let endIndex = text.length;
-              
-              // Find the next day section if any
-              for (const nextDay of daysOfWeek) {
-                if (nextDay === day) continue;
-                const nextDayStr = `"day":"${nextDay}"`;
-                const nextDayIndex = text.indexOf(nextDayStr, dayIndex + 10);
-                if (nextDayIndex !== -1 && nextDayIndex < endIndex) {
-                  endIndex = nextDayIndex;
-                }
-              }
-              
-              // Extract this day's section and try to parse it
-              const daySection = text.substring(dayIndex, endIndex);
-              const extractedDayData = extractPartialDietPlanData(daySection);
-              
-              if (extractedDayData.length > 0) {
-                console.log(`Successfully extracted data for ${day}`);
-                partialDays.push(extractedDayData[0]);
-                foundDays.add(day);
-              }
-            }
-          }
-        }
+        console.log(`Extracted ${partialDays.length} days from partial data`);
         
         // Sort the days of the week in the correct order
-        partialDays.sort((a, b) => {
-          const dayOrder: { [key: string]: number } = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6};
-          return (dayOrder[a.day.toLowerCase()] ?? 0) - (dayOrder[b.day.toLowerCase()] ?? 0);
-        });
+        const sortedDays = ensureAllDaysPresent(partialDays, planRequest.calorieTarget, planRequest.dietType);
         
-        // We were able to extract some data - ensure all seven days are present
-        const completePlan = ensureAllDaysPresent(partialDays, planRequest.calorieTarget);
+        // Create a response with what we have
         const partialPlan: DietPlanResponse = {
-          weeklyPlan: completePlan,
+          weeklyPlan: sortedDays,
           planSummary: "Personalized diet plan based on your preferences.",
-          weeklyNutritionAverage: calculateAverageNutrition(completePlan)
+          weeklyNutritionAverage: calculateAverageNutrition(sortedDays)
         };
         
         // Try to validate against schema
@@ -161,13 +229,40 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
           return dietPlanResponseSchema.parse(partialPlan);
         } catch (schemaError) {
           console.error("Schema validation error for partial plan:", schemaError);
+          
+          // Try one more API call with a direct prompt
+          try {
+            console.log("Making final attempt with direct prompt");
+            const directPrompt = `Generate a JSON 7-day meal plan with ${planRequest.mealsPerDay} meals per day. 
+              Diet type: ${planRequest.dietType}. Target calories: ${planRequest.calorieTarget}.
+              ${planRequest.dietType === 'vegetarian' ? 'ENSURE NO MEAT PRODUCTS.' : 
+              planRequest.dietType === 'vegan' ? 'ENSURE NO ANIMAL PRODUCTS.' : ''}
+              ONLY return valid JSON.`;
+              
+            const directResult = await model.generateContent(directPrompt);
+            const directText = directResult.response.text();
+            const directJsonStr = extractJsonFromText(directText);
+            const directCleanedJson = cleanJsonString(directJsonStr);
+            
+            const directAttempt = JSON.parse(directCleanedJson);
+            if (directAttempt.weeklyPlan && directAttempt.weeklyPlan.length > 0) {
+              const sortedPlan = ensureAllDaysPresent(directAttempt.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
+              return dietPlanResponseSchema.parse({
+                weeklyPlan: sortedPlan,
+                planSummary: "Meal plan based on your preferences.",
+                weeklyNutritionAverage: calculateAverageNutrition(sortedPlan)
+              });
+            }
+          } catch (finalTryError) {
+            console.error("Final attempt failed:", finalTryError);
+          }
         }
       }
       
-      // Fallback to minimal structure
-      const fallbackPlan: DietPlanResponse = {
+      // No usable data at all - return a clear error message
+      const errorPlan: DietPlanResponse = {
         weeklyPlan: [],
-        planSummary: "Error generating complete plan. Please try again with different preferences.",
+        planSummary: "We couldn't generate a meal plan based on your preferences. Please try again with different options.",
         weeklyNutritionAverage: {
           calories: 0,
           protein: 0,
@@ -176,7 +271,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         }
       };
       
-      return dietPlanResponseSchema.parse(fallbackPlan);
+      return dietPlanResponseSchema.parse(errorPlan);
     }
   } catch (error) {
     console.error("Error generating diet plan:", error);
@@ -1125,9 +1220,53 @@ function generatePrompt(planRequest: DietPlanRequest): string {
     extraNotes
   } = planRequest;
   
+  let dietaryInstructions = '';
+  
+  // Create very explicit dietary instructions based on diet type
+  if (dietType === 'vegetarian') {
+    dietaryInstructions = `
+STRICT VEGETARIAN DIET REQUIREMENTS:
+- NO meat of any kind (beef, pork, lamb, etc.)
+- NO poultry (chicken, turkey, duck, etc.)
+- NO fish or seafood of any kind
+- ALLOWED: eggs, dairy products (milk, cheese, yogurt)
+- USE plant-based protein sources like beans, lentils, tofu, tempeh, seitan, chickpeas
+
+`;
+  } else if (dietType === 'vegan') {
+    dietaryInstructions = `
+STRICT VEGAN DIET REQUIREMENTS:
+- NO animal products of ANY kind
+- NO meat, poultry, fish, seafood
+- NO eggs or dairy products (milk, cheese, yogurt, butter)
+- NO honey
+- USE plant-based protein sources like beans, lentils, tofu, tempeh, seitan, chickpeas
+- USE plant-based dairy alternatives (almond milk, coconut yogurt, etc.)
+
+`;
+  } else if (dietType === 'keto') {
+    dietaryInstructions = `
+STRICT KETO DIET REQUIREMENTS:
+- HIGH fat content (70-80% of calories)
+- MODERATE protein (15-20% of calories)
+- VERY LOW carbohydrates (5-10% of calories, under 50g daily)
+- NO grains, sugar, fruits (except small portions of berries), or starchy vegetables
+- FOCUS on foods like avocados, nuts, seeds, oils, fatty meats, and low-carb vegetables
+
+`;
+  } else if (dietType === 'paleo') {
+    dietaryInstructions = `
+STRICT PALEO DIET REQUIREMENTS:
+- FOCUS on whole, unprocessed foods
+- INCLUDE lean meats, fish, fruits, vegetables, nuts, and seeds
+- NO grains, legumes, dairy, refined sugar, salt, potatoes, or highly processed foods
+
+`;
+  }
+
   return "I need you to generate a personalized 7-day meal plan based on the following criteria:\n\n" +
     `Diet Type: ${dietType}\n` +
-    `IMPORTANT: Follow the requested Diet Type (${dietType}) STRICTLY. If ${dietType === 'vegetarian' ? 'vegetarian' : dietType === 'vegan' ? 'vegan' : dietType} is selected, DO NOT include any animal products ${dietType === 'vegetarian' ? 'except dairy and eggs' : dietType === 'vegan' ? 'of any kind' : ''}.\n` +
+    dietaryInstructions +
     `Health Goals: ${healthGoals.join(", ")}\n` +
     `Calorie Target: ${calorieTarget >= 2600 ? '3000-3200' : calorieTarget <= 1800 ? '1500-1700' : '2000-2200'} calories per day\n` +
     `Meals Per Day: ${mealsPerDay}\n` +
@@ -1209,22 +1348,23 @@ function generatePrompt(planRequest: DietPlanRequest): string {
     
     "Your response must follow strict JSON format and be able to parse with JSON.parse() with no modifications. " +
     "Do not include markdown code blocks or other formatting. The response must be the raw JSON object only. " +
-    "Make sure all meals combined meet the target calories per day.";
+    "Make sure all meals combined meet the target calories per day.\n\n" + 
+    "FINAL REMINDER: VERIFY THAT ALL MEALS STRICTLY COMPLY WITH THE DIETARY REQUIREMENTS SPECIFIED ABOVE. " +
+    (dietType === 'vegetarian' ? "MAKE SURE THERE IS NO MEAT, POULTRY, FISH, OR SEAFOOD IN ANY MEAL." : 
+     dietType === 'vegan' ? "MAKE SURE THERE ARE NO ANIMAL PRODUCTS OF ANY KIND IN ANY MEAL." : 
+     "");
 }
 
 /**
  * Ensures all seven days of the week are present in the diet plan
- * If a day is missing, it creates a placeholder with default meals
+ * If days are missing, we'll return what we have and not fill in templates
  */
-function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; totalDailyCalories: number; }>, calorieTarget: string | number = 2200): Array<{ day: string; meals: any[]; totalDailyCalories: number; }> {
-  // Determine target calories based on calorie preference
-  const targetCalories = typeof calorieTarget === 'number' 
-    ? calorieTarget 
-    : calorieTarget === 'high' 
-      ? 3000 
-      : calorieTarget === 'low' 
-        ? 1600 
-        : 2200;
+function ensureAllDaysPresent(
+  weeklyPlan: Array<{ day: string; meals: any[]; totalDailyCalories: number; }>, 
+  calorieTarget: string | number = 2200,
+  dietType: string = 'balanced'
+): Array<{ day: string; meals: any[]; totalDailyCalories: number; }> {
+  // Get days of the week in order
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const dayOrder: { [key: string]: number } = {
     "monday": 0, 
@@ -1242,453 +1382,9 @@ function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; tot
     existingDays.set(day.day.toLowerCase(), day);
   }
   
-  // Predefined meal templates by day
-  const mealTemplates: Record<string, any[]> = {
-    "thursday": [
-      {
-        name: "Greek Yogurt with Berries and Granola",
-        timeOfDay: "Breakfast",
-        ingredients: [
-          "1 cup Greek yogurt",
-          "1/2 cup mixed berries (strawberries, blueberries, raspberries)",
-          "1/4 cup low-sugar granola",
-          "1 tbsp honey",
-          "1 tbsp chia seeds"
-        ],
-        instructions: [
-          "Place yogurt in a bowl",
-          "Top with berries, granola, and chia seeds",
-          "Drizzle with honey and serve cold"
-        ],
-        nutritionalInfo: { calories: 320, protein: 20, carbs: 40, fat: 10 }
-      },
-      {
-        name: "Mediterranean Chickpea Salad",
-        timeOfDay: "Lunch",
-        ingredients: [
-          "1 cup chickpeas, rinsed and drained",
-          "1/2 cucumber, diced",
-          "1/2 cup cherry tomatoes, halved",
-          "1/4 cup feta cheese, crumbled",
-          "2 tbsp olive oil",
-          "1 tbsp lemon juice",
-          "Salt and pepper to taste"
-        ],
-        instructions: [
-          "Combine chickpeas, cucumber, tomatoes, and feta in a bowl",
-          "Whisk olive oil, lemon juice, salt and pepper for dressing",
-          "Pour dressing over salad and toss to combine"
-        ],
-        nutritionalInfo: { calories: 380, protein: 15, carbs: 35, fat: 20 }
-      },
-      {
-        name: "Herb-Roasted Vegetable Quinoa Bowl",
-        timeOfDay: "Dinner",
-        ingredients: [
-          "1 cup cooked quinoa",
-          "1.5 cups roasted vegetables (bell peppers, zucchini, onions, mushrooms)",
-          "1/2 cup chickpeas, rinsed and drained",
-          "1 tbsp olive oil",
-          "1 tsp dried herbs (thyme, rosemary, oregano)",
-          "1/4 cup crumbled feta cheese",
-          "Salt and pepper to taste"
-        ],
-        instructions: [
-          "Toss vegetables with olive oil, herbs, salt, and pepper",
-          "Roast vegetables at 375°F for 25 minutes until tender",
-          "Combine with quinoa and chickpeas in a bowl",
-          "Top with crumbled feta cheese and serve"
-        ],
-        nutritionalInfo: { calories: 450, protein: 18, carbs: 45, fat: 18 }
-      },
-      {
-        name: "Apple with Almond Butter",
-        timeOfDay: "Snack",
-        ingredients: [
-          "1 medium apple, sliced",
-          "1 tbsp almond butter"
-        ],
-        instructions: [
-          "Slice apple and serve with almond butter for dipping"
-        ],
-        nutritionalInfo: { calories: 180, protein: 5, carbs: 25, fat: 9 }
-      }
-    ],
-    "friday": [
-      {
-        name: "Spinach and Mushroom Omelette",
-        timeOfDay: "Breakfast",
-        ingredients: [
-          "2 large eggs",
-          "1 cup fresh spinach",
-          "1/4 cup mushrooms, sliced",
-          "1 tbsp olive oil",
-          "2 tbsp feta cheese",
-          "Salt and pepper to taste"
-        ],
-        instructions: [
-          "Whisk eggs with salt and pepper",
-          "Sauté mushrooms and spinach in olive oil",
-          "Pour eggs over vegetables and cook until set",
-          "Sprinkle with feta cheese before folding"
-        ],
-        nutritionalInfo: { calories: 290, protein: 18, carbs: 5, fat: 22 }
-      },
-      {
-        name: "Hummus and Avocado Wrap",
-        timeOfDay: "Lunch",
-        ingredients: [
-          "1 whole wheat tortilla",
-          "1/3 cup hummus",
-          "1/2 avocado, sliced",
-          "1/4 cup shredded lettuce",
-          "1/4 cup grated carrots",
-          "2 tbsp roasted red peppers",
-          "1 tsp Dijon mustard",
-          "Fresh ground black pepper"
-        ],
-        instructions: [
-          "Spread hummus and mustard on tortilla",
-          "Layer avocado, lettuce, carrots, and red peppers",
-          "Season with black pepper",
-          "Roll up tightly and slice in half"
-        ],
-        nutritionalInfo: { calories: 350, protein: 12, carbs: 38, fat: 18 }
-      },
-      {
-        name: "Roasted Vegetable and Sweet Potato Buddha Bowl",
-        timeOfDay: "Dinner",
-        ingredients: [
-          "1 cup Brussels sprouts, halved",
-          "1 cup sweet potato, cubed",
-          "1/2 cup chickpeas, rinsed and drained",
-          "1/4 cup red onion, sliced",
-          "2 tbsp olive oil",
-          "1 clove garlic, minced",
-          "1 tsp lemon zest",
-          "1 tbsp tahini sauce",
-          "1 tsp maple syrup",
-          "Salt and pepper to taste"
-        ],
-        instructions: [
-          "Toss vegetables and chickpeas with olive oil, garlic, salt, and pepper",
-          "Roast at 400°F for 25 minutes until tender",
-          "Mix tahini, lemon zest, maple syrup, and 1 tbsp water for dressing",
-          "Serve vegetables and chickpeas in a bowl, drizzled with tahini dressing"
-        ],
-        nutritionalInfo: { calories: 420, protein: 15, carbs: 50, fat: 22 }
-      },
-      {
-        name: "Greek Yogurt with Honey",
-        timeOfDay: "Snack",
-        ingredients: [
-          "3/4 cup Greek yogurt",
-          "1 tsp honey",
-          "1 tbsp walnuts, chopped"
-        ],
-        instructions: [
-          "Top yogurt with honey and walnuts"
-        ],
-        nutritionalInfo: { calories: 180, protein: 18, carbs: 15, fat: 7 }
-      }
-    ],
-    "saturday": [
-      {
-        name: "Avocado Toast with Poached Egg",
-        timeOfDay: "Breakfast",
-        ingredients: [
-          "1 slice whole grain bread",
-          "1/2 avocado, mashed",
-          "1 large egg",
-          "1 tsp lemon juice",
-          "Red pepper flakes",
-          "Salt and pepper to taste"
-        ],
-        instructions: [
-          "Toast bread until golden brown",
-          "Mash avocado with lemon juice, salt, and pepper",
-          "Spread avocado mixture on toast",
-          "Top with poached egg and red pepper flakes"
-        ],
-        nutritionalInfo: { calories: 300, protein: 15, carbs: 20, fat: 20 }
-      },
-      {
-        name: "Quinoa Bowl with Roasted Vegetables",
-        timeOfDay: "Lunch",
-        ingredients: [
-          "3/4 cup cooked quinoa",
-          "1 cup mixed roasted vegetables (bell peppers, zucchini, eggplant)",
-          "2 tbsp tahini sauce",
-          "1/4 cup chickpeas",
-          "1 tsp lemon juice",
-          "Fresh herbs (parsley, mint)"
-        ],
-        instructions: [
-          "Layer quinoa at the bottom of bowl",
-          "Top with roasted vegetables and chickpeas",
-          "Drizzle with tahini sauce and lemon juice",
-          "Garnish with fresh herbs"
-        ],
-        nutritionalInfo: { calories: 380, protein: 12, carbs: 45, fat: 18 }
-      },
-      {
-        name: "Lemon Herb Roasted Portobello with Sweet Potato",
-        timeOfDay: "Dinner",
-        ingredients: [
-          "2 large portobello mushroom caps",
-          "1 medium sweet potato",
-          "2 cups mixed green salad",
-          "1/4 cup cooked lentils",
-          "1 tbsp olive oil",
-          "1 tbsp lemon juice",
-          "1 tsp herbs de Provence",
-          "1 tbsp balsamic vinaigrette for salad",
-          "1 tbsp nutritional yeast"
-        ],
-        instructions: [
-          "Marinate portobellos in olive oil, lemon juice, and herbs for 30 minutes",
-          "Roast portobellos at 375°F for 20 minutes until tender",
-          "Bake sweet potato at 400°F for 45 minutes until tender",
-          "Warm lentils and mix with mushrooms",
-          "Serve with mixed greens dressed with balsamic vinaigrette",
-          "Sprinkle nutritional yeast over the dish for a savory finish"
-        ],
-        nutritionalInfo: { calories: 420, protein: 18, carbs: 60, fat: 15 }
-      },
-      {
-        name: "Fruit and Nut Mix",
-        timeOfDay: "Snack",
-        ingredients: [
-          "1/4 cup mixed dried fruits (apricots, cranberries)",
-          "1/4 cup mixed nuts (almonds, cashews, walnuts)",
-          "1 tbsp dark chocolate chips"
-        ],
-        instructions: [
-          "Combine all ingredients in a small container"
-        ],
-        nutritionalInfo: { calories: 200, protein: 6, carbs: 20, fat: 14 }
-      }
-    ],
-    "sunday": [
-      {
-        name: "Berry and Banana Smoothie Bowl",
-        timeOfDay: "Breakfast",
-        ingredients: [
-          "1 frozen banana",
-          "1 cup mixed berries",
-          "1/2 cup unsweetened almond milk",
-          "1 tbsp almond butter",
-          "1 tbsp chia seeds",
-          "1/4 cup granola for topping"
-        ],
-        instructions: [
-          "Blend banana, berries, almond milk, and almond butter until smooth",
-          "Pour into bowl and top with granola and chia seeds"
-        ],
-        nutritionalInfo: { calories: 340, protein: 10, carbs: 50, fat: 14 }
-      },
-      {
-        name: "Lentil Soup with Whole Grain Roll",
-        timeOfDay: "Lunch",
-        ingredients: [
-          "1 cup lentil soup",
-          "1 small whole grain roll",
-          "1 tsp olive oil",
-          "1 tbsp parmesan cheese (optional)"
-        ],
-        instructions: [
-          "Heat soup until hot",
-          "Serve with whole grain roll drizzled with olive oil",
-          "Sprinkle with parmesan if desired"
-        ],
-        nutritionalInfo: { calories: 330, protein: 18, carbs: 40, fat: 10 }
-      },
-      {
-        name: "Crispy Cauliflower Tacos with Cabbage Slaw",
-        timeOfDay: "Dinner",
-        ingredients: [
-          "2 cups cauliflower florets",
-          "2 small corn tortillas",
-          "1 cup cabbage slaw",
-          "1/4 avocado, sliced",
-          "2 tbsp Greek yogurt",
-          "1 lime, cut into wedges",
-          "Fresh cilantro",
-          "1 tbsp olive oil",
-          "1 tsp each: cumin, paprika, garlic powder",
-          "1/4 cup black beans, rinsed and drained"
-        ],
-        instructions: [
-          "Toss cauliflower with oil and spices, roast at 425°F for 20-25 min until crispy",
-          "Warm tortillas in a dry skillet",
-          "Mix black beans with a dash of cumin",
-          "Assemble tacos with beans, cauliflower, slaw, and avocado",
-          "Top with Greek yogurt and cilantro",
-          "Serve with lime wedges"
-        ],
-        nutritionalInfo: { calories: 390, protein: 15, carbs: 45, fat: 18 }
-      },
-      {
-        name: "Hummus with Vegetable Sticks",
-        timeOfDay: "Snack",
-        ingredients: [
-          "1/4 cup hummus",
-          "1 cup vegetable sticks (carrots, celery, bell peppers)"
-        ],
-        instructions: [
-          "Serve hummus with vegetable sticks for dipping"
-        ],
-        nutritionalInfo: { calories: 160, protein: 6, carbs: 15, fat: 8 }
-      }
-    ],
-    "wednesday": [
-      {
-        name: "Veggie Omelette with Whole Grain Toast",
-        timeOfDay: "Breakfast",
-        ingredients: [
-          "2 large eggs",
-          "1/4 cup diced bell peppers",
-          "1/4 cup diced onions",
-          "1/4 cup spinach",
-          "1 slice whole grain toast",
-          "1 tsp olive oil",
-          "Salt and pepper to taste"
-        ],
-        instructions: [
-          "Sauté veggies in olive oil until soft",
-          "Whisk eggs and pour over vegetables",
-          "Cook until set and fold in half",
-          "Serve with whole grain toast"
-        ],
-        nutritionalInfo: { calories: 300, protein: 18, carbs: 20, fat: 16 }
-      },
-      {
-        name: "Mediterranean Quinoa and Chickpea Salad",
-        timeOfDay: "Lunch",
-        ingredients: [
-          "1/2 cup cooked quinoa",
-          "1/2 cup chickpeas, rinsed and drained",
-          "1/4 cup roasted red peppers, chopped",
-          "1 cup mixed greens",
-          "1/4 cup cherry tomatoes",
-          "1/4 cucumber, sliced",
-          "2 tbsp crumbled feta cheese",
-          "1 tbsp kalamata olives, sliced",
-          "1 tbsp olive oil and red wine vinegar dressing",
-          "1 tsp dried oregano"
-        ],
-        instructions: [
-          "Place mixed greens in a bowl",
-          "Combine quinoa, chickpeas, red peppers, tomatoes, and cucumber",
-          "Top with feta cheese and olives",
-          "Sprinkle with oregano and drizzle with dressing",
-          "Toss to combine right before serving"
-        ],
-        nutritionalInfo: { calories: 350, protein: 15, carbs: 40, fat: 14 }
-      },
-      {
-        name: "Stuffed Bell Peppers with Lentils and Rice",
-        timeOfDay: "Dinner",
-        ingredients: [
-          "2 large bell peppers, halved and seeds removed",
-          "1/2 cup cooked lentils",
-          "1/2 cup cooked brown rice",
-          "1/4 cup diced onion",
-          "1/4 cup diced tomatoes",
-          "1 cup mixed vegetables (broccoli, carrots, cauliflower), chopped small",
-          "1 tbsp olive oil",
-          "1 clove garlic, minced",
-          "1 tsp Italian herbs",
-          "2 tbsp grated parmesan cheese (optional)",
-          "Salt and pepper to taste"
-        ],
-        instructions: [
-          "Preheat oven to 375°F",
-          "Sauté onions and garlic in olive oil until soft",
-          "Add chopped vegetables and cook for 5 minutes",
-          "Mix in lentils, rice, tomatoes, and herbs",
-          "Season with salt and pepper to taste",
-          "Fill bell pepper halves with mixture",
-          "Top with parmesan cheese if desired",
-          "Bake for 25-30 minutes until peppers are tender"
-        ],
-        nutritionalInfo: { calories: 420, protein: 18, carbs: 60, fat: 12 }
-      },
-      {
-        name: "Greek Yogurt with Berries",
-        timeOfDay: "Snack",
-        ingredients: [
-          "3/4 cup Greek yogurt",
-          "1/4 cup mixed berries",
-          "1 tsp honey"
-        ],
-        instructions: [
-          "Mix yogurt with berries and drizzle with honey"
-        ],
-        nutritionalInfo: { calories: 160, protein: 15, carbs: 20, fat: 3 }
-      }
-    ]
-  };
-  
-  // Check for missing days and add appropriate data
-  for (const day of daysOfWeek) {
-    if (!existingDays.has(day.toLowerCase())) {
-      console.log(`Creating detailed day for missing day: ${day}`);
-      
-      let meals = [];
-      let totalDailyCalories = 0;
-      
-      // Use predefined templates if available
-      if (mealTemplates[day.toLowerCase()]) {
-        meals = [...mealTemplates[day.toLowerCase()]];
-        totalDailyCalories = meals.reduce((sum, meal) => {
-          return sum + (meal.nutritionalInfo?.calories || 0);
-        }, 0);
-      } else {
-        // Fallback for any days without templates
-        // This should never happen since we have templates for all days
-        const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snack"];
-        
-        for (let i = 0; i < 4; i++) {
-          const meal = {
-            name: `${day} ${mealTimes[i]}`,
-            timeOfDay: mealTimes[i],
-            ingredients: [
-              "1/2 cup plant-based protein (lentils, chickpeas, tofu)",
-              "1 cup mixed vegetables",
-              "1/2 cup complex carbohydrates (quinoa, brown rice, sweet potato)",
-              "1 tbsp healthy fats (olive oil, avocado, nuts)",
-              "Fresh or dried herbs and spices to taste"
-            ],
-            instructions: [
-              "Prepare all ingredients according to your preference",
-              "Combine ingredients following standard culinary techniques",
-              "Season to taste and serve immediately"
-            ],
-            nutritionalInfo: { 
-              calories: 350, 
-              protein: 15, 
-              carbs: 40, 
-              fat: 12 
-            }
-          };
-          
-          meals.push(meal);
-          totalDailyCalories += meal.nutritionalInfo.calories;
-        }
-      }
-      
-      existingDays.set(day.toLowerCase(), {
-        day,
-        meals,
-        totalDailyCalories
-      });
-    }
-  }
-  
-  // Convert map back to array and sort by day of week
-  const fullWeeklyPlan = Array.from(existingDays.values());
-  return fullWeeklyPlan.sort((a, b) => 
+  // Sort the existing days by the day of week
+  const sortedPlan = Array.from(existingDays.values());
+  return sortedPlan.sort((a, b) => 
     (dayOrder[a.day.toLowerCase()] ?? 0) - (dayOrder[b.day.toLowerCase()] ?? 0)
   );
 }

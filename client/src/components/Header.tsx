@@ -51,7 +51,13 @@ export default function Header() {
           <Button 
             variant="outline"
             className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all mr-2"
-            onClick={() => navigate('/chat')}
+            onClick={() => {
+              if (currentUser) {
+                navigate('/chat');
+              } else {
+                navigate('/auth');
+              }
+            }}
           >
             <i className="fas fa-comments mr-2"></i>
             Recipe Chat
@@ -60,7 +66,13 @@ export default function Header() {
           <Button 
             variant="outline"
             className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all mr-2"
-            onClick={() => navigate('/recipes')}
+            onClick={() => {
+              if (currentUser) {
+                navigate('/recipes');
+              } else {
+                navigate('/auth');
+              }
+            }}
           >
             <i className="fas fa-bookmark mr-2"></i>
             My Recipes
@@ -101,7 +113,7 @@ export default function Header() {
             <LoginButton 
               variant="outline" 
               size="sm" 
-              className="rounded-full ml-1 hidden md:flex"
+              className="rounded-full ml-1 flex"
             />
           )}
         </div>

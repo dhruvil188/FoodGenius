@@ -7,7 +7,7 @@ import {
   type AnalyzeImageResponse,
   type AppUser
 } from "@shared/schema";
-import { db } from "./db";
+import { db, isDatabaseConnected } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { hashPassword, verifyPassword, generateToken } from "./utils";
 import type { IStorage } from "./storage";

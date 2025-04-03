@@ -156,13 +156,29 @@ export default function Header() {
                     <i className="fas fa-bookmark w-6 text-primary"></i>
                     My Recipes
                   </button>
+                  <button
+                    className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-green-50 text-green-700"
+                    onClick={() => {
+                      if (location === '/') {
+                        // If already on home page, scroll to the upload section
+                        document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' });
+                      } else {
+                        // If on another page, navigate to home with the upload section anchor
+                        navigate('/#upload-section');
+                      }
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <i className="fas fa-camera w-6 text-green-600"></i>
+                    Analyze Dish
+                  </button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
           
           <Button 
-            className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-3 md:px-5 shadow-md text-xs md:text-sm"
+            className="hidden md:flex bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-5 shadow-md text-sm"
             onClick={() => {
               if (location === '/') {
                 // If already on home page, scroll to the upload section
@@ -173,9 +189,8 @@ export default function Header() {
               }
             }}
           >
-            <i className="fas fa-camera mr-1 md:mr-1.5"></i>
-            <span className="hidden md:inline">Analyze Dish</span>
-            <span className="inline md:hidden">Analyze</span>
+            <i className="fas fa-camera mr-1.5"></i>
+            <span>Analyze Dish</span>
           </Button>
           
           {currentUser ? (

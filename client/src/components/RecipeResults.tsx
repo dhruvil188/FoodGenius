@@ -16,7 +16,8 @@ import {
   type PresentationGuidance,
   type CookingScience,
   type SensoryGuidance,
-  type IngredientGroup
+  type IngredientGroup,
+  type SavedRecipe
 } from '@shared/schema';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -24,6 +25,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 interface RecipeResultsProps {
   result: AnalyzeImageResponse;
@@ -38,8 +41,10 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
   const [completedSteps, setCompletedSteps] = useState<Record<number, Set<number>>>({});
   const [selectedVariation, setSelectedVariation] = useState<string | null>(null);
   const [savedRecipes, setSavedRecipes] = useState<AnalyzeImageResponse[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
   
   // Initialize completed steps for each recipe
   useEffect(() => {
@@ -149,6 +154,63 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
     );
   };
   
+  // Mutation to save a recipe to the user's library
+  const saveRecipeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/recipes", { recipe: result });
+      return response.json();
+    },
+    onSuccess: (savedRecipe: SavedRecipe) => {
+      setIsSaved(true);
+      toast({
+        title: "Recipe Saved",
+        description: `${result.foodName} has been saved to your library`,
+      });
+      // Invalidate recipes query to refresh the library
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
+      
+      // Trigger confetti celebration
+      triggerConfetti();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to save recipe",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to delete a recipe from the user's library
+  const deleteRecipeMutation = useMutation({
+    mutationFn: async (recipeId: number) => {
+      const response = await apiRequest("DELETE", `/api/recipes/${recipeId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      setIsSaved(false);
+      toast({
+        title: "Recipe Removed",
+        description: `${result.foodName} has been removed from your library`,
+      });
+      // Invalidate recipes query to refresh the library
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to remove recipe",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSaveRecipe = () => {
+    if (!isSaved) {
+      saveRecipeMutation.mutate();
+    }
+  };
+
   const handleLoadSavedRecipe = (savedRecipe: AnalyzeImageResponse) => {
     toast({
       title: "Recipe Loaded",
@@ -1680,7 +1742,23 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
             </TabsContent>
           </Tabs>
           
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center gap-4 mt-8">
+            <Button 
+              onClick={handleSaveRecipe} 
+              className="rounded-full bg-green-600 hover:bg-green-700 text-white" 
+              disabled={isSaved || saveRecipeMutation.isPending}
+            >
+              {saveRecipeMutation.isPending ? (
+                <>
+                  <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-heart mr-2"></i> Save Recipe
+                </>
+              )}
+            </Button>
             <Button onClick={onTryAnother} className="rounded-full">
               <i className="fas fa-camera mr-2"></i> Try Another Dish
             </Button>

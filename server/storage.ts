@@ -8,8 +8,9 @@ import {
 } from "@shared/schema";
 import { hashPassword, verifyPassword, generateToken } from './utils';
 
-// Dynamically import to avoid circular dependency
+// Import storage implementations
 import { databaseStorage } from './databaseStorage';
+import { supabaseStorage } from './supabaseStorage';
 
 // Re-export utility functions from utils.ts
 export { hashPassword, verifyPassword, generateToken };
@@ -57,5 +58,8 @@ export interface IStorage {
   }>;
 }
 
-// Use the database storage implementation
-export const storage = databaseStorage;
+// Use the Supabase storage implementation
+export const storage = supabaseStorage;
+
+// Uncomment the line below to revert to PostgreSQL database storage
+// export const storage = databaseStorage;

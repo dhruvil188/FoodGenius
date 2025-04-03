@@ -29,8 +29,8 @@ export async function analyzeImage(imageData: string, userId: number): Promise<A
   
   // Check if Gemini API is available
   if (!genAI || !apiKey) {
-    console.warn("Using mock data because Gemini API key is not available");
-    return getMockAnalysisResponse();
+    console.error("❌ Gemini API key is missing or invalid");
+    throw new ValidationError("API configuration error: Gemini API key is missing. Please contact support.");
   }
   
   try {

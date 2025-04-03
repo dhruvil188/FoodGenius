@@ -11,12 +11,15 @@ export async function saveRecipe(userId: number, recipeData: AnalyzeImageRespons
     throw new ValidationError("Invalid recipe data");
   }
   
+  // Get the image URL from the request if it exists, otherwise try to get it from the recipe data
+  const imageUrl = recipeData.imageUrl || (recipeData.recipes && recipeData.recipes[0] && recipeData.recipes[0].imageUrl) || "";
+  
   const savedRecipe: InsertSavedRecipe = {
     userId,
     recipeData,
     foodName: recipeData.foodName,
     description: recipeData.description,
-    imageUrl: recipeData.recipes[0]?.imageUrl || "",
+    imageUrl: imageUrl,
     tags: recipeData.tags || [],
     favorite: false
   };

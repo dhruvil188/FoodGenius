@@ -258,6 +258,7 @@ export const analyzeImageResponseSchema = z.object({
   tags: z.array(z.string()),
   recipes: z.array(recipeSchema),
   youtubeVideos: z.array(youtubeVideoSchema).optional(),
+  imageUrl: z.string().optional(), // The original image URL that was analyzed
 });
 
 export type AnalyzeImageResponse = z.infer<typeof analyzeImageResponseSchema>;

@@ -451,60 +451,77 @@ export default function Home() {
               </p>
             </motion.div>
 
-            {/* Recipe Showcase Carousel */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {expandedRecipes.slice(0, 6).map((recipe, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300">
-                    <div className="relative h-48 bg-gray-100">
-                      {recipe.youtubeVideos && recipe.youtubeVideos.length > 0 && recipe.youtubeVideos[0].thumbnailUrl ? (
-                        <img 
-                          src={recipe.youtubeVideos[0].thumbnailUrl} 
-                          alt={recipe.foodName} 
-                          className="w-full h-full object-cover" 
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-gradient-to-br from-green-100 to-emerald-200">
-                          <i className="fas fa-utensils text-4xl text-emerald-500"></i>
+            {/* Recipe Showcase Slider */}
+            <div className="relative max-w-5xl mx-auto mb-12 overflow-hidden">
+              <div className="flex items-stretch gap-6 px-4 md:px-8 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar">
+                {expandedRecipes.slice(0, 3).map((recipe, index) => {
+                  // Use direct recipe images instead of YouTube thumbnails
+                  let imageUrl = '';
+                  if (index === 0) {
+                    imageUrl = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1170&auto=format&fit=crop';
+                  } else if (index === 1) {
+                    imageUrl = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=987&auto=format&fit=crop';
+                  } else {
+                    imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1160&auto=format&fit=crop';
+                  }
+                  
+                  return (
+                    <motion.div
+                      key={index}
+                      className="min-w-[300px] md:min-w-[350px] flex-1 snap-center"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
+                      <Card className="overflow-hidden h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div className="relative h-64 bg-gray-100">
+                          <img 
+                            src={imageUrl} 
+                            alt={recipe.foodName} 
+                            className="w-full h-full object-cover" 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                          <div className="absolute bottom-4 left-4 right-4 text-white">
+                            <h3 className="font-bold text-2xl mb-1 text-shadow">{recipe.foodName}</h3>
+                            <div className="flex flex-wrap gap-2">
+                              {recipe.tags.slice(0, 2).map((tag, i) => (
+                                <span 
+                                  key={i} 
+                                  className="text-xs px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    <CardContent className="p-5">
-                      <h3 className="font-bold text-xl mb-2 line-clamp-1">{recipe.foodName}</h3>
-                      <p className="text-muted-foreground text-sm mb-4 overflow-hidden text-ellipsis" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                        {recipe.description}
-                      </p>
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {recipe.tags.slice(0, 3).map((tag, i) => (
-                          <span 
-                            key={i} 
-                            className={cn(
-                              "text-xs px-2 py-1 rounded-full",
-                              i === 0 ? "bg-green-100 text-green-800" :
-                              i === 1 ? "bg-blue-100 text-blue-800" :
-                              "bg-amber-100 text-amber-800"
-                            )}
+                        <CardContent className="p-5">
+                          <p className="text-muted-foreground text-sm mb-4 overflow-hidden text-ellipsis" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                            {recipe.description}
+                          </p>
+                          <Button 
+                            onClick={() => setLocation(`/recipe/${slugify(recipe.foodName)}`)} 
+                            className="w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
                           >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <Button 
-                        onClick={() => setLocation(`/recipe/${slugify(recipe.foodName)}`)} 
-                        className="w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
-                      >
-                        View Recipe
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                            View Recipe
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </div>
+              
+              {/* Slider Pagination Dots */}
+              <div className="flex justify-center mt-6 space-x-2">
+                {[0, 1, 2].map((index) => (
+                  <div 
+                    key={index} 
+                    className="w-2.5 h-2.5 rounded-full bg-primary/30"
+                  ></div>
+                ))}
+              </div>
             </div>
 
             <div className="text-center">

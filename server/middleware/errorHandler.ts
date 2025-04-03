@@ -55,6 +55,16 @@ export class NotFoundError extends AppError {
 }
 
 /**
+ * Database connection error
+ */
+export class DatabaseConnectionError extends AppError {
+  constructor(message: string = "Database connection error", details?: string) {
+    const errorMessage = details ? `${message}: ${details}` : message;
+    super(errorMessage, 503);
+  }
+}
+
+/**
  * Global error handler middleware
  */
 export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {

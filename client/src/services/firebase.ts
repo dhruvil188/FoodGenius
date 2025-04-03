@@ -13,16 +13,29 @@ import { AuthResponse } from "@shared/schema";
 // Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+  // Use image2recipe.com as the primary domain
+  authDomain: "image2recipe.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   messagingSenderId: "", // Optional in our use case
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// Initialize Firebase (only if not already initialized)
+let app;
+try {
+  // Check for existing Firebase apps
+  app = initializeApp(firebaseConfig);
+} catch (error) {
+  // If error is about duplicate app, get the existing app
+  if ((error as any)?.code === 'app/duplicate-app') {
+    console.log('Firebase app already initialized, using existing app');
+  } else {
+    console.error('Firebase initialization error:', error);
+  }
+}
+
+const auth = getAuth();
 const googleProvider = new GoogleAuthProvider();
 
 // Token management

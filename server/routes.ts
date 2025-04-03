@@ -26,7 +26,8 @@ import {
   errorHandler, 
   asyncHandler,
   ValidationError,
-  AuthenticationError
+  AuthenticationError,
+  DatabaseConnectionError
 } from "./middleware/errorHandler";
 
 // Import service layer
@@ -133,7 +134,7 @@ function checkDatabaseConnectivity(req: Request, res: Response, next: NextFuncti
       console.warn("⚠️ Database connection not established, some functionality may be limited");
       next();
     } else {
-      // In production, return a clear error response
+      // In production, throw a proper database connection error
       const missingVars = [];
       if (!process.env.DATABASE_URL) missingVars.push('DATABASE_URL');
       if (!process.env.PGHOST) missingVars.push('PGHOST');
@@ -141,16 +142,22 @@ function checkDatabaseConnectivity(req: Request, res: Response, next: NextFuncti
       if (!process.env.PGUSER) missingVars.push('PGUSER');
       if (!process.env.PGPASSWORD) missingVars.push('PGPASSWORD');
       
-      const errorMessage = missingVars.length > 0 
+      const errorDetails = missingVars.length > 0 
         ? `Missing required environment variables: ${missingVars.join(', ')}`
-        : 'Database connection failed. Please check your database configuration.';
+        : 'Please check your database configuration';
       
-      res.status(503).json({
-        error: 'Database Connection Error',
-        message: errorMessage,
-        status: 503,
+      // Use our new DatabaseConnectionError class
+      const error = new DatabaseConnectionError("Database connection required", errorDetails);
+      
+      // Add additional properties for frontend handling
+      const responseObj = {
+        success: false,
+        message: error.message,
+        status: error.statusCode,
         setup_required: true
-      });
+      };
+      
+      res.status(error.statusCode).json(responseObj);
     }
   } else {
     next();

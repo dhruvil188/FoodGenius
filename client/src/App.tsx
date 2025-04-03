@@ -11,6 +11,8 @@ import ChatPage from "@/pages/chat-page";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import SavedRecipesPage from "@/pages/saved-recipes-page";
+import RecipeDetailPage from "@/pages/recipe-detail-page";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -21,6 +23,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/library" component={Library} />
       <Route path="/recipe/:slug" component={RecipePage} />
+      <Route path="/recipes" component={SavedRecipesPage} />
+      <Route path="/recipe/:id" component={RecipeDetailPage} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/chat/:id" component={ChatPage} />
       <Route path="/contact" component={Contact} />

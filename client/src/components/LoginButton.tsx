@@ -32,11 +32,7 @@ export default function LoginButton({
       onClick={handleAuth}
       className={`${fullWidth ? 'w-full' : ''} ${className}`}
     >
-      {currentUser ? (
-        <span className="whitespace-nowrap text-xs md:text-sm">Sign Out</span>
-      ) : (
-        <span className="whitespace-nowrap">Sign In with Google</span>
-      )}
+      {currentUser ? "Sign Out" : "Sign In with Google"}
     </Button>
   );
 }

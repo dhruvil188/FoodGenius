@@ -37,7 +37,7 @@ const testimonials = [
     avatar: "https://randomuser.me/api/portraits/women/44.jpg"
   },
   {
-    quote: "As a food blogger, Dish Detective is my secret weapon. The AI recognizes even complex dishes and gives me accurate recipes every time.",
+    quote: "As a food blogger, Recipe Snap is my secret weapon. The AI recognizes even complex dishes and gives me accurate recipes every time.",
     author: "Michael Torres",
     role: "Food Blogger",
     avatar: "https://randomuser.me/api/portraits/men/32.jpg"

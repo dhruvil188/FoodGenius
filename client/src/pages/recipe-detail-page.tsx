@@ -112,7 +112,7 @@ export default function RecipeDetailPage() {
   
   // Handle delete confirmation
   const confirmDelete = () => {
-    if (window.confirm("Are you sure you want to delete this recipe? This action cannot be undone.")) {
+    if (window.confirm(`Are you sure you want to delete "${recipe?.foodName}"? This action cannot be undone.`)) {
       deleteRecipeMutation.mutate();
     }
   };

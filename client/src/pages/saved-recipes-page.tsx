@@ -1,21 +1,48 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { type SavedRecipe } from '@shared/schema';
 import { motion } from 'framer-motion';
 import { useLocation } from 'wouter';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 export default function SavedRecipesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('all');
   const [, navigate] = useLocation();
+  
+  // Delete recipe mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (recipeId: number) => {
+      await apiRequest("DELETE", `/api/recipes/${recipeId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Recipe Deleted",
+        description: "Recipe has been removed from your library",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to delete recipe",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Function to delete a recipe
+  const deleteRecipe = (recipeId: number) => {
+    deleteMutation.mutate(recipeId);
+  };
   
   // Fetch saved recipes
   const { data: recipes, isLoading, error } = useQuery<SavedRecipe[]>({
@@ -216,10 +243,11 @@ export default function SavedRecipesPage() {
                 variant="ghost"
                 size="sm"
                 className="px-2 text-slate-400 hover:text-red-500 hover:bg-transparent"
-                onClick={() => toast({
-                  title: "Feature Coming Soon",
-                  description: "Recipe deletion will be available in the next update!",
-                })}
+                onClick={() => {
+                  if (window.confirm(`Are you sure you want to delete "${recipe.foodName}"? This action cannot be undone.`)) {
+                    deleteRecipe(recipe.id);
+                  }
+                }}
               >
                 <i className="fas fa-trash"></i>
               </Button>

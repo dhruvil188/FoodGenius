@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,8 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useLocation } from "wouter";
 
 interface RecipeCardProps {
@@ -25,6 +23,8 @@ interface RecipeCardProps {
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
   const [, navigate] = useLocation();
+  const [checkedIngredients, setCheckedIngredients] = useState<Record<number, boolean>>({});
+  const [checkedSteps, setCheckedSteps] = useState<Record<number, boolean>>({});
   
   if (!recipe) return null;
   
@@ -33,10 +33,18 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
     ? recipe.recipes[0] 
     : null;
   
-  const handleViewRecipe = () => {
-    // In a real implementation, you'd save the recipe to the database first
-    // and navigate to the recipe page with the ID, but for now just an example
-    navigate(`/chat`);
+  const toggleIngredient = (index: number) => {
+    setCheckedIngredients(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+  
+  const toggleStep = (index: number) => {
+    setCheckedSteps(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
   };
 
   return (
@@ -94,18 +102,31 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
                 Ingredients
               </AccordionTrigger>
               <AccordionContent>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  {mainRecipe.ingredients && mainRecipe.ingredients.map((ingredient: any, i: number) => (
-                    <li key={i}>
-                      {typeof ingredient === 'string' 
-                        ? ingredient 
-                        : `${ingredient.amount || ''} ${ingredient.unit || ''} ${ingredient.item || ingredient.name || ''} ${ingredient.preparation ? `(${ingredient.preparation})` : ''}`
-                          .replace(/\s+/g, ' ')
-                          .trim()
-                      }
-                    </li>
-                  ))}
-                </ul>
+                <div className="space-y-2">
+                  {mainRecipe.ingredients && mainRecipe.ingredients.map((ingredient: any, i: number) => {
+                    const ingredientText = typeof ingredient === 'string' 
+                      ? ingredient 
+                      : `${ingredient.amount || ''} ${ingredient.unit || ''} ${ingredient.item || ingredient.name || ''} ${ingredient.preparation ? `(${ingredient.preparation})` : ''}`
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                        
+                    return (
+                      <div key={i} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`ingredient-${i}`} 
+                          checked={checkedIngredients[i] || false}
+                          onCheckedChange={() => toggleIngredient(i)}
+                        />
+                        <label 
+                          htmlFor={`ingredient-${i}`}
+                          className={`text-sm ${checkedIngredients[i] ? 'line-through text-gray-400' : ''}`}
+                        >
+                          {ingredientText}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
               </AccordionContent>
             </AccordionItem>
             
@@ -114,13 +135,24 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
                 Instructions
               </AccordionTrigger>
               <AccordionContent>
-                <ol className="list-decimal list-inside space-y-2 text-sm">
+                <div className="space-y-3">
                   {mainRecipe.instructions && mainRecipe.instructions.map((step: string, i: number) => (
-                    <li key={i} className="pl-1">
-                      <span className="ml-1">{step}</span>
-                    </li>
+                    <div key={i} className="flex items-start space-x-2">
+                      <Checkbox 
+                        id={`step-${i}`} 
+                        checked={checkedSteps[i] || false}
+                        onCheckedChange={() => toggleStep(i)}
+                        className="mt-0.5"
+                      />
+                      <label 
+                        htmlFor={`step-${i}`}
+                        className={`text-sm ${checkedSteps[i] ? 'line-through text-gray-400' : ''}`}
+                      >
+                        <span className="font-medium">{i+1}.</span> {step}
+                      </label>
+                    </div>
                   ))}
-                </ol>
+                </div>
               </AccordionContent>
             </AccordionItem>
             
@@ -154,13 +186,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, preview = false }) => {
           </Accordion>
         )}
       </CardContent>
-      {!preview && (
-        <CardFooter className="flex justify-end bg-gray-50 dark:bg-gray-800/20 py-3">
-          <Button variant="outline" size="sm" className="text-xs" onClick={handleViewRecipe}>
-            View Full Recipe <ChevronRight className="ml-1 h-3 w-3" />
-          </Button>
-        </CardFooter>
-      )}
     </Card>
   );
 };

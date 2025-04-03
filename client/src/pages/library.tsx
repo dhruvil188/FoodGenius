@@ -148,9 +148,9 @@ export default function Library() {
               >
                 <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300">
                   <div className="relative h-48 bg-gray-100">
-                    {recipe.youtubeVideos && recipe.youtubeVideos.length > 0 && recipe.youtubeVideos[0].videoId ? (
+                    {recipe.youtubeVideos && recipe.youtubeVideos.length > 0 && recipe.youtubeVideos[0].thumbnailUrl ? (
                       <img 
-                        src={`https://i.ytimg.com/vi/${recipe.youtubeVideos[0].videoId}/mqdefault.jpg`} 
+                        src={recipe.youtubeVideos[0].thumbnailUrl} 
                         alt={recipe.foodName} 
                         className="w-full h-full object-cover" 
                         onError={(e) => {

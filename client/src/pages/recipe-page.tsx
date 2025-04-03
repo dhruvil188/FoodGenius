@@ -143,7 +143,7 @@ export default function RecipePage() {
           "name": recipe.foodName,
           "image": imageUrl,
           "description": recipe.description || `A delicious recipe for ${recipe.foodName}`,
-          "keywords": recipe.tags.join(", "),
+          "keywords": recipe.tags?.join(", ") || "",
           "author": {
             "@type": "Organization",
             "name": "Recipe Snap"
@@ -152,14 +152,18 @@ export default function RecipePage() {
           "cookTime": recipe.cookTime ? `PT${recipe.cookTime.replace(/\D/g, '')}M` : "PT30M",
           "totalTime": recipe.totalTime ? `PT${recipe.totalTime.replace(/\D/g, '')}M` : "PT50M",
           "recipeYield": recipe.servings || "4 servings",
-          "recipeCategory": recipe.tags[0] || "Main Dish",
-          "recipeCuisine": recipe.tags.find(tag => tag.includes("cuisine")) || recipe.tags[1] || "International",
+          "recipeCategory": recipe.tags && recipe.tags.length > 0 ? recipe.tags[0] : "Main Dish",
+          "recipeCuisine": recipe.tags && recipe.tags.length > 0 ? 
+            (recipe.tags.find(tag => tag.includes("cuisine")) || recipe.tags[1] || "International") : 
+            "International",
           "recipeIngredient": recipe.ingredientList || recipe.ingredients || [],
-          "recipeInstructions": recipe.instructions.map((step, index) => ({
-            "@type": "HowToStep",
-            "position": index + 1,
-            "text": step
-          }))
+          "recipeInstructions": recipe.instructions && recipe.instructions.length > 0 ? 
+            recipe.instructions.map((step, index) => ({
+              "@type": "HowToStep",
+              "position": index + 1,
+              "text": step
+            })) : 
+            [{ "@type": "HowToStep", "position": 1, "text": "Prepare the dish according to standard recipe" }]
         }}
       />
       <Button 

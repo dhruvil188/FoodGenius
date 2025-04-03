@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Send, PlusCircle, Clock, Trash2 } from "lucide-react";
+import { Loader2, Send, PlusCircle, Clock, Trash2, MessageCircle, ChefHat } from "lucide-react";
 import RecipeCard from "@/components/RecipeCard";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -200,11 +200,11 @@ const ChatPage: React.FC = () => {
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] bg-background">
       {/* Sidebar with conversation list */}
-      <div className="w-full md:w-64 border-r border-border flex flex-col">
-        <div className="p-4 border-b border-border">
-          <Button onClick={handleNewConversation} className="w-full flex items-center gap-2">
+      <div className="w-full md:w-72 border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border bg-background/95 sticky top-0 z-10">
+          <Button onClick={handleNewConversation} className="w-full flex items-center gap-2" variant="default">
             <PlusCircle size={16} />
-            <span>New Conversation</span>
+            <span>New Recipe Fusion</span>
           </Button>
         </div>
         <ScrollArea className="flex-1">
@@ -217,15 +217,19 @@ const ChatPage: React.FC = () => {
               Error loading conversations. Please try again.
             </div>
           ) : conversations?.length === 0 ? (
-            <div className="p-4 text-muted-foreground text-center">
-              No conversations yet. Start a new one!
+            <div className="p-6 text-muted-foreground text-center space-y-2">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
+                <MessageCircle size={24} className="text-primary" />
+              </div>
+              <p className="font-medium">No recipe fusions yet</p>
+              <p className="text-sm">Start a new conversation to create fusion recipes!</p>
             </div>
           ) : (
             <div className="py-2">
               {conversations?.map((conversation: Conversation) => (
                 <div 
                   key={conversation.id} 
-                  className={`group w-full p-3 hover:bg-secondary/50 transition-colors flex justify-between items-center
+                  className={`group w-full p-3 mx-1 my-1 rounded-md hover:bg-secondary/50 transition-colors flex justify-between items-center
                     ${activeConversationId === conversation.id ? "bg-secondary" : ""}
                   `}
                 >
@@ -237,8 +241,8 @@ const ChatPage: React.FC = () => {
                       {getConversationTitle(conversation)}
                     </span>
                     <div className="flex items-center text-xs text-muted-foreground">
-                      <Clock size={12} className="mr-1" />
-                      <span>
+                      <Clock size={12} className="mr-1 flex-shrink-0" />
+                      <span className="truncate">
                         {formatDistanceToNow(new Date(conversation.lastMessage.createdAt), {
                           addSuffix: true,
                         })}
@@ -250,10 +254,10 @@ const ChatPage: React.FC = () => {
                       e.stopPropagation();
                       handleDeleteConversation(conversation.id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 p-2 ml-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-all"
                     aria-label="Delete conversation"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               ))}
@@ -268,20 +272,26 @@ const ChatPage: React.FC = () => {
         <ScrollArea className="flex-1 p-4">
           {!activeConversationId && !isLoadingMessages ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8">
-              <h2 className="text-2xl font-bold mb-2">Recipe Chat</h2>
-              <p className="text-muted-foreground mb-8">
-                Describe the dishes you'd like to combine, and I'll create a fusion recipe for you.
+              <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Recipe Chat</h2>
+              <p className="text-muted-foreground mb-10 max-w-md">
+                Describe the dishes you'd like to combine, and I'll create a delicious fusion recipe for you.
               </p>
-              <div className="max-w-md space-y-2 text-left">
-                <p className="text-sm p-2 rounded bg-secondary">
-                  "Create a pasta dish that combines elements of carbonara and pad thai"
-                </p>
-                <p className="text-sm p-2 rounded bg-secondary">
-                  "How would you combine a classic beef burger with Korean bibimbap?"
-                </p>
-                <p className="text-sm p-2 rounded bg-secondary">
-                  "Design a dessert that fuses tiramisu with mango sticky rice"
-                </p>
+              <div className="max-w-md space-y-4 text-left w-full">
+                <div className="text-sm p-4 rounded-lg border border-border bg-secondary/40 hover:bg-secondary/70 transition-colors cursor-pointer" 
+                     onClick={() => setPrompt("Create a pasta dish that combines elements of carbonara and pad thai")}>
+                  <p className="font-medium text-primary mb-1">Try this:</p>
+                  <p>"Create a pasta dish that combines elements of carbonara and pad thai"</p>
+                </div>
+                <div className="text-sm p-4 rounded-lg border border-border bg-secondary/40 hover:bg-secondary/70 transition-colors cursor-pointer"
+                     onClick={() => setPrompt("How would you combine a classic beef burger with Korean bibimbap?")}>
+                  <p className="font-medium text-primary mb-1">Try this:</p>
+                  <p>"How would you combine a classic beef burger with Korean bibimbap?"</p>
+                </div>
+                <div className="text-sm p-4 rounded-lg border border-border bg-secondary/40 hover:bg-secondary/70 transition-colors cursor-pointer"
+                     onClick={() => setPrompt("Design a dessert that fuses tiramisu with mango sticky rice")}>
+                  <p className="font-medium text-primary mb-1">Try this:</p>
+                  <p>"Design a dessert that fuses tiramisu with mango sticky rice"</p>
+                </div>
               </div>
             </div>
           ) : isLoadingMessages ? (
@@ -293,7 +303,7 @@ const ChatPage: React.FC = () => {
               Error loading messages. Please try again.
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6 px-2">
               {messages?.map((message: ChatMessage) => (
                 <motion.div
                   key={message.id}
@@ -305,22 +315,31 @@ const ChatPage: React.FC = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-4 ${
+                    className={`max-w-[85%] rounded-2xl shadow-sm ${
                       message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary"
+                        ? "bg-primary text-primary-foreground py-3 px-4 rounded-br-sm"
+                        : "bg-secondary/80 border border-border py-3 px-4 rounded-bl-sm"
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    {message.role === "assistant" && (
+                      <div className="flex items-center mb-2">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                          <ChefHat size={14} className="text-primary" />
+                        </div>
+                        <span className="text-xs font-medium">Recipe Chef</span>
+                      </div>
+                    )}
+                    
+                    <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                     
                     {/* Render recipe card if the message has a recipe output */}
                     {message.role === "assistant" && message.recipeOutput && (
-                      <div className="mt-4">
+                      <div className="mt-4 bg-background/40 rounded-lg p-2">
                         <RecipeCard recipe={message.recipeOutput} />
                       </div>
                     )}
                     
-                    <div className="text-xs opacity-70 mt-2">
+                    <div className="text-xs opacity-70 mt-2 text-right">
                       {formatDistanceToNow(new Date(message.createdAt), {
                         addSuffix: true,
                       })}
@@ -328,26 +347,31 @@ const ChatPage: React.FC = () => {
                   </div>
                 </motion.div>
               ))}
-              <div ref={messageEndRef} />
+              <div ref={messageEndRef} className="h-4" />
             </div>
           )}
         </ScrollArea>
 
         {/* Input area */}
-        <div className="border-t border-border p-4">
-          <form onSubmit={handleSendMessage} className="flex gap-2">
-            <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe dishes to combine... (e.g., 'Create a dish that combines tacos and sushi')"
-              className="flex-1 min-h-[60px] max-h-[180px]"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage(e);
-                }
-              }}
-            />
+        <div className="border-t border-border p-4 bg-background/95">
+          <form onSubmit={handleSendMessage} className="flex gap-3 items-end">
+            <div className="relative flex-1">
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe dishes to combine... (e.g., 'Create a dish that combines tacos and sushi')"
+                className="flex-1 min-h-[60px] max-h-[180px] pr-10 resize-none border-primary/20 focus-visible:ring-primary/30"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage(e);
+                  }
+                }}
+              />
+              <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+                Shift + Enter for new line
+              </div>
+            </div>
             <Button
               type="submit"
               disabled={
@@ -355,7 +379,8 @@ const ChatPage: React.FC = () => {
                 createMessageMutation.isPending ||
                 generateRecipeMutation.isPending
               }
-              className="self-end h-[60px] w-[60px]"
+              className="h-[60px] w-[60px] rounded-full shadow-sm"
+              size="icon"
             >
               {createMessageMutation.isPending || generateRecipeMutation.isPending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -364,7 +389,14 @@ const ChatPage: React.FC = () => {
               )}
             </Button>
           </form>
-          {/* Credits check would be added here if needed */}
+          
+          {/* Credits message */}
+          <div className="mt-2 text-xs text-center text-muted-foreground">
+            <span className="flex items-center justify-center gap-1">
+              <ChefHat size={12} className="inline-block" />
+              Recipe Chef combines your suggestions to create delicious fusion recipes
+            </span>
+          </div>
         </div>
       </div>
     </div>

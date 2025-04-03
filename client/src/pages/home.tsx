@@ -463,9 +463,9 @@ export default function Home() {
                 >
                   <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300">
                     <div className="relative h-48 bg-gray-100">
-                      {recipe.youtubeVideos && recipe.youtubeVideos.length > 0 && recipe.youtubeVideos[0].thumbnailUrl ? (
+                      {recipe.youtubeVideos && recipe.youtubeVideos.length > 0 && recipe.youtubeVideos[0].videoId ? (
                         <img 
-                          src={recipe.youtubeVideos[0].thumbnailUrl}
+                          src={`https://i.ytimg.com/vi/${recipe.youtubeVideos[0].videoId}/mqdefault.jpg`}
                           alt={recipe.foodName} 
                           className="w-full h-full object-cover"
                           onError={(e) => {

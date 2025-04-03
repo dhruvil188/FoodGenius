@@ -6,6 +6,7 @@ import { AnalyzeImageResponse } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { findRecipeBySlug, slugify } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import SEO from "@/components/SEO";
 
 export default function RecipePage() {
   const [location, setLocation] = useLocation();
@@ -130,6 +131,37 @@ export default function RecipePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <SEO 
+        title={`${recipe.foodName} Recipe | Recipe Snap`}
+        description={recipe.description || `Discover how to make delicious ${recipe.foodName} with our step-by-step recipe guide.`}
+        canonical={`/library/${params.slug}`}
+        image={imageUrl}
+        type="recipe"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Recipe",
+          "name": recipe.foodName,
+          "image": imageUrl,
+          "description": recipe.description || `A delicious recipe for ${recipe.foodName}`,
+          "keywords": recipe.tags.join(", "),
+          "author": {
+            "@type": "Organization",
+            "name": "Recipe Snap"
+          },
+          "prepTime": recipe.prepTime ? `PT${recipe.prepTime.replace(/\D/g, '')}M` : "PT20M",
+          "cookTime": recipe.cookTime ? `PT${recipe.cookTime.replace(/\D/g, '')}M` : "PT30M",
+          "totalTime": recipe.totalTime ? `PT${recipe.totalTime.replace(/\D/g, '')}M` : "PT50M",
+          "recipeYield": recipe.servings || "4 servings",
+          "recipeCategory": recipe.tags[0] || "Main Dish",
+          "recipeCuisine": recipe.tags.find(tag => tag.includes("cuisine")) || recipe.tags[1] || "International",
+          "recipeIngredient": recipe.ingredientList || recipe.ingredients || [],
+          "recipeInstructions": recipe.instructions.map((step, index) => ({
+            "@type": "HowToStep",
+            "position": index + 1,
+            "text": step
+          }))
+        }}
+      />
       <Button 
         onClick={handleBackToLibrary}
         className="mb-6"

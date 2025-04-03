@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { cn, slugify } from "@/lib/utils";
+import SEO from "@/components/SEO";
 
 export default function Library() {
   const [, setLocation] = useLocation();
@@ -96,6 +97,27 @@ export default function Library() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <SEO 
+        title="Recipe Library | Recipe Snap"
+        description="Explore our curated collection of detailed recipes with step-by-step instructions, nutrition information, and more. No need to upload photos!"
+        canonical="/library"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Recipe Library - Recipe Snap",
+          "description": "Browse our extensive collection of recipes with detailed cooking instructions",
+          "url": `${window.location.origin}/library`,
+          "mainEntity": {
+            "@type": "ItemList",
+            "itemListElement": expandedRecipes.map((recipe, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "url": `${window.location.origin}/recipe/${slugify(recipe.foodName)}`,
+              "name": recipe.foodName
+            }))
+          }
+        }}
+      />
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-green-500 to-teal-600 text-transparent bg-clip-text">
           Recipe Library

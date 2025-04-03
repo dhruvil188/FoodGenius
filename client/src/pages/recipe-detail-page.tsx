@@ -12,6 +12,7 @@ import { type SavedRecipe, type AnalyzeImageResponse } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { triggerConfetti } from '@/lib/confetti';
 import { motion } from 'framer-motion';
+import SEO from '@/components/SEO';
 
 export default function RecipeDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -187,6 +188,45 @@ export default function RecipeDetailPage() {
   
   return (
     <div className="container mx-auto py-8 px-4">
+      {recipe && recipeData && (
+        <SEO
+          title={`${recipe.foodName} Recipe | Recipe Snap`}
+          description={`Learn how to make ${recipe.foodName}. ${recipe.description}`}
+          canonical={`/recipes/${id}`}
+          schema={{
+            "@context": "https://schema.org",
+            "@type": "Recipe",
+            "name": recipe.foodName,
+            "image": recipe.imageUrl,
+            "description": recipe.description,
+            "keywords": recipe.tags?.join(", "),
+            "author": {
+              "@type": "Organization",
+              "name": "Recipe Snap"
+            },
+            "datePublished": recipe.createdAt,
+            "prepTime": selectedRecipe?.prepTime ? `PT${selectedRecipe.prepTime.replace(/\s+/g, '')}` : undefined,
+            "cookTime": selectedRecipe?.cookTime ? `PT${selectedRecipe.cookTime.replace(/\s+/g, '')}` : undefined,
+            "totalTime": selectedRecipe?.totalTime ? `PT${selectedRecipe.totalTime.replace(/\s+/g, '')}` : undefined,
+            "recipeYield": selectedRecipe?.servings ? `${selectedRecipe.servings} servings` : undefined,
+            "recipeIngredient": selectedRecipe?.ingredients?.map(ingredient => ingredient.name),
+            "recipeInstructions": selectedRecipe?.instructions?.map((step, index) => ({
+              "@type": "HowToStep",
+              "position": index + 1,
+              "text": step
+            })),
+            "recipeCategory": recipe.category,
+            "recipeCuisine": recipe.cuisine,
+            "nutrition": selectedRecipe?.nutritionFacts ? {
+              "@type": "NutritionInformation",
+              "calories": selectedRecipe.nutritionFacts.calories,
+              "proteinContent": selectedRecipe.nutritionFacts.protein,
+              "fatContent": selectedRecipe.nutritionFacts.fat,
+              "carbohydrateContent": selectedRecipe.nutritionFacts.carbohydrates
+            } : undefined
+          }}
+        />
+      )}
       <motion.div 
         className="max-w-5xl mx-auto"
         initial={{ opacity: 0 }}

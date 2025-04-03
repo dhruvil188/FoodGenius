@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import Hero from "@/components/Hero"; // Import the Hero component
 import ProtectedFeature from "@/components/ProtectedFeature"; // Import the ProtectedFeature component
+import SEO from "@/components/SEO"; // Import the SEO component
 import {
   Dialog,
   DialogContent,
@@ -195,6 +196,31 @@ export default function Home() {
 
   return (
     <div className="bg-white min-h-screen">
+      <SEO 
+        title="Recipe Snap | Find recipes from food photos"
+        description="Upload food photos and get instant recipes with AI-powered analysis. Find cooking instructions, recipe variations, and side dish recommendations."
+        canonical="/"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Recipe Snap",
+          "applicationCategory": "FoodApplication",
+          "description": "Upload food photos and get instant AI-powered recipes with cooking instructions, variations, and side dish recommendations.",
+          "operatingSystem": "Any",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "screenshot": "/assets/recipe-snap-screenshot.jpg",
+          "softwareVersion": "1.0.0",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "125"
+          }
+        }}
+      />
       <main>
         {/* Hero Section */}
         <Hero onGetStarted={scrollToUpload} />

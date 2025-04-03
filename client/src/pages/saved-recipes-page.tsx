@@ -11,6 +11,7 @@ import { type SavedRecipe } from '@shared/schema';
 import { motion } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import SEO from '@/components/SEO';
 
 export default function SavedRecipesPage() {
   const { currentUser: user } = useAuth();
@@ -140,6 +141,27 @@ export default function SavedRecipesPage() {
   
   return (
     <div className="container mx-auto py-8 px-4">
+      <SEO 
+        title="My Recipe Library | Recipe Snap"
+        description="Access your saved recipes, manage your personal collection, and find your favorite dishes in one place."
+        canonical="/recipes"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Recipe Library - Recipe Snap",
+          "description": "Your personal collection of saved recipes on Recipe Snap",
+          "url": `${window.location.origin}/recipes`,
+          "mainEntity": {
+            "@type": "ItemList",
+            "itemListElement": recipes?.map((recipe, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "url": `${window.location.origin}/recipes/${recipe.id}`,
+              "name": recipe.foodName
+            })) || []
+          }
+        }}
+      />
       <h1 className="text-3xl font-bold mb-8 food-gradient-text">My Recipe Library</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">

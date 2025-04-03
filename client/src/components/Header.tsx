@@ -49,15 +49,6 @@ export default function Header() {
           </Button>
           
           <Button 
-            variant="outline"
-            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all mr-2"
-            onClick={() => navigate('/diet-planner')}
-          >
-            <i className="fas fa-utensils mr-2"></i>
-            Diet Planner
-          </Button>
-          
-          <Button 
             className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"
             onClick={() => {
               if (location === '/') {

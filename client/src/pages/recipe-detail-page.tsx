@@ -233,7 +233,7 @@ export default function RecipeDetailPage({ id: propId }: RecipeDetailPageProps) 
         />
       )}
       <motion.div 
-        className="max-w-5xl mx-auto"
+        className="max-w-5xl mx-auto px-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -278,22 +278,22 @@ export default function RecipeDetailPage({ id: propId }: RecipeDetailPageProps) 
         </div>
         
         <Card className="bg-white rounded-2xl shadow-lg mb-8">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6 mx-0">
             <motion.div 
               className="flex flex-col md:flex-row items-start gap-6 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-full md:w-1/3">
+              <div className="w-full md:w-1/3 pl-0 md:pl-0">
                 {recipe.imageUrl ? (
                   <img 
                     src={recipe.imageUrl} 
                     alt={recipe.foodName} 
-                    className="w-full h-48 md:h-64 object-cover rounded-lg"
+                    className="w-full h-48 md:h-64 object-cover rounded-lg ml-0"
                   />
                 ) : (
-                  <div className="w-full h-48 md:h-64 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <div className="w-full h-48 md:h-64 bg-slate-100 rounded-lg flex items-center justify-center ml-0">
                     <i className="fas fa-utensils text-4xl text-slate-300"></i>
                   </div>
                 )}

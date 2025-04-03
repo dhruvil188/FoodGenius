@@ -56,7 +56,6 @@ import {
 // Import storage for user conversion
 import { storage } from './storage';
 import { isDatabaseConnected } from './db';
-import { checkSupabaseConnection } from './supabase';
 
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
@@ -126,61 +125,43 @@ async function optionalAuthenticate(req: Request, res: Response, next: NextFunct
 }
 
 // Middleware to check database connectivity
-async function checkDatabaseConnectivity(req: Request, res: Response, next: NextFunction) {
-  try {
+function checkDatabaseConnectivity(req: Request, res: Response, next: NextFunction) {
+  if (!isDatabaseConnected()) {
     const isDevelopment = process.env.NODE_ENV !== 'production';
     
-    // Check Supabase connection
-    const supabaseConnected = await checkSupabaseConnection();
-    
-    if (!supabaseConnected) {
-      // Check for missing required environment variables
+    if (isDevelopment) {
+      // In development, show a warning but allow the request to proceed
+      console.warn("⚠️ Database connection not established, some functionality may be limited");
+      next();
+    } else {
+      // In production, throw a proper database connection error
       const missingVars = [];
-      if (!process.env.SUPABASE_URL) missingVars.push('SUPABASE_URL');
-      if (!process.env.SUPABASE_KEY) missingVars.push('SUPABASE_KEY');
+      if (!process.env.DATABASE_URL) missingVars.push('DATABASE_URL');
+      if (!process.env.PGHOST) missingVars.push('PGHOST');
+      if (!process.env.PGDATABASE) missingVars.push('PGDATABASE');
+      if (!process.env.PGUSER) missingVars.push('PGUSER');
+      if (!process.env.PGPASSWORD) missingVars.push('PGPASSWORD');
       
       const errorDetails = missingVars.length > 0 
         ? `Missing required environment variables: ${missingVars.join(', ')}`
-        : 'Please check your Supabase configuration';
+        : 'Please check your database configuration';
       
-      if (isDevelopment) {
-        // In development, show a warning but allow the request to proceed
-        console.warn(`⚠️ Supabase connection not established: ${errorDetails}`);
-        console.warn("Some functionality may be limited");
-        next();
-      } else {
-        // In production, return a proper error response
-        const error = new DatabaseConnectionError("Database connection required", errorDetails);
-        
-        // Add additional properties for frontend handling
-        const responseObj = {
-          success: false,
-          message: "We're having trouble connecting to our database. Please try again later.",
-          status: error.statusCode,
-          setup_required: true,
-          error_detail: errorDetails
-        };
-        
-        return res.status(error.statusCode).json(responseObj);
-      }
-    } else {
-      // Database is connected, proceed
-      next();
-    }
-  } catch (error) {
-    console.error('Database connectivity check failed:', error);
-    
-    // In case of unexpected errors, allow the request in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn("⚠️ Database connectivity check failed, but allowing request in development mode");
-      next();
-    } else {
-      return res.status(503).json({
+      // Use our new DatabaseConnectionError class
+      const error = new DatabaseConnectionError("Database connection required", errorDetails);
+      
+      // Add additional properties for frontend handling
+      const responseObj = {
         success: false,
-        message: 'Database service is temporarily unavailable. Please try again later.',
-        status: 503
-      });
+        message: "We're having trouble connecting to our database. If you're using the app on mobile, please try on a desktop browser or check back later.",
+        status: error.statusCode,
+        setup_required: true,
+        error_detail: errorDetails
+      };
+      
+      res.status(error.statusCode).json(responseObj);
     }
+  } else {
+    next();
   }
 }
 
@@ -189,16 +170,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(errorHandler);
   
   // Add route to check database status - useful for deployment health checks
-  app.get("/api/health", asyncHandler(async (req: Request, res: Response) => {
-    const supabaseConnected = await checkSupabaseConnection();
+  app.get("/api/health", (req: Request, res: Response) => {
+    const isDbConnected = isDatabaseConnected();
     
-    res.status(supabaseConnected ? 200 : 503).json({
-      status: supabaseConnected ? "healthy" : "degraded",
-      database: supabaseConnected ? "connected" : "disconnected",
+    res.status(isDbConnected ? 200 : 503).json({
+      status: isDbConnected ? "healthy" : "degraded",
+      database: isDbConnected ? "connected" : "disconnected",
       environment: process.env.NODE_ENV || "development",
       timestamp: new Date().toISOString()
     });
-  }));
+  });
   
   // Apply database connectivity check to all API routes except health check
   app.use([

@@ -15,8 +15,6 @@ import { Logo } from "@/components/Logo";
 import Hero from "@/components/Hero"; // Import the Hero component
 import ProtectedFeature from "@/components/ProtectedFeature"; // Import the ProtectedFeature component
 import SEO from "@/components/SEO"; // Import the SEO component
-import { expandedRecipes } from "@/data/expandedRecipeLibrary"; // Import recipe library data
-import { cn, slugify } from "@/lib/utils"; // Import utility functions
 import {
   Dialog,
   DialogContent,
@@ -430,115 +428,8 @@ export default function Home() {
           </div>
         </section>
         
-        {/* Recipe Library Showcase Section */}
-        <section id="recipe-library-showcase" className="py-12 sm:py-16 bg-white">
-          <div className="container max-w-7xl mx-auto px-4">
-            <motion.div 
-              className="text-center mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
-                PUBLIC LIBRARY
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Explore Our <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Recipe Library</span>
-              </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
-                Browse our collection of curated recipes with detailed instructions, nutritional information, and cooking tips. No account required!
-              </p>
-            </motion.div>
-
-            {/* Recipe Showcase Slider */}
-            <div className="relative max-w-5xl mx-auto mb-12 overflow-hidden">
-              <div className="flex items-stretch gap-6 px-4 md:px-8 overflow-x-auto pb-4 snap-x snap-mandatory no-scrollbar">
-                {expandedRecipes.slice(0, 3).map((recipe, index) => {
-                  // Use direct recipe images instead of YouTube thumbnails
-                  let imageUrl = '';
-                  if (index === 0) {
-                    imageUrl = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1170&auto=format&fit=crop';
-                  } else if (index === 1) {
-                    imageUrl = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=987&auto=format&fit=crop';
-                  } else {
-                    imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1160&auto=format&fit=crop';
-                  }
-                  
-                  return (
-                    <motion.div
-                      key={index}
-                      className="min-w-[300px] md:min-w-[350px] flex-1 snap-center"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <Card className="overflow-hidden h-full hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <div className="relative h-64 bg-gray-100">
-                          <img 
-                            src={imageUrl} 
-                            alt={recipe.foodName} 
-                            className="w-full h-full object-cover" 
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                          <div className="absolute bottom-4 left-4 right-4 text-white">
-                            <h3 className="font-bold text-2xl mb-1 text-shadow">{recipe.foodName}</h3>
-                            <div className="flex flex-wrap gap-2">
-                              {recipe.tags.slice(0, 2).map((tag, i) => (
-                                <span 
-                                  key={i} 
-                                  className="text-xs px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <CardContent className="p-5">
-                          <p className="text-muted-foreground text-sm mb-4 overflow-hidden text-ellipsis" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                            {recipe.description}
-                          </p>
-                          <Button 
-                            onClick={() => setLocation(`/recipe/${slugify(recipe.foodName)}`)} 
-                            className="w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700"
-                          >
-                            View Recipe
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-              
-              {/* Slider Pagination Dots */}
-              <div className="flex justify-center mt-6 space-x-2">
-                {[0, 1, 2].map((index) => (
-                  <div 
-                    key={index} 
-                    className="w-2.5 h-2.5 rounded-full bg-primary/30"
-                  ></div>
-                ))}
-              </div>
-            </div>
-
-            <div className="text-center">
-              <Button 
-                onClick={() => setLocation('/library')} 
-                variant="outline" 
-                className="px-6 py-2 rounded-full border-primary text-primary hover:bg-primary/5"
-              >
-                <i className="fas fa-book-open mr-2"></i>
-                View All Recipes
-              </Button>
-            </div>
-          </div>
-        </section>
-        
         {/* Recipe Magic in Action Section */}
-        <section id="recipe-magic" className="py-12 sm:py-16 bg-gray-50">
+        <section id="recipe-magic" className="py-12 sm:py-16 bg-white">
           <div className="container max-w-7xl mx-auto px-4">
             <motion.div 
               className="text-center mb-8 sm:mb-10"

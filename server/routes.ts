@@ -211,6 +211,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Process image with AI
     const result = await analyzeImage(imageData, req.user.id);
     
+    // Store the original image URL in the result for saving
+    result.imageUrl = imageData;
+    
     // Return analysis result
     return res.status(200).json(result);
   }));

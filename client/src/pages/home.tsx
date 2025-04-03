@@ -16,6 +16,7 @@ import { Logo } from "@/components/Logo";
 import Hero from "@/components/Hero"; // Import the Hero component
 import ProtectedFeature from "@/components/ProtectedFeature"; // Import the ProtectedFeature component
 import SEO from "@/components/SEO"; // Import the SEO component
+import { useAuth } from "@/contexts/AuthContext"; // Import the useAuth hook
 import {
   Dialog,
   DialogContent,
@@ -94,6 +95,7 @@ export default function Home() {
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
   const uploadSectionRef = useRef<HTMLDivElement>(null);
+  const { appUser } = useAuth();
   
   // Scroll to the upload section if a deep link is used
   useEffect(() => {
@@ -1147,42 +1149,43 @@ export default function Home() {
         </section>
 
         {/* Recipe Showcase Section */}
-        <section id="recipe-showcase" className="py-12 sm:py-16 bg-white relative overflow-hidden">
+        <section id="recipe-showcase" className="py-10 sm:py-14 bg-white relative overflow-hidden">
           <div className="container max-w-7xl mx-auto px-4">
             <motion.div 
-              className="text-center mb-12"
+              className="text-center mb-8"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <Badge className="mb-4 bg-primary/10 text-primary border-none py-1.5 px-4">
-                RECIPE GALLERY
+              <Badge className="mb-3 bg-primary/10 text-primary border-none py-1.5 px-4">
+                RECIPE INSPIRATION
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
                 Discover <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Amazing Recipes</span>
               </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
-                Browse through our collection of AI-analyzed recipes from the community. Get inspired for your next meal!
+              <p className="text-slate-600 max-w-2xl mx-auto text-sm md:text-base">
+                Browse through our collection of delicious recipes, analyzed and enhanced by AI. Get inspired for your next meal!
               </p>
             </motion.div>
             
-            <ProtectedFeature
-              feature="Recipe Gallery"
-              fallbackMessage="Sign in to browse our recipe collection and save your favorites."
-            >
-              <RecipeCarousel />
-            </ProtectedFeature>
+            {/* RecipeCarousel with isAuthenticated prop */}
+            <RecipeCarousel isAuthenticated={!!appUser} />
             
             <motion.div
-              className="mt-10 text-center"
+              className="mt-8 text-center"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <Button variant="outline" onClick={() => setLocation("/saved-recipes")}>
-                View All Recipes
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => appUser ? setLocation("/saved-recipes") : setLocation("/auth")}
+                className="text-sm"
+              >
+                {appUser ? "View Your Recipe Collection" : "Sign in to Save Recipes"}
               </Button>
             </motion.div>
           </div>

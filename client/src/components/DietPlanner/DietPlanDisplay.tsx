@@ -150,7 +150,21 @@ export default function DietPlanDisplay({ dietPlan, onSave, isSaving }: DietPlan
             {sortedWeeklyPlan.map((day, dayIndex) => (
               <TabsContent key={day.day} value={dayIndex.toString()} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold capitalize">{day.day}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-semibold capitalize">{day.day}</h3>
+                    {day.meals.some(meal => meal.name === `${day.day} Breakfast` || meal.name === `${day.day} Lunch` || meal.name === `${day.day} Dinner`) && (
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                            Suggested Meals
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">These are suggested meals. Generate a new plan for detailed recipes for all days.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                   <Badge variant="outline" className="flex items-center gap-1 px-3 py-1.5">
                     <Flame className="h-4 w-4 text-orange-500" />
                     <span className="font-medium">{day.totalDailyCalories} calories</span>

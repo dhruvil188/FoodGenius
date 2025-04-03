@@ -152,9 +152,10 @@ function checkDatabaseConnectivity(req: Request, res: Response, next: NextFuncti
       // Add additional properties for frontend handling
       const responseObj = {
         success: false,
-        message: error.message,
+        message: "We're having trouble connecting to our database. If you're using the app on mobile, please try on a desktop browser or check back later.",
         status: error.statusCode,
-        setup_required: true
+        setup_required: true,
+        error_detail: errorDetails
       };
       
       res.status(error.statusCode).json(responseObj);

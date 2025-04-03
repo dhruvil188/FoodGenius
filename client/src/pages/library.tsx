@@ -148,16 +148,11 @@ export default function Library() {
               >
                 <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow duration-300">
                   <div className="relative h-48 bg-gray-100">
-                    {recipe.youtubeVideos && recipe.youtubeVideos.length > 0 && recipe.youtubeVideos[0].videoId ? (
+                    {recipe.youtubeVideos && recipe.youtubeVideos.length > 0 && recipe.youtubeVideos[0].thumbnailUrl ? (
                       <img 
-                        src={`https://i.ytimg.com/vi/${recipe.youtubeVideos[0].videoId}/mqdefault.jpg`} 
+                        src={recipe.youtubeVideos[0].thumbnailUrl} 
                         alt={recipe.foodName} 
                         className="w-full h-full object-cover" 
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = null;
-                          target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1000";
-                        }}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full bg-gradient-to-br from-green-100 to-emerald-200">

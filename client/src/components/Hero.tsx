@@ -357,19 +357,52 @@ export default function Hero({ onGetStarted }: HeroProps) {
                 <i className="fas fa-camera mr-2.5 group-hover:animate-pulse"></i> 
                 Try It Now
               </Button>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full px-8 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 transition-all py-6 relative overflow-hidden group"
+                  onClick={() => navigate('/library')}
+                >
+                  <i className="fas fa-book mr-2.5"></i> 
+                  Browse Recipes
+                  <span className="absolute inset-0 w-0 bg-green-100 transition-all duration-300 ease-out group-hover:w-full -z-10"></span>
+                </Button>
+              </motion.div>
+            </motion.div>
+            
+            {/* New Recipe Library Animation Banner */}
+            <motion.div
+              className="mt-6 bg-gradient-to-r from-emerald-100 to-green-100 p-4 rounded-xl shadow-sm border border-green-200 flex items-center"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+            >
+              <div className="mr-4 text-emerald-600 text-2xl animate-pulse">
+                <i className="fas fa-star"></i>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-emerald-800">Discover Our Public Recipe Library</h3>
+                <p className="text-sm text-emerald-700">
+                  Explore our collection of carefully crafted recipes - no account required!
+                </p>
+              </div>
               <Button 
-                size="lg"
-                variant="outline"
-                className="rounded-full px-8 border-2 border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 transition-all py-6"
+                variant="ghost" 
+                size="sm" 
+                className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-200"
                 onClick={() => navigate('/library')}
               >
-                <i className="fas fa-book mr-2.5"></i> 
-                Browse Recipes
+                Explore <i className="fas fa-arrow-right ml-2"></i>
               </Button>
             </motion.div>
             
             <motion.div
-              className="flex items-center text-sm text-gray-500"
+              className="flex items-center text-sm text-gray-500 mt-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}

@@ -15,6 +15,7 @@ import Privacy from "@/pages/privacy";
 import SavedRecipesPage from "@/pages/saved-recipes-page";
 import RecipeDetailPage from "@/pages/recipe-detail-page";
 import AuthPage from "@/pages/auth-page";
+import AuthHandler from "@/pages/auth-handler";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -58,6 +59,8 @@ function Router() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/auth/handler" component={AuthHandler} />
+      <Route path="/__/auth/handler" component={AuthHandler} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,9 +1,17 @@
-import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
-import { DietPlanRequest, DietPlanResponse, InsertSavedDietPlan, SavedDietPlan, dietPlanResponseSchema } from "@shared/schema";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { storage } from "../storage";
+import {
+  dietPlanRequestSchema,
+  dietPlanResponseSchema,
+  type DietPlanRequest,
+  type DietPlanResponse,
+  type InsertSavedDietPlan,
+  type SavedDietPlan
+} from "@shared/schema";
 import { extractJsonFromText, cleanJsonString } from "../utils";
-import { databaseStorage } from "../databaseStorage";
+import { NotFoundError, AuthorizationError } from "../middleware/errorHandler";
 
-// Initialize the Gemini model
+// Initialize Gemini API with API key
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
@@ -22,7 +30,6 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
   try {
     // Generate prompt for AI
     const prompt = generatePrompt(planRequest);
-    console.log("Generated prompt for Gemini:", prompt);
     
     // Get AI response
     const result = await model.generateContent(prompt);
@@ -43,7 +50,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
     
     console.log("Cleaned JSON:", cleanedJson);
     
-    // Try to parse the cleaned JSON
+    // Parse the cleaned JSON
     let dietPlan: DietPlanResponse;
     
     try {
@@ -51,146 +58,34 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
       
       // Check if the diet plan is empty or incomplete
       if (!dietPlan.weeklyPlan || dietPlan.weeklyPlan.length === 0) {
-        console.log("Diet plan is empty or has no weekly plan, trying to extract partial data");
-        
         // Try to extract partial data from the text
         const partialDays = extractPartialDietPlanData(text);
         
         if (partialDays.length > 0) {
-          console.log(`Found ${partialDays.length} days of partial data`);
-          // We have partial data, sort it in the correct order
-          const sortedPlan = ensureAllDaysPresent(partialDays, planRequest.calorieTarget, planRequest.dietType);
-          
+          // We have partial data, create a partial plan and ensure all 7 days are present
+          const completePlan = ensureAllDaysPresent(partialDays);
           dietPlan = {
-            weeklyPlan: sortedPlan,
+            weeklyPlan: completePlan,
             planSummary: "Personalized diet plan based on your preferences.",
-            weeklyNutritionAverage: calculateAverageNutrition(sortedPlan)
+            weeklyNutritionAverage: calculateAverageNutrition(completePlan)
           };
         } else {
-          console.log("No partial data found in response, trying again with simplified prompt");
-          
-          // Try again with a simplified prompt
-          const simplifiedPrompt = `Generate a JSON 7-day meal plan for a ${planRequest.dietType} diet with ${planRequest.mealsPerDay} meals per day.
-           The daily calorie target is ${planRequest.calorieTarget}.
-           ${planRequest.dietType === 'vegetarian' ? 'MAKE SURE THERE ARE NO MEAT, FISH, OR SEAFOOD IN ANY MEAL.' : 
-           planRequest.dietType === 'vegan' ? 'MAKE SURE THERE ARE NO ANIMAL PRODUCTS OF ANY KIND IN ANY MEAL.' : ''}
-           Return ONLY the JSON with this structure:
-           {
-             "weeklyPlan": [
-               {
-                 "day": "Monday",
-                 "meals": [
-                   {
-                     "name": "Meal name",
-                     "timeOfDay": "Breakfast (7:30 AM)",
-                     "ingredients": ["ingredient 1", "ingredient 2"],
-                     "instructions": ["step 1", "step 2"],
-                     "nutritionalInfo": { "calories": 300, "protein": 20, "carbs": 30, "fat": 10 }
-                   }
-                 ],
-                 "totalDailyCalories": 2000
-               }
-             ],
-             "planSummary": "Brief summary of the diet plan",
-             "weeklyNutritionAverage": {
-               "calories": 2000,
-               "protein": 100,
-               "carbs": 250,
-               "fat": 70
-             }
-           }`;
-
-          try {
-            // Make a second API call with the simplified prompt
-            console.log("Making second Gemini API call with simplified prompt");
-            const secondResult = await model.generateContent(simplifiedPrompt);
-            const secondResponse = secondResult.response;
-            const secondText = secondResponse.text();
-            
-            console.log("Raw second response:", secondText);
-            
-            // Try to extract valid JSON
-            const secondJsonStr = extractJsonFromText(secondText);
-            const secondCleanedJson = cleanJsonString(secondJsonStr);
-            
-            console.log("Second cleaned JSON:", secondCleanedJson);
-            
-            try {
-              // Parse the second attempt
-              const secondAttempt = JSON.parse(secondCleanedJson);
-              
-              if (secondAttempt.weeklyPlan && secondAttempt.weeklyPlan.length > 0) {
-                console.log("Second attempt successful, found valid data");
-                // Sort days in the correct order
-                const sortedPlan = ensureAllDaysPresent(secondAttempt.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
-                
-                dietPlan = {
-                  weeklyPlan: sortedPlan,
-                  planSummary: secondAttempt.planSummary || "Personalized meal plan based on your dietary preferences.",
-                  weeklyNutritionAverage: secondAttempt.weeklyNutritionAverage || calculateAverageNutrition(sortedPlan)
-                };
-              } else {
-                throw new Error("Second attempt returned empty plan");
-              }
-            } catch (secondError) {
-              console.error("Error parsing second attempt:", secondError);
-              // Try one final attempt with an even more direct prompt
-              const finalPrompt = `Return just a 7-day meal plan JSON with ${planRequest.mealsPerDay} meals per day.
-                Diet: ${planRequest.dietType}. Calories: ${planRequest.calorieTarget}.
-                ONLY return the JSON, nothing else.`;
-                
-              const finalResult = await model.generateContent(finalPrompt);
-              const finalText = finalResult.response.text();
-              const finalJsonStr = extractJsonFromText(finalText);
-              const finalCleanedJson = cleanJsonString(finalJsonStr);
-              
-              try {
-                const finalAttempt = JSON.parse(finalCleanedJson);
-                if (finalAttempt.weeklyPlan && finalAttempt.weeklyPlan.length > 0) {
-                  const sortedPlan = ensureAllDaysPresent(finalAttempt.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
-                  dietPlan = {
-                    weeklyPlan: sortedPlan,
-                    planSummary: "Meal plan based on your dietary preferences.",
-                    weeklyNutritionAverage: finalAttempt.weeklyNutritionAverage || calculateAverageNutrition(sortedPlan)
-                  };
-                } else {
-                  throw new Error("Final attempt failed");
-                }
-              } catch (finalError) {
-                // Return an honest error message
-                dietPlan = {
-                  weeklyPlan: [],
-                  planSummary: "We couldn't generate a complete meal plan. Please try again with different preferences.",
-                  weeklyNutritionAverage: {
-                    calories: 0,
-                    protein: 0,
-                    carbs: 0,
-                    fat: 0
-                  }
-                };
-              }
+          // No usable data found
+          dietPlan = {
+            weeklyPlan: [],
+            planSummary: "Diet plan could not be generated. Please try again with different preferences.",
+            weeklyNutritionAverage: {
+              calories: 0,
+              protein: 0,
+              carbs: 0,
+              fat: 0
             }
-          } catch (retryError) {
-            console.error("Error during retry attempts:", retryError);
-            // Return an error message to the user
-            dietPlan = {
-              weeklyPlan: [],
-              planSummary: "We couldn't generate a meal plan at this time. Please try again later.",
-              weeklyNutritionAverage: {
-                calories: 0,
-                protein: 0,
-                carbs: 0,
-                fat: 0
-              }
-            };
-          }
+          };
         }
       } else {
-        // We have a plan with days, sort it to ensure correct order
-        console.log(`Found ${dietPlan.weeklyPlan.length} days in the plan`);
-        dietPlan.weeklyPlan = ensureAllDaysPresent(dietPlan.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
-        
-        // Recalculate average nutrition based on the days we actually have
+        // Ensure all seven days are present in the plan
+        dietPlan.weeklyPlan = ensureAllDaysPresent(dietPlan.weeklyPlan);
+        // Recalculate average nutrition
         dietPlan.weeklyNutritionAverage = calculateAverageNutrition(dietPlan.weeklyPlan);
       }
       
@@ -200,20 +95,65 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
       
-      // Try to extract partial data using our extraction function
+      // Try to extract partial data
       const partialDays = extractPartialDietPlanData(text);
       
       if (partialDays.length > 0) {
-        console.log(`Extracted ${partialDays.length} days from partial data`);
+        // Check which days are missing
+        const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const foundDays = new Set(partialDays.map(day => day.day));
+        
+        console.log("Days successfully extracted:", Array.from(foundDays).join(", "));
+        
+        // Try to find any missing days specifically
+        for (const day of daysOfWeek) {
+          if (!foundDays.has(day)) {
+            console.log(`Attempting to specifically extract ${day} data...`);
+            
+            // Create a specific regex for this day
+            const dayRegex = new RegExp(`"day"\\s*:\\s*"${day}"`, 'i');
+            const dayIndex = text.search(dayRegex);
+            
+            if (dayIndex !== -1) {
+              console.log(`Found ${day} in text at position ${dayIndex}`);
+              // Extract just this section until the next day or end
+              let endIndex = text.length;
+              
+              // Find the next day section if any
+              for (const nextDay of daysOfWeek) {
+                if (nextDay === day) continue;
+                const nextDayStr = `"day":"${nextDay}"`;
+                const nextDayIndex = text.indexOf(nextDayStr, dayIndex + 10);
+                if (nextDayIndex !== -1 && nextDayIndex < endIndex) {
+                  endIndex = nextDayIndex;
+                }
+              }
+              
+              // Extract this day's section and try to parse it
+              const daySection = text.substring(dayIndex, endIndex);
+              const extractedDayData = extractPartialDietPlanData(daySection);
+              
+              if (extractedDayData.length > 0) {
+                console.log(`Successfully extracted data for ${day}`);
+                partialDays.push(extractedDayData[0]);
+                foundDays.add(day);
+              }
+            }
+          }
+        }
         
         // Sort the days of the week in the correct order
-        const sortedDays = ensureAllDaysPresent(partialDays, planRequest.calorieTarget, planRequest.dietType);
+        partialDays.sort((a, b) => {
+          const dayOrder: { [key: string]: number } = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6};
+          return (dayOrder[a.day.toLowerCase()] ?? 0) - (dayOrder[b.day.toLowerCase()] ?? 0);
+        });
         
-        // Create a response with what we have
+        // We were able to extract some data - ensure all seven days are present
+        const completePlan = ensureAllDaysPresent(partialDays);
         const partialPlan: DietPlanResponse = {
-          weeklyPlan: sortedDays,
+          weeklyPlan: completePlan,
           planSummary: "Personalized diet plan based on your preferences.",
-          weeklyNutritionAverage: calculateAverageNutrition(sortedDays)
+          weeklyNutritionAverage: calculateAverageNutrition(completePlan)
         };
         
         // Try to validate against schema
@@ -221,40 +161,13 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
           return dietPlanResponseSchema.parse(partialPlan);
         } catch (schemaError) {
           console.error("Schema validation error for partial plan:", schemaError);
-          
-          // Try one more API call with a direct prompt
-          try {
-            console.log("Making final attempt with direct prompt");
-            const directPrompt = `Generate a JSON 7-day meal plan with ${planRequest.mealsPerDay} meals per day. 
-              Diet type: ${planRequest.dietType}. Target calories: ${planRequest.calorieTarget}.
-              ${planRequest.dietType === 'vegetarian' ? 'ENSURE NO MEAT PRODUCTS.' : 
-              planRequest.dietType === 'vegan' ? 'ENSURE NO ANIMAL PRODUCTS.' : ''}
-              ONLY return valid JSON.`;
-              
-            const directResult = await model.generateContent(directPrompt);
-            const directText = directResult.response.text();
-            const directJsonStr = extractJsonFromText(directText);
-            const directCleanedJson = cleanJsonString(directJsonStr);
-            
-            const directAttempt = JSON.parse(directCleanedJson);
-            if (directAttempt.weeklyPlan && directAttempt.weeklyPlan.length > 0) {
-              const sortedPlan = ensureAllDaysPresent(directAttempt.weeklyPlan, planRequest.calorieTarget, planRequest.dietType);
-              return dietPlanResponseSchema.parse({
-                weeklyPlan: sortedPlan,
-                planSummary: "Meal plan based on your preferences.",
-                weeklyNutritionAverage: calculateAverageNutrition(sortedPlan)
-              });
-            }
-          } catch (finalTryError) {
-            console.error("Final attempt failed:", finalTryError);
-          }
         }
       }
       
-      // No usable data at all - return a clear error message
-      const errorPlan: DietPlanResponse = {
+      // Fallback to minimal structure
+      const fallbackPlan: DietPlanResponse = {
         weeklyPlan: [],
-        planSummary: "We couldn't generate a meal plan based on your preferences. Please try again with different options.",
+        planSummary: "Error generating complete plan. Please try again with different preferences.",
         weeklyNutritionAverage: {
           calories: 0,
           protein: 0,
@@ -263,7 +176,7 @@ export async function generateDietPlan(userId: number, planRequest: DietPlanRequ
         }
       };
       
-      return dietPlanResponseSchema.parse(errorPlan);
+      return dietPlanResponseSchema.parse(fallbackPlan);
     }
   } catch (error) {
     console.error("Error generating diet plan:", error);
@@ -403,100 +316,397 @@ function extractPartialDietPlanData(text: string): { day: string; meals: any[]; 
               const parsedMeal = JSON.parse(cleanedMealObj);
               mealMatches.push(parsedMeal);
             } catch (err) {
-              console.warn(`Failed to parse individual meal for ${dayName}:`, err);
+              console.warn(`Could not parse individual meal: ${mealMatch[1]}`);
             }
           }
         }
         
         if (mealMatches.length > 0) {
           meals = mealMatches;
+          console.log(`Successfully extracted ${meals.length} meals for ${dayName} using fallback approach`);
         } else {
-          console.log(`Could not extract any meals for ${dayName}`);
+          console.warn(`No meals could be extracted for ${dayName}`);
           continue;
         }
       }
       
-      if (!Array.isArray(meals)) {
-        console.log(`Meals for ${dayName} is not an array`);
-        continue;
-      }
-      
-      // Find the total daily calories
-      const totalDailyCaloriesMatch = text.match(new RegExp(`"totalDailyCalories"\\s*:\\s*(\\d+)`, 'i'));
-      let totalDailyCalories = totalDailyCaloriesMatch ? parseInt(totalDailyCaloriesMatch[1]) : 0;
-      
-      // If we don't have total calories, sum from individual meals
-      if (!totalDailyCalories && meals.length > 0) {
-        totalDailyCalories = meals.reduce((sum, meal) => {
+      // Calculate total calories
+      let totalDailyCalories = 0;
+      if (Array.isArray(meals)) {
+        totalDailyCalories = meals.reduce((sum: number, meal: any) => {
           return sum + (meal.nutritionalInfo?.calories || 0);
         }, 0);
+        
+        // Add this day to our partial results
+        partialDays.push({
+          day: dayName,
+          meals: meals,
+          totalDailyCalories
+        });
+        
+        // Mark this day as extracted
+        extractedDays.add(dayName);
+        console.log(`Successfully added ${dayName} with ${meals.length} meals and ${totalDailyCalories} calories`);
+      } else {
+        console.warn(`Meals is not an array for ${dayName}`);
+        continue;
       }
-      
-      // Add this day to our results
-      partialDays.push({
-        day: dayName,
-        meals: meals,
-        totalDailyCalories
-      });
-      
-      extractedDays.add(dayName);
-      console.log(`Successfully extracted ${dayName} with ${meals.length} meals and ${totalDailyCalories} calories`);
     } catch (error) {
-      console.warn(`Failed to parse meals for ${dayName}:`, error);
+      console.warn(`Could not parse meals for ${dayName}:`, error);
+      // Continue to the next day
+    }
+  }
+  
+  // Step 2: For days that weren't found, try a more targeted approach
+  for (const day of daysOfWeek) {
+    if (extractedDays.has(day)) {
+      continue; // Skip days we've already extracted
     }
     
-    // Try targeted extraction for days that are missing
-    for (const day of daysOfWeek) {
-      if (extractedDays.has(day)) continue;
+    console.log(`Trying targeted extraction for ${day}`);
+    
+    // Try to find this day in the text
+    const dayPatternStr = `["']day["']\\s*:\\s*["']${day}["']`;
+    const dayPattern = new RegExp(dayPatternStr, 'i');
+    const dayMatch = text.match(dayPattern);
+    
+    if (dayMatch) {
+      const dayStartIndex = dayMatch.index;
       
-      console.log(`Trying targeted extraction for ${day}`);
-      const dayPattern = `"day"\\s*:\\s*"${day}"`;
-      const dayMatch = text.match(new RegExp(dayPattern, 'i'));
+      // Find the meals
+      const mealsPatternStr = `["']meals["']\\s*:\\s*\\[`;
+      const mealsPattern = new RegExp(mealsPatternStr, 'i');
+      const mealsMatch = text.substring(dayStartIndex ?? 0).match(mealsPattern);
       
-      if (dayMatch) {
-        try {
-          // Extract a section around this day
-          const matchIndex = dayMatch.index;
-          const sectionStart = Math.max(0, matchIndex - 100);
-          const sectionEnd = Math.min(text.length, matchIndex + 2000);
-          const section = text.substring(sectionStart, sectionEnd);
-          
-          // Try to extract just this day's data
-          const partialExtracted = extractPartialDietPlanData(section);
-          if (partialExtracted.length > 0) {
-            for (const extracted of partialExtracted) {
-              if (extracted.day === day && !extractedDays.has(day)) {
-                partialDays.push(extracted);
-                extractedDays.add(day);
-                console.log(`Successfully extracted ${day} using targeted approach`);
-              }
+      if (mealsMatch && mealsMatch.index !== undefined) {
+        const mealsStartIndex = (dayStartIndex ?? 0) + mealsMatch.index + mealsMatch[0].length;
+        
+        // Find the end of the meals array
+        let mealsEndIndex = -1;
+        let bracketCount = 1;
+        for (let i = mealsStartIndex; i < text.length; i++) {
+          if (text[i] === '[') bracketCount++;
+          else if (text[i] === ']') {
+            bracketCount--;
+            if (bracketCount === 0) {
+              mealsEndIndex = i + 1;
+              break;
             }
           }
-        } catch (error) {
-          console.warn(`Failed to parse meals for ${day} using targeted approach:`, error);
+        }
+        
+        if (mealsEndIndex === -1) {
+          // Try to find the next day or the end of the object
+          const nextDayPatternStr = `["']day["']\\s*:`;
+          const nextDayPattern = new RegExp(nextDayPatternStr);
+          const nextDayMatch = text.substring(mealsStartIndex).match(nextDayPattern);
+          
+          if (nextDayMatch && nextDayMatch.index !== undefined) {
+            mealsEndIndex = mealsStartIndex + nextDayMatch.index;
+          } else {
+            // Look for the end of the current day object
+            const endOfDayPatternStr = `},\\s*{`;
+            const endOfDayPattern = new RegExp(endOfDayPatternStr);
+            const endOfDayMatch = text.substring(mealsStartIndex).match(endOfDayPattern);
+            
+            if (endOfDayMatch && endOfDayMatch.index !== undefined) {
+              mealsEndIndex = mealsStartIndex + endOfDayMatch.index;
+            } else {
+              // Just go to end of text
+              mealsEndIndex = text.length;
+            }
+          }
+        }
+        
+        if (mealsEndIndex > mealsStartIndex) {
+          // Extract and try to parse the meals array
+          let mealsText = text.substring(mealsStartIndex - 1, mealsEndIndex); // Include opening bracket
+          
+          try {
+            // Clean up and try to parse
+            mealsText = cleanJsonString(mealsText);
+            let meals = JSON.parse(mealsText);
+            
+            if (Array.isArray(meals)) {
+              // Calculate total calories
+              const totalDailyCalories = meals.reduce((sum: number, meal: any) => {
+                return sum + (meal.nutritionalInfo?.calories || 0);
+              }, 0);
+              
+              // Add this day to our results
+              partialDays.push({
+                day: day,
+                meals: meals,
+                totalDailyCalories
+              });
+              
+              extractedDays.add(day);
+              console.log(`Successfully extracted ${day} using targeted approach`);
+            }
+          } catch (error) {
+            console.warn(`Failed to parse meals for ${day} using targeted approach:`, error);
+          }
         }
       }
     }
   }
   
-  // Step 3: Only return what we were able to extract from the AI response
-  // We no longer create template days as that would not be honest to the user
-  console.log(`Extracted ${partialDays.length} days from the AI response: ${partialDays.map(d => d.day).join(', ')}`);
+  // Step 3: Last resort - create skeleton days for any missing days
+  for (const day of daysOfWeek) {
+    if (!extractedDays.has(day)) {
+      console.log(`Creating skeleton day for ${day}`);
+      
+      // Create placeholder day with default meal structure
+      partialDays.push({
+        day: day,
+        meals: [
+          {
+            name: `${day} Breakfast`,
+            timeOfDay: "Breakfast",
+            ingredients: ["Contact support for more details"],
+            instructions: ["This data could not be fully extracted"],
+            nutritionalInfo: {
+              calories: 0,
+              protein: 0,
+              carbs: 0,
+              fat: 0
+            }
+          }
+        ],
+        totalDailyCalories: 0
+      });
+      
+      extractedDays.add(day);
+    }
+  }
   
-  // Return only the days we successfully extracted - no templates
-  return partialDays;
+  // Sort days in correct order
+  return partialDays.sort((a, b) => {
+    const dayOrder: { [key: string]: number } = {
+      "monday": 0, 
+      "tuesday": 1, 
+      "wednesday": 2, 
+      "thursday": 3, 
+      "friday": 4, 
+      "saturday": 5, 
+      "sunday": 6
+    };
+    const aDay = a.day.toLowerCase();
+    const bDay = b.day.toLowerCase();
+    return (dayOrder[aDay] ?? 0) - (dayOrder[bDay] ?? 0);
+  });
+}
+
+/**
+ * Calculate weekly nutrition averages from partial data
+ */
+function calculateAverageNutrition(days: { day: string; meals: any[]; totalDailyCalories: number; }[]): { calories: number; protein: number; carbs: number; fat: number; } {
+  if (days.length === 0) {
+    return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  }
+  
+  let totalCalories = 0;
+  let totalProtein = 0;
+  let totalCarbs = 0;
+  let totalFat = 0;
+  let mealCount = 0;
+  
+  for (const day of days) {
+    for (const meal of day.meals) {
+      if (meal.nutritionalInfo) {
+        totalCalories += meal.nutritionalInfo.calories || 0;
+        totalProtein += meal.nutritionalInfo.protein || 0;
+        totalCarbs += meal.nutritionalInfo.carbs || 0;
+        totalFat += meal.nutritionalInfo.fat || 0;
+        mealCount++;
+      }
+    }
+  }
+  
+  // Calculate daily averages
+  const daysCount = days.length;
+  return {
+    calories: Math.round(totalCalories / (daysCount || 1)),
+    protein: Math.round(totalProtein / (daysCount || 1)),
+    carbs: Math.round(totalCarbs / (daysCount || 1)),
+    fat: Math.round(totalFat / (daysCount || 1))
+  };
+}
+
+/**
+ * Save a generated diet plan to the user's library
+ */
+export async function saveDietPlan(userId: number, planName: string, dietPlan: DietPlanResponse, mealsPerDay: number): Promise<SavedDietPlan> {
+  // Extract tags from the diet plan
+  const tags = extractTagsFromDietPlan(dietPlan);
+  
+  // Create the insert data
+  const savedPlanData: InsertSavedDietPlan = {
+    userId,
+    planName,
+    planData: dietPlan,
+    mealsPerDay,
+    tags: tags.length > 0 ? tags : null
+  };
+  
+  // Save to database
+  return await storage.createSavedDietPlan(savedPlanData);
+}
+
+/**
+ * Get all diet plans for a user
+ */
+export async function getUserDietPlans(userId: number): Promise<SavedDietPlan[]> {
+  return await storage.getSavedDietPlans(userId);
+}
+
+/**
+ * Get a specific diet plan by ID with ownership validation
+ */
+export async function getDietPlanById(planId: number, userId: number): Promise<SavedDietPlan> {
+  const plan = await storage.getSavedDietPlanById(planId);
+  
+  if (!plan) {
+    throw new NotFoundError("Diet plan not found");
+  }
+  
+  // Check ownership
+  if (plan.userId !== userId) {
+    throw new AuthorizationError("You don't have permission to access this diet plan");
+  }
+  
+  return plan;
+}
+
+/**
+ * Delete a diet plan with ownership validation
+ */
+export async function deleteDietPlan(planId: number, userId: number): Promise<boolean> {
+  const plan = await storage.getSavedDietPlanById(planId);
+  
+  if (!plan) {
+    throw new NotFoundError("Diet plan not found");
+  }
+  
+  // Check ownership
+  if (plan.userId !== userId) {
+    throw new AuthorizationError("You don't have permission to delete this diet plan");
+  }
+  
+  return await storage.deleteSavedDietPlan(planId);
+}
+
+/**
+ * Generate the AI prompt based on user preferences
+ */
+function generatePrompt(planRequest: DietPlanRequest): string {
+  const {
+    dietType,
+    healthGoals,
+    calorieTarget,
+    mealsPerDay,
+    excludedFoods,
+    medicalConditions,
+    cookingSkill,
+    timeConstraint,
+    budgetLevel,
+    preferredCuisines,
+    seasonalPreference,
+    proteinPreference,
+    extraNotes
+  } = planRequest;
+  
+  return "I need you to generate a personalized 7-day meal plan based on the following criteria:\n\n" +
+    `Diet Type: ${dietType}\n` +
+    `Health Goals: ${healthGoals.join(", ")}\n` +
+    `Calorie Target: ${calorieTarget} calories per day\n` +
+    `Meals Per Day: ${mealsPerDay}\n` +
+    `Excluded Foods: ${excludedFoods.join(", ")}\n` +
+    `Medical Conditions: ${medicalConditions.join(", ")}\n` +
+    `Cooking Skill Level: ${cookingSkill}\n` +
+    `Time Constraint: ${timeConstraint} minutes per meal\n` +
+    `Budget Level: ${budgetLevel}\n` +
+    `Preferred Cuisines: ${preferredCuisines.join(", ")}\n` +
+    `Seasonal Preference: ${seasonalPreference}\n` +
+    `Protein Preference: ${proteinPreference}\n` +
+    `Additional Notes: ${extraNotes || "None"}\n\n` +
+    
+    `For each day, generate exactly ${mealsPerDay} different meals. Each meal should be appropriate for the time of day (breakfast, lunch, dinner, snacks).\n` +
+    "Make sure each daily plan is different (no repeating the exact same meals).\n" +
+    "For EACH meal, provide:\n" +
+    "1. Meal name (use creative, appetizing names)\n" +
+    "2. Time of day to eat\n" +
+    "3. List of ingredients with precise quantities and brief explanations (e.g., '2 tbsp extra virgin olive oil (for heart-healthy fats)')\n" +
+    "4. Detailed step-by-step cooking instructions including:\n" +
+    "   - Preparation steps with timing (chopping, marinating, etc.)\n" +
+    "   - Exact cooking temperatures and times (e.g., '375°F for 25 minutes' or 'medium-high heat for 3-4 minutes per side')\n" +
+    "   - Specific cooking methods (sauté, bake, steam, etc.) with equipment needed\n" +
+    "   - Clear indicators for doneness (e.g., 'until golden brown' or 'internal temperature reaches 165°F')\n" +
+    "   - Professional plating and serving suggestions with garnishes\n" +
+    "   - Tips for meal prep or storage if applicable\n" +
+    "5. Detailed nutritional information (calories, protein, carbs, fat) with additional health benefits\n\n" +
+    
+    "***EXTREMELY IMPORTANT***: Your response MUST be a valid, parseable JSON object. Do not include explanations, text, or markdown outside the JSON. " +
+    "Use proper JSON syntax with double quotes for all strings and property names. All numbers must be numeric values without quotes. " +
+    "All arrays and objects must be properly terminated.\n\n" +
+    
+    "REQUIRED JSON FORMAT:\n\n" +
+    
+    `{
+  "weeklyPlan": [
+    {
+      "day": "Monday",
+      "meals": [
+        {
+          "name": "Golden Mediterranean Sunrise Bowl",
+          "timeOfDay": "Breakfast",
+          "ingredients": [
+            "1/2 cup Greek yogurt (high in protein and probiotics for gut health)",
+            "1/4 cup granola (provides fiber and sustained energy)",
+            "1 tbsp honey (natural sweetener with antimicrobial properties)",
+            "1/4 cup mixed berries (rich in antioxidants and vitamin C)",
+            "1 tbsp sliced almonds (heart-healthy fats and vitamin E)"
+          ],
+          "instructions": [
+            "Prepare all ingredients (2 minutes): Wash berries and pat dry with paper towel.",
+            "In a medium serving bowl, spread the Greek yogurt as the base layer.",
+            "Sprinkle granola evenly over the yogurt, creating a crunchy layer.",
+            "Arrange mixed berries decoratively on top of the granola.",
+            "Drizzle honey in a circular pattern for even distribution of sweetness.",
+            "Finish by scattering sliced almonds on top for extra crunch and visual appeal.",
+            "For best texture and flavor contrast, serve immediately after assembly.",
+            "Meal prep tip: Store granola and berries separately and assemble just before eating to maintain crunchiness."
+          ],
+          "nutritionalInfo": {
+            "calories": 320,
+            "protein": 18,
+            "carbs": 42,
+            "fat": 12
+          }
+        }
+      ],
+      "totalDailyCalories": 1900
+    }
+  ],
+  "planSummary": "A nutrient-rich Mediterranean-inspired meal plan focused on balanced macronutrients, complex carbohydrates, lean proteins, and healthy fats. Each meal incorporates fresh, seasonal ingredients with attention to proper portion control for optimal weight management while providing sustained energy throughout the day.",
+  "weeklyNutritionAverage": {
+    "calories": 1800,
+    "protein": 105,
+    "carbs": 180,
+    "fat": 65
+  }
+}\n\n` +
+    
+    "Your response must follow strict JSON format and be able to parse with JSON.parse() with no modifications. " +
+    "Do not include markdown code blocks or other formatting. The response must be the raw JSON object only. " +
+    "Make sure all meals combined meet the target calories per day.";
 }
 
 /**
  * Ensures all seven days of the week are present in the diet plan
- * If days are missing, we'll return what we have and not fill in templates
+ * If a day is missing, it creates a placeholder with default meals
  */
-function ensureAllDaysPresent(
-  weeklyPlan: Array<{ day: string; meals: any[]; totalDailyCalories: number; }>, 
-  calorieTarget: string | number = 2200,
-  dietType: string = 'balanced'
-): Array<{ day: string; meals: any[]; totalDailyCalories: number; }> {
-  // Get days of the week in order
+function ensureAllDaysPresent(weeklyPlan: Array<{ day: string; meals: any[]; totalDailyCalories: number; }>): Array<{ day: string; meals: any[]; totalDailyCalories: number; }> {
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const dayOrder: { [key: string]: number } = {
     "monday": 0, 
@@ -514,81 +724,67 @@ function ensureAllDaysPresent(
     existingDays.set(day.day.toLowerCase(), day);
   }
   
-  // Sort the existing days by the day of week
-  const sortedPlan = Array.from(existingDays.values());
-  return sortedPlan.sort((a, b) => 
+  // Check for missing days and add placeholder data
+  for (const day of daysOfWeek) {
+    if (!existingDays.has(day.toLowerCase())) {
+      console.log(`Adding placeholder for missing day: ${day}`);
+      
+      // Get a template from an existing day if available
+      let templateMeal = { 
+        name: `${day} Balanced Meal`,
+        timeOfDay: "Breakfast",
+        ingredients: ["1 cup fresh vegetables", "3 oz lean protein", "1 serving complex carbs", "1 tbsp healthy fats", "Seasoning to taste"],
+        instructions: ["Prepare all ingredients", "Combine and cook according to your preference", "Plate and serve with fresh herbs"],
+        nutritionalInfo: { calories: 350, protein: 20, carbs: 30, fat: 15 }
+      };
+      
+      // Try to copy a meal structure from an existing day
+      if (weeklyPlan.length > 0 && weeklyPlan[0].meals.length > 0) {
+        const existingMeal = { ...weeklyPlan[0].meals[0] };
+        templateMeal = {
+          name: `${day} ${existingMeal.timeOfDay}`,
+          timeOfDay: existingMeal.timeOfDay,
+          ingredients: ["1 cup fresh ingredients", "2 tbsp healthy oils", "1/4 cup protein source", "Herbs and spices to taste"],
+          instructions: ["Prepare ingredients according to your preference", "Cook following standard methods for this meal type", "Season to taste and serve immediately"],
+          nutritionalInfo: { calories: 350, protein: 20, carbs: 30, fat: 15 }
+        };
+      }
+      
+      // Create a full day's meals based on the average number of meals in other days
+      const avgMealsPerDay = Math.max(
+        1, 
+        Math.round(weeklyPlan.reduce((sum, day) => sum + day.meals.length, 0) / Math.max(1, weeklyPlan.length))
+      );
+      
+      const meals = [];
+      const mealTimes = ["Breakfast", "Lunch", "Dinner", "Snack", "Snack 2"];
+      
+      for (let i = 0; i < avgMealsPerDay; i++) {
+        meals.push({
+          ...templateMeal,
+          name: `${day} ${mealTimes[i] || "Meal"}`,
+          timeOfDay: mealTimes[i] || "Meal",
+        });
+      }
+      
+      // Calculate the total daily calories from the meals
+      const totalDailyCalories = meals.reduce((sum, meal) => {
+        return sum + (meal.nutritionalInfo?.calories || 0);
+      }, 0);
+      
+      existingDays.set(day.toLowerCase(), {
+        day,
+        meals,
+        totalDailyCalories
+      });
+    }
+  }
+  
+  // Convert map back to array and sort by day of week
+  const fullWeeklyPlan = Array.from(existingDays.values());
+  return fullWeeklyPlan.sort((a, b) => 
     (dayOrder[a.day.toLowerCase()] ?? 0) - (dayOrder[b.day.toLowerCase()] ?? 0)
   );
-}
-
-/**
- * Calculate weekly nutrition averages from partial data
- */
-function calculateAverageNutrition(days: { day: string; meals: any[]; totalDailyCalories: number; }[]): { calories: number; protein: number; carbs: number; fat: number; } {
-  if (!days || days.length === 0) {
-    return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-  }
-  
-  let totalCalories = 0;
-  let totalProtein = 0;
-  let totalCarbs = 0;
-  let totalFat = 0;
-  let mealCount = 0;
-  
-  // Sum up all nutritional info from all meals
-  for (const day of days) {
-    // Use the total daily calories if available, otherwise sum from meals
-    if (day.totalDailyCalories) {
-      totalCalories += day.totalDailyCalories;
-    }
-    
-    // Extract nutrient data from each meal
-    if (day.meals && Array.isArray(day.meals)) {
-      for (const meal of day.meals) {
-        if (meal.nutritionalInfo) {
-          // Add calories only if we don't have a day total
-          if (!day.totalDailyCalories && meal.nutritionalInfo.calories) {
-            totalCalories += meal.nutritionalInfo.calories;
-          }
-          
-          // Add other nutrients
-          if (meal.nutritionalInfo.protein) totalProtein += meal.nutritionalInfo.protein;
-          if (meal.nutritionalInfo.carbs) totalCarbs += meal.nutritionalInfo.carbs;
-          if (meal.nutritionalInfo.fat) totalFat += meal.nutritionalInfo.fat;
-        }
-      }
-      mealCount += day.meals.length;
-    }
-  }
-  
-  // Calculate daily averages
-  const avgCalories = Math.round(totalCalories / days.length);
-  
-  // For macronutrients, if we have data, average per meal then multiply by typical meals per day
-  let avgProtein = 0;
-  let avgCarbs = 0;
-  let avgFat = 0;
-  
-  if (mealCount > 0) {
-    // Average per meal
-    const proteinPerMeal = totalProtein / mealCount;
-    const carbsPerMeal = totalCarbs / mealCount;
-    const fatPerMeal = totalFat / mealCount;
-    
-    // Assume 3 meals per day for macro calculations if we don't have complete data
-    const mealsPerDay = days.length > 0 ? (mealCount / days.length) : 3;
-    
-    avgProtein = Math.round(proteinPerMeal * mealsPerDay);
-    avgCarbs = Math.round(carbsPerMeal * mealsPerDay);
-    avgFat = Math.round(fatPerMeal * mealsPerDay);
-  }
-  
-  return {
-    calories: avgCalories,
-    protein: avgProtein,
-    carbs: avgCarbs,
-    fat: avgFat
-  };
 }
 
 /**
@@ -623,140 +819,4 @@ function extractTagsFromDietPlan(dietPlan: DietPlanResponse): string[] {
   }
   
   return Array.from(tags);
-}
-
-/**
- * Generate the AI prompt based on user preferences
- */
-function generatePrompt(planRequest: DietPlanRequest): string {
-  // Calculate max daily calories from target
-  const targetCalories = typeof planRequest.calorieTarget === 'number' 
-    ? planRequest.calorieTarget 
-    : planRequest.calorieTarget === 'high' 
-      ? 3000 
-      : planRequest.calorieTarget === 'low' 
-        ? 1600 
-        : 2200;
-
-  // Start with the base prompt
-  let prompt = `Generate a personalized 7-day meal plan for a ${planRequest.dietType} diet with ${planRequest.mealsPerDay} meals per day. The daily calorie target is ${targetCalories}.
-
-The meal plan should follow these guidelines:
-1. Include EXACTLY ${planRequest.mealsPerDay} meals per day
-2. Daily calorie total should be approximately ${targetCalories} calories
-3. Each meal should include:
-   - Name of the meal
-   - Time of day to eat it (e.g., "Breakfast (7:30 AM)", "Lunch (12:30 PM)", "Dinner (6:30 PM)", "Snack (3:30 PM)")
-   - Ingredients list with quantities
-   - Step-by-step instructions
-   - Nutritional information (calories, protein, carbs, fat)
-4. Each day should have a total calorie count
-5. Provide a varied selection of meals across the week
-6. Include appropriate meal timing for each meal
-
-Present your response as a valid JSON object with the following structure:
-{
-  "weeklyPlan": [
-    {
-      "day": "Monday",
-      "meals": [
-        {
-          "name": "Meal Name",
-          "timeOfDay": "Breakfast (7:30 AM)",
-          "ingredients": ["Ingredient 1", "Ingredient 2", ...],
-          "instructions": ["Step 1", "Step 2", ...],
-          "nutritionalInfo": { "calories": 300, "protein": 20, "carbs": 30, "fat": 10 }
-        }
-      ],
-      "totalDailyCalories": 2000
-    }
-  ],
-  "planSummary": "Brief summary of the diet plan",
-  "weeklyNutritionAverage": {
-    "calories": 2000,
-    "protein": 100,
-    "carbs": 250,
-    "fat": 70
-  }
-}`;
-
-  // Add specific dietary restrictions based on diet type
-  if (planRequest.dietPreferences && planRequest.dietPreferences.length > 0) {
-    prompt += `\n\nInclude these preferences in the meal plan: ${planRequest.dietPreferences.join(", ")}`;
-  }
-
-  // Add allergies if specified
-  if (planRequest.allergies && planRequest.allergies.length > 0) {
-    prompt += `\n\nAvoid these allergens: ${planRequest.allergies.join(", ")}`;
-  }
-
-  // Add dietary type-specific instructions
-  prompt += "\n\n" + (
-    planRequest.dietType === 'vegetarian' ? "MAKE SURE THERE ARE ABSOLUTELY NO MEAT, FISH, OR SEAFOOD IN ANY MEAL." : 
-    planRequest.dietType === 'vegan' ? "MAKE SURE THERE ARE NO ANIMAL PRODUCTS OF ANY KIND IN ANY MEAL." : 
-    "");
-
-  return prompt;
-}
-
-/**
- * Save a generated diet plan to the user's library
- */
-export async function saveDietPlan(userId: number, planName: string, dietPlan: DietPlanResponse, mealsPerDay: number): Promise<SavedDietPlan> {
-  // Extract tags from the diet plan
-  const tags = extractTagsFromDietPlan(dietPlan);
-  
-  // Create the insert data
-  const savedPlanData: InsertSavedDietPlan = {
-    userId,
-    planName,
-    planData: dietPlan,
-    mealsPerDay,
-    tags,
-    calorieTarget: dietPlan.weeklyNutritionAverage.calories,
-    createdAt: new Date()
-  };
-  
-  return await databaseStorage.createSavedDietPlan(savedPlanData);
-}
-
-/**
- * Get all diet plans for a user
- */
-export async function getUserDietPlans(userId: number): Promise<SavedDietPlan[]> {
-  return await databaseStorage.getSavedDietPlans(userId);
-}
-
-/**
- * Get a specific diet plan by ID with ownership validation
- */
-export async function getDietPlanById(planId: number, userId: number): Promise<SavedDietPlan> {
-  const plan = await databaseStorage.getSavedDietPlanById(planId);
-  
-  if (!plan) {
-    throw new Error("Diet plan not found");
-  }
-  
-  if (plan.userId !== userId) {
-    throw new Error("You do not have permission to access this diet plan");
-  }
-  
-  return plan;
-}
-
-/**
- * Delete a diet plan with ownership validation
- */
-export async function deleteDietPlan(planId: number, userId: number): Promise<boolean> {
-  const plan = await databaseStorage.getSavedDietPlanById(planId);
-  
-  if (!plan) {
-    throw new Error("Diet plan not found");
-  }
-  
-  if (plan.userId !== userId) {
-    throw new Error("You do not have permission to delete this diet plan");
-  }
-  
-  return await databaseStorage.deleteSavedDietPlan(planId);
 }

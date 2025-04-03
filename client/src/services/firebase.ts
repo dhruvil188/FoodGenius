@@ -13,6 +13,7 @@ import { AuthResponse } from "@shared/schema";
 // Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  // For custom domain, use official Firebase domain as a fallback
   authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
@@ -68,6 +69,13 @@ export function removeAuthToken(): void {
  */
 export async function signInWithGoogle(): Promise<AuthResponse> {
   try {
+    // Configure the auth provider with custom redirect parameters
+    googleProvider.setCustomParameters({
+      // Ensure we redirect to a path that exists in our router
+      // This prevents 404 errors on the redirect
+      redirect_uri: `${window.location.origin}/auth/handler`
+    });
+    
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
     

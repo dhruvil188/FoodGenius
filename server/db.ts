@@ -11,22 +11,22 @@ neonConfig.webSocketConstructor = ws;
 let pool: Pool;
 
 try {
-  // Get the database URL from our centralized config helper
   const connectionString = getDatabaseUrl();
   pool = new Pool({ connectionString });
   console.log("Connecting to PostgreSQL database...");
-} catch (error) {
-  console.error("Failed to initialize database connection:", error);
   
-  // In development, we might want to continue without a database
-  // but for production deployment, we should fail fast
+  // Test the connection
+  await pool.query('SELECT NOW()');
+  console.log("Database connection successful");
+} catch (error) {
+  console.error("Database connection error:", error);
+  
   if (process.env.NODE_ENV === 'production') {
+    console.error("CRITICAL: Database connection failed in production");
     throw error;
   } else {
-    console.warn("WARNING: Starting without database connection. Some features may not work.");
-    // Create a dummy pool that will throw errors when used
-    // This allows the app to start but database operations will fail
-    pool = new Pool({ connectionString: 'postgresql://user:pass@localhost:5432/dummy' });
+    console.warn("WARNING: Database connection failed in development");
+    pool = new Pool({ connectionString: 'postgresql://postgres:postgres@localhost:5432/recipe_snap' });
   }
 }
 

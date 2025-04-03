@@ -16,6 +16,50 @@ if (apiKey) {
 }
 
 /**
+ * Adapts the Gemini API response to match our schema when validation fails.
+ * This handles cases where the API response format slightly differs from our expected schema.
+ */
+function adaptResponseToSchema(data: any): AnalyzeImageResponse {
+  // Create a base compliant object
+  const adapted: AnalyzeImageResponse = {
+    foodName: data.foodName || "Unknown Food",
+    description: data.description || "No description available",
+    tags: Array.isArray(data.tags) ? data.tags : [],
+    recipes: [],
+    imageUrl: data.imageUrl || "",
+  };
+  
+  // Adapt recipes if they exist
+  if (Array.isArray(data.recipes) && data.recipes.length > 0) {
+    adapted.recipes = data.recipes.map((recipe: any) => {
+      // Ensure required fields exist
+      const adaptedRecipe = {
+        title: recipe.title || "Untitled Recipe",
+        description: recipe.description || "No description available",
+        ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+        instructions: Array.isArray(recipe.instructions) ? recipe.instructions : [],
+      };
+      
+      // Copy all other fields that exist
+      Object.keys(recipe).forEach(key => {
+        if (key !== 'title' && key !== 'description' && key !== 'ingredients' && key !== 'instructions') {
+          (adaptedRecipe as any)[key] = recipe[key];
+        }
+      });
+      
+      return adaptedRecipe;
+    });
+  }
+  
+  // Copy YouTube videos if they exist
+  if (Array.isArray(data.youtubeVideos)) {
+    adapted.youtubeVideos = data.youtubeVideos;
+  }
+  
+  return adapted;
+}
+
+/**
  * Analyzes a food image using the Gemini AI API
  */
 export async function analyzeImage(imageData: string, userId: number): Promise<AnalyzeImageResponse> {
@@ -148,13 +192,31 @@ export async function analyzeImage(imageData: string, userId: number): Promise<A
       const jsonString = jsonMatch[0];
       const parsedData = JSON.parse(jsonString);
       
-      // Validate response against our schema
-      const validatedData = analyzeImageResponseSchema.parse(parsedData);
+      // Add imageUrl to the parsed data if it doesn't exist
+      if (!parsedData.imageUrl && imageData) {
+        parsedData.imageUrl = `data:image/jpeg;base64,${imageData}`;
+      }
       
-      // Enhance with YouTube videos
-      const enhancedData = await enhanceRecipeWithVideos(validatedData);
-      
-      return enhancedData;
+      // Make schema validation more flexible
+      try {
+        // Validate response against our schema
+        const validatedData = analyzeImageResponseSchema.parse(parsedData);
+        
+        // Enhance with YouTube videos
+        const enhancedData = await enhanceRecipeWithVideos(validatedData);
+        
+        return enhancedData;
+      } catch (validationError) {
+        console.error("Schema validation error:", validationError);
+        
+        // Try to adapt the response to match our schema
+        const adaptedData = adaptResponseToSchema(parsedData);
+        
+        // Enhance with YouTube videos
+        const enhancedData = await enhanceRecipeWithVideos(adaptedData);
+        
+        return enhancedData;
+      }
       
     } catch (error) {
       console.error("Error parsing AI response:", error);

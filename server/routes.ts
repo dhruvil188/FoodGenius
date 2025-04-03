@@ -54,6 +54,7 @@ import {
 
 // Import storage for user conversion
 import { storage } from './storage';
+import { isDatabaseConnected } from './db';
 
 // Simple mock user ID for guest access
 const GUEST_USER_ID = 1;
@@ -122,9 +123,65 @@ async function optionalAuthenticate(req: Request, res: Response, next: NextFunct
   next();
 }
 
+// Middleware to check database connectivity
+function checkDatabaseConnectivity(req: Request, res: Response, next: NextFunction) {
+  if (!isDatabaseConnected()) {
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    
+    if (isDevelopment) {
+      // In development, show a warning but allow the request to proceed
+      console.warn("⚠️ Database connection not established, some functionality may be limited");
+      next();
+    } else {
+      // In production, return a clear error response
+      const missingVars = [];
+      if (!process.env.DATABASE_URL) missingVars.push('DATABASE_URL');
+      if (!process.env.PGHOST) missingVars.push('PGHOST');
+      if (!process.env.PGDATABASE) missingVars.push('PGDATABASE');
+      if (!process.env.PGUSER) missingVars.push('PGUSER');
+      if (!process.env.PGPASSWORD) missingVars.push('PGPASSWORD');
+      
+      const errorMessage = missingVars.length > 0 
+        ? `Missing required environment variables: ${missingVars.join(', ')}`
+        : 'Database connection failed. Please check your database configuration.';
+      
+      res.status(503).json({
+        error: 'Database Connection Error',
+        message: errorMessage,
+        status: 503,
+        setup_required: true
+      });
+    }
+  } else {
+    next();
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register global error handler middleware
   app.use(errorHandler);
+  
+  // Add route to check database status - useful for deployment health checks
+  app.get("/api/health", (req: Request, res: Response) => {
+    const isDbConnected = isDatabaseConnected();
+    
+    res.status(isDbConnected ? 200 : 503).json({
+      status: isDbConnected ? "healthy" : "degraded",
+      database: isDbConnected ? "connected" : "disconnected",
+      environment: process.env.NODE_ENV || "development",
+      timestamp: new Date().toISOString()
+    });
+  });
+  
+  // Apply database connectivity check to all API routes except health check
+  app.use([
+    '/api/auth/*', 
+    '/api/recipes/*', 
+    '/api/recipes',
+    '/api/analyze-image',
+    '/api/chat/*',
+    '/api/stripe/*'
+  ], checkDatabaseConnectivity);
   
   // ==== Auth Routes ====
   

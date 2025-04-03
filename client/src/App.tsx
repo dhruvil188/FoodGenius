@@ -18,6 +18,7 @@ import AuthPage from "@/pages/auth-page";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 function Router() {
   return (
@@ -25,10 +26,34 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/library" component={Library} />
       <Route path="/recipe/:slug" component={RecipePage} />
-      <Route path="/recipes" component={SavedRecipesPage} />
-      <Route path="/recipes/:id" component={RecipeDetailPage} />
-      <Route path="/chat" component={ChatPage} />
-      <Route path="/chat/:id" component={ChatPage} />
+      <Route path="/recipes">
+        {() => (
+          <ProtectedRoute featureName="My Recipes">
+            <SavedRecipesPage />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/recipes/:id">
+        {({id}) => (
+          <ProtectedRoute featureName="Recipe Details">
+            <RecipeDetailPage id={id} />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/chat">
+        {() => (
+          <ProtectedRoute featureName="Recipe Fusion Chat">
+            <ChatPage />
+          </ProtectedRoute>
+        )}
+      </Route>
+      <Route path="/chat/:id">
+        {({id}) => (
+          <ProtectedRoute featureName="Recipe Fusion Chat">
+            <ChatPage id={id} />
+          </ProtectedRoute>
+        )}
+      </Route>
       <Route path="/contact" component={Contact} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />

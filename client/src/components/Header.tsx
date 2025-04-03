@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 import { Logo } from './Logo';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Menu } from 'lucide-react';
 import LoginButton from './LoginButton';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
@@ -18,6 +21,20 @@ export default function Header() {
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
+  
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   
   return (
     <motion.header 
@@ -38,7 +55,8 @@ export default function Header() {
           <Logo size={isMobile ? 'small' : 'medium'} />
         </motion.div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 relative">
+          {/* Desktop Menu */}
           <Button 
             variant="outline"
             className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all mr-2"
@@ -77,6 +95,71 @@ export default function Header() {
             <i className="fas fa-bookmark mr-2"></i>
             My Recipes
           </Button>
+          
+          {/* Mobile Menu Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden mr-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          
+          {/* Mobile Menu Dropdown */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                ref={menuRef}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-12 right-0 bg-white shadow-lg rounded-lg w-56 z-50 overflow-hidden"
+              >
+                <div className="py-2 border-b border-slate-100">
+                  <button
+                    className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-slate-50"
+                    onClick={() => {
+                      navigate('/library');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <i className="fas fa-book w-6 text-primary"></i>
+                    Recipe Library
+                  </button>
+                  <button
+                    className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-slate-50"
+                    onClick={() => {
+                      if (currentUser) {
+                        navigate('/chat');
+                      } else {
+                        navigate('/auth');
+                      }
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <i className="fas fa-comments w-6 text-primary"></i>
+                    Recipe Chat
+                  </button>
+                  <button
+                    className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-slate-50"
+                    onClick={() => {
+                      if (currentUser) {
+                        navigate('/recipes');
+                      } else {
+                        navigate('/auth');
+                      }
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <i className="fas fa-bookmark w-6 text-primary"></i>
+                    My Recipes
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           <Button 
             className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 text-white rounded-full px-6 shadow-md"

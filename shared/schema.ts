@@ -27,6 +27,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
   displayName: true,
+  profileImage: true,
+  firebaseUid: true, // Added for Firebase authentication
 });
 
 // Auth schemas for form validation
@@ -64,6 +66,9 @@ export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 
+// Note: These tables were redundant with savedRecipes table and aren't actively used.
+// They have been commented out for clarity. If needed in the future, they can be restored.
+/*
 // Schema for food analysis
 export const foodAnalysis = pgTable("food_analysis", {
   id: serial("id").primaryKey(),
@@ -72,7 +77,7 @@ export const foodAnalysis = pgTable("food_analysis", {
   description: text("description"),
   tags: text("tags").array(),
   imageUrl: text("image_url"),
-  createdAt: text("created_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertFoodAnalysisSchema = createInsertSchema(foodAnalysis).omit({
@@ -105,6 +110,7 @@ export const insertRecipeSchema = createInsertSchema(recipes).omit({
 
 export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
 export type Recipe = typeof recipes.$inferSelect;
+*/
 
 // API Request/Response Types
 export const analyzeImageRequestSchema = z.object({
@@ -113,24 +119,14 @@ export const analyzeImageRequestSchema = z.object({
 
 export type AnalyzeImageRequest = z.infer<typeof analyzeImageRequestSchema>;
 
+// Simplified nutritionInfo schema - minimal data as requested by user
 export const nutritionInfoSchema = z.object({
+  // Only keeping basic fields, others can be added back if needed
   calories: z.number().optional(),
   protein: z.string().optional(),
   carbs: z.string().optional(),
   fats: z.string().optional(),
-  fiber: z.string().optional(),
-  sugar: z.string().optional(),
-  sodium: z.string().optional(),
-  vitamins: z.array(z.string()).optional(),
-  healthyAlternatives: z.array(z.string()).optional(),
-  dietaryNotes: z.array(z.string()).optional(),
-  macronutrientRatio: z.object({
-    protein: z.number().optional(),
-    carbs: z.number().optional(),
-    fats: z.number().optional(),
-  }).optional(),
   allergens: z.array(z.string()).optional(),
-  dietaryCompliance: z.array(z.string()).optional(),
 });
 
 export type NutritionInfo = z.infer<typeof nutritionInfoSchema>;

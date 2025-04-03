@@ -381,17 +381,49 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
+  // This method is a pass-through to the chat service
+  // The actual implementation is in chatService.ts
   async createRecipeFromChatPrompt(userId: number, prompt: string, conversationId?: string): Promise<{
     recipe: AnalyzeImageResponse,
     message: ChatMessage
   }> {
-    // This method will be implemented in the chatService.ts file
-    // to avoid circular dependencies, we'll just define the method signature here
-    // and the actual implementation will be in chatService.ts
+    // Create a unique conversation ID if not provided
+    const actualConversationId = conversationId || `conv_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     
-    // Import the chat service dynamically to avoid circular dependencies
-    const { generateRecipeFromChatPrompt } = await import('./services/chatService');
-    return generateRecipeFromChatPrompt(userId, prompt, conversationId);
+    // Create the user message in the database
+    const userMessage = await this.createChatMessage({
+      userId,
+      content: prompt,
+      role: "user",
+      conversationId: actualConversationId,
+    });
+    
+    try {
+      // Forward to the chat service - we need to dynamically import to avoid circular dependencies
+      const { generateRecipeFromPrompt } = await import('./services/chatService');
+      return await generateRecipeFromPrompt(userId, prompt, actualConversationId, userMessage);
+    } catch (error) {
+      console.error("Error in createRecipeFromChatPrompt:", error);
+      
+      // Create an error message
+      const errorMessage = await this.createChatMessage({
+        userId,
+        content: `Sorry, I couldn't generate a recipe from your prompt. Error: ${(error as Error).message || 'Unknown error'}`,
+        role: "assistant",
+        conversationId: actualConversationId,
+      });
+      
+      // Return a basic error response
+      return {
+        recipe: {
+          foodName: "Error Generating Recipe",
+          description: `Sorry, I couldn't generate a recipe. Error: ${(error as Error).message || 'Unknown error'}`,
+          tags: ["error"],
+          recipes: [],
+        },
+        message: errorMessage,
+      };
+    }
   }
 }
 

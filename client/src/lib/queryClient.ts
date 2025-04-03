@@ -74,10 +74,14 @@ export async function apiRequest(
       throw error;
     }
     
-    // Otherwise, wrap it in an AppError
+    // Otherwise, wrap it in an AppError with appropriate error type
+    const errorType = error instanceof Error && error.name === 'TimeoutError' 
+      ? ErrorType.TIMEOUT 
+      : ErrorType.NETWORK;
+    
     throw createAppError(
       error instanceof Error ? error.message : 'Network request failed',
-      ErrorType.NETWORK,
+      errorType,
       error
     );
   }
@@ -117,14 +121,26 @@ export const getQueryFn: <T>(options: {
       await handleResponseErrors(res);
       return await res.json();
     } catch (error) {
-      // Don't show toast for queries, that's handled by the components
+      // If it's already an AppError, just rethrow it
       if (error && typeof error === 'object' && 'type' in error) {
         throw error;
       }
       
+      // Determine the most specific error type based on the error
+      let errorType = ErrorType.UNKNOWN;
+      
+      if (error instanceof Error) {
+        if (error.name === 'TimeoutError') {
+          errorType = ErrorType.TIMEOUT;
+        } else if (error.name === 'NetworkError' || error.message.includes('network') || error.message.includes('fetch')) {
+          errorType = ErrorType.NETWORK;
+        }
+      }
+      
+      // Create a properly typed error (don't show toast for queries, components handle that)
       throw createAppError(
         error instanceof Error ? error.message : 'Query failed',
-        ErrorType.NETWORK,
+        errorType,
         error
       );
     }

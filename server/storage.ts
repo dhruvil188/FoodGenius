@@ -46,6 +46,7 @@ export interface IStorage {
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getChatMessages(userId: number, conversationId: string): Promise<ChatMessage[]>;
   getConversations(userId: number): Promise<{ id: string, lastMessage: ChatMessage }[]>;
+  deleteConversation(userId: number, conversationId: string): Promise<boolean>;
   createRecipeFromChatPrompt(userId: number, prompt: string, conversationId?: string): Promise<{
     recipe: AnalyzeImageResponse, 
     message: ChatMessage

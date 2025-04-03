@@ -348,11 +348,7 @@ const ChatPage: React.FC = () => {
                       </div>
                     )}
                     
-                    <p className="whitespace-pre-wrap text-sm">
-                      {message.role === "assistant" && message.recipeOutput && message.content.includes("undefined") 
-                        ? `Here's a recipe for ${message.recipeOutput.foodName || "your fusion dish"}` 
-                        : message.content}
-                    </p>
+                    <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                     
                     {/* Render recipe card if the message has a recipe output */}
                     {message.role === "assistant" && message.recipeOutput && (

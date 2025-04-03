@@ -14,8 +14,13 @@ import { triggerConfetti } from '@/lib/confetti';
 import { motion } from 'framer-motion';
 import SEO from '@/components/SEO';
 
-export default function RecipeDetailPage() {
-  const { id } = useParams<{ id: string }>();
+interface RecipeDetailPageProps {
+  id?: string;
+}
+
+export default function RecipeDetailPage({ id: propId }: RecipeDetailPageProps) {
+  const params = useParams<{ id: string }>();
+  const id = propId || params.id;
   const [, navigate] = useLocation();
   const { currentUser: user } = useAuth();
   const { toast } = useToast();

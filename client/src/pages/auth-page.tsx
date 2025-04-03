@@ -15,12 +15,112 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import { ArrowRight, ChefHat, CheckCircle2, Image, Salad, ShieldCheck, UtensilsCrossed } from "lucide-react";
 import Hero from "@/components/Hero";
+import { useToast } from "@/hooks/use-toast";
+
+// Define form value types based on the schemas
+type LoginFormValues = {
+  email: string;
+  password: string;
+};
+
+type RegisterFormValues = {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 const AuthPage = () => {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>("login");
   const [, navigate] = useLocation();
   const { currentUser: user, isLoading, login } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
+  // Form hooks
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Mock mutations for now
+  const loginMutation = {
+    isPending: isLoggingIn,
+    mutateAsync: async (data: LoginFormValues) => {
+      setIsLoggingIn(true);
+      try {
+        await login();
+        return { success: true };
+      } catch (error) {
+        throw new Error("Login failed");
+      } finally {
+        setIsLoggingIn(false);
+      }
+    }
+  };
+  
+  const registerMutation = {
+    isPending: isLoggingIn,
+    mutateAsync: async (data: RegisterFormValues) => {
+      setIsLoggingIn(true);
+      try {
+        await login(); // Using login for now since we're using Firebase auth
+        return { success: true };
+      } catch (error) {
+        throw new Error("Registration failed");
+      } finally {
+        setIsLoggingIn(false);
+      }
+    }
+  };
+
+  // Form submission handlers
+  const onLoginSubmit = async (data: LoginFormValues) => {
+    try {
+      await loginMutation.mutateAsync(data);
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const onRegisterSubmit = async (data: RegisterFormValues) => {
+    try {
+      await registerMutation.mutateAsync(data);
+      toast({
+        title: "Account created!",
+        description: "Your account has been successfully created.",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Registration failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Redirect to home if already logged in
   useEffect(() => {

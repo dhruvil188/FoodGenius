@@ -1,99 +1,57 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
-import * as schema from "@shared/schema";
-import { getDatabaseUrl } from './dbConfig';
+import { supabase } from './supabaseClient';
 
-// Configure NeonDB to use WebSockets
-neonConfig.webSocketConstructor = ws;
+// Supabase connection status tracking
+let isSupabaseConnected = false;
 
-// Initialize pool with connection string
-let pool: Pool;
-let isDbConnected = false;
-
-// Create a function to initialize the database connection
-export async function initializeDatabase() {
+// Check Supabase connection
+async function checkSupabaseConnection() {
   try {
-    const connectionString = getDatabaseUrl();
-    console.log("Attempting to connect to PostgreSQL database...");
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+      console.error("ERROR: Supabase environment variables not found");
+      return false;
+    }
     
-    // Log available environment variables (without values for security)
-    console.log("Database environment variables present:", {
-      DATABASE_URL: !!process.env.DATABASE_URL,
-      PGHOST: !!process.env.PGHOST,
-      PGUSER: !!process.env.PGUSER,
-      PGPASSWORD: !!process.env.PGPASSWORD,
-      PGDATABASE: !!process.env.PGDATABASE,
-      PGPORT: !!process.env.PGPORT,
-    });
+    // Test Supabase connection by querying users
+    const { data, error } = await supabase.from('users').select('count').limit(1);
     
-    // Create a new pool with the connection string
-    pool = new Pool({ connectionString });
+    if (error) {
+      console.error("Supabase connection error:", error.message);
+      return false;
+    }
     
-    // Test the connection with a timeout
-    const connectionTest = await Promise.race([
-      pool.query('SELECT NOW()'),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Database connection timeout')), 5000))
-    ]);
-    
-    console.log("Database connection successful");
-    isDbConnected = true;
+    console.log("Supabase connection successful");
+    isSupabaseConnected = true;
     return true;
   } catch (error) {
-    console.error("Database connection error:", error);
-    
-    // Create a meaningful error message
-    let errorMessage = "Database connection failed: ";
-    if (error instanceof Error) {
-      errorMessage += error.message;
-    } else {
-      errorMessage += "Unknown error";
-    }
-    
-    // Different handling for production vs development
-    if (process.env.NODE_ENV === 'production') {
-      console.error("CRITICAL: Database connection failed in production");
-      console.error("Make sure DATABASE_URL or PGHOST, PGUSER, PGPASSWORD, and PGDATABASE environment variables are set.");
-      
-      // In production, create a placeholder pool that will throw clear errors
-      // This allows the application to at least start and show error messages
-      pool = new Pool({ 
-        connectionString: 'postgresql://placeholder:placeholder@placeholder:5432/placeholder',
-        max: 1 
-      });
-      isDbConnected = false;
-      
-      // Create a proper pool._clients array to avoid "Cannot read property 'release' of undefined" errors
-      (pool as any)._clients = [];
-    } else {
-      console.warn("WARNING: Database connection failed in development");
-      console.warn("Trying to continue with fallback in-memory storage where possible...");
-      
-      // In development, we'll try to create a working pool anyway to prevent startup errors
-      pool = new Pool({ 
-        connectionString: 'postgresql://postgres:postgres@localhost:5432/recipe_snap',
-        max: 1
-      });
-      
-      // Some routes may still work without DB access
-      isDbConnected = false;
-    }
-    
+    console.error("Supabase connection error:", error);
     return false;
   }
 }
 
-// Initialize the pool with a placeholder that will be replaced
-pool = new Pool({ 
-  connectionString: 'postgresql://placeholder:placeholder@placeholder:5432/placeholder',
-  max: 1 
-});
+// Initialize the database connection
+export async function initializeDatabase() {
+  try {
+    // Check Supabase connection
+    const connected = await checkSupabaseConnection();
+    
+    if (!connected) {
+      console.error("CRITICAL: Failed to connect to Supabase");
+      console.error("Make sure SUPABASE_URL and SUPABASE_ANON_KEY environment variables are set correctly");
+      return false;
+    }
+    
+    console.log("Using Supabase for database operations");
+    return true;
+  } catch (error) {
+    console.error("Failed to initialize database:", error);
+    return false;
+  }
+}
 
 // Initialize database asynchronously but don't block module loading
 initializeDatabase().catch(err => {
   console.error("Failed to initialize database:", err);
 });
 
-// Export Drizzle instance and connection status
-export const db = drizzle(pool, { schema });
-export const isDatabaseConnected = () => isDbConnected;
+// Export connection status
+export const isDatabaseConnected = () => isSupabaseConnected;

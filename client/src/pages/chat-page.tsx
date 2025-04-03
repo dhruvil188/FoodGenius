@@ -38,12 +38,16 @@ interface Conversation {
   lastMessage: ChatMessage;
 }
 
-const ChatPage: React.FC = () => {
+interface ChatPageProps {
+  id?: string;
+}
+
+const ChatPage: React.FC<ChatPageProps> = ({ id: conversationId }) => {
   const { currentUser } = useAuth();
   const params = useParams();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(conversationId || null);
   const [prompt, setPrompt] = useState("");
   const messageEndRef = useRef<HTMLDivElement>(null);
   

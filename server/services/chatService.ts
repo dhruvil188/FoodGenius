@@ -126,33 +126,22 @@ export async function generateRecipeFromChatPrompt(
       history: historyPrompts,
     });
     
-    // For new conversations, start by sending the instruction as a normal user message
-    // This avoids the system_instruction parameter that's causing issues
+    // For new conversations, we need a different approach.
+    // The Gemini API requires that the first message in history has role 'user', not 'model'
     if (historyPrompts.length === 0) {
-      // Send the instructions as a model message first
-      // Note: We need to manually add this to history since it won't be in the DB
-      historyPrompts.push({
-        role: "model",
-        parts: [{ text: RECIPE_COMBINATION_INSTRUCTION }]
-      });
+      // Create a chat with no history
+      const chat = model.startChat();
       
-      // Update the chat with our modified history
-      const updatedChat = model.startChat({
-        history: historyPrompts,
-      });
+      // First send the user message with our instructions prompt merged
+      const instructionsResult = await chat.sendMessage([{ 
+        text: RECIPE_COMBINATION_INSTRUCTION + "\n\nUser Input: " + prompt 
+      }]);
       
-      // Now we can proceed with the user's actual prompt
-      const result = await updatedChat.sendMessage([{ text: prompt }]);
-      const responseText = result.response.text();
+      const responseText = instructionsResult.response.text();
       console.log(`✅ Got response from Gemini AI for user ${userId}`);
       
-      // Store the instruction message in the database for future reference
-      await storage.createChatMessage({
-        userId,
-        content: RECIPE_COMBINATION_INSTRUCTION,
-        role: "assistant",
-        conversationId: actualConversationId,
-      });
+      // No need to store the instruction in the database as a separate message
+      // since we're including it with the user prompt
       
       // Extract the JSON from the response
       let jsonString = extractJsonFromText(responseText);
@@ -302,68 +291,86 @@ export async function generateRecipeFromPrompt(
       parts: [{ text: msg.content }]
     }));
     
-    // Check if we need to add instructions first
-    // This will happen when this is the first message in a conversation
+    // Check if we need to use the special approach for first message
     if (historyPrompts.length <= 1) { // Just the user message or empty
-      // Add the instruction as a model message at the beginning
-      historyPrompts = [
-        {
-          role: "model",
-          parts: [{ text: RECIPE_COMBINATION_INSTRUCTION }]
-        },
-        ...historyPrompts
-      ];
+      // We need to start fresh with no history to avoid the "first message must be user" error
+      const chat = model.startChat();
       
-      // Store the instruction in the database
-      if (messages.length === 1) { // Only the user message exists
-        await storage.createChatMessage({
-          userId,
-          content: RECIPE_COMBINATION_INSTRUCTION,
-          role: "assistant",
-          conversationId: conversationId,
-        });
+      // Send a combined message with instructions and user prompt
+      const combinedPrompt = RECIPE_COMBINATION_INSTRUCTION + "\n\nUser Input: " + prompt;
+      const result = await chat.sendMessage([{ text: combinedPrompt }]);
+      const responseText = result.response.text();
+      
+      console.log(`✅ Got response from Gemini AI for user ${userId}`);
+      
+      // Extract the JSON from the response
+      let jsonString = extractJsonFromText(responseText);
+      jsonString = cleanJsonString(jsonString);
+      
+      // Parse the JSON as a recipe
+      let recipeData: AnalyzeImageResponse;
+      try {
+        recipeData = JSON.parse(jsonString);
+        console.log(`✅ Successfully parsed recipe JSON`);
+      } catch (err) {
+        const error = err as Error;
+        console.error("❌ Error parsing recipe JSON:", error);
+        throw new Error(`Failed to parse recipe JSON: ${error.message}`);
       }
+  
+      // Create the assistant message with the recipe
+      const assistantMessage = await storage.createChatMessage({
+        userId,
+        content: `Here's a recipe for ${recipeData.foodName}`,
+        role: "assistant",
+        conversationId: conversationId,
+        recipeOutput: recipeData as any,
+      });
+  
+      return {
+        recipe: recipeData,
+        message: assistantMessage,
+      };
+    } else {
+      // For existing conversations with more than one message,
+      // we need a different approach to handle continuation
+      const chat = model.startChat();
+      
+      // Send just the user prompt
+      const result = await chat.sendMessage([{ text: prompt }]);
+      const responseText = result.response.text();
+      
+      console.log(`✅ Got response from Gemini AI for user ${userId}`);
+      
+      // Extract the JSON from the response
+      let jsonString = extractJsonFromText(responseText);
+      jsonString = cleanJsonString(jsonString);
+      
+      // Parse the JSON as a recipe
+      let recipeData: AnalyzeImageResponse;
+      try {
+        recipeData = JSON.parse(jsonString);
+        console.log(`✅ Successfully parsed recipe JSON`);
+      } catch (err) {
+        const error = err as Error;
+        console.error("❌ Error parsing recipe JSON:", error);
+        throw new Error(`Failed to parse recipe JSON: ${error.message}`);
+      }
+  
+      // Create the assistant message with the recipe
+      const assistantMessage = await storage.createChatMessage({
+        userId,
+        content: `Here's a recipe for ${recipeData.foodName}`,
+        role: "assistant",
+        conversationId: conversationId,
+        recipeOutput: recipeData as any,
+      });
+  
+      return {
+        recipe: recipeData,
+        message: assistantMessage,
+      };
     }
-
-    // Create a chat session with the history (including our instruction if needed)
-    const chat = model.startChat({
-      history: historyPrompts,
-    });
-
-    // Send the user's prompt
-    const result = await chat.sendMessage([{ text: prompt }]);
-    const responseText = result.response.text();
-    
-    console.log(`✅ Got response from Gemini AI for user ${userId}`);
-    
-    // Extract the JSON from the response
-    let jsonString = extractJsonFromText(responseText);
-    jsonString = cleanJsonString(jsonString);
-    
-    // Parse the JSON as a recipe
-    let recipeData: AnalyzeImageResponse;
-    try {
-      recipeData = JSON.parse(jsonString);
-      console.log(`✅ Successfully parsed recipe JSON`);
-    } catch (err) {
-      const error = err as Error;
-      console.error("❌ Error parsing recipe JSON:", error);
-      throw new Error(`Failed to parse recipe JSON: ${error.message}`);
-    }
-
-    // Create the assistant message with the recipe
-    const assistantMessage = await storage.createChatMessage({
-      userId,
-      content: `Here's a recipe for ${recipeData.foodName}`,
-      role: "assistant",
-      conversationId: conversationId,
-      recipeOutput: recipeData as any,
-    });
-
-    return {
-      recipe: recipeData,
-      message: assistantMessage,
-    };
   } catch (err) {
     const error = err as Error;
     console.error("❌ Error generating recipe from prompt:", error);

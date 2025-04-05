@@ -2,7 +2,7 @@
 
 Recipe Snap is a cutting-edge web application that transforms food discovery and cooking experiences through AI technology. Simply upload an image of any food dish, and Recipe Snap will identify it and generate comprehensive recipe information using Google's Gemini AI.
 
-![Recipe Snap Screenshot](https://i.imgur.com/placeholder.png)
+![AE5CF8C5-F6B9-4555-BC18-B28C37A86815_1_102_o](https://github.com/user-attachments/assets/10988b74-abc7-4740-8999-2bdb9bd17191)
 
 ## 🌟 Features
 

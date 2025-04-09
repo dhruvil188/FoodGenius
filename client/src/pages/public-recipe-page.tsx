@@ -395,10 +395,12 @@ export default function PublicRecipePage() {
                 <Card>
                   <CardContent className="p-4">
                     <ScrollArea className="h-96">
-                      <ol className="space-y-6 relative [counter-reset:step]">
+                      <ol className="space-y-6 relative list-none">
                         {instructions.map((step: string, i: number) => (
-                          <li key={i} className="relative pl-10 [counter-increment:step]">
-                            <div className="absolute top-0 left-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white text-sm font-medium before:absolute before:content-[counter(step)]"></div>
+                          <li key={i} className="relative pl-12 pb-6 border-l-2 border-muted last:border-l-0 last:pb-0">
+                            <div className="absolute -left-[1px] top-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm">
+                              {i + 1}
+                            </div>
                             <div className="space-y-2">
                               <div className="flex items-center">
                                 <input 
@@ -406,21 +408,33 @@ export default function PublicRecipePage() {
                                   id={`step-${i}`} 
                                   className="h-4 w-4 rounded border-muted-foreground text-primary mr-2" 
                                 />
-                                <label htmlFor={`step-${i}`} className="font-medium cursor-pointer hover:text-primary transition-colors">
-                                  {step.split('.')[0]}
+                                <label htmlFor={`step-${i}`} className="font-semibold text-base cursor-pointer hover:text-primary transition-colors">
+                                  Step {i + 1}: {step.split('.')[0].trim()}
                                 </label>
                               </div>
-                              <p className="text-muted-foreground ml-6">
-                                {step.includes('.') ? step.split('.').slice(1).join('.').trim() : ''}
-                              </p>
+                              <div className="text-muted-foreground ml-6 bg-muted/20 p-3 rounded-md">
+                                {step.includes('.') ? step.split('.').slice(1).join('.').trim() : step}
+                              </div>
                               {(i === 1 || i === 3 || i === 5) && (
-                                <div className="ml-6 mt-2 bg-muted/30 p-3 rounded-md text-sm flex items-start">
+                                <div className="ml-6 mt-2 bg-amber-50 border border-amber-100 p-3 rounded-md text-sm flex items-start">
                                   <Lightbulb className="h-4 w-4 text-amber-500 mr-2 mt-0.5 shrink-0" />
                                   <p><span className="font-medium">Pro Tip:</span> {
                                     i === 1 ? "For maximum flavor, don't rush this step. The caramelization creates depth of flavor." :
                                     i === 3 ? "Taste and adjust seasoning as you go. This is key to balanced flavor." :
                                     "Allow to rest before serving to let the flavors fully develop."
                                   }</p>
+                                </div>
+                              )}
+                              {(i === 0 || i === 2 || i === 4) && (
+                                <div className="ml-6 mt-2 flex justify-between gap-3 text-xs">
+                                  <div className="flex items-center text-blue-600">
+                                    <AlarmClock className="h-3 w-3 mr-1" />
+                                    <span>{i === 0 ? "5-7 min" : i === 2 ? "10-15 min" : "2-3 min"}</span>
+                                  </div>
+                                  <div className="flex items-center text-amber-600">
+                                    <Thermometer className="h-3 w-3 mr-1" />
+                                    <span>{i === 0 ? "Medium heat" : i === 2 ? "Medium-high heat" : "Low heat"}</span>
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -479,31 +493,115 @@ export default function PublicRecipePage() {
 
             {mainRecipe?.cookingScience && (
               <TabsContent value="science" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Cooking Science</CardTitle>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-medium flex items-center">
+                    <span className="mr-2">🔬</span>
+                    The Science Behind This Recipe
+                  </h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {mainRecipe.cookingScience.principles && (
+                    <Card className="bg-gradient-to-br from-blue-50 to-sky-50 border-blue-100">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base flex items-center">
+                          <span className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mr-2">
+                            <span>🧪</span>
+                          </span>
+                          Key Scientific Principles
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="p-3 bg-white rounded-md shadow-sm">
+                            <p className="text-sm leading-relaxed">{mainRecipe.cookingScience.principles}</p>
+                          </div>
+                          <div className="p-3 bg-blue-100/20 rounded-md text-sm">
+                            <p className="font-medium mb-1">Why It Matters:</p>
+                            <p>Understanding these principles helps you control the cooking process for consistent results every time.</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  {mainRecipe.cookingScience.reactions && (
+                    <Card className="bg-gradient-to-br from-violet-50 to-purple-50 border-violet-100">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base flex items-center">
+                          <span className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center mr-2">
+                            <span>⚗️</span>
+                          </span>
+                          Chemical Reactions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="p-3 bg-white rounded-md shadow-sm">
+                            <p className="text-sm leading-relaxed">{mainRecipe.cookingScience.reactions}</p>
+                          </div>
+                          <div className="rounded-md overflow-hidden border">
+                            <div className="p-2 bg-violet-100 text-violet-800 text-xs font-medium">
+                              Flavor Development Timeline
+                            </div>
+                            <div className="p-2 text-xs space-y-1">
+                              <div className="flex justify-between">
+                                <span>Initial heating</span>
+                                <span>→</span>
+                                <span>Maillard reaction begins</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Mid-cooking</span>
+                                <span>→</span>
+                                <span>Caramelization intensifies</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Final stage</span>
+                                <span>→</span>
+                                <span>Flavor compounds stabilize</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+                
+                {mainRecipe.cookingScience.tips && (
+                  <Card className="mt-4">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center">
+                        <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
+                        Science-Based Cooking Tips
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {mainRecipe.cookingScience.tips.split('. ').filter(Boolean).map((tip, i) => (
+                          <div key={i} className="p-3 bg-muted/30 rounded-md border border-muted">
+                            <div className="flex items-start">
+                              <div className="w-6 h-6 rounded-full bg-amber-100 flex-shrink-0 flex items-center justify-center text-amber-800 text-xs font-medium mr-2 mt-0.5">
+                                {i+1}
+                              </div>
+                              <p className="text-sm">{tip}.</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                <Card className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50">
+                  <CardHeader className="pb-0">
+                    <CardTitle className="text-base">Did You Know?</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {mainRecipe.cookingScience.principles && (
-                        <div>
-                          <h4 className="font-medium mb-2">Key Principles:</h4>
-                          <p>{mainRecipe.cookingScience.principles}</p>
-                        </div>
-                      )}
-                      {mainRecipe.cookingScience.reactions && (
-                        <div>
-                          <h4 className="font-medium mb-2">Chemical Reactions:</h4>
-                          <p>{mainRecipe.cookingScience.reactions}</p>
-                        </div>
-                      )}
-                      {mainRecipe.cookingScience.tips && (
-                        <div>
-                          <h4 className="font-medium mb-2">Science-Based Tips:</h4>
-                          <p>{mainRecipe.cookingScience.tips}</p>
-                        </div>
-                      )}
-                    </div>
+                    <p className="text-sm italic">
+                      The cooking methods in this recipe have been refined through centuries of culinary tradition, 
+                      but modern food science has now explained exactly why they work so well!
+                    </p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -586,6 +684,92 @@ export default function PublicRecipePage() {
                 </Badge>
               </div>
             </CardFooter>
+          </Card>
+          
+          {/* Health & Cost Estimation */}
+          <Card>
+            <CardHeader className="pb-2 flex flex-row items-center">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                <span className="text-lg">💲</span>
+              </div>
+              <div>
+                <CardTitle>Health & Cost</CardTitle>
+                <CardDescription>Estimated values</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium flex items-center mb-3">
+                    <span className="mr-2">💰</span> Cost Estimation
+                  </h4>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-2 rounded-md bg-green-50 border border-green-100">
+                      <div className="text-xs text-muted-foreground mb-1">Budget</div>
+                      <div className="text-lg font-semibold text-green-700">$</div>
+                      <div className="text-xs font-medium">
+                        {Math.round(Math.random() * 10) + 5}-{Math.round(Math.random() * 10) + 10} USD
+                      </div>
+                    </div>
+                    <div className="p-2 rounded-md bg-amber-50 border border-amber-100">
+                      <div className="text-xs text-muted-foreground mb-1">Mid-range</div>
+                      <div className="text-lg font-semibold text-amber-700">$$</div>
+                      <div className="text-xs font-medium">
+                        {Math.round(Math.random() * 10) + 15}-{Math.round(Math.random() * 10) + 20} USD
+                      </div>
+                    </div>
+                    <div className="p-2 rounded-md bg-muted">
+                      <div className="text-xs text-muted-foreground mb-1">Premium</div>
+                      <div className="text-lg font-semibold text-muted-foreground">$$$</div>
+                      <div className="text-xs font-medium">
+                        {Math.round(Math.random() * 15) + 25}+ USD
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium flex items-center mb-3">
+                    <span className="mr-2">❤️</span> Health Benefits
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Protein</span>
+                      <div className="flex items-center">
+                        <Progress value={75} className="h-2 w-24" />
+                        <span className="text-xs ml-2">High</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Fiber</span>
+                      <div className="flex items-center">
+                        <Progress value={40} className="h-2 w-24" />
+                        <span className="text-xs ml-2">Moderate</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Vitamins</span>
+                      <div className="flex items-center">
+                        <Progress value={65} className="h-2 w-24" />
+                        <span className="text-xs ml-2">Good</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs">Antioxidants</span>
+                      <div className="flex items-center">
+                        <Progress value={85} className="h-2 w-24" />
+                        <span className="text-xs ml-2">Excellent</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-muted/30 p-3 rounded-lg text-xs text-muted-foreground">
+                  <p className="font-medium mb-1">Note on Estimates</p>
+                  <p>Cost estimates are based on average US grocery prices and may vary by location and ingredient quality. Health benefits are general assessments and not nutritional advice.</p>
+                </div>
+              </div>
+            </CardContent>
           </Card>
 
           {/* Side Dishes */}

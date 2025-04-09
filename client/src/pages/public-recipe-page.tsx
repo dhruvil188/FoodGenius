@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { expandedRecipes } from "@/data/expandedRecipeLibrary";
-import { AnalyzeImageResponse } from "@shared/schema";
+import { 
+  AnalyzeImageResponse, 
+  RecipeVariation, 
+  EquipmentItem, 
+  TechniqueDetail, 
+  SideDish,
+  YoutubeVideo
+} from "@shared/schema";
 import { slugify, cn } from "@/lib/utils";
 import { 
   Card, 
@@ -214,13 +221,33 @@ export default function PublicRecipePage() {
           
           {/* Main Content */}
           <Tabs defaultValue="ingredients" className="mb-8">
-            <TabsList className="mb-6">
+            <TabsList className="mb-6 flex flex-wrap">
               <TabsTrigger value="ingredients">
                 <Utensils className="mr-2 h-4 w-4" /> Ingredients
               </TabsTrigger>
               <TabsTrigger value="instructions">
                 <Book className="mr-2 h-4 w-4" /> Instructions
               </TabsTrigger>
+              {mainRecipe?.variations && mainRecipe.variations.length > 0 && (
+                <TabsTrigger value="variations">
+                  <span className="mr-2">🔄</span> Variations
+                </TabsTrigger>
+              )}
+              {mainRecipe?.techniqueDetails && mainRecipe.techniqueDetails.length > 0 && (
+                <TabsTrigger value="techniques">
+                  <span className="mr-2">👨‍🍳</span> Techniques
+                </TabsTrigger>
+              )}
+              {mainRecipe?.cookingScience && (
+                <TabsTrigger value="science">
+                  <span className="mr-2">🧪</span> Cooking Science
+                </TabsTrigger>
+              )}
+              {mainRecipe?.culturalContext && (
+                <TabsTrigger value="culture">
+                  <span className="mr-2">🌍</span> Cultural Context
+                </TabsTrigger>
+              )}
             </TabsList>
             
             <TabsContent value="ingredients" className="space-y-6">
@@ -247,11 +274,187 @@ export default function PublicRecipePage() {
                 </ol>
               </section>
             </TabsContent>
+
+            {mainRecipe?.variations && mainRecipe.variations.length > 0 && (
+              <TabsContent value="variations" className="space-y-6">
+                <div className="space-y-6">
+                  {mainRecipe.variations.map((variation: RecipeVariation, i: number) => (
+                    <Card key={i}>
+                      <CardHeader>
+                        <CardTitle className="text-lg font-medium">{variation.type}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="mb-4">{variation.description}</p>
+                        {variation.adjustments && variation.adjustments.length > 0 && (
+                          <div>
+                            <h4 className="font-medium mb-2">Adjustments:</h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                              {variation.adjustments.map((adjustment: string, idx: number) => (
+                                <li key={idx}>{adjustment}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            )}
+
+            {mainRecipe?.techniqueDetails && mainRecipe.techniqueDetails.length > 0 && (
+              <TabsContent value="techniques" className="space-y-6">
+                <div className="space-y-6">
+                  {mainRecipe.techniqueDetails.map((technique: TechniqueDetail, i: number) => (
+                    <Card key={i}>
+                      <CardHeader>
+                        <CardTitle className="text-lg font-medium">{technique.name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p>{technique.description}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            )}
+
+            {mainRecipe?.cookingScience && (
+              <TabsContent value="science" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cooking Science</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mainRecipe.cookingScience.principles && (
+                        <div>
+                          <h4 className="font-medium mb-2">Key Principles:</h4>
+                          <p>{mainRecipe.cookingScience.principles}</p>
+                        </div>
+                      )}
+                      {mainRecipe.cookingScience.reactions && (
+                        <div>
+                          <h4 className="font-medium mb-2">Chemical Reactions:</h4>
+                          <p>{mainRecipe.cookingScience.reactions}</p>
+                        </div>
+                      )}
+                      {mainRecipe.cookingScience.tips && (
+                        <div>
+                          <h4 className="font-medium mb-2">Science-Based Tips:</h4>
+                          <p>{mainRecipe.cookingScience.tips}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
+
+            {mainRecipe?.culturalContext && (
+              <TabsContent value="culture" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cultural Context</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mainRecipe.culturalContext.origin && (
+                        <div>
+                          <h4 className="font-medium mb-2">Origin:</h4>
+                          <p>{mainRecipe.culturalContext.origin}</p>
+                        </div>
+                      )}
+                      {mainRecipe.culturalContext.history && (
+                        <div>
+                          <h4 className="font-medium mb-2">Historical Background:</h4>
+                          <p>{mainRecipe.culturalContext.history}</p>
+                        </div>
+                      )}
+                      {mainRecipe.culturalContext.significance && (
+                        <div>
+                          <h4 className="font-medium mb-2">Cultural Significance:</h4>
+                          <p>{mainRecipe.culturalContext.significance}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            )}
           </Tabs>
         </div>
         
         {/* Sidebar - Right Column on Desktop */}
         <div className="space-y-8">
+          {/* Side Dishes */}
+          {mainRecipe?.sideDishes && mainRecipe.sideDishes.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Recommended Side Dishes</CardTitle>
+                <CardDescription>Perfect pairings with {recipe.foodName}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-4">
+                  {mainRecipe.sideDishes.map((side: SideDish, i: number) => (
+                    <li key={i}>
+                      <h4 className="font-medium">{side.name}</h4>
+                      <p className="text-sm text-muted-foreground">{side.description}</p>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Equipment */}
+          {mainRecipe?.recommendedEquipment && mainRecipe.recommendedEquipment.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Recommended Equipment</CardTitle>
+                <CardDescription>Tools for the best results</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {mainRecipe.recommendedEquipment.map((equipment: EquipmentItem, i: number) => (
+                    <li key={i} className="flex items-start">
+                      <span className="inline-block w-2 h-2 rounded-full bg-primary mt-2 mr-2"></span>
+                      <div>
+                        <span className="font-medium">{equipment.name}:</span> {equipment.description}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Presentation Guidance */}
+          {mainRecipe?.presentationGuidance && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Presentation Tips</CardTitle>
+                <CardDescription>Make it Instagram-worthy</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mainRecipe.presentationGuidance.plating && (
+                    <div>
+                      <h4 className="font-medium mb-1">Plating Technique:</h4>
+                      <p className="text-sm">{mainRecipe.presentationGuidance.plating}</p>
+                    </div>
+                  )}
+                  {mainRecipe.presentationGuidance.garnish && (
+                    <div>
+                      <h4 className="font-medium mb-1">Garnish Suggestions:</h4>
+                      <p className="text-sm">{mainRecipe.presentationGuidance.garnish}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
           {/* Related Recipes */}
           {recipe.recipes && recipe.recipes.length > 1 && (
             <Card>
@@ -281,7 +484,7 @@ export default function PublicRecipePage() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4">
-                  {recipe.youtubeVideos.slice(0, 3).map((video: any, i: number) => (
+                  {recipe.youtubeVideos.slice(0, 3).map((video: YoutubeVideo, i: number) => (
                     <li key={i}>
                       <a 
                         href={`https://www.youtube.com/watch?v=${video.videoId}`} 

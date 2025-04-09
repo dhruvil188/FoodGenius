@@ -42,7 +42,6 @@ export interface IStorage {
   // Saved recipe methods
   getSavedRecipes(userId: number): Promise<SavedRecipe[]>;
   getSavedRecipeById(id: number): Promise<SavedRecipe | undefined>;
-  getPublicRecipes(): Promise<SavedRecipe[]>; // For sitemap and public listings
   createSavedRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   deleteSavedRecipe(id: number): Promise<boolean>;
   updateSavedRecipe(id: number, recipe: Partial<SavedRecipe>): Promise<SavedRecipe | undefined>;

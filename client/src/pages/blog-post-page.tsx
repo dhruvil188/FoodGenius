@@ -247,132 +247,145 @@ export default function BlogPostPage() {
             </div>
           )}
           
-          {/* Main Content */}
-          <div className="prose prose-lg max-w-none">
-            <ReactMarkdown>
-              {post.content}
-            </ReactMarkdown>
-          </div>
-          
-          {/* Step by Step Cooking Instructions */}
-          {post.cookingSteps && post.cookingSteps.length > 0 && (
-            <div className="my-12">
-              <h2 className="text-2xl font-bold mb-6">Step-by-Step Cooking Instructions</h2>
-              <div className="space-y-8">
-                {post.cookingSteps.map((step) => (
-                  <div key={step.step} className="relative pl-12 border-l-2 border-primary/20">
-                    <div className="absolute left-[-18px] top-0 w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center font-bold">
-                      {step.step}
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">Step {step.step}</h3>
-                    <p className="mb-3">{step.instruction}</p>
-                    {step.timeRequired && (
-                      <div className="flex items-center text-sm text-slate-600 mb-2">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>{step.timeRequired}</span>
-                      </div>
-                    )}
-                    {step.tipNote && (
-                      <div className="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
-                        <p className="text-sm text-amber-800 font-medium">Chef's Tip</p>
-                        <p className="text-sm text-amber-700">{step.tipNote}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+          {/* Recipe Content Container */}
+          <div className="flex flex-col">
+            
+            {/* First portion of content - introduction */}
+            <div className="prose prose-lg max-w-none mb-10">
+              <ReactMarkdown>
+                {post.content.split('## Practical Applications for Better Bread')[0]}
+              </ReactMarkdown>
             </div>
-          )}
-          
-          {/* Nutrition Information */}
-          {post.nutritionInfo && (
-            <div className="my-12 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-              <div className="bg-primary/10 p-4 border-b border-slate-200">
-                <h2 className="text-xl font-bold">Nutrition Information</h2>
-                <p className="text-sm text-slate-600">Per serving</p>
+            
+            {/* Step by Step Cooking Instructions - inserted in the middle */}
+            {post.cookingSteps && post.cookingSteps.length > 0 && (
+              <div className="my-8">
+                <h2 className="text-2xl font-bold mb-6">Step-by-Step Cooking Instructions</h2>
+                <div className="space-y-8">
+                  {post.cookingSteps.map((step) => (
+                    <div key={step.step} className="relative pl-12 border-l-2 border-primary/20">
+                      <div className="absolute left-[-18px] top-0 w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                        {step.step}
+                      </div>
+                      <h3 className="font-bold text-lg mb-2">Step {step.step}</h3>
+                      <p className="mb-3">{step.instruction}</p>
+                      {step.timeRequired && (
+                        <div className="flex items-center text-sm text-slate-600 mb-2">
+                          <Clock className="h-4 w-4 mr-1" />
+                          <span>{step.timeRequired}</span>
+                        </div>
+                      )}
+                      {step.tipNote && (
+                        <div className="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
+                          <p className="text-sm text-amber-800 font-medium">Chef's Tip</p>
+                          <p className="text-sm text-amber-700">{step.tipNote}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-4">
-                  <div>
-                    <p className="text-lg font-bold text-primary">{post.nutritionInfo.calories}</p>
-                    <p className="text-sm text-slate-600">Calories</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-primary">{post.nutritionInfo.protein}g</p>
-                    <p className="text-sm text-slate-600">Protein</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-primary">{post.nutritionInfo.carbs}g</p>
-                    <p className="text-sm text-slate-600">Carbs</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-primary">{post.nutritionInfo.fat}g</p>
-                    <p className="text-sm text-slate-600">Fat</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-primary">{post.nutritionInfo.fiber}g</p>
-                    <p className="text-sm text-slate-600">Fiber</p>
-                  </div>
-                  {post.nutritionInfo.sugar !== undefined && (
+            )}
+            
+            {/* Nutrition Information - in the middle */}
+            {post.nutritionInfo && (
+              <div className="my-8 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-primary/10 p-4 border-b border-slate-200">
+                  <h2 className="text-xl font-bold">Nutrition Information</h2>
+                  <p className="text-sm text-slate-600">Per serving</p>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-4">
                     <div>
-                      <p className="text-lg font-bold text-primary">{post.nutritionInfo.sugar}g</p>
-                      <p className="text-sm text-slate-600">Sugar</p>
+                      <p className="text-lg font-bold text-primary">{post.nutritionInfo.calories}</p>
+                      <p className="text-sm text-slate-600">Calories</p>
                     </div>
-                  )}
-                  {post.nutritionInfo.sodium !== undefined && (
                     <div>
-                      <p className="text-lg font-bold text-primary">{post.nutritionInfo.sodium}mg</p>
-                      <p className="text-sm text-slate-600">Sodium</p>
+                      <p className="text-lg font-bold text-primary">{post.nutritionInfo.protein}g</p>
+                      <p className="text-sm text-slate-600">Protein</p>
                     </div>
+                    <div>
+                      <p className="text-lg font-bold text-primary">{post.nutritionInfo.carbs}g</p>
+                      <p className="text-sm text-slate-600">Carbs</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-primary">{post.nutritionInfo.fat}g</p>
+                      <p className="text-sm text-slate-600">Fat</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-primary">{post.nutritionInfo.fiber}g</p>
+                      <p className="text-sm text-slate-600">Fiber</p>
+                    </div>
+                    {post.nutritionInfo.sugar !== undefined && (
+                      <div>
+                        <p className="text-lg font-bold text-primary">{post.nutritionInfo.sugar}g</p>
+                        <p className="text-sm text-slate-600">Sugar</p>
+                      </div>
+                    )}
+                    {post.nutritionInfo.sodium !== undefined && (
+                      <div>
+                        <p className="text-lg font-bold text-primary">{post.nutritionInfo.sodium}mg</p>
+                        <p className="text-sm text-slate-600">Sodium</p>
+                      </div>
+                    )}
+                  </div>
+                  {post.nutritionInfo.additionalInfo && (
+                    <p className="text-sm text-slate-600 italic">{post.nutritionInfo.additionalInfo}</p>
                   )}
                 </div>
-                {post.nutritionInfo.additionalInfo && (
-                  <p className="text-sm text-slate-600 italic">{post.nutritionInfo.additionalInfo}</p>
-                )}
               </div>
-            </div>
-          )}
-          
-          {/* Health Benefits */}
-          {post.healthBenefits && post.healthBenefits.length > 0 && (
-            <div className="my-12">
-              <h2 className="text-2xl font-bold mb-4">Health Benefits</h2>
-              <div className="bg-green-50 rounded-xl p-6">
-                <ul className="space-y-3">
-                  {post.healthBenefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="text-green-600 mr-3 mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <p>{benefit}</p>
-                    </li>
-                  ))}
-                </ul>
+            )}
+            
+            {/* Health Benefits - in the middle */}
+            {post.healthBenefits && post.healthBenefits.length > 0 && (
+              <div className="my-8">
+                <h2 className="text-2xl font-bold mb-4">Health Benefits</h2>
+                <div className="bg-green-50 rounded-xl p-6">
+                  <ul className="space-y-3">
+                    {post.healthBenefits.map((benefit, index) => (
+                      <li key={index} className="flex items-start">
+                        <div className="text-green-600 mr-3 mt-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <p>{benefit}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-            </div>
-          )}
-          
-          {/* Cost Estimate */}
-          {post.estimatedCost && (
-            <div className="my-12">
-              <h2 className="text-2xl font-bold mb-4">Estimated Cost</h2>
-              <div className="bg-slate-100 rounded-xl p-6">
-                <p className="text-lg font-semibold">{post.estimatedCost}</p>
+            )}
+            
+            {/* Cost Estimate - in the middle */}
+            {post.estimatedCost && (
+              <div className="my-8">
+                <h2 className="text-2xl font-bold mb-4">Estimated Cost</h2>
+                <div className="bg-slate-100 rounded-xl p-6">
+                  <p className="text-lg font-semibold">{post.estimatedCost}</p>
+                </div>
               </div>
-            </div>
-          )}
-          
-          {/* History and Origins */}
-          {post.historyAndOrigins && (
-            <div className="my-12">
-              <h2 className="text-2xl font-bold mb-4">History & Origins</h2>
-              <div className="prose max-w-none">
-                <p>{post.historyAndOrigins}</p>
+            )}
+            
+            {/* History and Origins - in the middle */}
+            {post.historyAndOrigins && (
+              <div className="my-8">
+                <h2 className="text-2xl font-bold mb-4">History & Origins</h2>
+                <div className="prose max-w-none">
+                  <p>{post.historyAndOrigins}</p>
+                </div>
               </div>
+            )}
+            
+            {/* Second part of content - after all the recipe details */}
+            <div className="prose prose-lg max-w-none mt-8">
+              <ReactMarkdown>
+                {post.content.includes('## Practical Applications for Better Bread') ? 
+                  post.content.split('## Practical Applications for Better Bread')[1] : 
+                  ''}
+              </ReactMarkdown>
             </div>
-          )}
+          </div>
           
           {/* Author Box */}
           <div className="border-t border-b border-gray-200 my-12 py-8">

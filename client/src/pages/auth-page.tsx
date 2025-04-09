@@ -1,72 +1,17 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, registerSchema } from "@shared/schema";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
-import { ArrowRight, ChefHat, CheckCircle2, Image, Salad, ShieldCheck, UtensilsCrossed } from "lucide-react";
-import Hero from "@/components/Hero";
+import { ChefHat, Image, Salad, ShieldCheck, UtensilsCrossed } from "lucide-react";
 import { signInWithGoogle } from "@/services/firebase";
 
 const AuthPage = () => {
-  const [activeTab, setActiveTab] = useState<string>("login");
   const [, navigate] = useLocation();
-  const { currentUser: user, isLoading, login } = useAuth();
+  const { currentUser: user, isLoading } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
-  
-  // Use the existing schemas
-  const loginFormSchema = loginSchema;
-  const registerFormSchema = registerSchema;
-  
-  // Types for our form data
-  type LoginFormValues = z.infer<typeof loginFormSchema>;
-  type RegisterFormValues = z.infer<typeof registerFormSchema>;
-  
-  // Set up form hooks with validation
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginFormSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-  
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerFormSchema),
-    defaultValues: {
-      username: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-  
-  // Login form submission handler
-  const onLoginSubmit = async (data: LoginFormValues) => {
-    // Handle login logic here
-    console.log("Login form data:", data);
-  };
-  
-  // Register form submission handler  
-  const onRegisterSubmit = async (data: RegisterFormValues) => {
-    // Handle registration logic here
-    console.log("Register form data:", data);
-  };
-  
-  // Define login and register mutations for UI state
-  const loginMutation = { isPending: false };
-  const registerMutation = { isPending: false };
 
   // Redirect if already logged in
   useEffect(() => {
@@ -112,15 +57,7 @@ const AuthPage = () => {
     }
   };
   
-  // Switch tab handler to clear forms
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    if (value === "login") {
-      loginForm.reset();
-    } else {
-      registerForm.reset();
-    }
-  };
+  // No additional helper functions needed - we're using the Google login directly
 
   if (isLoading) {
     return (
@@ -177,168 +114,18 @@ const AuthPage = () => {
               )}
             </Button>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-200"></span>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <div className="mt-8 text-center">
+              <p className="text-gray-600 text-sm max-w-md mx-auto mb-6">
+                Sign in with Google to access all features including recipe saving, analysis, and personalized recommendations. We'll give you 2 free credits to get started!
+              </p>
+              
+              <div className="flex flex-col items-center justify-center gap-4">
+                <ShieldCheck size={24} className="text-emerald-600" />
+                <p className="text-xs text-gray-500">
+                  Your data is securely stored and we never share your information with third parties.
+                </p>
               </div>
             </div>
-
-            <Card className="w-full">
-              <Tabs value={activeTab} onValueChange={handleTabChange}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="register">Register</TabsTrigger>
-                </TabsList>
-
-                {/* Login Tab */}
-                <TabsContent value="login">
-                  <CardHeader>
-                    <CardTitle>Login to Your Account</CardTitle>
-                    <CardDescription>
-                      Enter your email and password to access your saved recipes.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...loginForm}>
-                      <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                        <FormField
-                          control={loginForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input placeholder="you@example.com" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={loginForm.control}
-                          name="password"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button 
-                          type="submit" 
-                          className="w-full"
-                          disabled={loginMutation.isPending}
-                        >
-                          {loginMutation.isPending ? (
-                            <span className="flex items-center gap-2">
-                              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                              Logging in...
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-2">
-                              Sign In <ArrowRight size={16} />
-                            </span>
-                          )}
-                        </Button>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </TabsContent>
-
-                {/* Register Tab */}
-                <TabsContent value="register">
-                  <CardHeader>
-                    <CardTitle>Create Your Account</CardTitle>
-                    <CardDescription>
-                      Join Recipe Snap to save recipes and get personalized recommendations.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...registerForm}>
-                      <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                        <FormField
-                          control={registerForm.control}
-                          name="username"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Username</FormLabel>
-                              <FormControl>
-                                <Input placeholder="chefmaster" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={registerForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input placeholder="you@example.com" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={registerForm.control}
-                          name="password"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
-                              </FormControl>
-                              <FormDescription>
-                                At least 8 characters
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={registerForm.control}
-                          name="confirmPassword"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Confirm Password</FormLabel>
-                              <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button 
-                          type="submit" 
-                          className="w-full"
-                          disabled={registerMutation.isPending}
-                        >
-                          {registerMutation.isPending ? (
-                            <span className="flex items-center gap-2">
-                              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-                              Creating account...
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-2">
-                              Create Account <ArrowRight size={16} />
-                            </span>
-                          )}
-                        </Button>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </TabsContent>
-              </Tabs>
-            </Card>
           </div>
         </div>
 

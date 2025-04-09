@@ -44,10 +44,10 @@ export default function CreditsPage() {
       }
       
       // TESTING MODE: redirect directly to payment processor (uncomment the next line for testing)
-      navigate('/payment-processor');
+      // navigate('/payment-processor');
       
-      // PRODUCTION MODE: redirect to Stripe Payment Link (comment this out for testing)
-      // window.location.href = 'https://buy.stripe.com/00gbMD6RBeASeoE9AB';
+      // PRODUCTION MODE: redirect to Stripe Payment Link
+      window.location.href = 'https://buy.stripe.com/00gbMD6RBeASeoE9AB';
       
     } catch (error) {
       console.error('Error redirecting to payment:', error);

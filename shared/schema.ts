@@ -272,7 +272,9 @@ export const savedRecipes = pgTable("saved_recipes", {
   description: text("description"),
   imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at"),
   favorite: boolean("favorite").default(false),
+  isPublic: boolean("is_public").default(false), // Flag for public visibility in sitemap and public listings
   tags: text("tags").array(),
 });
 

@@ -94,6 +94,30 @@ export default function RecipeDetailPage({ id: propId }: RecipeDetailPageProps) 
     },
   });
   
+  // Handle public/private toggle for SEO visibility
+  const togglePublicMutation = useMutation({
+    mutationFn: async (isPublic: boolean) => {
+      const response = await apiRequest("PATCH", `/api/recipes/${id}/public`, { isPublic });
+      return response.json();
+    },
+    onSuccess: (updatedRecipe: SavedRecipe) => {
+      toast({
+        title: updatedRecipe.isPublic ? "Recipe Made Public" : "Recipe Made Private",
+        description: updatedRecipe.isPublic 
+          ? "This recipe is now visible to search engines." 
+          : "This recipe is now private and only visible to you.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes", parseInt(id)] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update visibility",
+        description: error.message,
+        variant: "destructive", 
+      });
+    },
+  });
+  
   // Toggle step completion
   const toggleStepCompletion = (stepIndex: number) => {
     setCompletedSteps(prev => {
@@ -259,6 +283,21 @@ export default function RecipeDetailPage({ id: propId }: RecipeDetailPageProps) 
                 <i className={`${recipe.favorite ? 'fas' : 'far'} fa-heart mr-2`}></i>
               )}
               {recipe.favorite ? 'Favorited' : 'Add to Favorites'}
+            </Button>
+            
+            <Button 
+              variant={recipe.isPublic ? "default" : "outline"}
+              className={recipe.isPublic ? "bg-blue-600 hover:bg-blue-700" : "text-blue-600 border-blue-200 hover:bg-blue-50"}
+              onClick={() => togglePublicMutation.mutate(!recipe.isPublic)}
+              disabled={togglePublicMutation.isPending}
+              title={recipe.isPublic ? "Make recipe private" : "Share recipe publicly"}
+            >
+              {togglePublicMutation.isPending ? (
+                <div className="animate-spin w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full"></div>
+              ) : (
+                <i className={`${recipe.isPublic ? 'fas fa-globe' : 'fas fa-lock'} mr-2`}></i>
+              )}
+              {recipe.isPublic ? 'Public' : 'Private'}
             </Button>
             
             <Button 

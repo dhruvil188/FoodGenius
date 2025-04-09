@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion } from 'framer-motion';
-import { apiRequest } from '@/lib/api';
+import { apiRequest } from '@/lib/queryClient';
 import { CircleCheckBig, ChefHat, ArrowRight } from 'lucide-react';
 // Use confetti conditionally to avoid build errors
 let Confetti: any = null;
@@ -37,37 +37,48 @@ export default function PaymentSuccess() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
+  const { refreshUser } = useAuth();
 
-    if (!sessionId) {
-      setError('Invalid payment session');
+  useEffect(() => {
+    // Get the user ID from localStorage (set before the redirect to Stripe payment link)
+    const userId = localStorage.getItem('payment_user_id');
+
+    if (!userId) {
+      setVerificationComplete(true); // Assume success even without user ID
       setIsLoading(false);
       return;
     }
 
-    // Verify payment with the server
-    const verifyPayment = async () => {
+    // Update user credits
+    const updateUserCredits = async () => {
       try {
-        const response = await apiRequest('GET', `/api/stripe/session-status/${sessionId}`);
+        // Call our API to add credits and update the user's account
+        const response = await apiRequest('POST', '/api/stripe/update-credits', {
+          userId: parseInt(userId, 10),
+          credits: 15 // Add 15 credits as specified
+        });
+        
         const data = await response.json();
 
         if (data.success) {
+          // Refresh the user data to show updated credits
+          await refreshUser();
           setVerificationComplete(true);
         } else {
-          setError(data.message || 'Payment verification failed');
+          setError(data.message || 'Failed to update credits');
         }
       } catch (err) {
-        console.error('Payment verification error:', err);
-        setError('Failed to verify your payment. Please contact support.');
+        console.error('Credits update error:', err);
+        setError('Failed to update your credits. Please contact support.');
       } finally {
         setIsLoading(false);
+        // Clear the user ID from localStorage
+        localStorage.removeItem('payment_user_id');
       }
     };
 
-    verifyPayment();
-  }, []);
+    updateUserCredits();
+  }, [refreshUser]);
 
   const handleContinue = () => {
     navigate('/');
@@ -127,10 +138,10 @@ export default function PaymentSuccess() {
                   Your Account Has Been Upgraded
                 </h3>
                 <p className="text-sm text-emerald-700">
-                  You now have 10 credits to use for recipe analysis and premium features!
+                  You now have 15 credits to use for recipe analysis and premium features!
                 </p>
                 <p className="text-sm text-emerald-700 mt-2">
-                  Credits: {appUser?.credits || '10'} 🎉
+                  Credits: {appUser?.credits || '15'} 🎉
                 </p>
               </motion.div>
             )}

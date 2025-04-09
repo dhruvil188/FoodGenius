@@ -28,18 +28,16 @@ export default function CreditsPage() {
     try {
       setLoading(true);
       
-      // Call the API to create a checkout session
-      const response = await apiRequest('POST', '/api/stripe/create-checkout-session');
-      const data = await response.json();
-      
-      // Redirect to Stripe Checkout
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
+      // Store the user ID in localStorage before redirect
+      if (appUser && appUser.id) {
+        localStorage.setItem('payment_user_id', appUser.id.toString());
       }
+      
+      // Redirect to Stripe Payment Link
+      window.location.href = 'https://buy.stripe.com/00gbMD6RBeASeoE9AB';
+      
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error('Error redirecting to payment:', error);
       toast({
         title: 'Error',
         description: 'Failed to initialize payment. Please try again.',

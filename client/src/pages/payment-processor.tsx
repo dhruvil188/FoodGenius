@@ -90,9 +90,9 @@ export default function PaymentProcessor() {
         console.log('Processing payment for user:', appUser.id);
         console.log('Payment token:', paymentToken);
         
-        // Add 15 credits to the user's account
+        // Add 20 credits to the user's account
         const currentCredits = appUser.credits || 0;
-        const newCredits = currentCredits + 15;
+        const newCredits = currentCredits + 20;
         
         console.log(`Updating credits for user ${appUser.id}: ${currentCredits} → ${newCredits}`);
         

@@ -47,13 +47,8 @@ export default function PaymentProcessor() {
         // Store a flag indicating we need to process payment after login
         localStorage.setItem('pending_payment_process', 'true');
         
-        // Display a toast notification when available
-        if (window.location.hostname !== "localhost") {
-          // Don't show the alert on localhost for testing purposes
-          setTimeout(() => {
-            alert('Please sign in to complete your payment processing');
-          }, 500);
-        }
+        // Don't use alert anymore as it causes browser notification popup
+        // Instead we'll rely on the UI feedback on the auth page
       }
       
       navigate('/auth');
@@ -79,11 +74,17 @@ export default function PaymentProcessor() {
         if (!paymentToken || !paymentToken.startsWith('payment_')) {
           console.log('No valid payment token found - generating one for testing');
           
-          // For direct testing only: generate a token if none exists
+          // Token generation for testing only - comment out in production
+          /*
           const testToken = `payment_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
           localStorage.setItem('payment_token', testToken);
-          
           console.log('Generated test payment token:', testToken);
+          */
+          
+          // In production, just show error that token is missing
+          setError('Invalid payment token. Please try your purchase again.');
+          setIsLoading(false);
+          return;
         }
         
         console.log('Processing payment for user:', appUser.id);

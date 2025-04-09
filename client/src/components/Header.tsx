@@ -67,6 +67,15 @@ export default function Header() {
             <i className="fas fa-book mr-2"></i>
             Recipe Library
           </Button>
+
+          <Button 
+            variant="outline"
+            className="hidden md:flex rounded-full px-4 border-slate-200 hover:border-primary/50 text-slate-700 hover:text-primary transition-all mr-2"
+            onClick={() => navigate('/blog')}
+          >
+            <i className="fas fa-pen-fancy mr-2"></i>
+            Blog
+          </Button>
           
           <Button 
             variant="outline"
@@ -142,6 +151,16 @@ export default function Header() {
                   >
                     <i className="fas fa-book w-6 text-primary"></i>
                     Recipe Library
+                  </button>
+                  <button
+                    className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-slate-50"
+                    onClick={() => {
+                      navigate('/blog');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <i className="fas fa-pen-fancy w-6 text-primary"></i>
+                    Blog
                   </button>
                   <button
                     className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-slate-50"

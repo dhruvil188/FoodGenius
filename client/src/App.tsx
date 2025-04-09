@@ -20,6 +20,8 @@ import PaymentSuccess from "@/pages/payment-success";
 import PaymentCancel from "@/pages/payment-cancel";
 import PaymentProcessor from "@/pages/payment-processor";
 import CreditsPage from "@/pages/credits-page";
+import BlogPage from "@/pages/blog-page";
+import BlogPostPage from "@/pages/blog-post-page";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -75,6 +77,8 @@ function Router() {
           </ProtectedRoute>
         )}
       </Route>
+      <Route path="/blog" component={BlogPage} />
+      <Route path="/blog/:slug" component={BlogPostPage} />
       <Route component={NotFound} />
     </Switch>
   );

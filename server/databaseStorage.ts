@@ -205,7 +205,7 @@ export class DatabaseStorage implements IStorage {
       createdAt: new Date(),
       updatedAt: new Date(),
       firebaseUid: firebaseData.uid,
-      credits: 1, // Start with one free credit
+      credits: 2, // Start with two free credits
       stripeCustomerId: null,
       stripeSubscriptionId: null,
       subscriptionStatus: 'free',

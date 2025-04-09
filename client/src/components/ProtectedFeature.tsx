@@ -43,52 +43,26 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
     return (appUser.credits || 0) >= costCredits;
   }, [appUser, costCredits]);
 
-  // Used for new users to get 2 free credits when they sign in
+  // New users now get 2 free credits directly from the server when signing up
+  // This effect is no longer needed
   React.useEffect(() => {
-    if (appUser && appUser.credits === 1) {
-      // Give 2 free credits for new users
-      apiRequest('POST', '/api/stripe/update-credits', { credits: 2 })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            console.log('Added free credits for new user');
-          }
-        })
-        .catch(err => console.error('Failed to add free credits', err));
-    }
+    // Credits are now set on initial signup
   }, [appUser]);
   
-  const handlePurchaseCredits = async () => {
+  const handlePurchaseCredits = () => {
     if (!currentUser) {
       login();
       return;
     }
     
-    setIsLoading(true);
-    try {
-      const response = await apiRequest('POST', '/api/stripe/create-checkout-session', {});
-      const data = await response.json();
-      
-      if (data.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
-      } else {
-        toast({
-          title: "Payment Error",
-          description: "Failed to create checkout session",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Payment initiation error:", error);
-      toast({
-        title: "Payment Error",
-        description: `Failed to initiate payment: ${(error as Error).message}`,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Simply redirect to the credits page
+    navigate('/credits');
+    
+    // Show a toast to inform the user
+    toast({
+      title: "Premium Credits",
+      description: "You'll be redirected to our credits page where you can purchase premium credits.",
+    });
   };
   
   // If user has access, render the children
@@ -161,7 +135,7 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
             {isLoading ? 'Processing...' : 'Get Premium Package ($5.99)'}
           </Button>
           <p className="text-xs text-gray-500 mt-2">
-            Premium package includes 10 credits. One-time payment, not a subscription.
+            Premium package includes 20 credits. One-time payment, not a subscription.
           </p>
         </CardFooter>
       </Card>

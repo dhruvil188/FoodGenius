@@ -55,6 +55,7 @@ export interface BlogPost {
 }
 
 import { additionalBlogPosts } from './additionalBlogPosts';
+import { moreBlogPosts } from './moreBlogPosts';
 
 // Original blog posts collection
 export const originalBlogPosts: BlogPost[] = [
@@ -1329,4 +1330,4 @@ The revival of traditional preservation methods in modern kitchens isn't merely 
 ];
 
 // Export combined blog posts
-export const blogPosts: BlogPost[] = [...originalBlogPosts, ...additionalBlogPosts];
+export const blogPosts: BlogPost[] = [...originalBlogPosts, ...additionalBlogPosts, ...moreBlogPosts];

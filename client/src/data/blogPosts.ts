@@ -1,3 +1,29 @@
+export interface Ingredient {
+  name: string;
+  quantity: string;
+  unit: string;
+  notes?: string;
+  substitutes?: { name: string; costImpact: 'higher' | 'lower' | 'similar' };
+}
+
+export interface NutritionInfo {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  sugar?: number;
+  sodium?: number;
+  additionalInfo?: string;
+}
+
+export interface CookingStep {
+  step: number;
+  instruction: string;
+  tipNote?: string;
+  timeRequired?: string;
+}
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -12,6 +38,20 @@ export interface BlogPost {
   category: string;
   readTime: number;
   relatedRecipes?: string[];
+  
+  // Recipe specific information
+  prepTime?: string;
+  cookTime?: string;
+  totalTime?: string;
+  servings?: number;
+  difficulty?: 'Easy' | 'Medium' | 'Hard';
+  cuisine?: string;
+  ingredients?: Ingredient[];
+  cookingSteps?: CookingStep[];
+  nutritionInfo?: NutritionInfo;
+  estimatedCost?: string;
+  healthBenefits?: string[];
+  historyAndOrigins?: string;
 }
 
 export const blogPosts: BlogPost[] = [
@@ -79,24 +119,6 @@ Understanding these scientific principles can help you troubleshoot and improve 
 Sourdough bread is a perfect example of how traditional food techniques often intuitively developed practices that science later confirmed as optimal. Modern bakers benefit from understanding both the traditional craft and the underlying scientific principles.
 
 The next time you slice into a freshly baked loaf of sourdough, take a moment to appreciate the complex dance of microorganisms, chemical reactions, and physical transformations that created it. In a world of mass-produced convenience foods, sourdough reminds us that sometimes, the best things require time, patience, and a bit of scientific magic.
-
-### Recipe: Basic Sourdough Bread
-
-**Ingredients:**
-- 500g bread flour
-- 350g water
-- 100g active sourdough starter
-- 10g salt
-
-**Instructions:**
-1. Mix flour and water until no dry flour remains. Let rest 30 minutes (autolyse).
-2. Add starter and salt, mix thoroughly.
-3. Perform stretch and folds every 30 minutes for 2-3 hours.
-4. Allow bulk fermentation to continue until dough has increased by 50% in volume.
-5. Shape and place in a floured banneton or bowl.
-6. Refrigerate overnight (8-12 hours).
-7. Bake in a preheated Dutch oven at 500°F (260°C) for 20 minutes covered, then 20-25 minutes uncovered at 450°F (230°C).
-8. Cool completely before slicing.
     `,
     author: "Dr. Emma Richardson",
     authorTitle: "Food Scientist & Artisan Baker",
@@ -104,8 +126,139 @@ The next time you slice into a freshly baked loaf of sourdough, take a moment to
     imageUrl: "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     tags: ["Baking", "Sourdough", "Fermentation", "Bread", "Science"],
     category: "Food Science",
-    readTime: 7,
-    relatedRecipes: ["sourdough-pizza-dough", "rustic-country-loaf"]
+    readTime: 10,
+    relatedRecipes: ["sourdough-pizza-dough", "rustic-country-loaf"],
+    prepTime: "30 minutes",
+    cookTime: "45 minutes",
+    totalTime: "14 hours",
+    servings: 8,
+    difficulty: "Medium",
+    cuisine: "Artisanal",
+    ingredients: [
+      {
+        name: "bread flour",
+        quantity: "500",
+        unit: "g",
+        notes: "high protein content (12-14%)"
+      },
+      {
+        name: "water",
+        quantity: "350",
+        unit: "g",
+        notes: "filtered, at room temperature",
+        substitutes: {
+          name: "spring water",
+          costImpact: "higher"
+        }
+      },
+      {
+        name: "active sourdough starter",
+        quantity: "100",
+        unit: "g",
+        notes: "fed within the last 8-12 hours and at peak activity"
+      },
+      {
+        name: "salt",
+        quantity: "10",
+        unit: "g",
+        notes: "sea salt preferred",
+        substitutes: {
+          name: "kosher salt",
+          costImpact: "similar"
+        }
+      }
+    ],
+    cookingSteps: [
+      {
+        step: 1,
+        instruction: "In a large bowl, mix flour and water with your hands or a wooden spoon until no dry flour remains. The dough will be shaggy and rough.",
+        tipNote: "Use your hands instead of a spoon for better incorporation of ingredients.",
+        timeRequired: "5 minutes"
+      },
+      {
+        step: 2,
+        instruction: "Cover the bowl with a damp cloth or plastic wrap and let rest for 30 minutes. This autolyse period allows the flour to fully hydrate and begins gluten development.",
+        timeRequired: "30 minutes"
+      },
+      {
+        step: 3,
+        instruction: "Add the active sourdough starter and salt to the dough. Mix thoroughly by pinching and folding the dough to incorporate all ingredients.",
+        tipNote: "Make sure your starter is bubbly and active for optimal fermentation.",
+        timeRequired: "5 minutes"
+      },
+      {
+        step: 4,
+        instruction: "Perform a series of stretch and folds: grab one side of the dough, stretch it up, and fold it over the center. Rotate the bowl 90 degrees and repeat three more times. Cover after each session.",
+        timeRequired: "2-3 hours (folding every 30 minutes)"
+      },
+      {
+        step: 5,
+        instruction: "Allow bulk fermentation to continue in a warm spot (75-78°F/24-26°C) until the dough has increased by approximately 50% in volume and shows visible bubbles on the surface.",
+        tipNote: "In cooler environments, this may take longer. Look for bubbles on the surface and a slight dome shape.",
+        timeRequired: "4-6 hours"
+      },
+      {
+        step: 6,
+        instruction: "Gently transfer the dough to a lightly floured work surface. Shape into a boule (round loaf) by folding the edges toward the center, then flipping and using tension to create a tight surface.",
+        timeRequired: "5 minutes"
+      },
+      {
+        step: 7,
+        instruction: "Place the shaped dough seam-side up in a floured banneton or bowl lined with a floured kitchen towel.",
+        tipNote: "Use rice flour for dusting as it doesn't absorb moisture as readily as wheat flour.",
+        timeRequired: "2 minutes"
+      },
+      {
+        step: 8,
+        instruction: "Cover the banneton and refrigerate overnight for cold fermentation.",
+        timeRequired: "8-12 hours"
+      },
+      {
+        step: 9,
+        instruction: "Preheat your oven to 500°F (260°C) with a Dutch oven inside for at least 45 minutes.",
+        timeRequired: "45 minutes"
+      },
+      {
+        step: 10,
+        instruction: "Turn the cold dough out onto a piece of parchment paper. Score the top with a sharp knife or bread lame to control the expansion during baking.",
+        tipNote: "Scoring at a 45-degree angle creates an \"ear\" that lifts during baking.",
+        timeRequired: "1 minute"
+      },
+      {
+        step: 11,
+        instruction: "Carefully transfer the dough on the parchment to the preheated Dutch oven. Cover and bake for 20 minutes.",
+        timeRequired: "20 minutes"
+      },
+      {
+        step: 12,
+        instruction: "Reduce oven temperature to 450°F (230°C), remove the Dutch oven lid, and continue baking until the crust is deep golden brown.",
+        timeRequired: "20-25 minutes"
+      },
+      {
+        step: 13,
+        instruction: "Remove from the oven and transfer to a wire rack. Allow to cool completely before slicing.",
+        tipNote: "Resist the temptation to cut too soon! The bread continues to cook and set during cooling.",
+        timeRequired: "2 hours"
+      }
+    ],
+    nutritionInfo: {
+      calories: 185,
+      protein: 6,
+      carbs: 38,
+      fat: 1,
+      fiber: 2,
+      sodium: 292,
+      additionalInfo: "Values are per 1/8 loaf slice. Sourdough bread has a lower glycemic index than regular bread, making it a better option for blood sugar management."
+    },
+    estimatedCost: "$0.75 - $1.25 per loaf (excluding cost of equipment and energy)",
+    healthBenefits: [
+      "Sourdough fermentation breaks down phytic acid, which increases mineral absorption.",
+      "The long fermentation partially breaks down gluten, potentially making it easier to digest for those with mild gluten sensitivities.",
+      "Contains prebiotic compounds that feed beneficial gut bacteria.",
+      "Lower glycemic index than conventional bread, causing less dramatic blood sugar spikes.",
+      "No commercial additives or preservatives when made traditionally."
+    ],
+    historyAndOrigins: "Sourdough is one of the oldest forms of grain fermentation, dating back to ancient Egypt around 3000 BCE. Prior to the development of commercial yeasts in the 19th century, all leavened breads were made using some form of sourdough fermentation. The technique spread throughout Europe and was particularly important in areas with cooler climates where wild yeasts were harnessed to make bread possible. During the California Gold Rush of 1849, sourdough became so important to miners that they carried their starters in special pouches, earning them the nickname 'sourdoughs'. San Francisco sourdough became famous due to a particular strain of lactobacillus (now called Lactobacillus sanfranciscensis) that thrives in the local climate and gives the bread its distinctive flavor profile. Today's resurgence of artisanal baking has brought sourdough back into home kitchens worldwide, with bakers sharing starters and techniques across generations and cultures."
   },
   {
     id: "2",

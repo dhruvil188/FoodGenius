@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'wouter';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Menu } from 'lucide-react';
 import LoginButton from './LoginButton';
+import CreditsDisplay from './CreditsDisplay';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,7 +18,7 @@ export default function Header() {
   const { scrollY } = useScroll();
   const isMobile = useIsMobile();
   const [location, navigate] = useLocation();
-  const { currentUser } = useAuth();
+  const { currentUser, appUser } = useAuth();
   
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
@@ -118,6 +120,19 @@ export default function Header() {
                 className="absolute top-12 right-0 bg-white shadow-lg rounded-lg w-56 z-50 overflow-hidden"
               >
                 <div className="py-2 border-b border-slate-100">
+                  {/* Credits display for mobile menu (only for logged in users) */}
+                  {appUser && (
+                    <div 
+                      className="flex items-center w-full px-4 py-2 text-sm"
+                      onClick={() => {
+                        navigate('/credits');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <CreditsDisplay className="w-full justify-center py-1.5" />
+                    </div>
+                  )}
+                
                   <button
                     className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-slate-50"
                     onClick={() => {
@@ -192,6 +207,13 @@ export default function Header() {
             <i className="fas fa-camera mr-1.5"></i>
             <span>Analyze Dish</span>
           </Button>
+          
+          {/* Credits Display for logged in users */}
+          {appUser && (
+            <Link href="/credits" className="mr-2 hidden md:block">
+              <CreditsDisplay />
+            </Link>
+          )}
           
           {currentUser ? (
             <div className="flex items-center ml-1">

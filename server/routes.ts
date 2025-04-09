@@ -254,18 +254,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { imageData } = validatedData;
     
     // Check user has enough credits
-    if (req.user.credits <= 0 && req.user.subscriptionTier === 'free') {
+    if (req.user.credits <= 0 && req.user.subscriptionTier !== 'premium') {
       throw new ValidationError("You don't have enough credits. Please upgrade your subscription.");
     }
     
-    // Process image with AI
-    const result = await analyzeImage(imageData, req.user.id);
-    
-    // Store the original image URL in the result for saving
-    result.imageUrl = imageData;
-    
-    // Return analysis result
-    return res.status(200).json(result);
+    try {
+      // Process image with AI
+      const result = await analyzeImage(imageData, req.user.id);
+      
+      // Store the original image URL in the result for saving
+      result.imageUrl = imageData;
+      
+      // If the user doesn't have premium subscription, deduct a credit
+      if (req.user.subscriptionTier !== 'premium') {
+        // Deduct 1 credit
+        await storage.updateUserCredits(req.user.id, Math.max(0, req.user.credits - 1));
+        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${req.user.credits - 1}`);
+      }
+      
+      // Return analysis result
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error in image analysis:", error);
+      throw error;
+    }
   }));
   
   // Get all saved recipes for a user
@@ -359,14 +371,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Check user has enough credits
-    if (req.user.credits <= 0 && req.user.subscriptionTier === 'free') {
+    if (req.user.credits <= 0 && req.user.subscriptionTier !== 'premium') {
       throw new ValidationError("You don't have enough credits. Please upgrade your subscription.");
     }
     
-    // Generate recipe from chat prompt
-    const result = await generateRecipeFromChatPrompt(req.user.id, prompt, conversationId);
-    
-    return res.status(200).json(result);
+    try {
+      // Generate recipe from chat prompt
+      const result = await generateRecipeFromChatPrompt(req.user.id, prompt, conversationId);
+      
+      // If the user doesn't have premium subscription, deduct a credit
+      if (req.user.subscriptionTier !== 'premium') {
+        // Deduct 1 credit
+        await storage.updateUserCredits(req.user.id, Math.max(0, req.user.credits - 1));
+        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${req.user.credits - 1}`);
+      }
+      
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Error in recipe generation:", error);
+      throw error;
+    }
   }));
   
 
@@ -375,6 +399,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Only setup Stripe routes if API key is available
   if (stripe) {
+    // Create a Stripe Checkout Session for the premium plan
+    app.post('/api/stripe/create-checkout-session', authenticate, asyncHandler(async (req: Request, res: Response) => {
+      try {
+        // Get the user from the request
+        const user = req.user;
+        if (!user) {
+          throw new AuthenticationError();
+        }
+        
+        // Check if the user already has a Stripe customer ID
+        let customerId = user.stripeCustomerId;
+        
+        // If not, create a new customer in Stripe
+        if (!customerId) {
+          const customer = await stripe.customers.create({
+            email: user.email,
+            name: user.displayName || user.username,
+            metadata: {
+              userId: user.id.toString()
+            }
+          });
+          
+          customerId = customer.id;
+          
+          // Update the user's Stripe customer ID in our database
+          await storage.updateStripeCustomerId(user.id, customerId);
+        }
+        
+        // Create a checkout session
+        const session = await stripe.checkout.sessions.create({
+          customer: customerId,
+          payment_method_types: ['card'],
+          line_items: [
+            {
+              price: process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1R9K9GRp4HZDUL919GPin0ra',
+              quantity: 1,
+            },
+          ],
+          mode: 'payment',
+          success_url: `${req.headers.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${req.headers.origin}/payment-cancel`,
+          metadata: {
+            userId: user.id.toString()
+          }
+        });
+        
+        // Return the session ID to the client
+        res.json({ 
+          sessionId: session.id,
+          url: session.url 
+        });
+      } catch (error) {
+        console.error('Stripe checkout session creation error:', error);
+        throw new Error(`Failed to create checkout session: ${(error as Error).message}`);
+      }
+    }));
+    
+    // Verify a successful payment and update user credits
+    app.get('/api/stripe/session-status/:sessionId', authenticate, asyncHandler(async (req: Request, res: Response) => {
+      try {
+        const { sessionId } = req.params;
+        
+        if (!sessionId) {
+          throw new ValidationError("Session ID is required");
+        }
+        
+        // Retrieve the session from Stripe
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        
+        // Check if payment was successful
+        if (session.payment_status === 'paid') {
+          // Update the user credits (10 credits for premium plan)
+          const updatedUser = await storage.updateUserCredits(req.user.id, 10);
+          
+          // Update subscription status
+          await storage.updateUser(req.user.id, {
+            subscriptionStatus: 'active',
+            subscriptionTier: 'premium'
+          });
+          
+          return res.status(200).json({
+            success: true,
+            user: storage.convertToAppUser(updatedUser),
+            session
+          });
+        }
+        
+        // If payment is still pending or failed
+        return res.status(200).json({
+          success: false,
+          message: `Payment ${session.payment_status}`,
+          session
+        });
+        
+      } catch (error) {
+        console.error('Stripe session status error:', error);
+        throw new Error(`Failed to verify payment: ${(error as Error).message}`);
+      }
+    }));
+    
+    // Webhook to handle stripe events (payment confirmations, etc.)
+    // Note: For this to work in production, you'll need to configure express.raw before routes
+    app.post('/api/stripe/webhook', asyncHandler(async (req, res) => {
+      const sig = req.headers['stripe-signature'];
+      
+      if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
+        return res.status(400).send('Webhook signature or secret missing');
+      }
+      
+      let event;
+      
+      try {
+        // Verify the webhook signature
+        event = stripe.webhooks.constructEvent(
+          req.body, 
+          sig, 
+          process.env.STRIPE_WEBHOOK_SECRET
+        );
+      } catch (err) {
+        console.error('Webhook signature verification failed:', err);
+        return res.status(400).send(`Webhook Error: ${(err as Error).message}`);
+      }
+      
+      // Handle specific events
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as Stripe.Checkout.Session;
+        
+        // Extract user ID from metadata
+        const userId = session.metadata?.userId;
+        
+        if (userId && session.payment_status === 'paid') {
+          try {
+            // Get the user from DB
+            const user = await storage.getUser(parseInt(userId));
+            
+            if (user) {
+              // Add credits to the user account (10 credits for premium)
+              await storage.updateUserCredits(user.id, 10);
+              
+              // Update subscription status
+              await storage.updateUser(user.id, {
+                subscriptionStatus: 'active',
+                subscriptionTier: 'premium'
+              });
+              
+              console.log(`✅ Added 10 credits to user ${userId} after payment`);
+            }
+          } catch (error) {
+            console.error('Error processing webhook payment:', error);
+          }
+        }
+      }
+      
+      // Return a 200 response to acknowledge receipt of the event
+      res.json({received: true});
+    }));
+    
     // Update user credits (for testing)
     app.post('/api/stripe/update-credits', authenticate, asyncHandler(async (req: Request, res: Response) => {
       // This is just for testing - in production you'd use webhooks to update credits

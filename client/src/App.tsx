@@ -16,6 +16,9 @@ import SavedRecipesPage from "@/pages/saved-recipes-page";
 import RecipeDetailPage from "@/pages/recipe-detail-page";
 import AuthPage from "@/pages/auth-page";
 import AuthHandler from "@/pages/auth-handler";
+import PaymentSuccess from "@/pages/payment-success";
+import PaymentCancel from "@/pages/payment-cancel";
+import CreditsPage from "@/pages/credits-page";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -61,6 +64,15 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/auth/handler" component={AuthHandler} />
       <Route path="/__/auth/handler" component={AuthHandler} />
+      <Route path="/payment-success" component={PaymentSuccess} />
+      <Route path="/payment-cancel" component={PaymentCancel} />
+      <Route path="/credits">
+        {() => (
+          <ProtectedRoute featureName="Credits Management">
+            <CreditsPage />
+          </ProtectedRoute>
+        )}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

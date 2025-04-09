@@ -30,7 +30,18 @@ export default function CreditsPage() {
       
       // Store the user ID in localStorage before redirect
       if (appUser && appUser.id) {
-        localStorage.setItem('payment_user_id', appUser.id.toString());
+        // Store user ID with timestamp to validate it later
+        const paymentData = {
+          userId: appUser.id,
+          email: appUser.email,
+          timestamp: new Date().toISOString(),
+        };
+        localStorage.setItem('payment_data', JSON.stringify(paymentData));
+        
+        console.log('Stored payment data for user:', appUser.id);
+        
+        // Also set a separate value to make it easier to check
+        localStorage.setItem('payment_pending', 'true');
       }
       
       // Redirect to Stripe Payment Link

@@ -48,9 +48,12 @@ export default function PaymentProcessor() {
         localStorage.setItem('pending_payment_process', 'true');
         
         // Display a toast notification when available
-        setTimeout(() => {
-          alert('Please sign in to complete your payment processing');
-        }, 500);
+        if (window.location.hostname !== "localhost") {
+          // Don't show the alert on localhost for testing purposes
+          setTimeout(() => {
+            alert('Please sign in to complete your payment processing');
+          }, 500);
+        }
       }
       
       navigate('/auth');
@@ -98,10 +101,37 @@ export default function PaymentProcessor() {
           currentCredits
         });
 
-        const response = await apiRequest('POST', '/api/stripe/update-credits', {
-          userId: appUser.id,
-          credits: newCredits, // Add 15 credits to whatever they currently have
+        // Ensure we have the correct user ID and new credits amount
+        if (!appUser || !appUser.id) {
+          throw new Error('User information is not available. Please try again.');
+        }
+        
+        // Convert both values to numbers and log detailed information
+        const userId = Number(appUser.id);
+        const creditsAmount = Number(newCredits);
+        
+        console.log('Payment request details:', {
+          rawUserId: appUser.id,
+          userId,
+          rawCredits: newCredits,
+          creditsAmount,
+          userIdType: typeof userId,
+          creditsType: typeof creditsAmount
         });
+        
+        if (isNaN(userId) || isNaN(creditsAmount)) {
+          throw new Error('Invalid user ID or credits amount. Please try again.');
+        }
+        
+        // Make sure we're sending both params correctly
+        const requestData = {
+          userId,
+          credits: creditsAmount
+        };
+        
+        console.log('Sending update credits request with data:', requestData);
+        
+        const response = await apiRequest('POST', '/api/stripe/update-credits', requestData);
         
         // Check if response is ok
         if (!response.ok) {

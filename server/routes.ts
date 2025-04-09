@@ -468,7 +468,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Only allow admins or the user themselves to update credits
-        if (req.user.id !== userId && req.user.role !== 'admin') {
+        if (Number(req.user.id) !== Number(userId) && req.user.role !== 'admin') {
+          console.log('Auth Error:', { requestUserId: req.user.id, targetUserId: userId, userRole: req.user.role });
           throw new AuthorizationError("You don't have permission to update credits for this user");
         }
         

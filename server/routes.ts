@@ -28,7 +28,8 @@ import {
   ValidationError,
   AuthenticationError,
   AuthorizationError,
-  DatabaseConnectionError
+  DatabaseConnectionError,
+  AppError
 } from "./middleware/errorHandler";
 
 // Import service layer
@@ -181,6 +182,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // Serve dynamic sitemap.xml
+  app.get("/sitemap.xml", asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { generateSitemap } = await import('./services/sitemapService');
+      
+      // Get the host from the request or use the default domain
+      const host = req.get('host');
+      const protocol = req.protocol;
+      const domain = host ? `${protocol}://${host}` : 'https://image2recipe.com';
+      
+      const sitemap = await generateSitemap(domain);
+      
+      res.header('Content-Type', 'application/xml');
+      res.send(sitemap);
+    } catch (error) {
+      console.error('Error generating sitemap:', error);
+      throw new AppError('Failed to generate sitemap', 500);
+    }
+  }));
+  
   // Apply database connectivity check to all API routes except health check
   app.use([
     '/api/auth/*', 
@@ -315,6 +336,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/recipes/:id/favorite", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const recipeId = parseInt(req.params.id);
     const updatedRecipe = await toggleFavorite(recipeId, req.user.id);
+    return res.status(200).json(updatedRecipe);
+  }));
+  
+  // Toggle recipe public visibility for SEO
+  app.patch("/api/recipes/:id/public", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    const recipeId = parseInt(req.params.id);
+    const { isPublic } = req.body;
+    
+    // Get the recipe
+    const recipe = await storage.getSavedRecipeById(recipeId);
+    
+    // Check ownership
+    if (!recipe || recipe.userId !== req.user.id) {
+      throw new AuthorizationError("You don't have permission to modify this recipe");
+    }
+    
+    // Update the public flag
+    const updatedRecipe = await storage.updateSavedRecipe(recipeId, {
+      isPublic: isPublic === true, // ensure boolean
+      updatedAt: new Date()
+    });
+    
     return res.status(200).json(updatedRecipe);
   }));
 

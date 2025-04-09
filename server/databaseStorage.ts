@@ -301,6 +301,38 @@ export class DatabaseStorage implements IStorage {
     const [recipe] = await db.select().from(savedRecipes).where(eq(savedRecipes.id, id));
     return recipe;
   }
+  
+  async getPublicRecipes(): Promise<SavedRecipe[]> {
+    try {
+      // First check if the isPublic column exists
+      const columnsResult = await db.execute(sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'saved_recipes' AND column_name = 'is_public'
+      `);
+      
+      const isPublicExists = columnsResult.rows.length > 0;
+      
+      if (isPublicExists) {
+        // Use the isPublic field if it exists
+        return db.select()
+          .from(savedRecipes)
+          .where(eq(savedRecipes.isPublic, true))
+          .orderBy(desc(savedRecipes.createdAt));
+      } else {
+        // Fallback: return most recent recipes if isPublic column doesn't exist yet
+        // This will be used until the migration is run
+        console.warn('is_public column not found, returning most recent recipes');
+        return db.select()
+          .from(savedRecipes)
+          .orderBy(desc(savedRecipes.createdAt))
+          .limit(100); // Limit to most recent 100 recipes
+      }
+    } catch (error) {
+      console.error('Error in getPublicRecipes:', error);
+      return []; // Return empty array in case of error
+    }
+  }
 
   async createSavedRecipe(recipeData: InsertSavedRecipe): Promise<SavedRecipe> {
     const [recipe] = await db.insert(savedRecipes).values({

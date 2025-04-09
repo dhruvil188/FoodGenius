@@ -59,6 +59,12 @@ export default function PaymentSuccess() {
       return;
     }
     
+    // Generate a unique payment token and add to localStorage
+    // This token will be verified and cleared by the payment processor
+    // to ensure the same payment can't be processed multiple times
+    const paymentToken = `payment_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    localStorage.setItem('payment_token', paymentToken);
+    
     // Instead of processing the payment here, redirect to the payment processor
     // which will handle the API calls to update credits
     navigate('/payment-processor');

@@ -30,13 +30,3 @@ export function slugify(text: string): string {
 export function findRecipeBySlug(recipes: any[], slug: string) {
   return recipes.find(recipe => slugify(recipe.foodName) === slug);
 }
-
-/**
- * Formats a duration string for display
- * @param duration Duration string (e.g., "30 minutes", "1 hour")
- * @returns Formatted duration string
- */
-export function formatDuration(duration?: string): string {
-  if (!duration) return "";
-  return duration.trim();
-}

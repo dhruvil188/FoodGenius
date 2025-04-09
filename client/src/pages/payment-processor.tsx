@@ -46,10 +46,30 @@ export default function PaymentProcessor() {
       return;
     }
 
+    // Check for payment data and token
+    const isPending = localStorage.getItem('payment_pending') === 'true';
+    const paymentDataStr = localStorage.getItem('payment_data');
+    const paymentToken = localStorage.getItem('payment_token');
+    
     // Process the payment automatically when the page loads
     const processPayment = async () => {
       try {
+        // Safety check 1: Check for payment data
+        if (!isPending || !paymentDataStr) {
+          setError('No pending payment information found');
+          setIsLoading(false);
+          return;
+        }
+        
+        // Safety check 2: Check for valid payment token (prevents reuse of success page)
+        if (!paymentToken || !paymentToken.startsWith('payment_')) {
+          setError('Invalid payment token - this payment may have already been processed');
+          setIsLoading(false);
+          return;
+        }
+        
         console.log('Processing payment for user:', appUser.id);
+        console.log('Payment token:', paymentToken);
         
         // Add 15 credits to the user's account
         const currentCredits = appUser.credits || 0;
@@ -71,6 +91,11 @@ export default function PaymentProcessor() {
           // Refresh the user data to show updated credits
           await refreshUser();
           setVerificationComplete(true);
+          
+          // Clear ALL payment data from localStorage to prevent reuse
+          localStorage.removeItem('payment_data');
+          localStorage.removeItem('payment_pending');
+          localStorage.removeItem('payment_token');
         } else {
           setError(data.message || 'Failed to update credits');
         }

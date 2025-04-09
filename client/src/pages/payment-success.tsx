@@ -40,44 +40,71 @@ export default function PaymentSuccess() {
   const { refreshUser } = useAuth();
 
   useEffect(() => {
-    // Get the user ID from localStorage (set before the redirect to Stripe payment link)
-    const userId = localStorage.getItem('payment_user_id');
-
-    if (!userId) {
-      setVerificationComplete(true); // Assume success even without user ID
+    // Check if there's a pending payment
+    const isPending = localStorage.getItem('payment_pending') === 'true';
+    
+    // Get the payment data from localStorage
+    const paymentDataStr = localStorage.getItem('payment_data');
+    
+    console.log('Payment success page loaded, pending payment:', isPending);
+    console.log('Payment data in localStorage:', paymentDataStr);
+    
+    if (!isPending || !paymentDataStr) {
+      console.log('No pending payment found');
+      setVerificationComplete(true); // Assume success even without user data
       setIsLoading(false);
       return;
     }
-
-    // Update user credits
-    const updateUserCredits = async () => {
-      try {
-        // Call our API to add credits and update the user's account
-        const response = await apiRequest('POST', '/api/stripe/update-credits', {
-          userId: parseInt(userId, 10),
-          credits: 15 // Add 15 credits as specified
-        });
-        
-        const data = await response.json();
-
-        if (data.success) {
-          // Refresh the user data to show updated credits
-          await refreshUser();
-          setVerificationComplete(true);
-        } else {
-          setError(data.message || 'Failed to update credits');
-        }
-      } catch (err) {
-        console.error('Credits update error:', err);
-        setError('Failed to update your credits. Please contact support.');
-      } finally {
+    
+    try {
+      const paymentData = JSON.parse(paymentDataStr);
+      const userId = paymentData.userId;
+      
+      if (!userId) {
+        console.error('Invalid payment data - no user ID');
+        setVerificationComplete(true); // Still show success to avoid confusion
         setIsLoading(false);
-        // Clear the user ID from localStorage
-        localStorage.removeItem('payment_user_id');
+        return;
       }
-    };
+      
+      // Update user credits
+      const updateUserCredits = async () => {
+        try {
+          console.log('Adding 15 credits to user:', userId);
+          
+          // Call our API to add credits and update the user's account
+          const response = await apiRequest('POST', '/api/stripe/update-credits', {
+            userId: userId,
+            credits: 15 // Add 15 credits as specified
+          });
+          
+          const data = await response.json();
+          console.log('Credits update response:', data);
 
-    updateUserCredits();
+          if (data.success) {
+            // Refresh the user data to show updated credits
+            await refreshUser();
+            setVerificationComplete(true);
+          } else {
+            setError(data.message || 'Failed to update credits');
+          }
+        } catch (err) {
+          console.error('Credits update error:', err);
+          setError('Failed to update your credits. Please contact support.');
+        } finally {
+          setIsLoading(false);
+          // Clear the payment data from localStorage
+          localStorage.removeItem('payment_data');
+          localStorage.removeItem('payment_pending');
+        }
+      };
+
+      updateUserCredits();
+    } catch (err) {
+      console.error('Error parsing payment data:', err);
+      setError('Invalid payment data. Please contact support.');
+      setIsLoading(false);
+    }
   }, [refreshUser]);
 
   const handleContinue = () => {

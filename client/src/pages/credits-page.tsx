@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Helmet } from 'react-helmet-async';
 import { Skeleton } from '@/components/ui/skeleton';
+import AdminCreditUpdate from '@/components/AdminCreditUpdate';
 
 export default function CreditsPage() {
   const { appUser, refreshUser } = useAuth();
@@ -204,9 +205,20 @@ export default function CreditsPage() {
               Each credit allows you to analyze one food image and generate a detailed recipe. 
               Free users get 2 credits upon signup. Premium users get unlimited recipe analysis forever.
             </p>
-            <p className="text-slate-600">
+            <p className="text-slate-600 mb-8">
               All payments are processed securely through Stripe.
             </p>
+            
+            {/* Admin Tools Section - Remove after testing */}
+            <div className="border-t border-dashed border-slate-300 pt-8 mt-8">
+              <h3 className="text-lg font-semibold mb-4 text-yellow-700">Admin Tools</h3>
+              <div className="flex justify-center">
+                <AdminCreditUpdate />
+              </div>
+              <p className="text-xs text-slate-500 mt-4">
+                This admin section is only for testing and should be removed before production deployment.
+              </p>
+            </div>
           </div>
         </div>
       </div>

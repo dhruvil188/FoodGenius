@@ -18,6 +18,7 @@ import AuthPage from "@/pages/auth-page";
 import AuthHandler from "@/pages/auth-handler";
 import PaymentSuccess from "@/pages/payment-success";
 import PaymentCancel from "@/pages/payment-cancel";
+import PaymentProcessor from "@/pages/payment-processor";
 import CreditsPage from "@/pages/credits-page";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -66,6 +67,13 @@ function Router() {
       <Route path="/__/auth/handler" component={AuthHandler} />
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/payment-cancel" component={PaymentCancel} />
+      <Route path="/payment-processor">
+        {() => (
+          <ProtectedRoute featureName="Payment Processing">
+            <PaymentProcessor />
+          </ProtectedRoute>
+        )}
+      </Route>
       <Route path="/credits">
         {() => (
           <ProtectedRoute featureName="Credits Management">

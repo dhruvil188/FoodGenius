@@ -29,7 +29,7 @@ export default function CreditsPage() {
     try {
       setLoading(true);
       
-      // Store the user ID in localStorage before redirect
+      // First, save payment intention to localStorage (as a fallback)
       if (appUser && appUser.id) {
         // Store user ID with timestamp to validate it later
         const paymentData = {
@@ -38,14 +38,17 @@ export default function CreditsPage() {
           timestamp: new Date().toISOString(),
         };
         localStorage.setItem('payment_data', JSON.stringify(paymentData));
+        localStorage.setItem('payment_pending', 'true');
         
         console.log('Stored payment data for user:', appUser.id);
-        
-        // Also set a separate value to make it easier to check
-        localStorage.setItem('payment_pending', 'true');
       }
       
-      // Redirect to Stripe Payment Link
+      // For testing: redirect to payment processor directly to skip the payment
+      // navigate('/payment-processor');
+      
+      // For production: redirect to Stripe Payment Link
+      // The success URL in Stripe should be configured to redirect to:
+      // https://yourdomain.com/payment-success
       window.location.href = 'https://buy.stripe.com/00gbMD6RBeASeoE9AB';
       
     } catch (error) {

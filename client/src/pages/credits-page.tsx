@@ -43,13 +43,11 @@ export default function CreditsPage() {
         console.log('Stored payment data for user:', appUser.id);
       }
       
-      // For testing: redirect to payment processor directly to skip the payment
-      // navigate('/payment-processor');
+      // TESTING MODE: redirect directly to payment processor (uncomment the next line for testing)
+      navigate('/payment-processor');
       
-      // For production: redirect to Stripe Payment Link
-      // The success URL in Stripe should be configured to redirect to:
-      // https://yourdomain.com/payment-success
-      window.location.href = 'https://buy.stripe.com/00gbMD6RBeASeoE9AB';
+      // PRODUCTION MODE: redirect to Stripe Payment Link (comment this out for testing)
+      // window.location.href = 'https://buy.stripe.com/00gbMD6RBeASeoE9AB';
       
     } catch (error) {
       console.error('Error redirecting to payment:', error);
@@ -215,8 +213,31 @@ export default function CreditsPage() {
             {/* Admin Tools Section - Remove after testing */}
             <div className="border-t border-dashed border-slate-300 pt-8 mt-8">
               <h3 className="text-lg font-semibold mb-4 text-yellow-700">Admin Tools</h3>
-              <div className="flex justify-center">
+              <div className="flex flex-col gap-4 items-center">
                 <AdminCreditUpdate />
+                
+                <div className="mt-4">
+                  <Button
+                    variant="outline"
+                    className="bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100"
+                    onClick={() => {
+                      const paymentData = {
+                        userId: appUser.id,
+                        email: appUser.email,
+                        timestamp: new Date().toISOString(),
+                      };
+                      localStorage.setItem('payment_data', JSON.stringify(paymentData));
+                      localStorage.setItem('payment_pending', 'true');
+                      
+                      const paymentToken = `payment_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+                      localStorage.setItem('payment_token', paymentToken);
+                      
+                      navigate('/payment-processor');
+                    }}
+                  >
+                    Test Payment Processor (Direct)
+                  </Button>
+                </div>
               </div>
               <p className="text-xs text-slate-500 mt-4">
                 This admin section is only for testing and should be removed before production deployment.

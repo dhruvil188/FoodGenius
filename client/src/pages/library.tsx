@@ -106,13 +106,13 @@ export default function Library() {
           "@type": "CollectionPage",
           "name": "Recipe Library - Recipe Snap",
           "description": "Browse our extensive collection of recipes with detailed cooking instructions",
-          "url": `${window.location.origin}/library`,
+          "url": "/library",
           "mainEntity": {
             "@type": "ItemList",
-            "itemListElement": expandedRecipes.map((recipe, index) => ({
+            "itemListElement": expandedRecipes.slice(0, 10).map((recipe, index) => ({
               "@type": "ListItem",
               "position": index + 1,
-              "url": `${window.location.origin}/recipe/${slugify(recipe.foodName)}`,
+              "url": `/recipe/${slugify(recipe.foodName)}`,
               "name": recipe.foodName
             }))
           }

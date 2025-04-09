@@ -47,6 +47,8 @@ export default function CreditsPage() {
       // navigate('/payment-processor');
       
       // PRODUCTION MODE: redirect to Stripe Payment Link
+      // Using window.location.href because we need to navigate outside our app 
+      // to Stripe's hosted checkout page
       window.location.href = 'https://buy.stripe.com/00gbMD6RBeASeoE9AB';
       
     } catch (error) {

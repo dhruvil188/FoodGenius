@@ -46,10 +46,12 @@ export default function SavedRecipesPage() {
   };
   
   // Fetch saved recipes
-  const { data: recipes, isLoading, error } = useQuery<SavedRecipe[]>({
+  const recipesQuery = useQuery<SavedRecipe[]>({
     queryKey: ["/api/recipes"],
     enabled: !!user,
   });
+  
+  const { data: recipes, isLoading, error } = recipesQuery;
   
   if (!user) {
     return (
@@ -102,7 +104,7 @@ export default function SavedRecipesPage() {
           </CardHeader>
           <CardContent>
             <p className="text-red-600 mb-4">Failed to load saved recipes. Please try again later.</p>
-            <Button onClick={() => window.location.reload()}>Retry</Button>
+            <Button onClick={() => recipesQuery.refetch()}>Retry</Button>
           </CardContent>
         </Card>
       </div>
@@ -134,10 +136,10 @@ export default function SavedRecipesPage() {
   
   // Filter recipes based on active tab
   const filteredRecipes = activeTab === 'all' 
-    ? recipes 
+    ? recipes || [] 
     : activeTab === 'favorites'
-      ? recipes.filter(recipe => recipe.favorite)
-      : recipes;
+      ? (recipes || []).filter((recipe: SavedRecipe) => recipe.favorite)
+      : recipes || [];
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -150,13 +152,13 @@ export default function SavedRecipesPage() {
           "@type": "CollectionPage",
           "name": "Recipe Library - Recipe Snap",
           "description": "Your personal collection of saved recipes on Recipe Snap",
-          "url": `${window.location.origin}/recipes`,
+          "url": `/recipes`,
           "mainEntity": {
             "@type": "ItemList",
-            "itemListElement": recipes?.map((recipe, index) => ({
+            "itemListElement": (recipes || []).slice(0, 10).map((recipe: SavedRecipe, index: number) => ({
               "@type": "ListItem",
               "position": index + 1,
-              "url": `${window.location.origin}/recipes/${recipe.id}`,
+              "url": `/recipes/${recipe.id}`,
               "name": recipe.foodName
             })) || []
           }

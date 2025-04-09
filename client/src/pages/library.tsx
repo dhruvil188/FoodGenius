@@ -109,12 +109,12 @@ export default function Library() {
           "url": "/library",
           "mainEntity": {
             "@type": "ItemList",
-            "itemListElement": expandedRecipes.slice(0, 10).map((recipe, index) => ({
+            "itemListElement": (expandedRecipes || []).slice(0, 10).map((recipe: AnalyzeImageResponse, index: number) => ({
               "@type": "ListItem",
               "position": index + 1,
               "url": `/recipe/${slugify(recipe.foodName)}`,
               "name": recipe.foodName
-            }))
+            })) || []
           }
         }}
       />

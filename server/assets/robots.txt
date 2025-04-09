@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Allow all bots to access all content
+Disallow: /auth
+Disallow: /payment-processor
+Disallow: /payment-success
+Disallow: /payment-cancel
+Disallow: /credits
+
+# Sitemap
+Sitemap: https://image2recipe.com/sitemap.xml

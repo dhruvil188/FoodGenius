@@ -9,7 +9,7 @@ export const additionalBlogPosts: BlogPost[] = [
     content: `
 # Ethiopian Injera: The Art of Fermented Flatbread
 
-![Ethiopian Injera](https://images.unsplash.com/photo-1567007452410-6225df99b017?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80)
+![Ethiopian Injera](https://images.unsplash.com/photo-1515443961218-a51367888e4b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80)
 
 ## Introduction
 
@@ -63,7 +63,7 @@ When you master the art of making injera, you connect with a culinary tradition 
     author: "Hiwot Desta",
     authorTitle: "Ethiopian Culinary Educator & Food Historian",
     date: "2025-02-18",
-    imageUrl: "https://images.unsplash.com/photo-1567007452410-6225df99b017?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1515443961218-a51367888e4b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
     tags: ["Ethiopian Cuisine", "Fermentation", "Flatbread", "African Cooking", "Gluten-Free"],
     category: "International Cuisine",
     readTime: 8,

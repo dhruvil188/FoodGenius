@@ -27,6 +27,7 @@ import {
   asyncHandler,
   ValidationError,
   AuthenticationError,
+  AuthorizationError,
   DatabaseConnectionError
 } from "./middleware/errorHandler";
 
@@ -457,6 +458,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }));
     
     // Verify a successful payment and update user credits
+    // New endpoint for updating credits after payment from payment link
+    app.post('/api/stripe/update-credits', authenticate, asyncHandler(async (req: Request, res: Response) => {
+      try {
+        const { userId, credits } = req.body;
+        
+        if (!userId || !credits) {
+          throw new ValidationError("User ID and credits are required");
+        }
+        
+        // Only allow admins or the user themselves to update credits
+        if (req.user.id !== userId && req.user.role !== 'admin') {
+          throw new AuthorizationError("You don't have permission to update credits for this user");
+        }
+        
+        // Update the user credits
+        const updatedUser = await storage.updateUserCredits(userId, credits);
+        
+        // Send email notification to admin (commented out as we don't have email setup)
+        // await sendEmailNotification(`User ID ${userId} has purchased ${credits} credits`);
+        
+        // Log the purchase for audit purposes
+        console.log(`[PAYMENT] User ID ${userId} purchased ${credits} credits`);
+        
+        return res.status(200).json({
+          success: true,
+          user: storage.convertToAppUser(updatedUser),
+          message: `Successfully added ${credits} credits to user ${userId}`
+        });
+      } catch (error) {
+        console.error('Error updating credits:', error);
+        throw error;
+      }
+    }));
+    
+    // Keep the old endpoint for backward compatibility
     app.get('/api/stripe/session-status/:sessionId', authenticate, asyncHandler(async (req: Request, res: Response) => {
       try {
         const { sessionId } = req.params;
@@ -470,8 +506,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Check if payment was successful
         if (session.payment_status === 'paid') {
-          // Update the user credits (10 credits for premium plan)
-          const updatedUser = await storage.updateUserCredits(req.user.id, 10);
+          // Update the user credits (15 credits for premium plan)
+          const updatedUser = await storage.updateUserCredits(req.user.id, 15);
           
           // Update subscription status
           await storage.updateUser(req.user.id, {
@@ -556,26 +592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({received: true});
     }));
     
-    // Update user credits (for testing)
-    app.post('/api/stripe/update-credits', authenticate, asyncHandler(async (req: Request, res: Response) => {
-      // This is just for testing - in production you'd use webhooks to update credits
-      const { credits } = req.body;
-      
-      if (typeof credits !== 'number' || credits < 0) {
-        throw new ValidationError("Invalid credits amount");
-      }
-      
-      // Get the user and update their credits
-      const updatedUser = await storage.updateUserCredits(req.user.id, credits);
-      
-      // In production, this would be triggered by a Stripe webhook after payment confirmation
-      // Here we're updating the credits directly for testing purposes
-      
-      return res.status(200).json({ 
-        success: true,
-        user: storage.convertToAppUser(updatedUser)
-      });
-    }));
+    // Endpoint for updating credits is defined above
   }
   
   // Create HTTP server

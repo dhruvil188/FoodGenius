@@ -5,6 +5,7 @@ import RecipeResults from "@/components/RecipeResults";
 import { type AnalyzeImageResponse } from "@shared/schema";
 import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import confetti from "canvas-confetti";
@@ -92,6 +93,7 @@ export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeImageResponse | null>(null);
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
+  const { refreshUser } = useAuth();
   const uploadSectionRef = useRef<HTMLDivElement>(null);
   
   // Scroll to the upload section if a deep link is used
@@ -124,6 +126,9 @@ export default function Home() {
         console.log('Analysis successful:', response);
         setAnalysisResult(response);
         setStage("results");
+        
+        // Refresh user data to update credit count in UI
+        refreshUser();
         
         // Trigger confetti effect when recipe is found
         setTimeout(() => {

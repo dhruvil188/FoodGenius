@@ -17,6 +17,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: () => Promise<AuthResponse | void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -81,12 +82,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Function to refresh user data from the backend
+  const refreshUser = async () => {
+    if (currentUser) {
+      try {
+        const [error, result] = await safeAsync<AuthResponse>(
+          syncUserWithBackend(currentUser),
+          "Failed to refresh user data"
+        );
+        
+        if (result && !error) {
+          setAppUser(result.user);
+          console.log("User data refreshed", result.user);
+        }
+      } catch (error) {
+        console.error("Failed to refresh user data:", error);
+      }
+    }
+  };
+
   const value = {
     currentUser,
     appUser,
     isLoading,
     login,
     logout,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

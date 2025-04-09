@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +43,7 @@ interface ChatPageProps {
 }
 
 const ChatPage: React.FC<ChatPageProps> = ({ id: conversationId }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, refreshUser } = useAuth();
   const params = useParams();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
@@ -116,6 +116,9 @@ const ChatPage: React.FC<ChatPageProps> = ({ id: conversationId }) => {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/chat/messages", data.message.conversationId] });
       queryClient.invalidateQueries({ queryKey: ["/api/chat/conversations"] });
+      
+      // Refresh user data to update credit count in UI
+      refreshUser();
     },
   });
   

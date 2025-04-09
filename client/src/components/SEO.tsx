@@ -17,15 +17,9 @@ export default function SEO({
   type = 'website',
   schema,
 }: SEOProps) {
-  // Get the site URL - for production deployment, use the actual domain
-  const siteUrl = typeof window !== 'undefined' 
-    ? window.location.origin 
-    : 'https://image2recipe.com'; // Fallback domain
-    
-  // Create the full canonical URL with the site URL
-  const url = canonical 
-    ? (canonical.startsWith('http') ? canonical : `${siteUrl}${canonical.startsWith('/') ? '' : '/'}${canonical}`) 
-    : siteUrl;
+  // Safely access window to prevent SSR issues
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const url = canonical ? `${siteUrl}${canonical}` : siteUrl;
   
   return (
     <Helmet>
@@ -39,14 +33,14 @@ export default function SEO({
       <meta property="og:url" content={url} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      {image && <meta property="og:image" content={image.startsWith('http') ? image : `${siteUrl}${image.startsWith('/') ? '' : '/'}${image}`} />}
+      {image && <meta property="og:image" content={image.startsWith('http') ? image : `${siteUrl}${image}`} />}
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:url" content={url} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      {image && <meta name="twitter:image" content={image.startsWith('http') ? image : `${siteUrl}${image.startsWith('/') ? '' : '/'}${image}`} />}
+      {image && <meta name="twitter:image" content={image.startsWith('http') ? image : `${siteUrl}${image}`} />}
       
       {/* Schema.org JSON-LD */}
       {schema && (

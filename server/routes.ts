@@ -2,8 +2,6 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import crypto from "crypto";
-import fs from "fs";
-import path from "path";
 
 // Extend Express Request type to include user
 declare global {
@@ -599,34 +597,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
   
   // Create HTTP server
-  // SEO Routes - Serve sitemap.xml and robots.txt from root
-  app.get('/sitemap.xml', (req: Request, res: Response) => {
-    // Use path.join instead of path.resolve for better path construction
-    const sitemapPath = path.join(process.cwd(), 'server/assets/sitemap.xml');
-    console.log('Looking for sitemap at:', sitemapPath);
-    
-    if (fs.existsSync(sitemapPath)) {
-      res.set('Content-Type', 'application/xml');
-      res.sendFile(sitemapPath);
-    } else {
-      console.error('Sitemap not found at:', sitemapPath);
-      res.status(404).send('Sitemap not found');
-    }
-  });
-
-  app.get('/robots.txt', (req: Request, res: Response) => {
-    const robotsPath = path.join(process.cwd(), 'server/assets/robots.txt');
-    console.log('Looking for robots.txt at:', robotsPath);
-    
-    if (fs.existsSync(robotsPath)) {
-      res.set('Content-Type', 'text/plain');
-      res.sendFile(robotsPath);
-    } else {
-      console.error('Robots.txt not found at:', robotsPath);
-      res.status(404).send('Robots.txt not found');
-    }
-  });
-
   const httpServer = createServer(app);
   return httpServer;
 }

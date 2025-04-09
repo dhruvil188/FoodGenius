@@ -22,10 +22,22 @@ const AuthPage = () => {
   const { currentUser: user, isLoading, login } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Redirect to home if already logged in
+  // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      // Check if we have a pending payment process to resume
+      const hasPendingPayment = localStorage.getItem('pending_payment_process') === 'true';
+      
+      if (hasPendingPayment) {
+        console.log('Detected pending payment process, redirecting to payment processor');
+        // Clear the pending flag
+        localStorage.removeItem('pending_payment_process');
+        // Redirect to payment processor
+        navigate("/payment-processor");
+      } else {
+        // Normal login flow - redirect to home
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 

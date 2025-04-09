@@ -67,13 +67,7 @@ function Router() {
       <Route path="/__/auth/handler" component={AuthHandler} />
       <Route path="/payment-success" component={PaymentSuccess} />
       <Route path="/payment-cancel" component={PaymentCancel} />
-      <Route path="/payment-processor">
-        {() => (
-          <ProtectedRoute featureName="Payment Processing">
-            <PaymentProcessor />
-          </ProtectedRoute>
-        )}
-      </Route>
+      <Route path="/payment-processor" component={PaymentProcessor} />
       <Route path="/credits">
         {() => (
           <ProtectedRoute featureName="Credits Management">

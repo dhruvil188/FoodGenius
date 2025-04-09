@@ -54,7 +54,10 @@ export interface BlogPost {
   historyAndOrigins?: string;
 }
 
-export const blogPosts: BlogPost[] = [
+import { additionalBlogPosts } from './additionalBlogPosts';
+
+// Original blog posts collection
+export const originalBlogPosts: BlogPost[] = [
   {
     id: "1",
     title: "The Science Behind Perfect Sourdough Bread",
@@ -1324,3 +1327,6 @@ The revival of traditional preservation methods in modern kitchens isn't merely 
     relatedRecipes: ["homemade-sauerkraut", "quick-pickled-vegetables", "gravlax"]
   }
 ];
+
+// Export combined blog posts
+export const blogPosts: BlogPost[] = [...originalBlogPosts, ...additionalBlogPosts];

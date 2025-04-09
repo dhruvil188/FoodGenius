@@ -41,7 +41,18 @@ export default function PaymentProcessor() {
 
   useEffect(() => {
     if (!appUser) {
-      // If no user is logged in, redirect to auth page
+      // If no user is logged in, redirect to auth page with a return destination
+      const paymentToken = localStorage.getItem('payment_token');
+      if (paymentToken) {
+        // Store a flag indicating we need to process payment after login
+        localStorage.setItem('pending_payment_process', 'true');
+        
+        // Display a toast notification when available
+        setTimeout(() => {
+          alert('Please sign in to complete your payment processing');
+        }, 500);
+      }
+      
       navigate('/auth');
       return;
     }

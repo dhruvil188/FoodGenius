@@ -93,7 +93,7 @@ export default function CreditsPage() {
                       <Crown className="h-12 w-12 text-amber-500" />
                     </div>
                     <h3 className="text-2xl font-bold text-amber-700">Premium Subscription</h3>
-                    <p className="text-slate-600 mt-2">Unlimited recipe analysis</p>
+                    <p className="text-slate-600 mt-2">20 recipe analysis credits</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
@@ -157,7 +157,7 @@ export default function CreditsPage() {
                     </span>
                   )}
                 </div>
-                <CardDescription>Unlimited recipe analysis</CardDescription>
+                <CardDescription>Get 20 credits for recipe analysis</CardDescription>
                 <div className="mt-2">
                   <span className="text-3xl font-bold">$5.99</span>
                   <span className="text-sm ml-1">one-time</span>
@@ -166,7 +166,7 @@ export default function CreditsPage() {
               <CardContent className="space-y-2">
                 <div className="flex items-start">
                   <Sparkles className="mr-2 h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-                  <span><strong>Unlimited</strong> recipe analysis</span>
+                  <span><strong>20 credits</strong> for recipe analysis</span>
                 </div>
                 <div className="flex items-start">
                   <Sparkles className="mr-2 h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
@@ -204,45 +204,13 @@ export default function CreditsPage() {
             <h3 className="text-lg font-semibold mb-2">How credits work</h3>
             <p className="text-slate-600 mb-4">
               Each credit allows you to analyze one food image and generate a detailed recipe. 
-              Free users get 2 credits upon signup. Premium users get unlimited recipe analysis forever.
+              Free users get 2 credits upon signup. Each premium payment adds 20 credits to your account.
             </p>
             <p className="text-slate-600 mb-8">
               All payments are processed securely through Stripe.
             </p>
             
-            {/* Admin Tools Section - Remove after testing */}
-            <div className="border-t border-dashed border-slate-300 pt-8 mt-8">
-              <h3 className="text-lg font-semibold mb-4 text-yellow-700">Admin Tools</h3>
-              <div className="flex flex-col gap-4 items-center">
-                <AdminCreditUpdate />
-                
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    className="bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100"
-                    onClick={() => {
-                      const paymentData = {
-                        userId: appUser.id,
-                        email: appUser.email,
-                        timestamp: new Date().toISOString(),
-                      };
-                      localStorage.setItem('payment_data', JSON.stringify(paymentData));
-                      localStorage.setItem('payment_pending', 'true');
-                      
-                      const paymentToken = `payment_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-                      localStorage.setItem('payment_token', paymentToken);
-                      
-                      navigate('/payment-processor');
-                    }}
-                  >
-                    Test Payment Processor (Direct)
-                  </Button>
-                </div>
-              </div>
-              <p className="text-xs text-slate-500 mt-4">
-                This admin section is only for testing and should be removed before production deployment.
-              </p>
-            </div>
+
           </div>
         </div>
       </div>

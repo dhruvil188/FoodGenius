@@ -17,7 +17,21 @@ export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState('all');
   
   // Combine all blog posts from both sources
-  const allBlogPosts = [...blogPosts, ...finalBlogPosts];
+  const unwantedBlogTitles = [
+    "French Coq au Vin: Rustic Elegance in a Wine-Braised Classic",
+    "Peruvian Ceviche: The Coastal Art of Raw Fish Transformed by Citrus",
+    "Brazilian Feijoada: The Complex Evolution of a National Dish",
+    "Lebanese Tabbouleh: The Art of Perfect Balance",
+    "Korean Kimchi: A Complete Guide to Homemade Fermentation",
+    "The Art of Food Preservation: Modern Methods Meet Traditional Techniques"
+  ];
+  
+  // Filter out unwanted blog posts
+  const filteredBlogPosts = [...blogPosts, ...finalBlogPosts].filter(
+    post => !unwantedBlogTitles.includes(post.title)
+  );
+  
+  const allBlogPosts = filteredBlogPosts;
   
   const categories = ['all', ...getAllCategories(allBlogPosts)];
   

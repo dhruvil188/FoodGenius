@@ -598,22 +598,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Serve sitemap.xml with proper XML content type
   app.get('/sitemap.xml', (req: Request, res: Response) => {
-    const fs = require('fs');
-    const path = require('path');
-    
     try {
-      // Read the sitemap.xml file from the public directory
-      const sitemapPath = path.join(__dirname, '../public/sitemap.xml');
-      const sitemapContent = fs.readFileSync(sitemapPath, 'utf8');
+      // Get base URL from request or use a default
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://image2recipe.com' 
+        : `${req.protocol}://${req.get('host')}`;
+      
+      // Current date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Generate XML content directly
+      let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+      xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+      
+      // Add static routes
+      const staticRoutes = [
+        { path: '/', priority: '1.0', changefreq: 'weekly' },
+        { path: '/library', priority: '0.8', changefreq: 'weekly' },
+        { path: '/recipes', priority: '0.8', changefreq: 'daily' },
+        { path: '/chat', priority: '0.7', changefreq: 'weekly' },
+        { path: '/auth', priority: '0.6', changefreq: 'monthly' },
+        { path: '/contact', priority: '0.5', changefreq: 'monthly' },
+        { path: '/terms', priority: '0.3', changefreq: 'yearly' },
+        { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
+        { path: '/blog', priority: '0.9', changefreq: 'daily' },
+        { path: '/credits', priority: '0.6', changefreq: 'monthly' },
+      ];
+      
+      staticRoutes.forEach(route => {
+        xml += '  <url>\n';
+        xml += `    <loc>${baseUrl}${route.path}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>${route.changefreq}</changefreq>\n`;
+        xml += `    <priority>${route.priority}</priority>\n`;
+        xml += '  </url>\n';
+      });
+      
+      // Add blog posts routes - just a few examples
+      const blogPosts = [
+        { slug: 'science-behind-perfect-sourdough-bread', date: '2025-01-15' },
+        { slug: 'plant-based-protein-guide-vegetarian-cooking', date: '2025-01-18' },
+        { slug: 'thai-green-curry-authentic-recipe-history', date: '2025-01-25' },
+        { slug: 'japanese-ramen-regional-varieties-techniques', date: '2025-02-01' },
+        { slug: 'spanish-paella-valencian-tradition-modern-variations', date: '2025-02-05' },
+        { slug: 'french-pastry-techniques-perfect-croissants', date: '2025-02-10' },
+        { slug: 'mexican-mole-poblano-complex-sauce-history', date: '2025-02-20' },
+        { slug: 'korean-kimchi-fermentation-guide-variations', date: '2025-02-25' },
+        { slug: 'indian-butter-chicken-tandoori-tradition', date: '2025-03-01' }
+      ];
+      
+      blogPosts.forEach(post => {
+        xml += '  <url>\n';
+        xml += `    <loc>${baseUrl}/blog/${post.slug}</loc>\n`;
+        xml += `    <lastmod>${post.date}</lastmod>\n`;
+        xml += `    <changefreq>monthly</changefreq>\n`;
+        xml += `    <priority>0.7</priority>\n`;
+        xml += '  </url>\n';
+      });
+      
+      // Close the XML document
+      xml += '</urlset>';
       
       // Set the correct content type for XML
       res.setHeader('Content-Type', 'application/xml');
       
       // Send the XML content
-      res.send(sitemapContent);
+      res.send(xml);
     } catch (error) {
-      console.error('Error serving sitemap.xml:', error);
-      res.status(500).send('Error serving sitemap');
+      console.error('Error generating sitemap.xml:', error);
+      res.status(500).send('Error generating sitemap');
     }
   });
   

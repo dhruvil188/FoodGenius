@@ -567,6 +567,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             subscriptionTier: 'premium'
           });
           
+          // Track the session payment activity
+          await storage.logUserActivity({
+            userId: req.user.id,
+            activityType: "session_payment",
+            resourceId: sessionId,
+            details: {
+              creditsAdded: 15,
+              totalCredits: updatedUser.credits,
+              paymentType: "stripe_session",
+              paymentStatus: session.payment_status
+            },
+            ipAddress: req.ip,
+            userAgent: req.headers["user-agent"]
+          });
+          
           return res.status(200).json({
             success: true,
             user: storage.convertToAppUser(updatedUser),
@@ -639,7 +654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 resourceId: session.id,
                 details: {
                   creditsAdded: 10,
-                  totalCredits: user.credits + 10,
+                  totalCredits: Number(user.credits || 0) + 10,
                   paymentType: "stripe_webhook",
                   paymentStatus: session.payment_status
                 }

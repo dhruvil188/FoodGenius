@@ -1,9 +1,10 @@
 import { 
-  users, sessions, savedRecipes, chatMessages, 
+  users, sessions, savedRecipes, chatMessages, userActivities,
   type User, type InsertUser, 
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
   type ChatMessage, type InsertChatMessage,
+  type UserActivity, type InsertUserActivity,
   type AnalyzeImageResponse,
   type AppUser
 } from "@shared/schema";

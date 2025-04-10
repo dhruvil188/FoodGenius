@@ -596,6 +596,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Endpoint for updating credits is defined above
   }
   
+  // Serve sitemap.xml with proper XML content type
+  app.get('/sitemap.xml', (req: Request, res: Response) => {
+    const fs = require('fs');
+    const path = require('path');
+    
+    try {
+      // Read the sitemap.xml file from the public directory
+      const sitemapPath = path.join(__dirname, '../public/sitemap.xml');
+      const sitemapContent = fs.readFileSync(sitemapPath, 'utf8');
+      
+      // Set the correct content type for XML
+      res.setHeader('Content-Type', 'application/xml');
+      
+      // Send the XML content
+      res.send(sitemapContent);
+    } catch (error) {
+      console.error('Error serving sitemap.xml:', error);
+      res.status(500).send('Error serving sitemap');
+    }
+  });
+  
   // Create HTTP server
   const httpServer = createServer(app);
   return httpServer;

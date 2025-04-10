@@ -371,6 +371,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(200).json(updatedRecipe);
   }));
 
+  // ==== User Activity Routes ====
+  
+  // Get user activity history
+  app.get("/api/user/activities", authenticate, asyncHandler(async (req: Request, res: Response) => {
+    // Get query parameters with defaults
+    const limit = parseInt(req.query.limit as string || '20', 10);
+    const offset = parseInt(req.query.offset as string || '0', 10);
+    
+    // Get user activities from storage
+    const activities = await storage.getUserActivities(req.user.id, limit, offset);
+    
+    // Get activity statistics
+    const stats = await storage.getUserActivityStats(req.user.id);
+    
+    return res.status(200).json({
+      activities,
+      stats,
+      meta: {
+        limit,
+        offset,
+        total: activities.length
+      }
+    });
+  }));
+  
   // ==== Chat Routes ====
   
   // Get user conversations (chat history)

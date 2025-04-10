@@ -1270,7 +1270,7 @@ The next time you savor the layered complexity of a well-made biryani, appreciat
         notes: "about 20-25 strands",
         substitutes: {
           name: "turmeric (for color only)",
-          costImpact: "much lower"
+          costImpact: "lower"
         }
       },
       {

@@ -480,7 +480,7 @@ The next time you gather around a dim sum table, appreciate not just the delicio
     prepTime: "1-3 hours (varies by item)",
     cookTime: "10-20 minutes (varies by item)",
     totalTime: "1.5-4 hours",
-    servings: "Makes approximately 24 dumplings",
+    servings: 24,
     difficulty: "Hard",
     cuisine: "Chinese",
     ingredients: [
@@ -850,7 +850,7 @@ The next time you savor the rich complexity of a well-made coq au vin, appreciat
         notes: "full bottle, preferably Burgundy (Pinot Noir)",
         substitutes: {
           name: "other medium-bodied red wine",
-          costImpact: "variable"
+          costImpact: "similar"
         }
       },
       {

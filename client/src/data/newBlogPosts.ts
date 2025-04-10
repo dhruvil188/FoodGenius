@@ -98,7 +98,7 @@ The next time you savor the distinctive honey-sweet, butter-rich, nut-studded de
     author: "Chef Mehmet Yılmaz",
     authorTitle: "Master Pastry Chef & Ottoman Culinary Historian",
     date: "2025-02-10",
-    imageUrl: "https://images.pexels.com/photos/6596273/pexels-photo-6596273.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    imageUrl: "https://www.dailysabah.com/life/food/delicious-turkish-baklava-rises-in-popularity-in-india",
     tags: ["Turkish Cuisine", "Baklava", "Desserts", "Middle Eastern", "Pastry"],
     category: "International Cuisine",
     readTime: 8,
@@ -1244,7 +1244,7 @@ The next time you savor a properly made borscht—ideally with a dollop of sour 
     content: `
 # Australian Pavlova: The Delicate Meringue Dessert of the South Pacific
 
-![Australian Pavlova](https://images.pexels.com/photos/5419114/pexels-photo-5419114.jpeg?auto=compress&cs=tinysrgb&w=1000)
+![Australian Pavlova](https://images.pexels.com/photos/6824392/pexels-photo-6824392.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -1330,7 +1330,7 @@ The next time you savor a perfect pavlova—its meringue shell shattering to rev
     author: "Chef Sarah Mitchell",
     authorTitle: "Australian Pastry Chef & Culinary Researcher",
     date: "2025-02-25",
-    imageUrl: "https://images.pexels.com/photos/5419114/pexels-photo-5419114.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    imageUrl: "https://images.pexels.com/photos/6824392/pexels-photo-6824392.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Australian Cuisine", "Pavlova", "Desserts", "Meringue", "New Zealand"],
     category: "International Cuisine",
     readTime: 8,

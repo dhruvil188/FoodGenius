@@ -56,6 +56,7 @@ export interface BlogPost {
 
 import { additionalBlogPosts } from './additionalBlogPosts';
 import { moreBlogPosts } from './moreBlogPosts';
+import { newBlogPosts } from './newBlogPosts';
 
 // Original blog posts collection
 export const originalBlogPosts: BlogPost[] = [

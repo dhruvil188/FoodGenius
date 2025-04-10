@@ -1,7 +1,5 @@
 import { BlogPost } from './blogPosts';
 
-import { minestroneBlogPost } from './minestroneBlogPost';
-
 export const finalBlogPosts: BlogPost[] = [
   {
     id: "21",
@@ -1835,6 +1833,5 @@ The next time you taste the bright, citrus-infused perfection of a well-made cev
       "The dish is naturally low in calories and carbohydrates while being high in protein, making it suitable for many dietary preferences."
     ],
     historyAndOrigins: "Ceviche's origins extend deep into Peru's pre-Columbian past, with evidence suggesting that the Moche civilization (100-700 CE) was preparing fish with the juice of local fruits like tumbo (banana passionfruit) over 2,000 years ago. This early version relied on fermentation rather than citrus acids, as citrus fruits were introduced only after Spanish colonization in the 16th century. The name 'ceviche' likely derives from the word 'siwichi' in the indigenous Quechua language, meaning 'fresh or tender fish,' though some linguists suggest connections to Spanish or Arabic terms. The dish evolved significantly in the late 19th and early 20th centuries with the arrival of Japanese immigrants, who brought precise knife skills and aesthetic sensibilities that influenced modern preparation styles. Until the late 20th century, ceviche was typically marinated for extended periods (hours), but contemporary Peruvian chefs, notably Gastón Acurio, popularized the briefly-marinated style that preserves texture and freshness. In 2004, Peru officially recognized ceviche as part of its national heritage, and June 28th was designated National Ceviche Day. Today, the dish stands as Peru's most internationally recognized culinary ambassador, reflecting the country's remarkable biodiversity and its historical ability to harmoniously blend indigenous traditions with global influences. While variations exist throughout Latin America, Peruvian ceviche is distinguished by its precision, balanced flavor profile, and significant cultural importance."
-  },
-  minestroneBlogPost
+  }
 ];

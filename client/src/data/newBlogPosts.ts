@@ -9,7 +9,7 @@ export const newBlogPosts: BlogPost[] = [
     content: `
 # Turkish Baklava: The Sweet Layers of Ottoman Culinary Heritage
 
-![Turkish Baklava](https://images.pexels.com/photos/6157051/pexels-photo-6157051.jpeg?auto=compress&cs=tinysrgb&w=1000)
+![Turkish Baklava](https://www.dailysabah.com/life/food/delicious-turkish-baklava-rises-in-popularity-in-india)
 
 ## Introduction
 
@@ -98,7 +98,7 @@ The next time you savor the distinctive honey-sweet, butter-rich, nut-studded de
     author: "Chef Mehmet Yılmaz",
     authorTitle: "Master Pastry Chef & Ottoman Culinary Historian",
     date: "2025-02-10",
-    imageUrl: "https://images.pexels.com/photos/6157051/pexels-photo-6157051.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    imageUrl: "https://images.pexels.com/photos/6596273/pexels-photo-6596273.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Turkish Cuisine", "Baklava", "Desserts", "Middle Eastern", "Pastry"],
     category: "International Cuisine",
     readTime: 8,
@@ -625,7 +625,7 @@ The next time you savor the distinctive spicy, aromatic complexity of properly p
     content: `
 # Argentine Asado: The Ritual and Art of South American Barbecue
 
-![Argentine Asado](https://images.pexels.com/photos/12912595/pexels-photo-12912595.jpeg?auto=compress&cs=tinysrgb&w=1000)
+![Argentine Asado](https://images.pexels.com/photos/1268558/pexels-photo-1268558.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -715,7 +715,7 @@ The next time you savor the distinctive smoke-kissed, salt-seasoned perfection o
     author: "Chef Martín Rodriguez",
     authorTitle: "Asador Master & Argentinian Beef Expert",
     date: "2025-03-02",
-    imageUrl: "https://images.pexels.com/photos/12912595/pexels-photo-12912595.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    imageUrl: "https://images.pexels.com/photos/1268558/pexels-photo-1268558.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Argentine Cuisine", "Asado", "Barbecue", "Beef", "South American"],
     category: "International Cuisine",
     readTime: 8,
@@ -912,7 +912,7 @@ The next time you savor the distinctive smoke-kissed, salt-seasoned perfection o
     content: `
 # Russian Borscht: The Hearty Beet Soup with Soviet and Slavic Roots
 
-![Russian Borscht](https://images.pexels.com/photos/6731354/pexels-photo-6731354.jpeg?auto=compress&cs=tinysrgb&w=1000)
+![Russian Borscht](https://images.pexels.com/photos/8664307/pexels-photo-8664307.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -1002,7 +1002,7 @@ The next time you savor a properly made borscht—ideally with a dollop of sour 
     author: "Dr. Natalia Ivanova",
     authorTitle: "Slavic Food Historian & Culinary Anthropologist",
     date: "2025-01-20",
-    imageUrl: "https://images.pexels.com/photos/6731354/pexels-photo-6731354.jpeg?auto=compress&cs=tinysrgb&w=1000",
+    imageUrl: "https://images.pexels.com/photos/8664307/pexels-photo-8664307.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Russian Cuisine", "Borscht", "Soups", "Eastern European", "Beets"],
     category: "International Cuisine",
     readTime: 7,

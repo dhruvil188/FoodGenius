@@ -1331,4 +1331,4 @@ The revival of traditional preservation methods in modern kitchens isn't merely 
 ];
 
 // Export combined blog posts
-export const blogPosts: BlogPost[] = [...originalBlogPosts, ...additionalBlogPosts, ...moreBlogPosts];
+export const blogPosts: BlogPost[] = [...originalBlogPosts, ...additionalBlogPosts, ...moreBlogPosts, ...newBlogPosts];

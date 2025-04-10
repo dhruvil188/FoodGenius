@@ -634,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         xml += '  </url>\n';
       });
       
-      // Add blog posts routes - just a few examples
+      // Add blog posts routes - including our newly added posts
       const blogPosts = [
         { slug: 'science-behind-perfect-sourdough-bread', date: '2025-01-15' },
         { slug: 'plant-based-protein-guide-vegetarian-cooking', date: '2025-01-18' },
@@ -644,7 +644,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { slug: 'french-pastry-techniques-perfect-croissants', date: '2025-02-10' },
         { slug: 'mexican-mole-poblano-complex-sauce-history', date: '2025-02-20' },
         { slug: 'korean-kimchi-fermentation-guide-variations', date: '2025-02-25' },
-        { slug: 'indian-butter-chicken-tandoori-tradition', date: '2025-03-01' }
+        { slug: 'indian-butter-chicken-tandoori-tradition', date: '2025-03-01' },
+        { slug: 'ethiopian-injera-sourdough-flatbread-guide', date: '2025-03-05' },
+        { slug: 'lebanese-mezze-small-plates-big-flavors', date: '2025-03-10' },
+        { slug: 'greek-moussaka-mediterranean-tradition-layers', date: '2025-01-18' },
+        { slug: 'chinese-dim-sum-small-bites-big-flavors', date: '2025-02-03' },
+        { slug: 'turkish-baklava-sweet-layers-ottoman-heritage', date: '2025-02-10' },
+        { slug: 'caribbean-jerk-chicken-fiery-island-flavors-history', date: '2025-01-30' },
+        { slug: 'argentine-asado-ritual-art-south-american-barbecue', date: '2025-03-02' },
+        { slug: 'russian-borscht-hearty-beet-soup-soviet-slavic-roots', date: '2025-01-20' },
+        { slug: 'australian-pavlova-delicate-meringue-dessert-south-pacific', date: '2025-02-25' }
       ];
       
       blogPosts.forEach(post => {

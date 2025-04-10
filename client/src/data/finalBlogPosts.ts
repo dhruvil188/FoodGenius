@@ -1,4 +1,5 @@
 import { BlogPost } from './blogPosts';
+import { homemadePizzaBlogPost } from './newBlogPost';
 
 export const finalBlogPosts: BlogPost[] = [
   {

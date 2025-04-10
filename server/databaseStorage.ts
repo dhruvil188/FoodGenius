@@ -1,10 +1,9 @@
 import { 
-  users, sessions, savedRecipes, chatMessages, userActivities,
+  users, sessions, savedRecipes, chatMessages, 
   type User, type InsertUser, 
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
   type ChatMessage, type InsertChatMessage,
-  type UserActivity, type InsertUserActivity,
   type AnalyzeImageResponse,
   type AppUser
 } from "@shared/schema";
@@ -324,82 +323,6 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedRecipe;
-  }
-  
-  // Activity tracking methods
-  async logUserActivity(activity: InsertUserActivity): Promise<UserActivity> {
-    // Get the current credits for the user if not provided
-    if (activity.creditsRemaining === undefined) {
-      const user = await this.getUser(activity.userId);
-      if (user) {
-        activity.creditsRemaining = user.credits || 0;
-      }
-    }
-    
-    // Make a copy of the activity object and handle the details field properly
-    const activityData = {
-      ...activity,
-      // If details is provided, ensure it's properly stringified for PostgreSQL jsonb
-      details: activity.details ? JSON.stringify(activity.details) : null,
-      createdAt: new Date()
-    };
-
-    const [newActivity] = await db.insert(userActivities).values(activityData).returning();
-    
-    console.log(`📊 Activity logged: ${activity.activityType} for user ${activity.userId}, cost: ${activity.creditsCost} credits`);
-    
-    return newActivity;
-  }
-  
-  async getUserActivities(userId: number, limit: number = 50, offset: number = 0): Promise<UserActivity[]> {
-    return db.select()
-      .from(userActivities)
-      .where(eq(userActivities.userId, userId))
-      .orderBy(desc(userActivities.createdAt))
-      .limit(limit)
-      .offset(offset);
-  }
-  
-  async getUserActivityStats(userId: number): Promise<{
-    totalCreditsUsed: number,
-    imageAnalysisCount: number,
-    chatMessageCount: number,
-    savedRecipeCount: number
-  }> {
-    // Use SQL aggregate functions to get usage statistics
-    const result = await db.execute(sql`
-      SELECT 
-        COALESCE(SUM(credits_cost), 0) as total_credits_used,
-        COALESCE(SUM(CASE WHEN activity_type = 'image_analysis' THEN 1 ELSE 0 END), 0) as image_analysis_count,
-        COALESCE(SUM(CASE WHEN activity_type = 'chat_message' THEN 1 ELSE 0 END), 0) as chat_message_count,
-        COALESCE(SUM(CASE WHEN activity_type = 'save_recipe' THEN 1 ELSE 0 END), 0) as saved_recipe_count
-      FROM user_activities
-      WHERE user_id = ${userId}
-    `);
-    
-    // Parse the SQL result into our expected format
-    const stats = result.rows[0] || {
-      total_credits_used: '0',
-      image_analysis_count: '0',
-      chat_message_count: '0', 
-      saved_recipe_count: '0'
-    };
-    
-    // Convert string values to integers explicitly
-    return {
-      totalCreditsUsed: typeof stats.total_credits_used === 'string' 
-        ? parseInt(stats.total_credits_used, 10) 
-        : Number(stats.total_credits_used) || 0,
-      imageAnalysisCount: typeof stats.image_analysis_count === 'string' 
-        ? parseInt(stats.image_analysis_count, 10) 
-        : Number(stats.image_analysis_count) || 0,
-      chatMessageCount: typeof stats.chat_message_count === 'string' 
-        ? parseInt(stats.chat_message_count, 10) 
-        : Number(stats.chat_message_count) || 0,
-      savedRecipeCount: typeof stats.saved_recipe_count === 'string' 
-        ? parseInt(stats.saved_recipe_count, 10) 
-        : Number(stats.saved_recipe_count) || 0
-    };
   }
 
   // Chat message methods

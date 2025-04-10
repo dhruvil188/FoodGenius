@@ -16,8 +16,20 @@ export default function BlogPostPage() {
   const [, params] = useRoute('/blog/:slug');
   const slug = params?.slug;
   
-  // Combine all blog posts from both sources
-  const allBlogPosts = [...blogPosts, ...finalBlogPosts];
+  // List of blog titles to be filtered out
+  const unwantedBlogTitles = [
+    "French Coq au Vin: Rustic Elegance in a Wine-Braised Classic",
+    "Peruvian Ceviche: The Coastal Art of Raw Fish Transformed by Citrus",
+    "Brazilian Feijoada: The Complex Evolution of a National Dish",
+    "Lebanese Tabbouleh: The Art of Perfect Balance",
+    "Korean Kimchi: A Complete Guide to Homemade Fermentation",
+    "The Art of Food Preservation: Modern Methods Meet Traditional Techniques"
+  ];
+  
+  // Combine all blog posts from both sources and filter out unwanted ones
+  const allBlogPosts = [...blogPosts, ...finalBlogPosts].filter(
+    post => !unwantedBlogTitles.includes(post.title)
+  );
   const post = allBlogPosts.find(post => post.slug === slug);
   
   if (!post) {

@@ -9,7 +9,7 @@ export const newBlogPosts: BlogPost[] = [
     content: `
 # Turkish Baklava: The Sweet Layers of Ottoman Culinary Heritage
 
-![Turkish Baklava](https://images.unsplash.com/photo-1625944525533-473038e6d728?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80)
+![Turkish Baklava](https://images.pexels.com/photos/6157051/pexels-photo-6157051.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -98,7 +98,7 @@ The next time you savor the distinctive honey-sweet, butter-rich, nut-studded de
     author: "Chef Mehmet Yılmaz",
     authorTitle: "Master Pastry Chef & Ottoman Culinary Historian",
     date: "2025-02-10",
-    imageUrl: "https://images.unsplash.com/photo-1625944525533-473038e6d728?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    imageUrl: "https://images.pexels.com/photos/6157051/pexels-photo-6157051.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Turkish Cuisine", "Baklava", "Desserts", "Middle Eastern", "Pastry"],
     category: "International Cuisine",
     readTime: 8,
@@ -306,7 +306,7 @@ The next time you savor the distinctive honey-sweet, butter-rich, nut-studded de
     content: `
 # Caribbean Jerk Chicken: Fiery Island Flavors with History and Soul
 
-![Caribbean Jerk Chicken](https://images.unsplash.com/photo-1532636739872-4bd2d0491d96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80)
+![Caribbean Jerk Chicken](https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -397,7 +397,7 @@ The next time you savor the distinctive spicy, aromatic complexity of properly p
     author: "Chef Leroy Johnson",
     authorTitle: "Jamaican Culinary Expert & Food Historian",
     date: "2025-01-30",
-    imageUrl: "https://images.unsplash.com/photo-1532636739872-4bd2d0491d96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    imageUrl: "https://images.pexels.com/photos/2673353/pexels-photo-2673353.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Caribbean Cuisine", "Jamaican Food", "Jerk Chicken", "Grilling", "Spicy"],
     category: "International Cuisine",
     readTime: 8,

@@ -320,13 +320,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/recipes", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const recipeData: AnalyzeImageResponse = req.body.recipe;
     const savedRecipe = await saveRecipe(req.user.id, recipeData);
+    
+    // Log the recipe saving activity
+    await storage.logUserActivity({
+      userId: req.user.id,
+      activityType: "save_recipe",
+      resourceId: savedRecipe.id.toString(),
+      details: {
+        recipeName: recipeData.foodName,
+        tags: recipeData.tags
+      },
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"]
+    });
+    
     return res.status(201).json(savedRecipe);
   }));
   
   // Delete a recipe
   app.delete("/api/recipes/:id", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const recipeId = parseInt(req.params.id);
+    
+    // Get the recipe before deleting to capture its details for the activity log
+    const recipe = await storage.getSavedRecipeById(recipeId);
+    
     await deleteRecipe(recipeId, req.user.id);
+    
+    // Log the recipe deletion activity
+    if (recipe) {
+      await storage.logUserActivity({
+        userId: req.user.id,
+        activityType: "delete_recipe",
+        resourceId: recipeId.toString(),
+        details: {
+          recipeName: recipe.foodName,
+          recipeId: recipeId
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"]
+      });
+    }
+    
     return res.status(200).json({ success: true });
   }));
   
@@ -372,12 +406,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       throw new ValidationError("Message content is required");
     }
     
+    const actualConversationId = conversationId || crypto.randomUUID(); // Generate new conversation ID if not provided
+    
     const message = await createChatMessage(
       req.user.id,
       content,
-      conversationId || crypto.randomUUID(), // Generate new conversation ID if not provided
+      actualConversationId,
       'user'
     );
+    
+    // Log chat message activity
+    await storage.logUserActivity({
+      userId: req.user.id,
+      activityType: "chat_message",
+      resourceId: actualConversationId,
+      details: {
+        messageId: message.id.toString(),
+        messageType: 'user',
+        messageLength: content.length
+      },
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"]
+    });
     
     return res.status(201).json(message);
   }));

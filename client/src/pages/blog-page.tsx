@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { blogPosts, BlogPost } from '@/data/blogPosts';
 import { finalBlogPosts } from '@/data/finalBlogPosts';
-import { newBlogPosts } from '@/data/newBlogPosts';
 import SEO from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,8 +16,8 @@ export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   
-  // Combine all blog posts from all sources
-  const allBlogPosts = [...blogPosts, ...finalBlogPosts, ...newBlogPosts];
+  // Combine all blog posts from both sources
+  const allBlogPosts = [...blogPosts, ...finalBlogPosts];
   
   const categories = ['all', ...getAllCategories(allBlogPosts)];
   

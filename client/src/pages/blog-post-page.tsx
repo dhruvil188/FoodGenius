@@ -437,7 +437,7 @@ export default function BlogPostPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {relatedPosts.map((relatedPost, index) => (
                 <RelatedPostCard 
-                  key={relatedPost.id} 
+                  key={`${relatedPost.id}-${index}`} 
                   post={relatedPost} 
                   index={index}
                   onClick={() => {

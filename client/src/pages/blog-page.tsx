@@ -119,7 +119,7 @@ export default function BlogPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPosts.map((post, index) => (
             <BlogPostCard 
-              key={post.id} 
+              key={`${post.id}-${index}`} 
               post={post} 
               index={index} 
               onClick={() => navigate(`/blog/${post.slug}`)}

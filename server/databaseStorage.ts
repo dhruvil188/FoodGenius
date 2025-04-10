@@ -378,13 +378,27 @@ export class DatabaseStorage implements IStorage {
     `);
     
     // Parse the SQL result into our expected format
-    const stats = result.rows[0];
+    const stats = result.rows[0] || {
+      total_credits_used: '0',
+      image_analysis_count: '0',
+      chat_message_count: '0', 
+      saved_recipe_count: '0'
+    };
     
+    // Convert string values to integers explicitly
     return {
-      totalCreditsUsed: parseInt(stats.total_credits_used || '0', 10),
-      imageAnalysisCount: parseInt(stats.image_analysis_count || '0', 10),
-      chatMessageCount: parseInt(stats.chat_message_count || '0', 10),
-      savedRecipeCount: parseInt(stats.saved_recipe_count || '0', 10)
+      totalCreditsUsed: typeof stats.total_credits_used === 'string' 
+        ? parseInt(stats.total_credits_used, 10) 
+        : Number(stats.total_credits_used) || 0,
+      imageAnalysisCount: typeof stats.image_analysis_count === 'string' 
+        ? parseInt(stats.image_analysis_count, 10) 
+        : Number(stats.image_analysis_count) || 0,
+      chatMessageCount: typeof stats.chat_message_count === 'string' 
+        ? parseInt(stats.chat_message_count, 10) 
+        : Number(stats.chat_message_count) || 0,
+      savedRecipeCount: typeof stats.saved_recipe_count === 'string' 
+        ? parseInt(stats.saved_recipe_count, 10) 
+        : Number(stats.saved_recipe_count) || 0
     };
   }
 

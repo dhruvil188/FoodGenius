@@ -336,10 +336,15 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    const [newActivity] = await db.insert(userActivities).values({
+    // Make a copy of the activity object and handle the details field properly
+    const activityData = {
       ...activity,
+      // If details is provided, ensure it's properly stringified for PostgreSQL jsonb
+      details: activity.details ? JSON.stringify(activity.details) : null,
       createdAt: new Date()
-    }).returning();
+    };
+
+    const [newActivity] = await db.insert(userActivities).values(activityData).returning();
     
     console.log(`📊 Activity logged: ${activity.activityType} for user ${activity.userId}, cost: ${activity.creditsCost} credits`);
     

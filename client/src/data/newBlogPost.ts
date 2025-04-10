@@ -1,14 +1,14 @@
 import { BlogPost } from './blogPosts';
 
 export const homemadePizzaBlogPost: BlogPost = {
-  id: "15",
+  id: "30",
   title: "The Art of Perfect Homemade Pizza",
   slug: "art-of-perfect-homemade-pizza",
   excerpt: "Master the techniques for creating restaurant-quality pizza in your home kitchen, from perfecting the dough to achieving that crispy-chewy crust.",
   content: `
 # The Art of Perfect Homemade Pizza
 
-![Homemade Pizza](https://www.foodiesfeed.com/wp-content/uploads/2021/01/fried-egg-and-guacamole-sandwiches-1.jpg)
+![Homemade Pizza](https://www.foodiesfeed.com/wp-content/uploads/2019/02/pizza-ready-for-baking-600x400.jpg)
 
 ## Introduction
 
@@ -133,7 +133,7 @@ The perfect pizza is the one that brings joy to your table and satisfaction to t
   author: "Chef Maria Rossi",
   authorTitle: "Pizzaiolo & Culinary Instructor",
   date: "2025-04-10",
-  imageUrl: "https://www.foodiesfeed.com/wp-content/uploads/2021/01/fried-egg-and-guacamole-sandwiches-1.jpg",
+  imageUrl: "https://www.foodiesfeed.com/wp-content/uploads/2019/02/pizza-ready-for-baking-600x400.jpg",
   tags: ["Pizza", "Baking", "Italian", "Dough", "Homemade"],
   category: "Techniques",
   readTime: 12,

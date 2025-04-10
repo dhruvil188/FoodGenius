@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { blogPosts, BlogPost } from '@/data/blogPosts';
+import { finalBlogPosts } from '@/data/finalBlogPosts';
 import SEO from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,10 +16,13 @@ export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   
-  const categories = ['all', ...getAllCategories(blogPosts)];
+  // Combine all blog posts from both sources
+  const allBlogPosts = [...blogPosts, ...finalBlogPosts];
+  
+  const categories = ['all', ...getAllCategories(allBlogPosts)];
   
   // Filter posts based on search query and active category
-  const filteredPosts = blogPosts.filter(post => {
+  const filteredPosts = allBlogPosts.filter(post => {
     const matchesSearch = 
       searchQuery === '' || 
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -50,7 +54,7 @@ export default function BlogPage() {
           "url": "/blog",
           "mainEntity": {
             "@type": "ItemList",
-            "itemListElement": blogPosts.slice(0, 10).map((post, index) => ({
+            "itemListElement": allBlogPosts.slice(0, 10).map((post, index) => ({
               "@type": "ListItem",
               "position": index + 1,
               "url": `/blog/${post.slug}`,

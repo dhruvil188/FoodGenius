@@ -267,11 +267,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       result.imageUrl = imageData;
       
       // If the user doesn't have premium subscription, deduct a credit
+      let creditsCost = 0;
+      let creditsRemaining = req.user.credits;
+      
       if (req.user.subscriptionTier !== 'premium') {
         // Deduct 1 credit
-        await storage.updateUserCredits(req.user.id, Math.max(0, req.user.credits - 1));
-        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${req.user.credits - 1}`);
+        creditsCost = 1;
+        creditsRemaining = Math.max(0, req.user.credits - 1);
+        await storage.updateUserCredits(req.user.id, creditsRemaining);
+        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${creditsRemaining}`);
       }
+      
+      // Log the activity
+      await storage.logUserActivity({
+        userId: req.user.id,
+        activityType: "image_analysis",
+        details: {
+          foodName: result.foodName,
+          tags: result.tags
+        },
+        creditsCost: creditsCost,
+        creditsRemaining: creditsRemaining,
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"]
+      });
       
       // Return analysis result
       return res.status(200).json(result);
@@ -381,11 +400,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await generateRecipeFromChatPrompt(req.user.id, prompt, conversationId);
       
       // If the user doesn't have premium subscription, deduct a credit
+      let creditsCost = 0;
+      let creditsRemaining = req.user.credits;
+      
       if (req.user.subscriptionTier !== 'premium') {
         // Deduct 1 credit
-        await storage.updateUserCredits(req.user.id, Math.max(0, req.user.credits - 1));
-        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${req.user.credits - 1}`);
+        creditsCost = 1;
+        creditsRemaining = Math.max(0, req.user.credits - 1);
+        await storage.updateUserCredits(req.user.id, creditsRemaining);
+        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${creditsRemaining}`);
       }
+      
+      // Log the activity
+      await storage.logUserActivity({
+        userId: req.user.id,
+        activityType: "generate_recipe",
+        resourceId: result.message.conversationId,
+        details: {
+          prompt: prompt,
+          foodName: result.recipe.foodName
+        },
+        creditsCost: creditsCost,
+        creditsRemaining: creditsRemaining,
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"]
+      });
       
       return res.status(200).json(result);
     } catch (error) {
@@ -481,6 +520,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Log the purchase for audit purposes
         console.log(`[PAYMENT] User ID ${userId} purchased ${credits} credits`);
+        
+        // Track the credit purchase activity
+        await storage.logUserActivity({
+          userId: Number(userId),
+          activityType: "purchase_credits",
+          details: {
+            creditsAdded: credits,
+            totalCredits: updatedUser.credits
+          },
+          ipAddress: req.ip,
+          userAgent: req.headers["user-agent"]
+        });
         
         return res.status(200).json({
           success: true,
@@ -579,6 +630,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await storage.updateUser(user.id, {
                 subscriptionStatus: 'active',
                 subscriptionTier: 'premium'
+              });
+              
+              // Track the payment activity
+              await storage.logUserActivity({
+                userId: user.id,
+                activityType: "webhook_payment",
+                resourceId: session.id,
+                details: {
+                  creditsAdded: 10,
+                  totalCredits: user.credits + 10,
+                  paymentType: "stripe_webhook",
+                  paymentStatus: session.payment_status
+                }
               });
               
               console.log(`✅ Added 10 credits to user ${userId} after payment`);

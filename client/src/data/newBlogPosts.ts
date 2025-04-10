@@ -625,7 +625,7 @@ The next time you savor the distinctive spicy, aromatic complexity of properly p
     content: `
 # Argentine Asado: The Ritual and Art of South American Barbecue
 
-![Argentine Asado](https://images.unsplash.com/photo-1550367363-ea12d966d25d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80)
+![Argentine Asado](https://images.pexels.com/photos/12912595/pexels-photo-12912595.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -715,7 +715,7 @@ The next time you savor the distinctive smoke-kissed, salt-seasoned perfection o
     author: "Chef Martín Rodriguez",
     authorTitle: "Asador Master & Argentinian Beef Expert",
     date: "2025-03-02",
-    imageUrl: "https://images.unsplash.com/photo-1550367363-ea12d966d25d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    imageUrl: "https://images.pexels.com/photos/12912595/pexels-photo-12912595.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Argentine Cuisine", "Asado", "Barbecue", "Beef", "South American"],
     category: "International Cuisine",
     readTime: 8,
@@ -912,7 +912,7 @@ The next time you savor the distinctive smoke-kissed, salt-seasoned perfection o
     content: `
 # Russian Borscht: The Hearty Beet Soup with Soviet and Slavic Roots
 
-![Russian Borscht](https://images.unsplash.com/photo-1549906770-a316bbed76f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80)
+![Russian Borscht](https://images.pexels.com/photos/6731354/pexels-photo-6731354.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -1002,7 +1002,7 @@ The next time you savor a properly made borscht—ideally with a dollop of sour 
     author: "Dr. Natalia Ivanova",
     authorTitle: "Slavic Food Historian & Culinary Anthropologist",
     date: "2025-01-20",
-    imageUrl: "https://images.unsplash.com/photo-1549906770-a316bbed76f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    imageUrl: "https://images.pexels.com/photos/6731354/pexels-photo-6731354.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Russian Cuisine", "Borscht", "Soups", "Eastern European", "Beets"],
     category: "International Cuisine",
     readTime: 7,
@@ -1244,7 +1244,7 @@ The next time you savor a properly made borscht—ideally with a dollop of sour 
     content: `
 # Australian Pavlova: The Delicate Meringue Dessert of the South Pacific
 
-![Australian Pavlova](https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80)
+![Australian Pavlova](https://images.pexels.com/photos/5419114/pexels-photo-5419114.jpeg?auto=compress&cs=tinysrgb&w=1000)
 
 ## Introduction
 
@@ -1330,7 +1330,7 @@ The next time you savor a perfect pavlova—its meringue shell shattering to rev
     author: "Chef Sarah Mitchell",
     authorTitle: "Australian Pastry Chef & Culinary Researcher",
     date: "2025-02-25",
-    imageUrl: "https://images.unsplash.com/photo-1464305795204-6f5bbfc7fb81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",
+    imageUrl: "https://images.pexels.com/photos/5419114/pexels-photo-5419114.jpeg?auto=compress&cs=tinysrgb&w=1000",
     tags: ["Australian Cuisine", "Pavlova", "Desserts", "Meringue", "New Zealand"],
     category: "International Cuisine",
     readTime: 8,

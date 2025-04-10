@@ -131,27 +131,15 @@ export default function Header() {
                 <div className="py-2 border-b border-slate-100">
                   {/* Credits display for mobile menu (only for logged in users) */}
                   {appUser && (
-                    <>
-                      <div 
-                        className="flex items-center w-full px-4 py-2 text-sm"
-                        onClick={() => {
-                          navigate('/credits');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <CreditsDisplay className="w-full justify-center py-1.5" />
-                      </div>
-                      <button
-                        className="flex items-center w-full px-4 py-2 text-sm text-left hover:bg-slate-50"
-                        onClick={() => {
-                          navigate('/profile');
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <i className="fas fa-user-circle w-6 text-primary"></i>
-                        My Profile
-                      </button>
-                    </>
+                    <div 
+                      className="flex items-center w-full px-4 py-2 text-sm"
+                      onClick={() => {
+                        navigate('/credits');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <CreditsDisplay className="w-full justify-center py-1.5" />
+                    </div>
                   )}
                 
                   <button
@@ -248,14 +236,12 @@ export default function Header() {
           
           {currentUser ? (
             <div className="flex items-center ml-1">
-              <Link href="/profile">
-                <Avatar className="h-8 w-8 border-2 border-primary/20 cursor-pointer hover:border-primary transition-colors">
-                  <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
-                  <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">
-                    {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
+              <Avatar className="h-8 w-8 border-2 border-primary/20">
+                <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} />
+                <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-primary text-white text-xs">
+                  {currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'U'}
+                </AvatarFallback>
+              </Avatar>
               <LoginButton 
                 variant="link" 
                 size="sm" 

@@ -267,30 +267,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       result.imageUrl = imageData;
       
       // If the user doesn't have premium subscription, deduct a credit
-      let creditsCost = 0;
-      let creditsRemaining = req.user.credits;
-      
       if (req.user.subscriptionTier !== 'premium') {
         // Deduct 1 credit
-        creditsCost = 1;
-        creditsRemaining = Math.max(0, req.user.credits - 1);
-        await storage.updateUserCredits(req.user.id, creditsRemaining);
-        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${creditsRemaining}`);
+        await storage.updateUserCredits(req.user.id, Math.max(0, req.user.credits - 1));
+        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${req.user.credits - 1}`);
       }
-      
-      // Log the activity
-      await storage.logUserActivity({
-        userId: req.user.id,
-        activityType: "image_analysis",
-        details: {
-          foodName: result.foodName,
-          tags: result.tags
-        },
-        creditsCost: creditsCost,
-        creditsRemaining: creditsRemaining,
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"]
-      });
       
       // Return analysis result
       return res.status(200).json(result);
@@ -320,47 +301,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/recipes", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const recipeData: AnalyzeImageResponse = req.body.recipe;
     const savedRecipe = await saveRecipe(req.user.id, recipeData);
-    
-    // Log the recipe saving activity
-    await storage.logUserActivity({
-      userId: req.user.id,
-      activityType: "save_recipe",
-      resourceId: savedRecipe.id.toString(),
-      details: {
-        recipeName: recipeData.foodName,
-        tags: recipeData.tags
-      },
-      ipAddress: req.ip,
-      userAgent: req.headers["user-agent"]
-    });
-    
     return res.status(201).json(savedRecipe);
   }));
   
   // Delete a recipe
   app.delete("/api/recipes/:id", authenticate, asyncHandler(async (req: Request, res: Response) => {
     const recipeId = parseInt(req.params.id);
-    
-    // Get the recipe before deleting to capture its details for the activity log
-    const recipe = await storage.getSavedRecipeById(recipeId);
-    
     await deleteRecipe(recipeId, req.user.id);
-    
-    // Log the recipe deletion activity
-    if (recipe) {
-      await storage.logUserActivity({
-        userId: req.user.id,
-        activityType: "delete_recipe",
-        resourceId: recipeId.toString(),
-        details: {
-          recipeName: recipe.foodName,
-          recipeId: recipeId
-        },
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"]
-      });
-    }
-    
     return res.status(200).json({ success: true });
   }));
   
@@ -371,31 +318,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(200).json(updatedRecipe);
   }));
 
-  // ==== User Activity Routes ====
-  
-  // Get user activity history
-  app.get("/api/user/activities", authenticate, asyncHandler(async (req: Request, res: Response) => {
-    // Get query parameters with defaults
-    const limit = parseInt(req.query.limit as string || '20', 10);
-    const offset = parseInt(req.query.offset as string || '0', 10);
-    
-    // Get user activities from storage
-    const activities = await storage.getUserActivities(req.user.id, limit, offset);
-    
-    // Get activity statistics
-    const stats = await storage.getUserActivityStats(req.user.id);
-    
-    return res.status(200).json({
-      activities,
-      stats,
-      meta: {
-        limit,
-        offset,
-        total: activities.length
-      }
-    });
-  }));
-  
   // ==== Chat Routes ====
   
   // Get user conversations (chat history)
@@ -431,28 +353,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       throw new ValidationError("Message content is required");
     }
     
-    const actualConversationId = conversationId || crypto.randomUUID(); // Generate new conversation ID if not provided
-    
     const message = await createChatMessage(
       req.user.id,
       content,
-      actualConversationId,
+      conversationId || crypto.randomUUID(), // Generate new conversation ID if not provided
       'user'
     );
-    
-    // Log chat message activity
-    await storage.logUserActivity({
-      userId: req.user.id,
-      activityType: "chat_message",
-      resourceId: actualConversationId,
-      details: {
-        messageId: message.id.toString(),
-        messageType: 'user',
-        messageLength: content.length
-      },
-      ipAddress: req.ip,
-      userAgent: req.headers["user-agent"]
-    });
     
     return res.status(201).json(message);
   }));
@@ -475,31 +381,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await generateRecipeFromChatPrompt(req.user.id, prompt, conversationId);
       
       // If the user doesn't have premium subscription, deduct a credit
-      let creditsCost = 0;
-      let creditsRemaining = req.user.credits;
-      
       if (req.user.subscriptionTier !== 'premium') {
         // Deduct 1 credit
-        creditsCost = 1;
-        creditsRemaining = Math.max(0, req.user.credits - 1);
-        await storage.updateUserCredits(req.user.id, creditsRemaining);
-        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${creditsRemaining}`);
+        await storage.updateUserCredits(req.user.id, Math.max(0, req.user.credits - 1));
+        console.log(`Deducted 1 credit from user ${req.user.id}, credits remaining: ${req.user.credits - 1}`);
       }
-      
-      // Log the activity
-      await storage.logUserActivity({
-        userId: req.user.id,
-        activityType: "generate_recipe",
-        resourceId: result.message.conversationId,
-        details: {
-          prompt: prompt,
-          foodName: result.recipe.foodName
-        },
-        creditsCost: creditsCost,
-        creditsRemaining: creditsRemaining,
-        ipAddress: req.ip,
-        userAgent: req.headers["user-agent"]
-      });
       
       return res.status(200).json(result);
     } catch (error) {
@@ -596,18 +482,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Log the purchase for audit purposes
         console.log(`[PAYMENT] User ID ${userId} purchased ${credits} credits`);
         
-        // Track the credit purchase activity
-        await storage.logUserActivity({
-          userId: Number(userId),
-          activityType: "purchase_credits",
-          details: {
-            creditsAdded: credits,
-            totalCredits: updatedUser.credits
-          },
-          ipAddress: req.ip,
-          userAgent: req.headers["user-agent"]
-        });
-        
         return res.status(200).json({
           success: true,
           user: storage.convertToAppUser(updatedUser),
@@ -640,21 +514,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.updateUser(req.user.id, {
             subscriptionStatus: 'active',
             subscriptionTier: 'premium'
-          });
-          
-          // Track the session payment activity
-          await storage.logUserActivity({
-            userId: req.user.id,
-            activityType: "session_payment",
-            resourceId: sessionId,
-            details: {
-              creditsAdded: 15,
-              totalCredits: updatedUser.credits,
-              paymentType: "stripe_session",
-              paymentStatus: session.payment_status
-            },
-            ipAddress: req.ip,
-            userAgent: req.headers["user-agent"]
           });
           
           return res.status(200).json({
@@ -720,19 +579,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await storage.updateUser(user.id, {
                 subscriptionStatus: 'active',
                 subscriptionTier: 'premium'
-              });
-              
-              // Track the payment activity
-              await storage.logUserActivity({
-                userId: user.id,
-                activityType: "webhook_payment",
-                resourceId: session.id,
-                details: {
-                  creditsAdded: 10,
-                  totalCredits: Number(user.credits || 0) + 10,
-                  paymentType: "stripe_webhook",
-                  paymentStatus: session.payment_status
-                }
               });
               
               console.log(`✅ Added 10 credits to user ${userId} after payment`);

@@ -345,27 +345,5 @@ export const recipeCombinationRequestSchema = z.object({
 
 export type RecipeCombinationRequest = z.infer<typeof recipeCombinationRequestSchema>;
 
-// User activity log table
-export const userActivities = pgTable("user_activities", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  activityType: text("activity_type").notNull(), // e.g., "image_analysis", "chat_message", "credit_purchase"
-  resourceId: text("resource_id"), // ID of the resource being acted upon (e.g., saved_recipe ID, chat ID)
-  details: jsonb("details"), // Flexible JSON field for additional details about the activity
-  creditsCost: integer("credits_cost").default(0), // Number of credits consumed by this activity
-  creditsRemaining: integer("credits_remaining"), // User's remaining credits after this activity
-  ipAddress: text("ip_address"), // Optional tracking of IP address
-  userAgent: text("user_agent"), // Browser/device information
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const insertUserActivitySchema = createInsertSchema(userActivities).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
-export type UserActivity = typeof userActivities.$inferSelect;
-
 export type FirebaseAuthSync = z.infer<typeof firebaseAuthSyncSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;

@@ -3,7 +3,6 @@ import {
   type Session, type InsertSession,
   type SavedRecipe, type InsertSavedRecipe,
   type ChatMessage, type InsertChatMessage,
-  type UserActivity, type InsertUserActivity,
   type AnalyzeImageResponse,
   type AppUser
 } from "@shared/schema";
@@ -46,16 +45,6 @@ export interface IStorage {
   createSavedRecipe(recipe: InsertSavedRecipe): Promise<SavedRecipe>;
   deleteSavedRecipe(id: number): Promise<boolean>;
   updateSavedRecipe(id: number, recipe: Partial<SavedRecipe>): Promise<SavedRecipe | undefined>;
-  
-  // Activity tracking methods
-  logUserActivity(activity: InsertUserActivity): Promise<UserActivity>;
-  getUserActivities(userId: number, limit?: number, offset?: number): Promise<UserActivity[]>;
-  getUserActivityStats(userId: number): Promise<{
-    totalCreditsUsed: number,
-    imageAnalysisCount: number,
-    chatMessageCount: number,
-    savedRecipeCount: number
-  }>;
   
   // Chat message methods
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;

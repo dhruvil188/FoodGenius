@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { blogPosts, BlogPost } from '@/data/blogPosts';
+import { finalBlogPosts } from '@/data/finalBlogPosts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

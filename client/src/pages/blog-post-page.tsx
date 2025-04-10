@@ -16,7 +16,9 @@ export default function BlogPostPage() {
   const [, params] = useRoute('/blog/:slug');
   const slug = params?.slug;
   
-  const post = blogPosts.find(post => post.slug === slug);
+  // Combine all blog posts from both sources
+  const allBlogPosts = [...blogPosts, ...finalBlogPosts];
+  const post = allBlogPosts.find(post => post.slug === slug);
   
   if (!post) {
     return (
@@ -37,7 +39,7 @@ export default function BlogPostPage() {
   }
   
   // Get related posts
-  const relatedPosts = getRelatedPosts(post, blogPosts, 3);
+  const relatedPosts = getRelatedPosts(post, allBlogPosts, 3);
 
   return (
     <div>

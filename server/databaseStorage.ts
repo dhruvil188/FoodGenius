@@ -325,6 +325,63 @@ export class DatabaseStorage implements IStorage {
     
     return updatedRecipe;
   }
+  
+  // Activity tracking methods
+  async logUserActivity(activity: InsertUserActivity): Promise<UserActivity> {
+    // Get the current credits for the user if not provided
+    if (activity.creditsRemaining === undefined) {
+      const user = await this.getUser(activity.userId);
+      if (user) {
+        activity.creditsRemaining = user.credits || 0;
+      }
+    }
+    
+    const [newActivity] = await db.insert(userActivities).values({
+      ...activity,
+      createdAt: new Date()
+    }).returning();
+    
+    console.log(`📊 Activity logged: ${activity.activityType} for user ${activity.userId}, cost: ${activity.creditsCost} credits`);
+    
+    return newActivity;
+  }
+  
+  async getUserActivities(userId: number, limit: number = 50, offset: number = 0): Promise<UserActivity[]> {
+    return db.select()
+      .from(userActivities)
+      .where(eq(userActivities.userId, userId))
+      .orderBy(desc(userActivities.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+  
+  async getUserActivityStats(userId: number): Promise<{
+    totalCreditsUsed: number,
+    imageAnalysisCount: number,
+    chatMessageCount: number,
+    savedRecipeCount: number
+  }> {
+    // Use SQL aggregate functions to get usage statistics
+    const result = await db.execute(sql`
+      SELECT 
+        COALESCE(SUM(credits_cost), 0) as total_credits_used,
+        COALESCE(SUM(CASE WHEN activity_type = 'image_analysis' THEN 1 ELSE 0 END), 0) as image_analysis_count,
+        COALESCE(SUM(CASE WHEN activity_type = 'chat_message' THEN 1 ELSE 0 END), 0) as chat_message_count,
+        COALESCE(SUM(CASE WHEN activity_type = 'save_recipe' THEN 1 ELSE 0 END), 0) as saved_recipe_count
+      FROM user_activities
+      WHERE user_id = ${userId}
+    `);
+    
+    // Parse the SQL result into our expected format
+    const stats = result.rows[0];
+    
+    return {
+      totalCreditsUsed: parseInt(stats.total_credits_used || '0', 10),
+      imageAnalysisCount: parseInt(stats.image_analysis_count || '0', 10),
+      chatMessageCount: parseInt(stats.chat_message_count || '0', 10),
+      savedRecipeCount: parseInt(stats.saved_recipe_count || '0', 10)
+    };
+  }
 
   // Chat message methods
   async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {

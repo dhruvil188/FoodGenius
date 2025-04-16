@@ -24,7 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti, isIOS } from '@/lib/confetti';
+import { fireConfettiFromElement, celebrateRecipeCompletion, triggerConfetti } from '@/lib/confetti';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -471,15 +471,7 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         <Button
                           variant="outline"
                           className="w-full bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
-                          onClick={() => {
-                            try {
-                              window.open('https://www.ubereats.com', '_blank');
-                            } catch (err) {
-                              console.warn('Could not open external link', err);
-                              // Fallback for iOS
-                              window.location.href = 'https://www.ubereats.com';
-                            }
-                          }}
+                          onClick={() => window.open('https://www.ubereats.com', '_blank')}
                         >
                           <i className="fas fa-shopping-basket mr-2"></i>
                           Uber Eats

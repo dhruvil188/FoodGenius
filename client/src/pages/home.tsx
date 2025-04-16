@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ImageUploader from "@/components/ImageUploader";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import RecipeResults from "@/components/RecipeResults";
-import { type AnalyzeImageResponse, type SavedRecipe } from "@shared/schema";
+import { type AnalyzeImageResponse } from "@shared/schema";
 import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +16,6 @@ import { Logo } from "@/components/Logo";
 import Hero from "@/components/Hero"; // Import the Hero component
 import ProtectedFeature from "@/components/ProtectedFeature"; // Import the ProtectedFeature component
 import SEO from "@/components/SEO"; // Import the SEO component
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -94,39 +93,8 @@ export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeImageResponse | null>(null);
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
-  const { refreshUser, appUser } = useAuth();
+  const { refreshUser } = useAuth();
   const uploadSectionRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
-  
-  // Mutation to save a recipe
-  const saveRecipeMutation = useMutation({
-    mutationFn: async (recipe: AnalyzeImageResponse) => {
-      try {
-        const response = await apiRequest("POST", "/api/recipes", { recipe });
-        return await response.json();
-      } catch (error) {
-        console.error('Error in API request:', error);
-        throw error;
-      }
-    },
-    onSuccess: (savedRecipe: SavedRecipe) => {
-      toast({
-        title: "Recipe Saved",
-        description: `Your recipe has been automatically saved to your library`,
-        variant: "default",
-      });
-      // Invalidate recipes query to refresh the library
-      queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
-    },
-    onError: (error: any) => {
-      console.error('Error saving recipe:', error);
-      toast({
-        title: "Failed to save recipe",
-        description: "There was an error saving the recipe to your library",
-        variant: "destructive",
-      });
-    },
-  });
   
   // Scroll to the upload section if a deep link is used
   useEffect(() => {
@@ -146,9 +114,6 @@ export default function Home() {
       description: "We're analyzing your food image. This may take a moment...",
     });
     
-    // Handle iOS Safari differently to prevent blank screens
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    
     // Directly use apiRequest from lib/api
     apiRequest<AnalyzeImageResponse>('POST', '/api/analyze-image', { imageData })
       .then((response) => {
@@ -158,48 +123,28 @@ export default function Home() {
           throw new Error("The AI couldn't identify the food in your image properly.");
         }
         
-        // Special handling for iOS
-        if (isIOS) {
-          console.log('iOS device detected, using simplified state updates');
-          // First update the result data
-          setAnalysisResult(response);
-          
-          // Then update UI state after a small delay
-          setTimeout(() => {
-            setStage("results");
-            refreshUser();
-          }, 50);
-        } else {
-          // Normal flow for other browsers
-          console.log('Analysis successful:', response);
-          setAnalysisResult(response);
-          setStage("results");
-          
-          // Refresh user data to update credit count in UI
-          refreshUser();
-          
-          // Trigger confetti effect when recipe is found
-          setTimeout(() => {
-            confetti({
-              particleCount: 100,
-              spread: 70,
-              origin: { y: 0.6 }
-            });
-          }, 500);
-        }
+        console.log('Analysis successful:', response);
+        setAnalysisResult(response);
+        setStage("results");
+        
+        // Refresh user data to update credit count in UI
+        refreshUser();
+        
+        // Trigger confetti effect when recipe is found
+        setTimeout(() => {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }, 500);
         
         toast({
           title: `Found: ${response.foodName}`,
           description: "Your recipe is ready! We've analyzed your dish successfully.",
           variant: "default",
         });
-        
-        // Automatically save the recipe to user's saved recipes
-        // Only save if user is logged in
-        if (appUser) {
-          saveRecipeMutation.mutate(response);
-        }
-        })
+      })
       .catch((error: any) => {
         console.error('Error in image analysis:', error);
         setStage("upload");

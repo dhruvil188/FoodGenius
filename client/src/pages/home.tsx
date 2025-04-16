@@ -101,8 +101,13 @@ export default function Home() {
   // Mutation to save a recipe
   const saveRecipeMutation = useMutation({
     mutationFn: async (recipe: AnalyzeImageResponse) => {
-      const response = await apiRequest("POST", "/api/recipes", { recipe });
-      return response.json() as Promise<SavedRecipe>;
+      try {
+        const response = await apiRequest("POST", "/api/recipes", { recipe });
+        return await response.json();
+      } catch (error) {
+        console.error('Error in API request:', error);
+        throw error;
+      }
     },
     onSuccess: (savedRecipe: SavedRecipe) => {
       toast({
@@ -113,7 +118,7 @@ export default function Home() {
       // Invalidate recipes query to refresh the library
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       console.error('Error saving recipe:', error);
       toast({
         title: "Failed to save recipe",

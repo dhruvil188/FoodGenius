@@ -114,6 +114,9 @@ export default function Home() {
       description: "We're analyzing your food image. This may take a moment...",
     });
     
+    // Handle iOS Safari differently to prevent blank screens
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    
     // Directly use apiRequest from lib/api
     apiRequest<AnalyzeImageResponse>('POST', '/api/analyze-image', { imageData })
       .then((response) => {
@@ -123,28 +126,42 @@ export default function Home() {
           throw new Error("The AI couldn't identify the food in your image properly.");
         }
         
-        console.log('Analysis successful:', response);
-        setAnalysisResult(response);
-        setStage("results");
-        
-        // Refresh user data to update credit count in UI
-        refreshUser();
-        
-        // Trigger confetti effect when recipe is found
-        setTimeout(() => {
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-          });
-        }, 500);
+        // Special handling for iOS
+        if (isIOS) {
+          console.log('iOS device detected, using simplified state updates');
+          // First update the result data
+          setAnalysisResult(response);
+          
+          // Then update UI state after a small delay
+          setTimeout(() => {
+            setStage("results");
+            refreshUser();
+          }, 50);
+        } else {
+          // Normal flow for other browsers
+          console.log('Analysis successful:', response);
+          setAnalysisResult(response);
+          setStage("results");
+          
+          // Refresh user data to update credit count in UI
+          refreshUser();
+          
+          // Trigger confetti effect when recipe is found
+          setTimeout(() => {
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 }
+            });
+          }, 500);
+        }
         
         toast({
           title: `Found: ${response.foodName}`,
           description: "Your recipe is ready! We've analyzed your dish successfully.",
           variant: "default",
         });
-      })
+        })
       .catch((error: any) => {
         console.error('Error in image analysis:', error);
         setStage("upload");

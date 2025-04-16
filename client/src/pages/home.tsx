@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ImageUploader from "@/components/ImageUploader";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import RecipeResults from "@/components/RecipeResults";
-import { type AnalyzeImageResponse } from "@shared/schema";
+import { type AnalyzeImageResponse, type SavedRecipe } from "@shared/schema";
 import { apiRequest } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,7 @@ import { Logo } from "@/components/Logo";
 import Hero from "@/components/Hero"; // Import the Hero component
 import ProtectedFeature from "@/components/ProtectedFeature"; // Import the ProtectedFeature component
 import SEO from "@/components/SEO"; // Import the SEO component
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -95,6 +96,32 @@ export default function Home() {
   const [location, setLocation] = useLocation();
   const { refreshUser } = useAuth();
   const uploadSectionRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  
+  // Mutation to save a recipe
+  const saveRecipeMutation = useMutation({
+    mutationFn: async (recipe: AnalyzeImageResponse) => {
+      const response = await apiRequest("POST", "/api/recipes", { recipe });
+      return response.json() as Promise<SavedRecipe>;
+    },
+    onSuccess: (savedRecipe: SavedRecipe) => {
+      toast({
+        title: "Recipe Saved",
+        description: `Your recipe has been automatically saved to your library`,
+        variant: "success",
+      });
+      // Invalidate recipes query to refresh the library
+      queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
+    },
+    onError: (error: Error) => {
+      console.error('Error saving recipe:', error);
+      toast({
+        title: "Failed to save recipe",
+        description: "There was an error saving the recipe to your library",
+        variant: "destructive",
+      });
+    },
+  });
   
   // Scroll to the upload section if a deep link is used
   useEffect(() => {

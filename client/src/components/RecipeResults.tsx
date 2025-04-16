@@ -471,7 +471,15 @@ export default function RecipeResults({ result, imageUrl, onTryAnother }: Recipe
                         <Button
                           variant="outline"
                           className="w-full bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
-                          onClick={() => window.open('https://www.ubereats.com', '_blank')}
+                          onClick={() => {
+                            try {
+                              window.open('https://www.ubereats.com', '_blank');
+                            } catch (err) {
+                              console.warn('Could not open external link', err);
+                              // Fallback for iOS
+                              window.location.href = 'https://www.ubereats.com';
+                            }
+                          }}
                         >
                           <i className="fas fa-shopping-basket mr-2"></i>
                           Uber Eats

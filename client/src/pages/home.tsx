@@ -94,7 +94,7 @@ export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeImageResponse | null>(null);
   const { toast } = useToast();
   const [location, setLocation] = useLocation();
-  const { refreshUser } = useAuth();
+  const { refreshUser, appUser } = useAuth();
   const uploadSectionRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   
@@ -108,7 +108,7 @@ export default function Home() {
       toast({
         title: "Recipe Saved",
         description: `Your recipe has been automatically saved to your library`,
-        variant: "success",
+        variant: "default",
       });
       // Invalidate recipes query to refresh the library
       queryClient.invalidateQueries({ queryKey: ["/api/recipes"] });
@@ -188,6 +188,12 @@ export default function Home() {
           description: "Your recipe is ready! We've analyzed your dish successfully.",
           variant: "default",
         });
+        
+        // Automatically save the recipe to user's saved recipes
+        // Only save if user is logged in
+        if (appUser) {
+          saveRecipeMutation.mutate(response);
+        }
         })
       .catch((error: any) => {
         console.error('Error in image analysis:', error);

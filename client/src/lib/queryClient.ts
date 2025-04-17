@@ -35,19 +35,6 @@ async function handleResponseErrors(res: Response): Promise<void> {
 }
 
 /**
- * Get the base URL for API requests based on environment
- */
-function getApiBaseUrl(): string {
-  // In development, use relative URLs
-  if (import.meta.env.DEV) {
-    return '';
-  }
-  
-  // In production on Vercel or with a custom domain
-  return window.location.origin;
-}
-
-/**
  * Makes API requests with proper authorization and error handling
  */
 export async function apiRequest(
@@ -71,11 +58,8 @@ export async function apiRequest(
     headers["Authorization"] = `Bearer ${token}`;
   }
   
-  // Ensure URL is properly formed with base URL if needed
-  const apiUrl = url.startsWith('http') ? url : `${getApiBaseUrl()}${url}`;
-  
   try {
-    const res = await fetch(apiUrl, {
+    const res = await fetch(url, {
       method,
       headers,
       body: data ? JSON.stringify(data) : undefined,

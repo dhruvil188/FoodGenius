@@ -145,64 +145,21 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
-      <Card className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden backdrop-blur-sm bg-white/80">
-        <CardContent className="p-6 sm:p-8">
-          {/* Decorative elements */}
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-gradient-to-br from-green-200/40 to-emerald-300/30 rounded-full blur-2xl"></div>
-          <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-gradient-to-tr from-green-300/30 to-emerald-200/20 rounded-full blur-xl"></div>
-          
-          <motion.div 
-            className="relative overflow-hidden mb-8 w-auto mx-auto"
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: "auto", opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+      <Card className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+        <CardContent className="p-8">
+          <motion.h3 
+            className="text-2xl font-semibold mb-8 text-center"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <motion.h3 
-              className="text-2xl font-bold text-center"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <span className="relative inline-block">
-                <span className="bg-gradient-to-r from-emerald-600 via-green-500 to-primary bg-clip-text text-transparent px-1">
-                  Upload or Capture Your Dish
-                </span>
-                
-                {/* Animated underline */}
-                <motion.span 
-                  className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-emerald-400 to-primary rounded-full"
-                  initial={{ width: "0%" }}
-                  animate={{ width: "100%" }}
-                  transition={{ delay: 0.6, duration: 0.8 }}
-                />
-                
-                {/* Animated sparkles */}
-                <motion.span 
-                  className="absolute -top-1 -right-1 text-yellow-400 text-xs"
-                  animate={{ 
-                    opacity: [0, 1, 0],
-                    scale: [0.5, 1.2, 0.5],
-                    rotate: [0, 15, 0]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  <i className="fas fa-star"></i>
-                </motion.span>
-                
-                <motion.span 
-                  className="absolute -top-1 -left-1 text-yellow-400 text-xs"
-                  animate={{ 
-                    opacity: [0, 1, 0],
-                    scale: [0.5, 1.2, 0.5],
-                    rotate: [0, -15, 0]
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
-                >
-                  <i className="fas fa-star"></i>
-                </motion.span>
+            <span className="relative">
+              <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
+                Upload or Capture Your Dish
               </span>
-            </motion.h3>
-          </motion.div>
+              <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-600/40 to-primary/40 rounded-full"></span>
+            </span>
+          </motion.h3>
           
           <Tabs 
             defaultValue="upload" 
@@ -213,38 +170,22 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               setFileName(null);
             }}
           >
-            <motion.div
-              initial={{ y: 10, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              <TabsList className="grid w-full grid-cols-2 rounded-full bg-gradient-to-r from-slate-100 to-white p-1.5 mb-8 border border-slate-200 shadow-sm">
-                <TabsTrigger 
-                  value="upload" 
-                  className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-3 transition-all duration-300 data-[state=active]:text-green-600"
-                >
-                  <motion.div
-                    whileHover={{ rotate: [0, -10, 10, -5, 0] }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <i className="fas fa-cloud-upload-alt mr-1.5"></i>
-                  </motion.div>
-                  <span className="font-medium">Upload Image</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="camera" 
-                  className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-3 transition-all duration-300 data-[state=active]:text-green-600"
-                >
-                  <motion.div
-                    whileHover={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <i className="fas fa-camera mr-1.5"></i>
-                  </motion.div>
-                  <span className="font-medium">Take Photo</span>
-                </TabsTrigger>
-              </TabsList>
-            </motion.div>
+            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 p-1.5 mb-8 border border-slate-200">
+              <TabsTrigger 
+                value="upload" 
+                className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-2.5"
+              >
+                <i className="fas fa-cloud-upload-alt text-primary"></i>
+                <span className="font-medium">Upload Image</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="camera" 
+                className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-2.5"
+              >
+                <i className="fas fa-camera text-primary"></i>
+                <span className="font-medium">Take Photo</span>
+              </TabsTrigger>
+            </TabsList>
             
             <TabsContent value="upload" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
               <motion.div 
@@ -459,116 +400,42 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
           >
             {/* Buttons container */}
             <div className="flex flex-col md:flex-row justify-center items-center gap-4">
-              {/* Enhanced Analyze Button */}
-              <div className="relative">
-                {/* Background glow effect for button */}
-                <motion.div 
-                  className="absolute -inset-4 rounded-full bg-gradient-to-r from-green-400/20 to-emerald-500/20 blur-xl -z-10"
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    opacity: [0.7, 0.9, 0.7]
-                  }}
-                  transition={{ 
-                    duration: 3, 
-                    repeat: Infinity,
-                    ease: "easeInOut" 
-                  }}
-                />
-                
-                <motion.div
-                  whileHover={{ 
-                    scale: 1.03,
-                    transition: { duration: 0.2 }
-                  }}
-                  whileTap={{ 
-                    scale: 0.97,
-                    transition: { duration: 0.1 }
-                  }}
-                  className="relative"
-                  animate={{ 
-                    y: [0, -4, 0], 
-                  }}
-                  transition={{ 
-                    duration: 4, 
-                    repeat: Infinity,
-                    ease: "easeInOut" 
-                  }}
+              {/* Analyze Button */}
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button 
+                  className="bg-gradient-to-r from-primary to-emerald-600 text-white font-medium rounded-full px-10 py-6 shadow-md hover:shadow-lg hover:from-primary/95 hover:to-emerald-600/95 transition-all"
+                  disabled={!selectedImage || isAnalyzing}
+                  onClick={handleAnalyzeImage}
+                  size="lg"
                 >
-                  <Button 
-                    className={`
-                      relative overflow-hidden group
-                      bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium 
-                      rounded-full px-12 py-7 shadow-lg hover:shadow-xl 
-                      border border-emerald-400/20
-                      transition-all duration-300
-                      ${!selectedImage && 'opacity-60 cursor-not-allowed'}
-                    `}
-                    disabled={!selectedImage || isAnalyzing}
-                    onClick={handleAnalyzeImage}
-                    size="lg"
-                  >
-                    {/* Shine effect */}
-                    <span 
-                      className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
-                    />
-                    
-                    {isAnalyzing ? (
-                      <div className="flex items-center gap-3 py-1">
-                        <div className="relative w-6 h-6">
-                          <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-25 animate-ping"></div>
-                          <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-bold tracking-wide text-lg">Analyzing Dish...</span>
-                          <span className="text-xs text-white/80">Please wait, our AI is working</span>
-                        </div>
+                  {isAnalyzing ? (
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-5 h-5">
+                        <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-25 animate-ping"></div>
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-4 py-1">
-                        <div className="relative">
-                          <motion.div
-                            animate={{ 
-                              rotate: [0, 10, 0, -10, 0],
-                              scale: [1, 1.1, 1]
-                            }}
-                            transition={{ 
-                              duration: 3, 
-                              repeat: Infinity,
-                              ease: "easeInOut" 
-                            }}
-                          >
-                            <i className="fas fa-magic text-2xl"></i>
-                          </motion.div>
-                          
-                          <motion.span 
-                            className="absolute -top-2 -right-2 flex h-4 w-4"
-                            animate={{ 
-                              scale: [1, 1.5, 1],
-                              opacity: [0.7, 1, 0.7]
-                            }}
-                            transition={{ 
-                              duration: 2, 
-                              repeat: Infinity,
-                              ease: "easeInOut" 
-                            }}
-                          >
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-4 w-4 bg-white"></span>
-                          </motion.span>
-                        </div>
-                        
-                        <div className="flex flex-col items-start">
-                          <span className="font-bold tracking-wide text-lg">Analyze This Dish</span>
-                          <span className="text-xs text-white/90">Powered by Gemini AI</span>
-                        </div>
+                      <span className="font-semibold tracking-wide">Analyzing Dish...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <i className="fas fa-magic text-lg"></i>
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                        </span>
                       </div>
-                    )}
-                  </Button>
-                </motion.div>
-              </div>
+                      <span className="font-semibold tracking-wide">Analyze This Dish</span>
+                    </div>
+                  )}
+                </Button>
+              </motion.div>
               
 
             </div>

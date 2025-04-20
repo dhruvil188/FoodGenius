@@ -15,44 +15,172 @@ interface FeatureCardProps {
 
 const FeatureCard = ({ icon, title, description, delay = 0 }: FeatureCardProps) => (
   <motion.div 
-    className="relative bg-white rounded-xl shadow-lg p-6 border border-gray-100 h-full overflow-hidden group"
+    className="relative bg-white rounded-xl shadow-md p-6 border border-gray-100 h-full"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5 }}
-    whileHover={{ 
-      y: -5, 
-      boxShadow: "0 25px 30px -12px rgba(0, 0, 0, 0.15)" 
-    }}
+    whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
   >
-    {/* Background pattern */}
-    <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-gradient-to-br from-green-300/20 to-emerald-400/20 opacity-20 group-hover:scale-150 transition-transform duration-700"></div>
-    
-    {/* Feature icon with animated gradient background */}
-    <div className="relative w-14 h-14 mb-5 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white overflow-hidden group-hover:scale-110 transition-transform duration-300">
-      <motion.div 
-        className="absolute inset-0 opacity-40"
-        animate={{
-          background: [
-            'linear-gradient(0deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
-            'linear-gradient(120deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
-            'linear-gradient(240deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
-            'linear-gradient(360deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
-          ]
-        }}
-        transition={{ 
-          duration: 8, 
-          repeat: Infinity,
-          ease: "linear" 
-        }}
-      />
+    <div className="w-12 h-12 mb-4 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
       <i className={`fas ${icon} text-xl`}></i>
     </div>
-    
-    {/* Feature content with animated underline */}
-    <div className="relative z-10">
-      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors duration-300">{title}</h3>
-      <div className="w-10 h-1 bg-gradient-to-r from-green-500 to-emerald-400 rounded mb-3 group-hover:w-16 transition-all duration-300"></div>
-      <p className="text-gray-600">{description}</p>
+    <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+    <p className="text-gray-600 text-sm">{description}</p>
+  </motion.div>
+);
+
+// Floating Food Image Component
+interface FoodImageProps {
+  src: string;
+  alt: string;
+  top: string;
+  right?: string;
+  left?: string;
+  width: string;
+  delay?: number;
+  rotate?: number;
+  zIndex?: number;
+}
+
+const FloatingFoodImage = ({ 
+  src, 
+  alt, 
+  top, 
+  right, 
+  left, 
+  width, 
+  delay = 0, 
+  rotate = 0,
+  zIndex = 10
+}: FoodImageProps) => (
+  <motion.div
+    className="absolute rounded-2xl shadow-xl overflow-hidden"
+    style={{ 
+      top, 
+      right, 
+      left, 
+      width, 
+      zIndex
+    }}
+    initial={{ opacity: 0, y: 20, rotate: rotate - 5 }}
+    animate={{ opacity: 1, y: 0, rotate }}
+    transition={{ 
+      delay, 
+      duration: 0.8,
+      type: "spring",
+      bounce: 0.4
+    }}
+  >
+    <img 
+      src={src} 
+      alt={alt}
+      className="w-full h-full object-cover"
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+  </motion.div>
+);
+
+// Floating Ingredient Component
+interface FloatingIngredientProps {
+  icon: string;
+  size: number;
+  top: string;
+  left?: string;
+  right?: string;
+  rotate?: number;
+  delay?: number;
+  color?: string;
+  opacity?: number;
+  zIndex?: number;
+  animationDuration?: number;
+}
+
+const FloatingIngredient = ({
+  icon,
+  size,
+  top,
+  left,
+  right,
+  rotate = 0,
+  delay = 0,
+  color = 'text-green-500',
+  opacity = 0.8,
+  zIndex = 0,
+  animationDuration = 20
+}: FloatingIngredientProps) => {
+  // Random movement animation values
+  const floatY = Math.random() * 30 + 15; // Increased vertical float distance
+  const floatX = Math.random() * 25 + 10; // Horizontal float distance
+  const rotateAmount = Math.random() * 12 + 8; // Increased rotation amount
+  const duration = 8 + Math.random() * 7; // Shorter animation duration for more noticeable movement
+  
+  return (
+    <motion.div
+      className={`absolute ${color}`}
+      style={{
+        top,
+        left,
+        right,
+        fontSize: `${size}px`,
+        opacity,
+        zIndex,
+      }}
+      initial={{ y: 0, x: 0, rotate, opacity: 0 }}
+      animate={{ 
+        y: [0, -floatY, -floatY/2, -floatY, 0], 
+        x: [0, floatX/2, floatX, floatX/2, 0],
+        rotate: [rotate, rotate + rotateAmount, rotate, rotate - rotateAmount, rotate],
+        opacity
+      }}
+      transition={{
+        y: { 
+          duration, 
+          repeat: Infinity,
+          repeatType: 'loop',
+          ease: 'easeInOut',
+          delay
+        },
+        x: { 
+          duration: duration * 1.2, 
+          repeat: Infinity,
+          repeatType: 'loop',
+          ease: 'easeInOut',
+          delay: delay + 0.5
+        },
+        rotate: {
+          duration: duration * 0.8,
+          repeat: Infinity,
+          repeatType: 'loop',
+          ease: 'easeInOut',
+          delay: delay + 1
+        },
+        opacity: { duration: 1, delay }
+      }}
+    >
+      <i className={`fas ${icon}`}></i>
+    </motion.div>
+  );
+};
+
+// Recipe Step Component
+interface RecipeStepProps {
+  number: number;
+  text: string;
+  delay?: number;
+}
+
+const RecipeStep = ({ number, text, delay = 0 }: RecipeStepProps) => (
+  <motion.div 
+    className="flex items-start gap-4 mb-4"
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ delay, duration: 0.5 }}
+  >
+    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-semibold text-sm">
+      {number}
+    </div>
+    <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100 flex-1">
+      <p className="text-gray-700 text-sm">{text}</p>
     </div>
   </motion.div>
 );
@@ -73,6 +201,18 @@ interface Feature {
   title: string;
   description: string;
   delay: number;
+}
+
+interface FloatingIngredient {
+  icon: string;
+  size: number;
+  top: string;
+  left?: string;
+  right?: string;
+  rotate: number;
+  delay: number;
+  color: string;
+  opacity: number;
 }
 
 interface HeroProps {
@@ -113,79 +253,94 @@ export default function Hero({ onGetStarted }: HeroProps) {
     { icon: 'fa-share-alt', title: 'Share Easily', description: 'Share your culinary creations with friends and family', delay: 0.6 }
   ];
   
+  // Floating ingredients in the background
+  const floatingIngredients: FloatingIngredient[] = [
+    { icon: 'fa-apple-alt', size: 40, top: '15%', right: '15%', rotate: -10, delay: 0.2, color: 'text-red-600', opacity: 0.45 },
+    { icon: 'fa-carrot', size: 46, top: '25%', left: '10%', rotate: 15, delay: 1.2, color: 'text-orange-600', opacity: 0.5 },
+    { icon: 'fa-lemon', size: 40, top: '45%', right: '8%', rotate: 0, delay: 0.6, color: 'text-yellow-500', opacity: 0.4 },
+    { icon: 'fa-pepper-hot', size: 38, top: '60%', left: '20%', rotate: -5, delay: 1.8, color: 'text-green-600', opacity: 0.45 },
+    { icon: 'fa-egg', size: 42, top: '75%', right: '25%', rotate: 10, delay: 0.9, color: 'text-gray-500', opacity: 0.4 },
+    { icon: 'fa-cheese', size: 44, top: '85%', left: '30%', rotate: -8, delay: 1.5, color: 'text-yellow-500', opacity: 0.5 },
+    { icon: 'fa-fish', size: 46, top: '10%', left: '25%', rotate: 8, delay: 0.4, color: 'text-blue-500', opacity: 0.45 },
+    { icon: 'fa-drumstick-bite', size: 42, top: '35%', left: '5%', rotate: -15, delay: 1.0, color: 'text-amber-700', opacity: 0.45 },
+    { icon: 'fa-bread-slice', size: 44, top: '50%', right: '15%', rotate: 5, delay: 0.7, color: 'text-amber-600', opacity: 0.5 },
+    { icon: 'fa-pizza-slice', size: 46, top: '70%', right: '5%', rotate: -10, delay: 1.3, color: 'text-red-600', opacity: 0.45 },
+    { icon: 'fa-leaf', size: 36, top: '15%', left: '15%', rotate: 10, delay: 0.8, color: 'text-green-600', opacity: 0.45 },
+    { icon: 'fa-seedling', size: 34, top: '55%', left: '40%', rotate: 0, delay: 1.6, color: 'text-green-500', opacity: 0.4 },
+    { icon: 'fa-bacon', size: 44, top: '80%', right: '35%', rotate: 12, delay: 0.3, color: 'text-red-500', opacity: 0.5 },
+    { icon: 'fa-cookie', size: 38, top: '30%', right: '30%', rotate: -5, delay: 1.1, color: 'text-amber-700', opacity: 0.45 },
+  ];
+  
   return (
-    <section className="relative overflow-hidden pt-20 pb-24 bg-white">
-      {/* Enhanced gradient background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50"></div>
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{ 
-            backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', 
-            backgroundSize: '30px 30px' 
-          }} />
-        </div>
-        
-        {/* Background shapes */}
-        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-b from-green-400/10 to-emerald-300/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-t from-emerald-400/10 to-green-300/5 rounded-full blur-3xl"></div>
-        
-        <div className="absolute bottom-[10%] right-[15%] w-32 h-32 bg-green-400/20 rounded-full blur-2xl"></div>
-        <div className="absolute top-[20%] left-[10%] w-40 h-40 bg-emerald-300/15 rounded-full blur-2xl"></div>
+    <section className="relative overflow-hidden pt-16 pb-20">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-5 z-0">
+        <div className="absolute inset-0" style={{ 
+          backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', 
+          backgroundSize: '30px 30px' 
+        }} />
       </div>
       
+      {/* Decorative shapes */}
+      <div className="absolute top-20 right-[5%] w-64 h-64 bg-green-400/20 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute bottom-40 left-[10%] w-72 h-72 bg-emerald-300/20 rounded-full blur-3xl -z-10"></div>
+      
+      {/* Floating food ingredients */}
+      {floatingIngredients.map((ingredient, index) => (
+        <FloatingIngredient
+          key={index}
+          icon={ingredient.icon}
+          size={ingredient.size}
+          top={ingredient.top}
+          left={ingredient.left}
+          right={ingredient.right}
+          rotate={ingredient.rotate}
+          delay={ingredient.delay}
+          color={ingredient.color}
+          opacity={ingredient.opacity}
+          zIndex={5}
+          animationDuration={8 + Math.random() * 4}
+        />
+      ))}
+      
       {/* Main content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Hero content grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Left column - Text content */}
-          <div className="max-w-2xl">
+          <div>
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="mb-6"
             >
-              <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 hover:bg-gradient-to-r hover:from-green-200 hover:to-emerald-200 hover:text-green-900 px-4 py-1.5 rounded-full font-medium">
-                <motion.span 
-                  animate={{ opacity: [1, 0.5, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="mr-2 text-green-600"
-                >
-                  <i className="fas fa-bolt"></i>
-                </motion.span>
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 px-3 py-1">
+                <i className="fas fa-bolt mr-1.5"></i>
                 AI-POWERED FOOD RECOGNITION
               </Badge>
             </motion.div>
             
             <motion.h1
-              className="text-5xl sm:text-6xl font-bold leading-tight text-gray-900 mb-6"
+              className="text-5xl font-bold leading-tight text-gray-900 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <div className="inline-block">
-                <span>Transform </span>
-                <span className="relative">
-                  <span className="relative z-10 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
-                    food photos
-                  </span>
-                  <motion.span 
-                    className="absolute -bottom-1 left-0 w-full h-3 bg-green-200/50 -z-10 rounded"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{ delay: 0.6, duration: 0.8 }}
-                  />
-                </span>
-              </div>
-              <div>into detailed recipes</div>
+              <span>Transform </span>
+              <span className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+                food photos
+              </span>
+              <span> into detailed recipes</span>
             </motion.h1>
             
             <motion.p
-              className="text-xl text-gray-600 mb-8 max-w-xl"
+              className="text-xl text-gray-600 mb-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <span className="font-medium">Our cutting-edge AI instantly analyzes your food photos</span> to create complete recipes with precise ingredients, step-by-step instructions, and full nutritional details.
+              Our AI technology instantly identifies dishes, provides ingredients, step-by-step instructions, and nutritional information from a single photo.
             </motion.p>
             
             <motion.div
@@ -196,23 +351,11 @@ export default function Hero({ onGetStarted }: HeroProps) {
             >
               <Button 
                 size="lg"
-                className="relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white rounded-full px-8 shadow-xl hover:shadow-2xl transition-all py-7 group border-2 border-green-400"
+                className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white rounded-full px-8 shadow-lg hover:shadow-xl transition-all py-6 group"
                 onClick={onGetStarted || (() => navigate('#upload-section'))}
               >
-                <motion.span 
-                  className="absolute inset-0 bg-white/20"
-                  initial={{ x: "-100%", opacity: 0 }}
-                  whileHover={{ x: "100%", opacity: 0.3 }}
-                  transition={{ duration: 0.7 }}
-                />
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="mr-2 text-white text-lg"
-                >
-                  <i className="fas fa-camera"></i>
-                </motion.div>
-                <span className="text-lg font-medium">Try It Now</span>
+                <i className="fas fa-camera mr-2.5 group-hover:animate-pulse"></i> 
+                Try It Now
               </Button>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -231,179 +374,87 @@ export default function Hero({ onGetStarted }: HeroProps) {
               </motion.div>
             </motion.div>
             
-            {/* Enhanced Recipe Library Banner */}
+            {/* New Recipe Library Animation Banner */}
             <motion.div
-              className="mt-8 bg-gradient-to-r from-emerald-50 to-green-50 p-5 rounded-2xl shadow-md border border-green-100 flex items-center relative overflow-hidden group"
+              className="mt-6 bg-gradient-to-r from-emerald-100 to-green-100 p-4 rounded-xl shadow-sm border border-green-200 flex items-center"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
             >
-              {/* Notification dot */}
-              <motion.div 
-                className="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full"
-                animate={{ 
-                  scale: [1, 1.3, 1],
-                  opacity: [0.7, 1, 0.7]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity,
-                  repeatType: "reverse"
-                }}
-              />
-              
-              <div className="relative mr-5 text-emerald-600 text-2xl">
-                <motion.div
-                  animate={{ 
-                    rotate: [0, 10, 0, -10, 0],
-                    scale: [1, 1.2, 1, 1.2, 1]
-                  }}
-                  transition={{ 
-                    duration: 5, 
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <i className="fas fa-book-open"></i>
-                </motion.div>
+              <div className="mr-4 text-emerald-600 text-2xl animate-pulse">
+                <i className="fas fa-star"></i>
               </div>
-              
               <div className="flex-1">
-                <h3 className="font-semibold text-emerald-800">Discover Our Recipe Collection</h3>
-                <p className="text-sm text-emerald-700 mt-1">
-                  Browse hundreds of professionally crafted recipes with detailed instructions
+                <h3 className="font-medium text-emerald-800">Discover Our Public Recipe Library</h3>
+                <p className="text-sm text-emerald-700">
+                  Explore our collection of carefully crafted recipes - no account required!
                 </p>
               </div>
-              
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/80 rounded-lg group"
+                className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-200"
                 onClick={() => navigate('/library')}
               >
-                <span>Explore</span>
-                <motion.span 
-                  className="inline-block ml-2"
-                  animate={{ x: [0, 4, 0] }}
-                  transition={{ 
-                    duration: 1.5, 
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut"
-                  }}
-                >
-                  <i className="fas fa-arrow-right"></i>
-                </motion.span>
+                Explore <i className="fas fa-arrow-right ml-2"></i>
               </Button>
             </motion.div>
             
-            {/* Enhanced social proof section */}
             <motion.div
-              className="flex items-center text-sm text-gray-500 mt-8 bg-white/70 backdrop-blur-sm p-3 rounded-lg border border-gray-100 shadow-sm"
+              className="flex items-center text-sm text-gray-500 mt-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <div className="flex -space-x-3 mr-4">
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0, x: -20 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.5, type: "spring" }}
-                >
-                  <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/17.jpg" alt="" />
-                </motion.div>
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0, x: -20 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.7, type: "spring" }}
-                >
-                  <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/4.jpg" alt="" />
-                </motion.div>
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0, x: -20 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 0.9, type: "spring" }}
-                >
-                  <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/3.jpg" alt="" />
-                </motion.div>
-                <motion.div 
-                  className="flex items-center justify-center h-9 w-9 rounded-full bg-green-100 text-green-700 ring-2 ring-white text-xs font-medium"
-                  initial={{ opacity: 0, scale: 0, x: -20 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 1.1, type: "spring" }}
-                >
-                  +5k
-                </motion.div>
+              <div className="flex -space-x-2 mr-3">
+                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/17.jpg" alt="" />
+                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/4.jpg" alt="" />
+                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/3.jpg" alt="" />
               </div>
-              <div>
-                <div className="flex items-center mb-1">
-                  <p>Trusted by <span className="font-semibold text-gray-900">14,000+</span> home cooks</p>
-                  <div className="flex ml-2">
-                    {[...Array(5)].map((_, i) => (
-                      <motion.div 
-                        key={i}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 1.2 + i * 0.1 }}
-                      >
-                        <i className="fas fa-star text-yellow-400 text-xs"></i>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-                <div className="text-xs text-green-600">
-                  <i className="fas fa-shield-alt mr-1"></i> Secure AI Processing · 100% Private
-                </div>
-              </div>
+              <p>Trusted by <span className="font-medium text-gray-700">14,000+</span> home cooks</p>
             </motion.div>
           </div>
           
           {/* Right column - Visual content */}
-          <div className="relative hidden md:block h-[500px]">
+          <div className="relative h-[500px]">
             {/* Main dish image */}
-            <motion.div
-              className="absolute top-[5%] left-[5%] w-[70%] rounded-2xl shadow-xl overflow-hidden z-30"
-              initial={{ opacity: 0, y: 20, rotate: -5 }}
-              animate={{ opacity: 1, y: 0, rotate: 0 }}
-              transition={{ 
-                delay: 0.1,
-                duration: 0.8,
-                type: "spring",
-                bounce: 0.4
-              }}
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
-                alt="Delicious pasta dish"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-            </motion.div>
+            <FloatingFoodImage 
+              src="https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+              alt="Delicious pasta dish"
+              top="5%"
+              left="5%"
+              width="70%"
+              delay={0.1}
+              zIndex={30}
+            />
             
-            {/* Secondary dish image */}
-            <motion.div
-              className="absolute top-[40%] right-[0%] w-[50%] rounded-2xl shadow-xl overflow-hidden z-20"
-              initial={{ opacity: 0, x: 20, rotate: 5 }}
-              animate={{ opacity: 1, x: 0, rotate: -5 }}
-              transition={{ 
-                delay: 0.3,
-                duration: 0.8,
-                type: "spring",
-                bounce: 0.4
-              }}
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1081&q=80" 
-                alt="Pizza"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-            </motion.div>
+            {/* Secondary food images */}
+            <FloatingFoodImage 
+              src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1081&q=80" 
+              alt="Pizza"
+              top="40%"
+              right="0%"
+              width="50%"
+              delay={0.3}
+              rotate={-5}
+              zIndex={20}
+            />
             
-            {/* Recipe card */}
+            <FloatingFoodImage 
+              src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" 
+              alt="Colorful food plate"
+              top="60%"
+              left="15%"
+              width="45%"
+              delay={0.5}
+              rotate={5}
+              zIndex={25}
+            />
+            
+            {/* Recipe steps card */}
             <motion.div
-              className="absolute right-5 top-[25%] bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-100 w-[220px] z-40"
+              className="absolute right-5 top-[35%] bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-100 w-[220px] z-40"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7, duration: 0.5 }}
@@ -503,6 +554,9 @@ export default function Hero({ onGetStarted }: HeroProps) {
             ))}
           </div>
         </div>
+        
+        {/* Ultra minimal transition between stats and featured dishes */}
+        {/* No transition - removing space completely */}
       </div>
     </section>
   );

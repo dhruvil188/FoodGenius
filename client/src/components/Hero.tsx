@@ -1,31 +1,67 @@
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import CountUp from 'react-countup';
 import { Badge } from '@/components/ui/badge';
 
-// Feature Card Component
+// Feature Card Component with more advanced effects
 interface FeatureCardProps {
   icon: string;
   title: string;
   description: string;
   delay?: number;
+  imageSrc?: string;
 }
 
-const FeatureCard = ({ icon, title, description, delay = 0 }: FeatureCardProps) => (
+const FeatureCard = ({ icon, title, description, delay = 0, imageSrc }: FeatureCardProps) => (
   <motion.div 
-    className="relative bg-white rounded-xl shadow-md p-6 border border-gray-100 h-full"
+    className="relative bg-white rounded-xl shadow-lg p-6 border border-gray-100 h-full overflow-hidden group"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5 }}
-    whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+    whileHover={{ 
+      y: -5, 
+      boxShadow: "0 25px 30px -12px rgba(0, 0, 0, 0.15), 0 10px 20px -10px rgba(0, 0, 0, 0.1)"
+    }}
   >
-    <div className="w-12 h-12 mb-4 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+    {/* Background pattern */}
+    <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-gradient-to-br from-green-300/20 to-emerald-400/20 opacity-20 group-hover:scale-150 transition-transform duration-700"></div>
+    
+    {/* Feature icon with animated gradient background */}
+    <div className="relative w-14 h-14 mb-5 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white overflow-hidden group-hover:scale-110 transition-transform duration-300">
+      <motion.div 
+        className="absolute inset-0 opacity-40"
+        animate={{
+          background: [
+            'linear-gradient(0deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
+            'linear-gradient(120deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
+            'linear-gradient(240deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
+            'linear-gradient(360deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 100%)',
+          ]
+        }}
+        transition={{ 
+          duration: 8, 
+          repeat: Infinity,
+          ease: "linear" 
+        }}
+      />
       <i className={`fas ${icon} text-xl`}></i>
     </div>
-    <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-    <p className="text-gray-600 text-sm">{description}</p>
+    
+    {/* Feature content with animated underline */}
+    <div className="relative z-10">
+      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors duration-300">{title}</h3>
+      <div className="w-10 h-1 bg-gradient-to-r from-green-500 to-emerald-400 rounded mb-3 group-hover:w-16 transition-all duration-300"></div>
+      <p className="text-gray-600">{description}</p>
+    </div>
+    
+    {/* Optional image background for premium cards */}
+    {imageSrc && (
+      <div className="absolute -right-24 bottom-0 w-48 h-48 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
+        <img src={imageSrc} alt="" className="w-full h-full object-cover filter blur-sm" />
+      </div>
+    )}
   </motion.div>
 );
 
@@ -272,18 +308,51 @@ export default function Hero({ onGetStarted }: HeroProps) {
   ];
   
   return (
-    <section className="relative overflow-hidden pt-16 pb-20">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-5 z-0">
-        <div className="absolute inset-0" style={{ 
-          backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', 
-          backgroundSize: '30px 30px' 
-        }} />
+    <section className="relative overflow-hidden pt-20 pb-24 min-h-[90vh] flex items-center">
+      {/* Enhanced geometric background with animated gradient overlays */}
+      <div className="absolute inset-0 -z-10">
+        {/* Base pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{ 
+            backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', 
+            backgroundSize: '30px 30px' 
+          }} />
+        </div>
+        
+        {/* Animated gradient blobs */}
+        <motion.div 
+          className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-green-400/10 to-emerald-300/5 rounded-full blur-3xl"
+          animate={{
+            x: [0, 20, 0],
+            y: [0, -20, 0],
+            scale: [1, 1.05, 1],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-0 left-0 w-2/3 h-2/3 bg-gradient-to-t from-emerald-400/10 to-green-300/5 rounded-full blur-3xl"
+          animate={{
+            x: [0, -20, 0],
+            y: [0, 20, 0],
+            scale: [1, 1.05, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        
+        {/* Dynamic accent shapes */}
+        <div className="absolute bottom-[10%] right-[15%] w-32 h-32 bg-green-400/20 rounded-full blur-2xl" />
+        <div className="absolute top-[20%] left-[10%] w-40 h-40 bg-emerald-300/15 rounded-full blur-2xl" />
+        <div className="absolute bottom-[30%] left-[20%] w-24 h-24 bg-green-200/20 rounded-full blur-xl" />
+        <div className="absolute top-[30%] right-[25%] w-28 h-28 bg-emerald-400/10 rounded-full blur-xl" />
       </div>
-      
-      {/* Decorative shapes */}
-      <div className="absolute top-20 right-[5%] w-64 h-64 bg-green-400/20 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute bottom-40 left-[10%] w-72 h-72 bg-emerald-300/20 rounded-full blur-3xl -z-10"></div>
       
       {/* Floating food ingredients */}
       {floatingIngredients.map((ingredient, index) => (

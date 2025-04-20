@@ -384,32 +384,48 @@ export default function Hero({ onGetStarted }: HeroProps) {
               transition={{ duration: 0.5 }}
               className="mb-6"
             >
-              <Badge className="bg-green-100 text-green-800 hover:bg-green-200 hover:text-green-900 px-3 py-1">
-                <i className="fas fa-bolt mr-1.5"></i>
+              <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 hover:bg-gradient-to-r hover:from-green-200 hover:to-emerald-200 hover:text-green-900 px-4 py-1.5 rounded-full font-medium">
+                <motion.span 
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="mr-2 text-green-600"
+                >
+                  <i className="fas fa-bolt"></i>
+                </motion.span>
                 AI-POWERED FOOD RECOGNITION
               </Badge>
             </motion.div>
             
             <motion.h1
-              className="text-5xl font-bold leading-tight text-gray-900 mb-6"
+              className="text-5xl sm:text-6xl font-bold leading-tight text-gray-900 mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <span>Transform </span>
-              <span className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
-                food photos
-              </span>
-              <span> into detailed recipes</span>
+              <div className="inline-block">
+                <span>Transform </span>
+                <span className="relative">
+                  <span className="relative z-10 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+                    food photos
+                  </span>
+                  <motion.span 
+                    className="absolute -bottom-1 left-0 w-full h-3 bg-green-200/50 -z-10 rounded"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ delay: 0.6, duration: 0.8 }}
+                  />
+                </span>
+              </div>
+              <div>into detailed recipes</div>
             </motion.h1>
             
             <motion.p
-              className="text-xl text-gray-600 mb-8"
+              className="text-xl text-gray-600 mb-8 max-w-xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Our AI technology instantly identifies dishes, provides ingredients, step-by-step instructions, and nutritional information from a single photo.
+              <span className="font-medium">Our cutting-edge AI instantly analyzes your food photos</span> to create complete recipes with precise ingredients, step-by-step instructions, and full nutritional details.
             </motion.p>
             
             <motion.div
@@ -420,11 +436,23 @@ export default function Hero({ onGetStarted }: HeroProps) {
             >
               <Button 
                 size="lg"
-                className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white rounded-full px-8 shadow-lg hover:shadow-xl transition-all py-6 group"
+                className="relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white rounded-full px-8 shadow-xl hover:shadow-2xl transition-all py-7 group border-2 border-green-400"
                 onClick={onGetStarted || (() => navigate('#upload-section'))}
               >
-                <i className="fas fa-camera mr-2.5 group-hover:animate-pulse"></i> 
-                Try It Now
+                <motion.span 
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ x: "-100%", opacity: 0 }}
+                  whileHover={{ x: "100%", opacity: 0.3 }}
+                  transition={{ duration: 0.7 }}
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="mr-2 text-white text-lg"
+                >
+                  <i className="fas fa-camera"></i>
+                </motion.div>
+                <span className="text-lg font-medium">Try It Now</span>
               </Button>
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -443,45 +471,144 @@ export default function Hero({ onGetStarted }: HeroProps) {
               </motion.div>
             </motion.div>
             
-            {/* New Recipe Library Animation Banner */}
+            {/* Enhanced Recipe Library Banner with notification dot animation */}
             <motion.div
-              className="mt-6 bg-gradient-to-r from-emerald-100 to-green-100 p-4 rounded-xl shadow-sm border border-green-200 flex items-center"
+              className="mt-8 bg-gradient-to-r from-emerald-50 to-green-50 p-5 rounded-2xl shadow-md border border-green-100 flex items-center relative overflow-hidden group"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
             >
-              <div className="mr-4 text-emerald-600 text-2xl animate-pulse">
-                <i className="fas fa-star"></i>
+              {/* Animated background effect */}
+              <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-emerald-200/10 to-green-200/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" 
+                animate={{ 
+                  background: [
+                    'linear-gradient(to right, rgba(16,185,129,0.05) 0%, rgba(5,150,105,0.05) 100%)',
+                    'linear-gradient(to right, rgba(5,150,105,0.05) 0%, rgba(16,185,129,0.05) 100%)',
+                    'linear-gradient(to right, rgba(16,185,129,0.05) 0%, rgba(5,150,105,0.05) 100%)'
+                  ]
+                }}
+                transition={{ duration: 5, repeat: Infinity }}
+              />
+              
+              {/* Notification dot */}
+              <motion.div 
+                className="absolute top-2 right-2 h-3 w-3 bg-green-500 rounded-full"
+                animate={{ 
+                  scale: [1, 1.3, 1],
+                  opacity: [0.7, 1, 0.7]
+                }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              />
+              
+              <div className="relative mr-5 text-emerald-600 text-2xl">
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 10, 0, -10, 0],
+                    scale: [1, 1.2, 1, 1.2, 1]
+                  }}
+                  transition={{ 
+                    duration: 5, 
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <i className="fas fa-book-open"></i>
+                </motion.div>
               </div>
+              
               <div className="flex-1">
-                <h3 className="font-medium text-emerald-800">Discover Our Public Recipe Library</h3>
-                <p className="text-sm text-emerald-700">
-                  Explore our collection of carefully crafted recipes - no account required!
+                <h3 className="font-semibold text-emerald-800">Discover Our Recipe Collection</h3>
+                <p className="text-sm text-emerald-700 mt-1">
+                  Browse hundreds of professionally crafted recipes with detailed instructions
                 </p>
               </div>
+              
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-200"
+                className="text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100/80 rounded-lg group"
                 onClick={() => navigate('/library')}
               >
-                Explore <i className="fas fa-arrow-right ml-2"></i>
+                <span>Explore</span>
+                <motion.span 
+                  className="inline-block ml-2"
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ 
+                    duration: 1.5, 
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut"
+                  }}
+                >
+                  <i className="fas fa-arrow-right"></i>
+                </motion.span>
               </Button>
             </motion.div>
             
+            {/* Enhanced social proof section */}
             <motion.div
-              className="flex items-center text-sm text-gray-500 mt-6"
+              className="flex items-center text-sm text-gray-500 mt-8 bg-white/70 backdrop-blur-sm p-3 rounded-lg border border-gray-100 shadow-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <div className="flex -space-x-2 mr-3">
-                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/17.jpg" alt="" />
-                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/4.jpg" alt="" />
-                <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/3.jpg" alt="" />
+              <div className="flex -space-x-3 mr-4">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0, x: -20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ delay: 0.5, type: "spring" }}
+                >
+                  <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/17.jpg" alt="" />
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0, x: -20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ delay: 0.7, type: "spring" }}
+                >
+                  <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/4.jpg" alt="" />
+                </motion.div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0, x: -20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ delay: 0.9, type: "spring" }}
+                >
+                  <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/3.jpg" alt="" />
+                </motion.div>
+                <motion.div 
+                  className="flex items-center justify-center h-9 w-9 rounded-full bg-green-100 text-green-700 ring-2 ring-white text-xs font-medium"
+                  initial={{ opacity: 0, scale: 0, x: -20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ delay: 1.1, type: "spring" }}
+                >
+                  +5k
+                </motion.div>
               </div>
-              <p>Trusted by <span className="font-medium text-gray-700">14,000+</span> home cooks</p>
+              <div>
+                <div className="flex items-center mb-1">
+                  <p>Trusted by <span className="font-semibold text-gray-900">14,000+</span> home cooks</p>
+                  <div className="flex ml-2">
+                    {[...Array(5)].map((_, i) => (
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1.2 + i * 0.1 }}
+                      >
+                        <i className="fas fa-star text-yellow-400 text-xs"></i>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-xs text-green-600">
+                  <i className="fas fa-shield-alt mr-1"></i> Secure AI Processing · 100% Private
+                </div>
+              </div>
             </motion.div>
           </div>
           

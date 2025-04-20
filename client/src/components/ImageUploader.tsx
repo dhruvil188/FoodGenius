@@ -145,21 +145,64 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
-      <Card className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-        <CardContent className="p-8">
-          <motion.h3 
-            className="text-2xl font-semibold mb-8 text-center"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+      <Card className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden backdrop-blur-sm bg-white/80">
+        <CardContent className="p-6 sm:p-8">
+          {/* Decorative elements */}
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-gradient-to-br from-green-200/40 to-emerald-300/30 rounded-full blur-2xl"></div>
+          <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-gradient-to-tr from-green-300/30 to-emerald-200/20 rounded-full blur-xl"></div>
+          
+          <motion.div 
+            className="relative overflow-hidden mb-8 w-auto mx-auto"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: "auto", opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <span className="relative">
-              <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">
-                Upload or Capture Your Dish
+            <motion.h3 
+              className="text-2xl font-bold text-center"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-emerald-600 via-green-500 to-primary bg-clip-text text-transparent px-1">
+                  Upload or Capture Your Dish
+                </span>
+                
+                {/* Animated underline */}
+                <motion.span 
+                  className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-emerald-400 to-primary rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ delay: 0.6, duration: 0.8 }}
+                />
+                
+                {/* Animated sparkles */}
+                <motion.span 
+                  className="absolute -top-1 -right-1 text-yellow-400 text-xs"
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    scale: [0.5, 1.2, 0.5],
+                    rotate: [0, 15, 0]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <i className="fas fa-star"></i>
+                </motion.span>
+                
+                <motion.span 
+                  className="absolute -top-1 -left-1 text-yellow-400 text-xs"
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    scale: [0.5, 1.2, 0.5],
+                    rotate: [0, -15, 0]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                >
+                  <i className="fas fa-star"></i>
+                </motion.span>
               </span>
-              <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-600/40 to-primary/40 rounded-full"></span>
-            </span>
-          </motion.h3>
+            </motion.h3>
+          </motion.div>
           
           <Tabs 
             defaultValue="upload" 
@@ -170,22 +213,38 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
               setFileName(null);
             }}
           >
-            <TabsList className="grid w-full grid-cols-2 rounded-full bg-slate-100 p-1.5 mb-8 border border-slate-200">
-              <TabsTrigger 
-                value="upload" 
-                className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-2.5"
-              >
-                <i className="fas fa-cloud-upload-alt text-primary"></i>
-                <span className="font-medium">Upload Image</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="camera" 
-                className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-2.5"
-              >
-                <i className="fas fa-camera text-primary"></i>
-                <span className="font-medium">Take Photo</span>
-              </TabsTrigger>
-            </TabsList>
+            <motion.div
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              <TabsList className="grid w-full grid-cols-2 rounded-full bg-gradient-to-r from-slate-100 to-white p-1.5 mb-8 border border-slate-200 shadow-sm">
+                <TabsTrigger 
+                  value="upload" 
+                  className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-3 transition-all duration-300 data-[state=active]:text-green-600"
+                >
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, -5, 0] }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <i className="fas fa-cloud-upload-alt mr-1.5"></i>
+                  </motion.div>
+                  <span className="font-medium">Upload Image</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="camera" 
+                  className="flex items-center justify-center gap-2.5 rounded-full data-[state=active]:bg-white data-[state=active]:shadow-md py-3 transition-all duration-300 data-[state=active]:text-green-600"
+                >
+                  <motion.div
+                    whileHover={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <i className="fas fa-camera mr-1.5"></i>
+                  </motion.div>
+                  <span className="font-medium">Take Photo</span>
+                </TabsTrigger>
+              </TabsList>
+            </motion.div>
             
             <TabsContent value="upload" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
               <motion.div 

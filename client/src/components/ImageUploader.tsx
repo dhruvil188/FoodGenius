@@ -459,42 +459,116 @@ export default function ImageUploader({ onAnalyzeImage }: ImageUploaderProps) {
           >
             {/* Buttons container */}
             <div className="flex flex-col md:flex-row justify-center items-center gap-4">
-              {/* Analyze Button */}
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button 
-                  className="bg-gradient-to-r from-primary to-emerald-600 text-white font-medium rounded-full px-10 py-6 shadow-md hover:shadow-lg hover:from-primary/95 hover:to-emerald-600/95 transition-all"
-                  disabled={!selectedImage || isAnalyzing}
-                  onClick={handleAnalyzeImage}
-                  size="lg"
+              {/* Enhanced Analyze Button */}
+              <div className="relative">
+                {/* Background glow effect for button */}
+                <motion.div 
+                  className="absolute -inset-4 rounded-full bg-gradient-to-r from-green-400/20 to-emerald-500/20 blur-xl -z-10"
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    opacity: [0.7, 0.9, 0.7]
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity,
+                    ease: "easeInOut" 
+                  }}
+                />
+                
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.03,
+                    transition: { duration: 0.2 }
+                  }}
+                  whileTap={{ 
+                    scale: 0.97,
+                    transition: { duration: 0.1 }
+                  }}
+                  className="relative"
+                  animate={{ 
+                    y: [0, -4, 0], 
+                  }}
+                  transition={{ 
+                    duration: 4, 
+                    repeat: Infinity,
+                    ease: "easeInOut" 
+                  }}
                 >
-                  {isAnalyzing ? (
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-5 h-5">
-                        <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-25 animate-ping"></div>
-                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                  <Button 
+                    className={`
+                      relative overflow-hidden group
+                      bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium 
+                      rounded-full px-12 py-7 shadow-lg hover:shadow-xl 
+                      border border-emerald-400/20
+                      transition-all duration-300
+                      ${!selectedImage && 'opacity-60 cursor-not-allowed'}
+                    `}
+                    disabled={!selectedImage || isAnalyzing}
+                    onClick={handleAnalyzeImage}
+                    size="lg"
+                  >
+                    {/* Shine effect */}
+                    <span 
+                      className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
+                    />
+                    
+                    {isAnalyzing ? (
+                      <div className="flex items-center gap-3 py-1">
+                        <div className="relative w-6 h-6">
+                          <div className="absolute inset-0 rounded-full border-2 border-white border-opacity-25 animate-ping"></div>
+                          <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold tracking-wide text-lg">Analyzing Dish...</span>
+                          <span className="text-xs text-white/80">Please wait, our AI is working</span>
+                        </div>
                       </div>
-                      <span className="font-semibold tracking-wide">Analyzing Dish...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <i className="fas fa-magic text-lg"></i>
-                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                        </span>
+                    ) : (
+                      <div className="flex items-center gap-4 py-1">
+                        <div className="relative">
+                          <motion.div
+                            animate={{ 
+                              rotate: [0, 10, 0, -10, 0],
+                              scale: [1, 1.1, 1]
+                            }}
+                            transition={{ 
+                              duration: 3, 
+                              repeat: Infinity,
+                              ease: "easeInOut" 
+                            }}
+                          >
+                            <i className="fas fa-magic text-2xl"></i>
+                          </motion.div>
+                          
+                          <motion.span 
+                            className="absolute -top-2 -right-2 flex h-4 w-4"
+                            animate={{ 
+                              scale: [1, 1.5, 1],
+                              opacity: [0.7, 1, 0.7]
+                            }}
+                            transition={{ 
+                              duration: 2, 
+                              repeat: Infinity,
+                              ease: "easeInOut" 
+                            }}
+                          >
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-white"></span>
+                          </motion.span>
+                        </div>
+                        
+                        <div className="flex flex-col items-start">
+                          <span className="font-bold tracking-wide text-lg">Analyze This Dish</span>
+                          <span className="text-xs text-white/90">Powered by Gemini AI</span>
+                        </div>
                       </div>
-                      <span className="font-semibold tracking-wide">Analyze This Dish</span>
-                    </div>
-                  )}
-                </Button>
-              </motion.div>
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
               
 
             </div>

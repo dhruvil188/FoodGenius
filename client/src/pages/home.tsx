@@ -1203,205 +1203,28 @@ export default function Home() {
         </section>
         
         {/* Upload Section */}
-        <section ref={uploadSectionRef} id="upload-section" className="py-16 sm:py-24 relative overflow-hidden">
-          {/* Enhanced background with animated gradient and patterns */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-emerald-50"></div>
-          
-          {/* Animated background elements */}
-          <motion.div 
-            className="absolute top-0 right-0 w-1/2 h-1/2 bg-gradient-to-br from-green-300/10 to-emerald-300/5 rounded-full blur-3xl -z-10"
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.3, 0.5, 0.3]
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          
-          <motion.div 
-            className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-emerald-300/10 to-green-300/5 rounded-full blur-3xl -z-10"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.2, 0.4, 0.2]
-            }}
-            transition={{
-              duration: 18,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          
-          {/* Subtle pattern */}
+        <section ref={uploadSectionRef} id="upload-section" className="py-12 sm:py-16 bg-gradient-to-br from-primary/5 to-emerald-600/5 relative">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJjdXJyZW50Q29sb3IiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PGNpcmNsZSBjeD0iMzYiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjM2IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSIzNiIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iMzYiIGN5PSI0OCIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMzYiIHI9IjEiLz48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIxIi8+PGNpcmNsZSBjeD0iMjQiIGN5PSIxMiIgcj0iMSIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iNDgiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjM2IiByPSIxIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIyNCIgcj0iMSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjQ4IiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSIzNiIgcj0iMSIvPjxjaXJjbGUgY3g9IjQ4IiBjeT0iMjQiIHI9IjEiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjEyIiByPSIxIi8+PGNpcmNsZSBjeD0iNDgiIGN5PSI0OCIgcj0iMSIvPjwvZz48L3N2Zz4=')]" style={{ opacity: 0.3, color: '#10b981' }}></div>
-          
-          {/* Floating food icons for visual appeal */}
-          <motion.div 
-            className="absolute text-green-400 text-4xl left-[5%] top-[10%]"
-            animate={{
-              y: [0, -15, 0],
-              x: [0, 5, 0],
-              rotate: [0, 5, 0, -5, 0]
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{ opacity: 0.2 }}
-          >
-            <i className="fas fa-carrot"></i>
-          </motion.div>
-          
-          <motion.div 
-            className="absolute text-red-400 text-3xl right-[15%] top-[15%]"
-            animate={{
-              y: [0, -10, 0],
-              x: [0, -5, 0],
-              rotate: [0, -3, 0, 3, 0]
-            }}
-            transition={{
-              duration: 4.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{ opacity: 0.2 }}
-          >
-            <i className="fas fa-apple-alt"></i>
-          </motion.div>
-          
-          <motion.div 
-            className="absolute text-yellow-400 text-4xl left-[10%] bottom-[15%]"
-            animate={{
-              y: [0, 15, 0],
-              x: [0, 10, 0],
-              rotate: [0, 8, 0, -8, 0]
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{ opacity: 0.2 }}
-          >
-            <i className="fas fa-lemon"></i>
-          </motion.div>
-          
-          <motion.div 
-            className="absolute text-orange-400 text-3xl right-[8%] bottom-[20%]"
-            animate={{
-              y: [0, 12, 0],
-              x: [0, -8, 0],
-              rotate: [0, -10, 0, 10, 0]
-            }}
-            transition={{
-              duration: 5.5,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{ opacity: 0.2 }}
-          >
-            <i className="fas fa-pizza-slice"></i>
-          </motion.div>
-          
           <div className="container max-w-7xl mx-auto px-4 relative z-10">
             <motion.div 
-              className="text-center mb-12 sm:mb-14"
+              className="text-center mb-8 sm:mb-10"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              {/* Animated badge */}
-              <motion.div 
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, type: "spring" }}
-                className="mb-4 inline-block"
-              >
-                <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-none py-1.5 sm:py-2 px-4 sm:px-5 text-xs sm:text-sm rounded-full font-medium">
-                  <motion.span 
-                    animate={{ 
-                      rotate: [0, 10, 0, -10, 0],
-                      scale: [1, 1.2, 1, 1.2, 1]
-                    }}
-                    transition={{ 
-                      duration: 2.5, 
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="mr-2 inline-block text-green-600"
-                  >
-                    <i className="fas fa-utensils"></i>
-                  </motion.span>
-                  START COOKING
-                </Badge>
-              </motion.div>
-              
-              <motion.h2 
-                className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 relative inline-block"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1, duration: 0.6 }}
-              >
-                <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3">
-                  <span className="pr-1">Discover Your</span> 
-                  <span className="relative">
-                    <span className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
-                      Perfect Recipe
-                    </span>
-                    <motion.span 
-                      className="absolute -bottom-1 left-0 w-full h-2 bg-green-200/40 -z-10 rounded"
-                      initial={{ width: "0%" }}
-                      whileInView={{ width: "100%" }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.6, duration: 0.8 }}
-                    />
-                  </span>
-                </div>
-              </motion.h2>
-              
-              <motion.p 
-                className="text-slate-600 text-lg max-w-2xl mx-auto px-2 leading-relaxed"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2, duration: 0.6 }}
-              >
-                Upload a food image and instantly get a complete recipe with step-by-step instructions, ingredients, and more. 
-                <span className="font-semibold text-slate-700"> Powered by advanced AI technology.</span>
-              </motion.p>
+              <Badge className="mb-3 sm:mb-4 bg-primary/10 text-primary border-none py-1 sm:py-1.5 px-3 sm:px-4 text-xs sm:text-sm">
+                START COOKING
+              </Badge>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4">
+                Discover Your <span className="bg-gradient-to-r from-emerald-600 to-primary bg-clip-text text-transparent">Recipe</span> Now
+              </h2>
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto px-2">
+                Upload a food image to instantly get a complete recipe with ingredients, instructions, and nutritional information.
+              </p>
             </motion.div>
             
-            <div className="max-w-4xl mx-auto relative">
-              {/* Decorative elements around the uploader */}
-              <motion.div className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-green-100 opacity-80 -z-10"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.5, 0.8, 0.5]
-                }}
-                transition={{
-                  duration: 4, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              
-              <motion.div className="absolute -bottom-8 -right-6 w-24 h-24 rounded-full bg-emerald-100 opacity-50 -z-10"
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.3, 0.5, 0.3]
-                }}
-                transition={{
-                  duration: 5, 
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
-              
+            <div className="max-w-4xl mx-auto">
               <AnimatePresence mode="wait">
                 {stage === "upload" && (
                   <motion.div
@@ -1409,9 +1232,9 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <div className="bg-white rounded-2xl p-4 sm:p-8 shadow-xl border border-gray-100">
+                    <div className="bg-white rounded-xl p-4 sm:p-8 shadow-sm border border-slate-100">
                       <ProtectedFeature
                         feature="AI Image Analysis"
                         fallbackMessage="Upload a food image to get a detailed recipe. Sign in to unlock this feature."
